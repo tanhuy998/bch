@@ -2,29 +2,47 @@ package middleware
 
 import (
 	"app/app/model"
-	"app/app/service"
+	authService "app/app/service/auth"
+	"fmt"
 
+	"github.com/gofor-little/env"
+	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/kataras/iris/v12"
 )
 
-const AUTH_USER = "auth_user"
+const (
+	AUTH_USER      = "auth_user"
+	AUTH_HEADER    = "AUTH_HEADER"
+	JWT_PUBLIC_KEY = "JWT_PUBLIC_KEY"
+)
 
 type AuthUser *model.User
 
-func Authentication() func(iris.Context, *service.AuthenticateService) {
+type SigningMethod jwt.SigningMethodECDSA
 
-	return func(ctx iris.Context, service *service.AuthenticateService) {
+func Authentication() func(iris.Context, *authService.AuthenticateService) {
 
-		var reqToken string = ctx.GetHeader("bearer")
+	return func(ctx iris.Context, auth *authService.AuthenticateService) {
 
-		if reqToken == "" {
+		ENV_AUTH_HEADER := env.Get(AUTH_HEADER, "bearer")
+		var strToken string = ctx.GetHeader(ENV_AUTH_HEADER)
 
-			noToken(ctx)
+		if strToken == "" {
+
+			unAuthenticated(ctx)
 			return
 		}
 
-		ctx.RegisterDependency(user)
-		ctx.Values().Set(AUTH_USER, user)
+		token, err := verifyToken(strToken)
+
+		if err != nil {
+
+			unAuthenticated(ctx)
+			return
+		}
+
+		ctx.RegisterDependency(token)
+		//ctx.Values().Set(AUTH_USER, user)
 		ctx.Next()
 	}
 }
@@ -33,7 +51,7 @@ func handleInvalidInput(ctx iris.Context, err error) {
 
 }
 
-func noToken(ctx iris.Context) {
+func unAuthenticated(ctx iris.Context) {
 
 	ctx.StatusCode(401)
 
@@ -44,4 +62,20 @@ func noToken(ctx iris.Context) {
 	})
 
 	ctx.EndRequest()
+}
+
+func verifyToken(strToken string) (*jwt.Token, error) {
+
+	// token := jwt.New(jwt.SigningMethodES256)
+	// token.Raw = strToken
+
+	return jwt.Parse(strToken, func(token *jwt.Token) (interface{}, error) {
+
+		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
+
+			return nil, fmt.Errorf("")
+		}
+
+		return JWT_PUBLIC_KEY, nil
+	})
 }

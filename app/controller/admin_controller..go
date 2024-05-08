@@ -12,3 +12,7 @@ func (this *AdminController) Index() {
 func (this *AdminController) Login(ctx iris.Context) {
 
 }
+
+func (this *AdminController) NewCampaign() {
+
+}

@@ -5,7 +5,7 @@ import (
 	"app/app/config"
 	"app/app/db"
 	"app/app/middleware"
-	"app/app/service"
+	authService "app/app/service/auth"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofor-little/env"
@@ -53,10 +53,10 @@ func registerServices(app *iris.Application) {
 	app.RegisterDependency(initAuthService())
 }
 
-func initAuthService() *service.AuthenticateService {
+func initAuthService() *authService.AuthenticateService {
 
-	s := new(service.AuthenticateService)
-	s.SetDB(db.GetDB())
+	s := new(authService.AuthenticateService)
+	//s.SetDB(db.GetDB())
 
 	return s
 }
