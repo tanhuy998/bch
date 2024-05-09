@@ -27,7 +27,7 @@ func initCandidateGroupApi(app *iris.Application) {
 
 			activator.Handle(
 				"GET", "/{uuid:string}", "GetCandidate",
-				middleware.Authorization(middleware.AuthorizationLicense{
+				middleware.Authorization(authService.AuthorizationLicense{
 					Fields: []authService.AuthorizationField{authField},
 					Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
@@ -35,15 +35,16 @@ func initCandidateGroupApi(app *iris.Application) {
 
 			activator.Handle(
 				"POST", "/", "PostCandidate",
-				middleware.Authorization(middleware.AuthorizationLicense{
+				middleware.Authorization(authService.AuthorizationLicense{
 					Fields: []authService.AuthorizationField{authField},
-					Groups: []authService.AuthorizationGroup{auth_commander_group},
+					//Groups: []authService.AuthorizationGroup{auth_commander_group},
+					Claims: []authService.AuthorizationClaim{auth_post_claim},
 				}),
 			)
 
 			activator.Handle(
 				"PUT", "/{uuid:string}", "UpdateCandidate",
-				middleware.Authorization(middleware.AuthorizationLicense{
+				middleware.Authorization(authService.AuthorizationLicense{
 					Fields: []authService.AuthorizationField{authField},
 					Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
@@ -51,9 +52,10 @@ func initCandidateGroupApi(app *iris.Application) {
 
 			activator.Handle(
 				"DELETE", "/{uuid:string}", "DeleteCandidate",
-				middleware.Authorization(middleware.AuthorizationLicense{
+				middleware.Authorization(authService.AuthorizationLicense{
 					Fields: []authService.AuthorizationField{authField},
-					Groups: []authService.AuthorizationGroup{auth_commander_group},
+					//Groups: []authService.AuthorizationGroup{auth_commander_group},
+					Claims: []authService.AuthorizationClaim{auth_delete_claim},
 				}),
 			)
 		}),

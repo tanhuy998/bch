@@ -9,8 +9,10 @@ import (
 
 const ENV_JWT_PRIVATE_KEY = "JWT_PRIVATE_KEY"
 
-var private_key []byte
-var signing_method *jwt.SigningMethodECDSA = jwt.SigningMethodES256
+var (
+	private_key    []byte
+	signing_method *jwt.SigningMethodECDSA = jwt.SigningMethodES256
+)
 
 /*
 Authentication service is design in microservice manner in order to isolate the authentication
@@ -20,12 +22,31 @@ in inplementing Policy Decision Point pattern.
 Authorization implement the following principal
 claim-based authorization
 group-based authorization
-document-based authorization
+
+This service is determined as a centralized authentication/authorization like an
+authentication server for internal authentication/authorization between services in a distributed
+system. It manipulates it's own authentication database for authentication
+and authorization. Applications that use this service will be provided an AppID in order to
+indentify its right to use and interact with the service. Besides, applications also been
+provided a public key to distributedly verify user's access tokens.
+
+There are 4 concept
++ Field is the target object that groups aim to be granted to
++ Group is a set of users that will is organized to be gramted a specific permission
++ License is the permission on a field that a group could manifest
++ Claim is the info about the license, sometimes it also been detemined as the operation
+that users of a granted goup could take action.
 */
 
 type AuthorizationClaim string
 type AuthorizationGroup string
 type AuthorizationField string
+
+type AuthorizationLicense struct {
+	Fields []AuthorizationField
+	Groups []AuthorizationGroup
+	Claims []AuthorizationClaim
+}
 
 type AuthenticateService struct {
 	IAuthCore

@@ -7,6 +7,7 @@ type IAuthorize interface {
 
 type IAuthenticate interface {
 	ValidateCredential(uname string, pass string) (string, error)
+	SignUp(AuthUser)
 }
 
 type IAuthCore interface {

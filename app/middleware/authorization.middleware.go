@@ -6,13 +6,7 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
-type AuthorizationLicense struct {
-	Fields []authService.AuthorizationField
-	Groups []authService.AuthorizationGroup
-	Claims []authService.AuthorizationClaim
-}
-
-func Authorization(option AuthorizationLicense) iris.Handler {
+func Authorization(licenses ...authService.AuthorizationLicense) iris.Handler {
 
 	return func(ctx iris.Context) {
 

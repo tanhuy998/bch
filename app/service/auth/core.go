@@ -9,6 +9,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const (
+	DB_NAME            = "auth"
+	USER_COLLECTION    = "users"
+	FIELD_COLLECTION   = "fields"
+	GROUP_COLLECTION   = "groups"
+	LICENSE_COLLECTION = "licenses"
+	COLL_NUM           = 4
+)
+
 /*
 Authentication service is design in microservice manner in order to isolate the authentication
 and authorization logics with the app's bussiness logic
@@ -38,9 +47,13 @@ func (this *auth_core) init() {
 	if error != nil {
 
 		this.pending_error = error
+
+		return
 	}
 
-	this.auth_db = client.Database("auth")
+	this.auth_db = client.Database(DB_NAME)
+
+	this.initDB()
 }
 
 func (this *auth_core) ValidateCredential(uname string, pass string) (string, error) {
@@ -76,4 +89,49 @@ func (this *auth_core) AuthorizeGroup(token string, field string, groups []strin
 func (this *auth_core) generateToken(uuid uuid.UUID) string {
 
 	return ""
+}
+
+func (this *auth_core) initDB() {
+
+	this.checkCollection()
+}
+
+func (this *auth_core) checkCollection() error {
+
+	if this.pending_error != nil {
+
+		return this.pending_error
+	}
+
+	db := this.auth_db
+	collNames, err := db.ListCollectionNames(context.TODO(), nil)
+
+	if err != nil {
+
+		this.pending_error = err
+	}
+
+	var checkList map[string]bool = map[string]bool{
+		USER_COLLECTION:    false,
+		FIELD_COLLECTION:   false,
+		GROUP_COLLECTION:   false,
+		LICENSE_COLLECTION: false,
+	}
+
+	for _, name := range collNames {
+
+		if _, ok := checkList[name]; !ok {
+
+			continue
+		}
+
+		delete(checkList, name)
+	}
+
+	for key := range checkList {
+
+		db.CreateCollection(context.TODO(), key)
+	}
+
+	return nil
 }

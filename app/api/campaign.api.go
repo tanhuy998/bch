@@ -27,33 +27,35 @@ func initCampaignGroupApi(app *iris.Application) {
 
 			activator.Handle(
 				"GET", "/{uuid:string}", "GetCampaign",
-				middleware.Authorization(middleware.AuthorizationLicense{
+				middleware.Authorization(authService.AuthorizationLicense{
 					Fields: []authService.AuthorizationField{authField},
-					Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
+					//Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
 			)
 
 			activator.Handle(
 				"POST", "/", "NewCampaign",
-				middleware.Authorization(middleware.AuthorizationLicense{
+				middleware.Authorization(authService.AuthorizationLicense{
 					Fields: []authService.AuthorizationField{authField},
-					Groups: []authService.AuthorizationGroup{auth_commander_group},
+					Claims: []authService.AuthorizationClaim{auth_post_claim},
+					//Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
 			)
 
 			activator.Handle(
 				"PUT", "/{uuid:string}", "UpdateCampaign",
-				middleware.Authorization(middleware.AuthorizationLicense{
+				middleware.Authorization(authService.AuthorizationLicense{
 					Fields: []authService.AuthorizationField{authField},
-					Groups: []authService.AuthorizationGroup{auth_commander_group},
+					//Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
 			)
 
 			activator.Handle(
 				"DELETE", "/{uuid:string}", "DeleteCampaign",
-				middleware.Authorization(middleware.AuthorizationLicense{
+				middleware.Authorization(authService.AuthorizationLicense{
 					Fields: []authService.AuthorizationField{authField},
-					Groups: []authService.AuthorizationGroup{auth_commander_group},
+					Claims: []authService.AuthorizationClaim{auth_post_claim},
+					//Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
 			)
 		}),

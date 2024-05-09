@@ -17,7 +17,7 @@ func initCandidateSigningApi(app *iris.Application) {
 		applyRoutes(func(activator *mvc.ControllerActivator) {
 
 			activator.Handle("GET", "/campaign/{campaignUUID:string}/candidate/{candidateUUID:string}", "GetSigningInfo")
-			activator.Handle("POSt", "/", "Sign")
+			activator.Handle("POST", "/", "Sign")
 		}),
 	)
 }
