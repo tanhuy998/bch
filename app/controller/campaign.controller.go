@@ -3,6 +3,9 @@ package controller
 type CampaignController struct {
 }
 
+/*
+GET /campaign/{uuid:string}?p={number}
+*/
 func (this *CampaignController) GetCampaign() {
 
 }
