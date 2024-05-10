@@ -43,53 +43,53 @@ type AuthorizationGroup string
 type AuthorizationField string
 
 type AuthorizationLicense struct {
-	Fields []AuthorizationField
+	Fields AuthorizationField
 	Groups []AuthorizationGroup
 	Claims []AuthorizationClaim
 }
 
 type AuthenticateService struct {
-	IAuthCore
-	core *auth_core
+	IAuthService
+	vault *auth_vault
 }
 
 func New(connString string) *AuthenticateService {
 
 	ret := new(AuthenticateService)
-	ret.core = &auth_core{}
+	ret.vault = &auth_vault{}
 
 	ret.SetConnString(connString)
 	privateKey, err := retrievePrivateKey()
 
 	if err != nil {
 
-		ret.core.pending_error = err
+		ret.vault.pending_error = err
 	}
 
-	ret.core.private_key = privateKey
+	ret.vault.private_key = privateKey
 
 	return ret
 }
 
 func (this *AuthenticateService) SetConnString(connString string) {
 
-	this.core.conn_string = connString
+	this.vault.conn_string = connString
 }
 
-func (this *AuthenticateService) ValidateCredential(uname string, pass string) (string, error) {
+// func (this *AuthenticateService) ValidateCredential(uname string, pass string) (string, error) {
 
-	return this.core.ValidateCredential(uname, pass)
-}
+// 	//return this.core.ValidateCredential(uname, pass)
+// }
 
-func (this *AuthenticateService) AuthorizeClaims(token string, field string, claims []string) error {
+// func (this *AuthenticateService) AuthorizeClaims(token string, field string, claims []string) error {
 
-	return this.core.AuthorizeClaims(token, field, claims)
-}
+// 	//return this.core.AuthorizeClaims(token, field, claims)
+// }
 
-func (this *AuthenticateService) AuthorizeGroup(token string, field string, groups []string) error {
+// func (this *AuthenticateService) AuthorizeGroup(token string, field string, groups []string) error {
 
-	return this.core.AuthorizeGroup(token, field, groups)
-}
+// 	//return this.core.AuthorizeGroup(token, field, groups)
+// }
 
 func retrievePrivateKey() ([]byte, error) {
 

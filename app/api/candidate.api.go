@@ -14,7 +14,9 @@ func initCandidateGroupApi(app *iris.Application) {
 	router := app.Party("/candidate")
 
 	router.ConfigureContainer(func(api *iris.APIContainer) {
-
+		/*
+			for dependencies injection
+		*/
 		api.Use(middleware.Authentication())
 	})
 
@@ -23,37 +25,84 @@ func initCandidateGroupApi(app *iris.Application) {
 		new(controller.CandidateController),
 		applyRoutes(func(activator *mvc.ControllerActivator) {
 
-			authField := authService.AuthorizationField("candidate")
+			candidateField := authService.AuthorizationField("candidate")
+			campaignField := authService.AuthorizationField("campaign")
 
+			/*
+				Get Candidate list in pagination form of a specific campaign
+			*/
+			activator.Handle(
+				"GET", "/campaign/{uuid:string}", "GetCandidateByPage",
+				middleware.Authorize(
+					authService.AuthorizationLicense{
+						Fields: candidateField,
+						Claims: []authService.AuthorizationClaim{auth_get_claim},
+					},
+					authService.AuthorizationLicense{
+						Fields: campaignField,
+						Claims: []authService.AuthorizationClaim{auth_get_claim},
+					},
+				),
+			)
+
+			/*
+				Seach Candidates by given infomations
+			*/
+			activator.Handle(
+				"GET", "/search", "SearchByInformation",
+				middleware.Authorize(authService.AuthorizationLicense{
+					Fields: candidateField,
+					Claims: []authService.AuthorizationClaim{authService.AuthorizationClaim("discover_claim")},
+				}),
+			)
+
+			/*
+				Get a specific candidate by uuid
+			*/
 			activator.Handle(
 				"GET", "/{uuid:string}", "GetCandidate",
-				middleware.Authorization(authService.AuthorizationLicense{
-					Fields: []authService.AuthorizationField{authField},
+				middleware.Authorize(authService.AuthorizationLicense{
+					Fields: candidateField,
 					Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
 			)
 
+			/*
+				Post a candidate to a specific campaign
+			*/
 			activator.Handle(
-				"POST", "/", "PostCandidate",
-				middleware.Authorization(authService.AuthorizationLicense{
-					Fields: []authService.AuthorizationField{authField},
-					//Groups: []authService.AuthorizationGroup{auth_commander_group},
-					Claims: []authService.AuthorizationClaim{auth_post_claim},
-				}),
+				"POST", "/campaign/{uuid:string}", "PostCandidate",
+				middleware.Authorize(
+					authService.AuthorizationLicense{
+						Fields: candidateField,
+						//Groups: []authService.AuthorizationGroup{auth_commander_group},
+						Claims: []authService.AuthorizationClaim{auth_post_claim},
+					},
+					authService.AuthorizationLicense{
+						Fields: campaignField,
+						Claims: []authService.AuthorizationClaim{auth_post_claim},
+					},
+				),
 			)
 
+			/*
+				Update information of a candidate
+			*/
 			activator.Handle(
-				"PUT", "/{uuid:string}", "UpdateCandidate",
-				middleware.Authorization(authService.AuthorizationLicense{
-					Fields: []authService.AuthorizationField{authField},
+				"PATCH", "/{uuid:string}", "UpdateCandidate",
+				middleware.Authorize(authService.AuthorizationLicense{
+					Fields: candidateField,
 					Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
 			)
 
+			/*
+				Delete a
+			*/
 			activator.Handle(
 				"DELETE", "/{uuid:string}", "DeleteCandidate",
-				middleware.Authorization(authService.AuthorizationLicense{
-					Fields: []authService.AuthorizationField{authField},
+				middleware.Authorize(authService.AuthorizationLicense{
+					Fields: candidateField,
 					//Groups: []authService.AuthorizationGroup{auth_commander_group},
 					Claims: []authService.AuthorizationClaim{auth_delete_claim},
 				}),

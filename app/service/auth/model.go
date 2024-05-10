@@ -1,6 +1,8 @@
 package authService
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -15,9 +17,9 @@ type AuthUser struct {
 }
 
 type AuthGroup struct {
-	UUID   uuid.UUID   `json:"uuid" bson:"uuid"`
-	Name   string      `json:"name" bson:"name"`
-	UserId []uuid.UUID `json:"userIDs" bson:"userIDs"`
+	UUID    uuid.UUID   `json:"uuid" bson:"uuid"`
+	Name    string      `json:"name" bson:"name"`
+	UserIds []uuid.UUID `json:"userUUIDs" bson:"userUUIDs"`
 }
 
 type AuthField struct {
@@ -27,8 +29,10 @@ type AuthField struct {
 }
 
 type AuthLicense struct {
-	GroupID uuid.UUID                 `json:"groupID" bson:"groupID"`
-	Claims  map[AuthClaim]interface{} `json:"claims" bson:"claims"`
+	GroupID  uuid.UUID                 `json:"groupID" bson:"groupID"`
+	Claims   map[AuthClaim]interface{} `json:"claims" bson:"claims"`
+	IssuedAt time.Time                 `json:"issuedAt bson:'issuedAt"`
+	Expire   time.Time                 `json:"expire" bson:"expire"`
 }
 
 // func (this *User) VerifyPassword(pass string) error {

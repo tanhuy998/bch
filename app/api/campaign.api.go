@@ -23,37 +23,47 @@ func initCampaignGroupApi(app *iris.Application) {
 		new(controller.CampaignController),
 		applyRoutes(func(activator *mvc.ControllerActivator) {
 
-			authField := authService.AuthorizationField("campaign")
+			campaignField := authService.AuthorizationField("campaign")
+
+			//activator.Handle("GET", "/", "HealthCheck")
 
 			activator.Handle(
 				"GET", "/{uuid:string}", "GetCampaign",
-				middleware.Authorization(authService.AuthorizationLicense{
-					Fields: []authService.AuthorizationField{authField},
+				middleware.Authorize(authService.AuthorizationLicense{
+					Fields: campaignField,
+					//Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
+				}),
+			)
+
+			activator.Handle(
+				"Get", "/", "GetCampaignListOnPage",
+				middleware.Authorize(authService.AuthorizationLicense{
+					Fields: campaignField,
 					//Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
 			)
 
 			activator.Handle(
 				"POST", "/", "NewCampaign",
-				middleware.Authorization(authService.AuthorizationLicense{
-					Fields: []authService.AuthorizationField{authField},
+				middleware.Authorize(authService.AuthorizationLicense{
+					Fields: campaignField,
 					Claims: []authService.AuthorizationClaim{auth_post_claim},
 					//Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
 			)
 
 			activator.Handle(
-				"PUT", "/{uuid:string}", "UpdateCampaign",
-				middleware.Authorization(authService.AuthorizationLicense{
-					Fields: []authService.AuthorizationField{authField},
+				"PATCH", "/{uuid:string}", "UpdateCampaign",
+				middleware.Authorize(authService.AuthorizationLicense{
+					Fields: campaignField,
 					//Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
 			)
 
 			activator.Handle(
 				"DELETE", "/{uuid:string}", "DeleteCampaign",
-				middleware.Authorization(authService.AuthorizationLicense{
-					Fields: []authService.AuthorizationField{authField},
+				middleware.Authorize(authService.AuthorizationLicense{
+					Fields: campaignField,
 					Claims: []authService.AuthorizationClaim{auth_post_claim},
 					//Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),

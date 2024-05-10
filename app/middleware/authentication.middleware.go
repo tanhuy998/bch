@@ -1,11 +1,9 @@
 package middleware
 
 import (
-	"app/app/model"
 	authService "app/app/service/auth"
 	"fmt"
 
-	"github.com/gofor-little/env"
 	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/kataras/iris/v12"
 )
@@ -16,32 +14,30 @@ const (
 	JWT_PUBLIC_KEY = "JWT_PUBLIC_KEY"
 )
 
-type AuthUser *model.User
-
 type SigningMethod jwt.SigningMethodECDSA
 
 func Authentication() func(iris.Context, *authService.AuthenticateService) {
 
 	return func(ctx iris.Context, auth *authService.AuthenticateService) {
 
-		ENV_AUTH_HEADER := env.Get(AUTH_HEADER, "bearer")
-		var strToken string = ctx.GetHeader(ENV_AUTH_HEADER)
+		// ENV_AUTH_HEADER := env.Get(AUTH_HEADER, "bearer")
+		// var strToken string = ctx.GetHeader(ENV_AUTH_HEADER)
 
-		if strToken == "" {
+		// if strToken == "" {
 
-			unAuthenticated(ctx)
-			return
-		}
+		// 	unAuthenticated(ctx)
+		// 	return
+		// }
 
-		token, err := verifyToken(strToken)
+		// token, err := verifyToken(strToken)
 
-		if err != nil {
+		// if err != nil {
 
-			unAuthenticated(ctx)
-			return
-		}
+		// 	unAuthenticated(ctx)
+		// 	return
+		// }
 
-		ctx.RegisterDependency(token)
+		// ctx.RegisterDependency(token)
 		//ctx.Values().Set(AUTH_USER, user)
 		ctx.Next()
 	}
