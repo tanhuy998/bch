@@ -1,6 +1,7 @@
 package authService
 
 import (
+	libCommon "app/app/lib/common"
 	"context"
 	"fmt"
 	"time"
@@ -171,8 +172,8 @@ func (this *auth_vault) initDBIndexes() error {
 			mongo.IndexModel{
 				Keys: "uname",
 				Options: &options.IndexOptions{
-					Name:   pPrimitive("username"),
-					Unique: pPrimitive(true),
+					Name:   libCommon.PointerPrimitive("username"),
+					Unique: libCommon.PointerPrimitive(true),
 				},
 			},
 		},
@@ -190,15 +191,15 @@ func (this *auth_vault) initDBIndexes() error {
 			mongo.IndexModel{
 				Keys: "name",
 				Options: &options.IndexOptions{
-					Name:   pPrimitive("name"),
-					Unique: pPrimitive(true),
+					Name:   libCommon.PointerPrimitive("name"),
+					Unique: libCommon.PointerPrimitive(true),
 				},
 			},
 			mongo.IndexModel{
 				Keys: "uuid",
 				Options: &options.IndexOptions{
-					Name:   pPrimitive("uuid"),
-					Unique: pPrimitive(true),
+					Name:   libCommon.PointerPrimitive("uuid"),
+					Unique: libCommon.PointerPrimitive(true),
 				},
 			},
 		},
@@ -216,15 +217,15 @@ func (this *auth_vault) initDBIndexes() error {
 			mongo.IndexModel{
 				Keys: "name",
 				Options: &options.IndexOptions{
-					Name:   pPrimitive("name"),
-					Unique: pPrimitive(true),
+					Name:   libCommon.PointerPrimitive("name"),
+					Unique: libCommon.PointerPrimitive(true),
 				},
 			},
 			mongo.IndexModel{
 				Keys: "uuid",
 				Options: &options.IndexOptions{
-					Name:   pPrimitive("uuid"),
-					Unique: pPrimitive(true),
+					Name:   libCommon.PointerPrimitive("uuid"),
+					Unique: libCommon.PointerPrimitive(true),
 				},
 			},
 		},
@@ -242,15 +243,15 @@ func (this *auth_vault) initDBIndexes() error {
 			mongo.IndexModel{
 				Keys: "name",
 				Options: &options.IndexOptions{
-					Name:   pPrimitive("name"),
-					Unique: pPrimitive(true),
+					Name:   libCommon.PointerPrimitive("name"),
+					Unique: libCommon.PointerPrimitive(true),
 				},
 			},
 			mongo.IndexModel{
 				Keys: "uuid",
 				Options: &options.IndexOptions{
-					Name:   pPrimitive("uuid"),
-					Unique: pPrimitive(true),
+					Name:   libCommon.PointerPrimitive("uuid"),
+					Unique: libCommon.PointerPrimitive(true),
 				},
 			},
 		},
@@ -263,12 +264,6 @@ func (this *auth_vault) initDBIndexes() error {
 	}
 
 	return nil
-}
-
-func pPrimitive[T any](val T) *T {
-
-	ret := val
-	return &ret
 }
 
 func (this *auth_vault) getUserByUsername(uname string) (*AuthUser, error) {

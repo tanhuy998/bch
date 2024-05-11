@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	ITEM_PER_PAGE            = 10
 	CAMPAIGN_COLLECTION_NAME = "campaigns"
 )
 
@@ -38,37 +39,42 @@ func (this *CampaignRepository) FindByUUID(uuid uuid.UUID) (*model.Campaign, err
 
 func (this *CandidateRepository) RetrieveCandidatesOfCampaign(campaign uuid.UUID, page int) ([]model.Candidate, error) {
 
-	if page < 0 {
+	if page <= 0 {
 
-		page = 0
+		page = 1
 	}
 
 	coll := this.collection
 
+	//coll.CountDocuments()
+	convertedPageNum := this.returnPageThresholdIfOutOfRange(int64(page))
+
 	cursor, err := coll.Aggregate(
 		context.TODO(),
 		bson.D{
-			{
-				"$match", bson.D{
-					{"uuid", campaign},
-				},
-			},
-			{"$unwind", "candidates"},
-			{
-				"$lookup", bson.D{
-					{"from", "candidates"},
-					{"localField", "candidate_ids"},
-					{"foreignField", "_id"},
-					{"as", "detail"},
-				},
-			},
-			{
-				"project", bson.D{
-					{"$detail.name", 1},
-					{"$detail.address", 1},
-					{"$detail.idNumber", 1},
-				},
-			},
+			// {
+			// 	"$match", bson.D{
+			// 		{"uuid", campaign},
+			// 	},
+			// },
+			// {"$unwind", "candidates"},
+			// {"$skip", convertedPageNum * int64(ITEM_PER_PAGE)},
+			// {"$limit", ITEM_PER_PAGE},
+			// {
+			// 	"$lookup", bson.D{
+			// 		{"from", "candidates"},
+			// 		{"localField", "candidate_ids"},
+			// 		{"foreignField", "_id"},
+			// 		{"as", "detail"},
+			// 	},
+			// },
+			// {
+			// 	"project", bson.D{
+			// 		{"$detail.name", 1},
+			// 		{"$detail.address", 1},
+			// 		{"$detail.idNumber", 1},
+			// 	},
+			// },
 		},
 	)
 
@@ -77,11 +83,9 @@ func (this *CandidateRepository) RetrieveCandidatesOfCampaign(campaign uuid.UUID
 		return nil, err
 	}
 
-	parsedList, err := ParseCursor(
-		cursor, struct {
-			Detail model.Candidate `bson:"detail"`
-		}{},
-	)
+	parsedList, err := ParseCursor[struct {
+		Detail model.Candidate `bson:"detail"`
+	}](cursor)
 
 	if err != nil {
 
