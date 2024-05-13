@@ -1,7 +1,7 @@
 package repository
 
 import (
-	lib "app/app/lib/concrete/error"
+	libCommon "app/app/lib/common"
 	"context"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -30,14 +30,14 @@ func (this *AbstractRepository) CountPage() (int64, error) {
 	}
 
 	even := docNum / int64(ITEM_PER_PAGE)
-	odd := lib.Ternary[int64](docNum%ITEM_PER_PAGE > 0, int64(64), int64(0))
+	odd := libCommon.Ternary[int64](docNum%ITEM_PER_PAGE > 0, int64(64), int64(0))
 
 	return even + odd, nil
 }
 
 func (this *AbstractRepository) returnPageThresholdIfOutOfRange(inputPageNum int64) int64 {
 
-	inputPageNum = lib.Ternary(inputPageNum <= 0, 1, inputPageNum)
+	inputPageNum = libCommon.Ternary(inputPageNum <= 0, 1, inputPageNum)
 
 	pageCount, err := this.CountPage()
 
@@ -46,7 +46,7 @@ func (this *AbstractRepository) returnPageThresholdIfOutOfRange(inputPageNum int
 		return 1
 	}
 
-	return lib.Ternary[int64](inputPageNum > pageCount, pageCount, inputPageNum)
+	return libCommon.Ternary[int64](inputPageNum > pageCount, pageCount, inputPageNum)
 }
 
 func ParseCursor[T any](cursor *mongo.Cursor) ([]*T, error) {

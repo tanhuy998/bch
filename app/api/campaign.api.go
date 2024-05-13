@@ -9,6 +9,13 @@ import (
 	"github.com/kataras/iris/v12/mvc"
 )
 
+// func initCampaignGroup(app *flamego.Flame) {
+
+// 	app.Group("/campaign", func() {
+
+// 	})
+// }
+
 func initCampaignGroupApi(app *iris.Application) {
 
 	router := app.Party("/campaign")

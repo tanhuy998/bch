@@ -49,7 +49,6 @@ type AuthorizationLicense struct {
 }
 
 type AuthenticateService struct {
-	IAuthService
 	vault *auth_vault
 }
 

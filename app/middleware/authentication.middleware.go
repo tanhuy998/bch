@@ -19,7 +19,7 @@ type SigningMethod jwt.SigningMethodECDSA
 func Authentication() func(iris.Context, authService.IAuthenticate) {
 
 	return func(ctx iris.Context, auth authService.IAuthenticate) {
-
+		fmt.Println("1")
 		// ENV_AUTH_HEADER := env.Get(AUTH_HEADER, "bearer")
 		// var strToken string = ctx.GetHeader(ENV_AUTH_HEADER)
 

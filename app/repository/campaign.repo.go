@@ -14,7 +14,6 @@ const (
 )
 
 type CampaignRepository struct {
-	IRepository
 	AbstractRepository
 	//collection *mongo.Collection
 }
@@ -37,70 +36,81 @@ func (this *CampaignRepository) FindByUUID(uuid uuid.UUID) (*model.Campaign, err
 	return camp, nil
 }
 
-func (this *CandidateRepository) RetrieveCandidatesOfCampaign(campaign uuid.UUID, page int) ([]model.Candidate, error) {
+func (this *CampaignRepository) PostNewCampaign(model model.Campaign) (*model.Campaign, error) {
 
-	if page <= 0 {
+	model.Store()
 
-		page = 1
-	}
-
-	coll := this.collection
-
-	//coll.CountDocuments()
-	convertedPageNum := this.returnPageThresholdIfOutOfRange(int64(page))
-
-	cursor, err := coll.Aggregate(
-		context.TODO(),
-		bson.D{
-			// {
-			// 	"$match", bson.D{
-			// 		{"uuid", campaign},
-			// 	},
-			// },
-			// {"$unwind", "candidates"},
-			// {"$skip", convertedPageNum * int64(ITEM_PER_PAGE)},
-			// {"$limit", ITEM_PER_PAGE},
-			// {
-			// 	"$lookup", bson.D{
-			// 		{"from", "candidates"},
-			// 		{"localField", "candidate_ids"},
-			// 		{"foreignField", "_id"},
-			// 		{"as", "detail"},
-			// 	},
-			// },
-			// {
-			// 	"project", bson.D{
-			// 		{"$detail.name", 1},
-			// 		{"$detail.address", 1},
-			// 		{"$detail.idNumber", 1},
-			// 	},
-			// },
-		},
-	)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	parsedList, err := ParseCursor[struct {
-		Detail model.Candidate `bson:"detail"`
-	}](cursor)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	var ret []model.Candidate = []model.Candidate{}
-
-	for _, model := range parsedList {
-
-		ret = append(ret, model.Detail)
-	}
-
-	return ret, nil
+	return &model, nil
 }
+
+// func (this *CampaignRepository) PatchCampaign(uuid uuid.UUID) (*model.Campaign, error) {
+
+// }
+
+// func (this *CandidateRepository) RetrieveCandidatesOfCampaign(campaign uuid.UUID, page int) ([]model.Candidate, error) {
+
+// 	if page <= 0 {
+
+// 		page = 1
+// 	}
+
+// 	coll := this.collection
+
+// 	//coll.CountDocuments()
+// 	convertedPageNum := this.returnPageThresholdIfOutOfRange(int64(page))
+
+// 	cursor, err := coll.Aggregate(
+// 		context.TODO(),
+// 		bson.D{
+// 			// {
+// 			// 	"$match", bson.D{
+// 			// 		{"uuid", campaign},
+// 			// 	},
+// 			// },
+// 			// {"$unwind", "candidates"},
+// 			// {"$skip", convertedPageNum * int64(ITEM_PER_PAGE)},
+// 			// {"$limit", ITEM_PER_PAGE},
+// 			// {
+// 			// 	"$lookup", bson.D{
+// 			// 		{"from", "candidates"},
+// 			// 		{"localField", "candidate_ids"},
+// 			// 		{"foreignField", "_id"},
+// 			// 		{"as", "detail"},
+// 			// 	},
+// 			// },
+// 			// {
+// 			// 	"project", bson.D{
+// 			// 		{"$detail.name", 1},
+// 			// 		{"$detail.address", 1},
+// 			// 		{"$detail.idNumber", 1},
+// 			// 	},
+// 			// },
+// 		},
+// 	)
+
+// 	if err != nil {
+
+// 		return nil, err
+// 	}
+
+// 	parsedList, err := ParseCursor[struct {
+// 		Detail model.Candidate `bson:"detail"`
+// 	}](cursor)
+
+// 	if err != nil {
+
+// 		return nil, err
+// 	}
+
+// 	var ret []model.Candidate = []model.Candidate{}
+
+// 	for _, model := range parsedList {
+
+// 		ret = append(ret, model.Detail)
+// 	}
+
+// 	return ret, nil
+// }
 
 func (this *CampaignRepository) InsertCandidates(uuid uuid.UUID) {
 

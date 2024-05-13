@@ -2,6 +2,7 @@ package middleware
 
 import (
 	authService "app/app/service/auth"
+	"fmt"
 
 	"github.com/kataras/iris/v12"
 )
@@ -15,7 +16,7 @@ func Authorize(licenses ...authService.AuthorizationLicense) iris.Handler {
 		// if user == nil {
 
 		// }
-
+		fmt.Println("2")
 		ctx.Next()
 	}
 }

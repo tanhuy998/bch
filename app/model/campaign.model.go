@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const MONGOD_CAMPAIGN_MODEL_COLLECTION = "campaigns"
@@ -9,9 +11,10 @@ const MONGOD_CAMPAIGN_MODEL_COLLECTION = "campaigns"
 type Campaign struct {
 	IModel
 	Model
-	Title    string    `json:"title"`
-	Time     time.Time `json:"time"`
-	ExpireAt time.Time `json:"expiredAt" bson:"expiredAt"`
+	UUID   uuid.UUID `json:"uuid" bson:"uuid" validate:"required"`
+	Title  string    `json:"title" bson:"title" validate:"required"`
+	Time   time.Time `json:"time" bson:"time"`
+	Expire time.Time `json:"expire" bson:"expire" validate:"required"`
 	//Candidates []primitive.ObjectID `json:"candidate_ids" bson:"candidate_ids"`
 }
 

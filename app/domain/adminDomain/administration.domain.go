@@ -1,0 +1,5 @@
+package adminDomain
+
+func AddCampain() {
+
+}

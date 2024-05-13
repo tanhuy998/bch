@@ -1,13 +1,22 @@
 package controller
 
+import (
+	authService "app/app/service/auth"
+	"fmt"
+	"reflect"
+)
+
 type CampaignController struct {
 }
 
 /*
 GET /campaign/{uuid:string}?p={number}
 */
-func (this *CampaignController) GetCampaign() {
+func (this *CampaignController) GetCampaign(auth authService.IAuthService) string {
 
+	fmt.Println(auth)
+
+	return fmt.Sprintf("type %T", reflect.TypeOf(auth))
 }
 
 func (this *CampaignController) GetCampaignListOnPage() {
