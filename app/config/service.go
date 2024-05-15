@@ -90,17 +90,17 @@ func BindDependency[AbstractType any, ConcreteType any](container *hero.Containe
 	}
 
 	//if !libCommon.GetOriginalTypeOf(concreteVal).Implements(abstractType) {
-	// if _, ok := any(concreteVal).(AbstractType); ok {
-	// 	//if reflect.TypeOf(concreteVal).Implements(libCommon.InterfaceOf((*AbstractType)(nil))) {
+	if _, ok := any(concreteVal).(AbstractType); !ok {
+		//if reflect.TypeOf(concreteVal).Implements(libCommon.InterfaceOf((*AbstractType)(nil))) {
 
-	// 	panic(
-	// 		fmt.Sprintf(
-	// 			"Could not bind concrete type %s as interface %s",
-	// 			reflect.TypeOf(concreteVal).String(),
-	// 			abstractType.String(),
-	// 		),
-	// 	)
-	// }
+		panic(
+			fmt.Sprintf(
+				"Could not bind concrete type %s as interface %s",
+				reflect.TypeOf(concreteVal).String(),
+				abstractType.String(),
+			),
+		)
+	}
 
 	dep := container.Register(concreteVal)
 	dep.DestType = abstractType
