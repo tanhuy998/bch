@@ -43,7 +43,7 @@ func initCampaignGroupApi(app *iris.Application) {
 			)
 
 			activator.Handle(
-				"Get", "/", "GetCampaignListOnPage",
+				"Get", "/page/{page:int}", "GetCampaignListOnPage",
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: campaignField,
 					//Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},

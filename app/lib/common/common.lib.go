@@ -1,6 +1,8 @@
 package libCommon
 
-import "reflect"
+import (
+	"reflect"
+)
 
 func Ternary[T any](criteria bool, valIfTrue T, valIfFalse T) T {
 
@@ -18,7 +20,19 @@ func PointerPrimitive[T any](val T) *T {
 	return &ret
 }
 
-func InterfaceOf(value interface{}) reflect.Type {
+func GetOriginalTypeOf(value interface{}) reflect.Type {
+
+	t := reflect.TypeOf(value)
+	for t.Kind() == reflect.Ptr {
+
+		t = t.Elem()
+	}
+
+	return t
+}
+
+func GetOriginalInterfaceOf(value interface{}) reflect.Type {
+
 	t := reflect.TypeOf(value)
 	for t.Kind() == reflect.Ptr {
 
@@ -26,7 +40,17 @@ func InterfaceOf(value interface{}) reflect.Type {
 	}
 
 	if t.Kind() != reflect.Interface {
-		panic("called inject.InterfaceOf with a value that is not a pointer to an interface. (*MyInterface)(nil)")
+		panic("called libCommon.GetOriginalTypeOf with a value that is not a pointer to an interface. (*MyInterface)(nil)")
 	}
 	return t
+}
+
+func Wrap[T any]() reflect.Type {
+
+	return GetOriginalTypeOf((*T)(nil))
+}
+
+func IsInterface[T any]() bool {
+
+	return reflect.TypeOf((*T)(nil)).Kind() == reflect.Interface
 }

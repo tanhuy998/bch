@@ -16,6 +16,7 @@ func Authorize(licenses ...authService.AuthorizationLicense) iris.Handler {
 		// if user == nil {
 
 		// }
+
 		fmt.Println("2")
 		ctx.Next()
 	}

@@ -3,8 +3,8 @@ package authService
 import "context"
 
 type IAuthorize interface {
-	AuthorizeClaims(token string, field AuthorizationField, claims []AuthorizationGroup) (context.Context, error)
-	AuthorizeGroup(token string, field AuthorizationField, groups []AuthorizationGroup) (context.Context, error)
+	AuthorizeClaims(token string, field AuthorizationField, claims []AuthorizationGroup) (*context.Context, error)
+	AuthorizeGroup(token string, field AuthorizationField, groups []AuthorizationGroup) (*context.Context, error)
 }
 
 type IAuthenticate interface {

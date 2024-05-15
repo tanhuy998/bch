@@ -2,6 +2,7 @@ package main
 
 import (
 	"app/app/api"
+	"app/app/bootstrap"
 	"app/app/config"
 	"app/app/db"
 	libCommon "app/app/lib/common"
@@ -16,6 +17,7 @@ import (
 )
 
 func main() {
+
 	loadConfig()
 
 	var app *iris.Application = iris.New()
@@ -25,13 +27,16 @@ func main() {
 	//app.UseGlobal(middleware.RedirectInternalError())
 	app.UseRouter(
 		cors.New(cors.Options{
-			AllowedOrigins:   config.RetrieveCORSHosts(),
+			AllowedOrigins:   bootstrap.RetrieveCORSHosts(),
 			AllowCredentials: true,
 		}),
 	)
 
-	registerServices(app)
-	registerDependencies(app)
+	config.InitializeDatabase(app)
+	config.RegisterServices(app)
+
+	// registerServices(app)
+	// registerDependencies(app)
 
 	api.Init(app)
 	app.Listen(env.Get("HTTP_PORT", ":80"))
@@ -43,7 +48,7 @@ func main() {
 
 func loadConfig() {
 
-	config.InitEnv()
+	bootstrap.InitEnv()
 }
 
 func registerDependencies(app *iris.Application) {
@@ -70,7 +75,8 @@ func registerServices(app *iris.Application) {
 
 	auth := new(authService.AuthenticateService)
 	Dep := container.Register(auth)
-	Dep.DestType = libCommon.InterfaceOf((*authService.IAuthService)(nil))
+	Dep.DestType = libCommon.Wrap[authService.IAuthService]()
+
 }
 
 // func initAuthService() *authService.AuthenticateService {

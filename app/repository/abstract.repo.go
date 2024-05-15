@@ -2,22 +2,54 @@ package repository
 
 import (
 	libCommon "app/app/lib/common"
+	"app/app/model"
 	"context"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type IRepository interface {
-	Init(db *mongo.Database)
-}
+const (
+	ITEM_PER_PAGE = 10
+)
 
-type AbstractRepository struct {
-	collection *mongo.Collection
-}
+type (
+	UUIDModel interface {
+		model.Campaign | model.Candidate
+	}
 
-func (this *AbstractRepository) Init(db *mongo.Database) {
+	IRepository interface {
+		Init(*mongo.Database)
+	}
 
-	this.collection = db.Collection(CAMPAIGN_COLLECTION_NAME)
+	ICampaignRepository interface {
+		FindByUUID(uuid.UUID) (*model.Campaign, error)
+		Get(page int) ([]*model.Campaign, error)
+		GetPendingCampaigns(page int) ([]*model.Campaign, error)
+		Create(*model.Campaign) error
+		//CreateMany([]*model.Campaign) error
+		Update(*model.Campaign) error
+		Delete(uuid.UUID) error
+		//Remove(uuid uuid.UUID) (bool, error)
+	}
+
+	ICandidateRepository interface {
+		FindByUUID(uuid.UUID) (*model.Campaign, error)
+		Get(page int) ([]*model.Campaign, error)
+		Create(*model.Candidate) error
+		Update(*model.Candidate) error
+		Delete(uuid.UUID) error
+		//Remove(uuid uuid.UUID) (bool, error)
+	}
+
+	AbstractRepository struct {
+		collection *mongo.Collection
+	}
+)
+
+func (this *AbstractRepository) Init(db *mongo.Database, collectionName string) {
+
+	this.collection = db.Collection(collectionName)
 }
 
 func (this *AbstractRepository) CountPage() (int64, error) {
@@ -49,26 +81,7 @@ func (this *AbstractRepository) returnPageThresholdIfOutOfRange(inputPageNum int
 	return libCommon.Ternary[int64](inputPageNum > pageCount, pageCount, inputPageNum)
 }
 
-func ParseCursor[T any](cursor *mongo.Cursor) ([]*T, error) {
+func (this *AbstractRepository) Collection() *mongo.Collection {
 
-	var ret []*T
-
-	for cursor.Next(context.TODO()) {
-
-		var parsedModel = new(T)
-
-		if err := cursor.Decode(&parsedModel); err != nil {
-
-			return nil, err
-		}
-
-		ret = append(ret, parsedModel)
-	}
-
-	if err := cursor.Err(); err != nil {
-
-		return nil, err
-	}
-
-	return ret, nil
+	return this.collection
 }

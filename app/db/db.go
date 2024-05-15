@@ -1,7 +1,7 @@
 package db
 
 import (
-	"app/app/config"
+	"app/app/bootstrap"
 	"context"
 	"regexp"
 	"time"
@@ -56,7 +56,7 @@ func GetDB() *mongo.Database {
 
 func newClient() (*mongo.Client, error) {
 
-	err := config.InitEnv()
+	err := bootstrap.InitEnv()
 
 	if err != nil {
 

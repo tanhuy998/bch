@@ -2,14 +2,12 @@ package repository
 
 import (
 	"app/app/model"
-	"context"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
-	ITEM_PER_PAGE            = 10
 	CAMPAIGN_COLLECTION_NAME = "campaigns"
 )
 
@@ -18,100 +16,43 @@ type CampaignRepository struct {
 	//collection *mongo.Collection
 }
 
+func (this *CampaignRepository) Init(db *mongo.Database) *CampaignRepository {
+
+	this.AbstractRepository.Init(db, CAMPAIGN_COLLECTION_NAME)
+
+	return this
+}
+
 func (this *CampaignRepository) FindByUUID(uuid uuid.UUID) (*model.Campaign, error) {
 
-	res := this.collection.FindOne(context.TODO(), bson.M{
-		"uuid": uuid,
-	})
-
-	var camp *model.Campaign
-
-	err := res.Decode(&camp)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	return camp, nil
+	return findDocumentByUUID[model.Campaign](uuid, this.collection)
 }
 
-func (this *CampaignRepository) PostNewCampaign(model model.Campaign) (*model.Campaign, error) {
+func (this *CampaignRepository) Get(page int) ([]*model.Campaign, error) {
 
-	model.Store()
+	calcPage := this.returnPageThresholdIfOutOfRange(int64(page))
 
-	return &model, nil
+	return getDocuments[model.Campaign](calcPage, this.collection)
 }
 
-// func (this *CampaignRepository) PatchCampaign(uuid uuid.UUID) (*model.Campaign, error) {
+func (this *CampaignRepository) GetPendingCampaigns(page int) ([]*model.Campaign, error) {
 
-// }
+	return make([]*model.Campaign, 0), nil
+}
 
-// func (this *CandidateRepository) RetrieveCandidatesOfCampaign(campaign uuid.UUID, page int) ([]model.Candidate, error) {
+func (this *CampaignRepository) Create(model *model.Campaign) error {
 
-// 	if page <= 0 {
+	model.UUID = uuid.New()
 
-// 		page = 1
-// 	}
+	return createDocument(model, this.collection)
+}
 
-// 	coll := this.collection
+func (this *CampaignRepository) Update(model *model.Campaign) error {
 
-// 	//coll.CountDocuments()
-// 	convertedPageNum := this.returnPageThresholdIfOutOfRange(int64(page))
+	return updateDocument(model.UUID, model, this.collection)
+}
 
-// 	cursor, err := coll.Aggregate(
-// 		context.TODO(),
-// 		bson.D{
-// 			// {
-// 			// 	"$match", bson.D{
-// 			// 		{"uuid", campaign},
-// 			// 	},
-// 			// },
-// 			// {"$unwind", "candidates"},
-// 			// {"$skip", convertedPageNum * int64(ITEM_PER_PAGE)},
-// 			// {"$limit", ITEM_PER_PAGE},
-// 			// {
-// 			// 	"$lookup", bson.D{
-// 			// 		{"from", "candidates"},
-// 			// 		{"localField", "candidate_ids"},
-// 			// 		{"foreignField", "_id"},
-// 			// 		{"as", "detail"},
-// 			// 	},
-// 			// },
-// 			// {
-// 			// 	"project", bson.D{
-// 			// 		{"$detail.name", 1},
-// 			// 		{"$detail.address", 1},
-// 			// 		{"$detail.idNumber", 1},
-// 			// 	},
-// 			// },
-// 		},
-// 	)
+func (this *CampaignRepository) Delete(uuid uuid.UUID) error {
 
-// 	if err != nil {
-
-// 		return nil, err
-// 	}
-
-// 	parsedList, err := ParseCursor[struct {
-// 		Detail model.Candidate `bson:"detail"`
-// 	}](cursor)
-
-// 	if err != nil {
-
-// 		return nil, err
-// 	}
-
-// 	var ret []model.Candidate = []model.Candidate{}
-
-// 	for _, model := range parsedList {
-
-// 		ret = append(ret, model.Detail)
-// 	}
-
-// 	return ret, nil
-// }
-
-func (this *CampaignRepository) InsertCandidates(uuid uuid.UUID) {
-
+	return deleteDocument(uuid, this.collection)
 }

@@ -1,6 +1,7 @@
 package authService
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/gofor-little/env"
@@ -73,6 +74,31 @@ func New(connString string) *AuthenticateService {
 func (this *AuthenticateService) SetConnString(connString string) {
 
 	this.vault.conn_string = connString
+}
+
+func (this *AuthenticateService) AuthorizeClaims(token string, field AuthorizationField, claims []AuthorizationGroup) (*context.Context, error) {
+
+	return nil, nil
+}
+
+func (this *AuthenticateService) AuthorizeGroup(token string, field AuthorizationField, groups []AuthorizationGroup) (*context.Context, error) {
+
+	return nil, nil
+}
+
+func (this *AuthenticateService) ValidateCredential(uname string, pass string) (string, error) {
+
+	return "", nil
+}
+
+func (this *AuthenticateService) SignUp(uname string, pass string) error {
+
+	return nil
+}
+
+func (this *AuthenticateService) ChangePassword(uname string) error {
+
+	return nil
 }
 
 // func (this *AuthenticateService) ValidateCredential(uname string, pass string) (string, error) {
