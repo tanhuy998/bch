@@ -34,7 +34,17 @@ func ParseCursor[T any](cursor *mongo.Cursor) ([]*T, error) {
 
 func getDocuments[T any](page int64, collection *mongo.Collection) ([]*T, error) {
 
-	return make([]*T, 0), nil
+	cursor, err := collection.Aggregate(context.TODO(), bson.D{
+		{"$skip", page},
+		{"$limit", ITEM_PER_PAGE},
+	})
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return ParseCursor[T](cursor)
 }
 
 func findDocumentByUUID[T any](uuid uuid.UUID, collection *mongo.Collection) (*T, error) {

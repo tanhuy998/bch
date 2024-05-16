@@ -2,8 +2,10 @@ package repository
 
 import (
 	"app/app/model"
+	"context"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -37,7 +39,24 @@ func (this *CampaignRepository) Get(page int) ([]*model.Campaign, error) {
 
 func (this *CampaignRepository) GetPendingCampaigns(page int) ([]*model.Campaign, error) {
 
-	return make([]*model.Campaign, 0), nil
+	cursor, err := this.collection.Aggregate(context.TODO(), bson.D{
+		{
+			"$search", bson.D{
+				{"index", "issueTime_index"},
+				{"searchBefore", "$$NOW"},
+			},
+		},
+		{"$kip", int64(page)},
+		{"$limit", ITEM_PER_PAGE},
+		{"$sort", bson.D{{"issueTime", -1}}},
+	})
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return ParseCursor[model.Campaign](cursor)
 }
 
 func (this *CampaignRepository) Create(model *model.Campaign) error {
