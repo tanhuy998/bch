@@ -23,7 +23,7 @@ func (this *CampaignController) GetCampaign(auth authService.IAuthService) strin
 
 	fmt.Println(auth)
 
-	return fmt.Sprintf("type %T", reflect.TypeOf(auth))
+	return fmt.Sprintf("type %s", reflect.TypeOf(auth).String())
 }
 
 func (this *CampaignController) GetCampaignListOnPage() {

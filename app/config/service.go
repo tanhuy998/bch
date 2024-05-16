@@ -1,12 +1,11 @@
 package config
 
 import (
+	libService "app/app/config/lib"
 	"app/app/db"
-	libCommon "app/app/lib/common"
 	"app/app/repository"
 	authService "app/app/service/auth"
 	"fmt"
-	"reflect"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/hero"
@@ -49,10 +48,10 @@ func InitializeDatabase(app *iris.Application) {
 	fmt.Println("DBMS client initialized.")
 
 	fmt.Println("Initialize Repositories...")
-	BindDependency[repository.ICampaignRepository](
+	libService.BindDependency[repository.ICampaignRepository](
 		container, new(repository.CampaignRepository).Init(db),
 	)
-	BindDependency[repository.ICandidateRepository](
+	libService.BindDependency[repository.ICandidateRepository](
 		container, new(repository.CandidateRepository).Init(db),
 	)
 	fmt.Println("Repositories Initialized.")
@@ -66,44 +65,16 @@ func RegisterServices(app *iris.Application) {
 	// Dep := container.Register(auth)
 	// Dep.DestType = libCommon.InterfaceOf((*authService.IAuthService)(nil))
 	fmt.Println("Initialize Auth service...")
-	BindDependency[authService.IAuthService, authService.AuthenticateService](container, nil)
+	//BindDependency[authService.IAuthService, authService.AuthenticateService](container, nil)
+	// auth := new(authService.AuthenticateService)
+	// container.Register(func(ctx iris.Context) authService.IAuthService {
+
+	// 	ctx.Values().Set(AUTH, auth)
+
+	// 	return auth
+	// })
+	libService.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticateService](container, nil, AUTH)
 	fmt.Println("Auth service initialized.")
-}
-
-func BindDependency[AbstractType any, ConcreteType any](container *hero.Container, concreteVal *ConcreteType) {
-
-	abstractType := libCommon.Wrap[AbstractType]()
-
-	if abstractType.Kind() != reflect.Interface {
-
-		panic(
-			fmt.Sprintf(
-				"Could not use %s as abstract type which is not an interface",
-				abstractType.String(),
-			),
-		)
-	}
-
-	if concreteVal == nil {
-
-		concreteVal = new(ConcreteType)
-	}
-
-	//if !libCommon.GetOriginalTypeOf(concreteVal).Implements(abstractType) {
-	if _, ok := any(concreteVal).(AbstractType); !ok {
-		//if reflect.TypeOf(concreteVal).Implements(libCommon.InterfaceOf((*AbstractType)(nil))) {
-
-		panic(
-			fmt.Sprintf(
-				"Could not bind concrete type %s as interface %s",
-				reflect.TypeOf(concreteVal).String(),
-				abstractType.String(),
-			),
-		)
-	}
-
-	dep := container.Register(concreteVal)
-	dep.DestType = abstractType
 }
 
 // func GetComponent[AbstractType](ctx iris.Context) {
