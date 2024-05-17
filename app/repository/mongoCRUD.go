@@ -1,6 +1,7 @@
 package repository
 
 import (
+	libCommon "app/app/lib/common"
 	"context"
 
 	"github.com/google/uuid"
@@ -8,11 +9,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func ParseCursor[T any](cursor *mongo.Cursor) ([]*T, error) {
+func ParseCursor[T any](cursor *mongo.Cursor, ctx context.Context) ([]*T, error) {
 
 	var ret []*T
 
-	for cursor.Next(context.TODO()) {
+	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+
+	for cursor.Next(ctx) {
 
 		var parsedModel = new(T)
 
@@ -32,9 +35,11 @@ func ParseCursor[T any](cursor *mongo.Cursor) ([]*T, error) {
 	return ret, nil
 }
 
-func getDocuments[T any](page int64, collection *mongo.Collection) ([]*T, error) {
+func getDocuments[T any](page int64, collection *mongo.Collection, ctx context.Context) ([]*T, error) {
 
-	cursor, err := collection.Aggregate(context.TODO(), bson.D{
+	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+
+	cursor, err := collection.Aggregate(ctx, bson.D{
 		{"$skip", page},
 		{"$limit", ITEM_PER_PAGE},
 	})
@@ -44,12 +49,14 @@ func getDocuments[T any](page int64, collection *mongo.Collection) ([]*T, error)
 		return nil, err
 	}
 
-	return ParseCursor[T](cursor)
+	return ParseCursor[T](cursor, ctx)
 }
 
-func findDocumentByUUID[T any](uuid uuid.UUID, collection *mongo.Collection) (*T, error) {
+func findDocumentByUUID[T any](uuid uuid.UUID, collection *mongo.Collection, ctx context.Context) (*T, error) {
 
-	res := collection.FindOne(context.TODO(), bson.M{
+	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+
+	res := collection.FindOne(ctx, bson.M{
 		"uuid": uuid,
 	})
 
@@ -65,11 +72,13 @@ func findDocumentByUUID[T any](uuid uuid.UUID, collection *mongo.Collection) (*T
 	return camp, nil
 }
 
-func createDocument[T any](model *T, collection *mongo.Collection) error {
+func createDocument[T any](model *T, collection *mongo.Collection, ctx context.Context) error {
 
 	//(*model).UUID = uuid.New()
 
-	_, err := collection.InsertOne(context.TODO(), model)
+	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+
+	_, err := collection.InsertOne(ctx, model)
 
 	if err != nil {
 
@@ -79,16 +88,20 @@ func createDocument[T any](model *T, collection *mongo.Collection) error {
 	return nil
 }
 
-func updateDocument[T any](uuid uuid.UUID, model *T, collection *mongo.Collection) error {
+func updateDocument[T any](uuid uuid.UUID, model *T, collection *mongo.Collection, ctx context.Context) error {
 
-	collection.FindOneAndUpdate(context.TODO(), bson.D{{"uuid", uuid}}, model)
+	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+
+	collection.FindOneAndUpdate(ctx, bson.D{{"uuid", uuid}}, model)
 
 	return nil
 }
 
-func deleteDocument(uuid uuid.UUID, collection *mongo.Collection) error {
+func deleteDocument(uuid uuid.UUID, collection *mongo.Collection, ctx context.Context) error {
 
-	_, err := collection.DeleteOne(context.TODO(), bson.D{{"uuid", uuid}})
+	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+
+	_, err := collection.DeleteOne(ctx, bson.D{{"uuid", uuid}})
 
 	if err != nil {
 

@@ -9,14 +9,19 @@ import (
 	"github.com/kataras/iris/v12/hero"
 )
 
-func BindDependency[AbstractType any, ConcreteType any](container *hero.Container, concreteVal *ConcreteType) {
+func BindDependency[AbstractType any, ConcreteType any](
+	container *hero.Container, concreteVal *ConcreteType,
+) {
 
 	abstractType := libCommon.Wrap[AbstractType]()
 
 	checkInterfaceOrPanic(abstractType)
 
+	var autowireField bool = false
+
 	if concreteVal == nil {
 
+		autowireField = true
 		concreteVal = new(ConcreteType)
 	}
 
@@ -24,16 +29,22 @@ func BindDependency[AbstractType any, ConcreteType any](container *hero.Containe
 
 	dep := container.Register(concreteVal)
 	dep.DestType = abstractType
+	dep.StructDependents = autowireField
 }
 
-func BindAndMapDependencyToContext[AbstractType any, ConcreteType any](container *hero.Container, concreteVal *ConcreteType, contextKey string) {
+func BindAndMapDependencyToContext[AbstractType any, ConcreteType any](
+	container *hero.Container, concreteVal *ConcreteType, contextKey string,
+) {
 
 	aType := libCommon.Wrap[AbstractType]()
 
 	checkInterfaceOrPanic(aType)
 
+	var autowireField bool = false
+
 	if concreteVal == nil {
 
+		autowireField = true
 		concreteVal = new(ConcreteType)
 	}
 
@@ -41,12 +52,13 @@ func BindAndMapDependencyToContext[AbstractType any, ConcreteType any](container
 
 	mappedObj, _ := any(concreteVal).(AbstractType)
 
-	container.Register(func(ctx iris.Context) AbstractType {
+	dep := container.Register(func(ctx iris.Context) AbstractType {
 
 		ctx.Values().Set(contextKey, concreteVal)
 
 		return mappedObj
 	})
+	dep.StructDependents = autowireField
 }
 
 func checkInterfaceOrPanic(t reflect.Type) {

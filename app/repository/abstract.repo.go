@@ -23,22 +23,22 @@ type (
 	}
 
 	ICampaignRepository interface {
-		FindByUUID(uuid.UUID) (*model.Campaign, error)
-		Get(page int) ([]*model.Campaign, error)
-		GetPendingCampaigns(page int) ([]*model.Campaign, error)
-		Create(*model.Campaign) error
+		FindByUUID(uuid.UUID, context.Context) (*model.Campaign, error)
+		Get(page int, ctx context.Context) ([]*model.Campaign, error)
+		GetPendingCampaigns(page int, ctx context.Context) ([]*model.Campaign, error)
+		Create(*model.Campaign, context.Context) error
 		//CreateMany([]*model.Campaign) error
-		Update(*model.Campaign) error
-		Delete(uuid.UUID) error
+		Update(*model.Campaign, context.Context) error
+		Delete(uuid.UUID, context.Context) error
 		//Remove(uuid uuid.UUID) (bool, error)
 	}
 
 	ICandidateRepository interface {
-		FindByUUID(uuid.UUID) (*model.Campaign, error)
-		Get(page int) ([]*model.Campaign, error)
-		Create(*model.Candidate) error
-		Update(*model.Candidate) error
-		Delete(uuid.UUID) error
+		FindByUUID(uuid.UUID, context.Context) (*model.Campaign, error)
+		Get(page int, ctx context.Context) ([]*model.Campaign, error)
+		Create(*model.Candidate, context.Context) error
+		Update(*model.Candidate, context.Context) error
+		Delete(uuid.UUID, context.Context) error
 		//Remove(uuid uuid.UUID) (bool, error)
 	}
 

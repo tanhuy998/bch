@@ -15,7 +15,7 @@ func TestCampaignRepo() {
 
 	fmt.Println(repo.Collection())
 
-	err := repo.Create(&campaign)
+	err := repo.Create(&campaign, nil)
 
 	if err != nil {
 

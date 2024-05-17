@@ -26,6 +26,15 @@ var (
 	MONGOD_CONN_STR_REGEX, _ = regexp.Compile(`^mongodb(\+srv)?:\/\/\[username:password\]@.*`)
 )
 
+type (
+	MongoDomainDatabase = mongo.Database
+	/*
+		for dependency inversion among domain
+	*/
+	MongoCampaignCollection  = mongo.Collection
+	MongoCandidateCollection = mongo.Collection
+)
+
 func GetClient() (*mongo.Client, error) {
 
 	if dbClient != nil {

@@ -3,6 +3,7 @@ package api
 import (
 	"app/app/controller"
 	"app/app/middleware"
+	"app/app/model"
 	authService "app/app/service/auth"
 
 	"github.com/kataras/iris/v12"
@@ -83,6 +84,7 @@ func initCandidateGroupApi(app *iris.Application) {
 						Claims: []authService.AuthorizationClaim{auth_post_claim},
 					},
 				),
+				middleware.BindRequestBody[model.Candidate](),
 			)
 
 			/*
@@ -94,6 +96,7 @@ func initCandidateGroupApi(app *iris.Application) {
 					Fields: candidateField,
 					Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
+				middleware.BindRequestBody[model.Candidate](),
 			)
 
 			/*

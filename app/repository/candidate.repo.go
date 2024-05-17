@@ -2,6 +2,7 @@ package repository
 
 import (
 	"app/app/model"
+	"context"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -22,27 +23,27 @@ func (this *CandidateRepository) Init(db *mongo.Database) *CandidateRepository {
 	return this
 }
 
-func (this *CandidateRepository) FindByUUID(uuid uuid.UUID) (*model.Campaign, error) {
+func (this *CandidateRepository) FindByUUID(uuid uuid.UUID, ctx context.Context) (*model.Campaign, error) {
 
-	return findDocumentByUUID[model.Campaign](uuid, this.collection)
+	return findDocumentByUUID[model.Campaign](uuid, this.collection, ctx)
 }
 
-func (this *CandidateRepository) Get(page int) ([]*model.Campaign, error) {
+func (this *CandidateRepository) Get(page int, ctx context.Context) ([]*model.Campaign, error) {
 
-	return getDocuments[model.Campaign](int64(page), this.collection)
+	return getDocuments[model.Campaign](int64(page), this.collection, ctx)
 }
 
-func (this *CandidateRepository) Create(candidate *model.Candidate) error {
+func (this *CandidateRepository) Create(candidate *model.Candidate, ctx context.Context) error {
 
-	return createDocument(candidate, this.collection)
+	return createDocument(candidate, this.collection, ctx)
 }
 
-func (this *CandidateRepository) Update(candidate *model.Candidate) error {
+func (this *CandidateRepository) Update(candidate *model.Candidate, ctx context.Context) error {
 
-	return updateDocument(candidate.UUID, candidate, this.collection)
+	return updateDocument(candidate.UUID, candidate, this.collection, ctx)
 }
 
-func (this *CandidateRepository) Delete(uuid uuid.UUID) error {
+func (this *CandidateRepository) Delete(uuid uuid.UUID, ctx context.Context) error {
 
-	return deleteDocument(uuid, this.collection)
+	return deleteDocument(uuid, this.collection, ctx)
 }

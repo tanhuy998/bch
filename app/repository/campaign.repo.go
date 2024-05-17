@@ -25,19 +25,19 @@ func (this *CampaignRepository) Init(db *mongo.Database) *CampaignRepository {
 	return this
 }
 
-func (this *CampaignRepository) FindByUUID(uuid uuid.UUID) (*model.Campaign, error) {
+func (this *CampaignRepository) FindByUUID(uuid uuid.UUID, ctx context.Context) (*model.Campaign, error) {
 
-	return findDocumentByUUID[model.Campaign](uuid, this.collection)
+	return findDocumentByUUID[model.Campaign](uuid, this.collection, ctx)
 }
 
-func (this *CampaignRepository) Get(page int) ([]*model.Campaign, error) {
+func (this *CampaignRepository) Get(page int, ctx context.Context) ([]*model.Campaign, error) {
 
 	calcPage := this.returnPageThresholdIfOutOfRange(int64(page))
 
-	return getDocuments[model.Campaign](calcPage, this.collection)
+	return getDocuments[model.Campaign](calcPage, this.collection, ctx)
 }
 
-func (this *CampaignRepository) GetPendingCampaigns(page int) ([]*model.Campaign, error) {
+func (this *CampaignRepository) GetPendingCampaigns(page int, ctx context.Context) ([]*model.Campaign, error) {
 
 	cursor, err := this.collection.Aggregate(context.TODO(), bson.D{
 		{
@@ -56,22 +56,20 @@ func (this *CampaignRepository) GetPendingCampaigns(page int) ([]*model.Campaign
 		return nil, err
 	}
 
-	return ParseCursor[model.Campaign](cursor)
+	return ParseCursor[model.Campaign](cursor, ctx)
 }
 
-func (this *CampaignRepository) Create(model *model.Campaign) error {
+func (this *CampaignRepository) Create(model *model.Campaign, ctx context.Context) error {
 
-	model.UUID = uuid.New()
-
-	return createDocument(model, this.collection)
+	return createDocument(model, this.collection, ctx)
 }
 
-func (this *CampaignRepository) Update(model *model.Campaign) error {
+func (this *CampaignRepository) Update(model *model.Campaign, ctx context.Context) error {
 
-	return updateDocument(model.UUID, model, this.collection)
+	return updateDocument(model.UUID, model, this.collection, ctx)
 }
 
-func (this *CampaignRepository) Delete(uuid uuid.UUID) error {
+func (this *CampaignRepository) Delete(uuid uuid.UUID, ctx context.Context) error {
 
-	return deleteDocument(uuid, this.collection)
+	return deleteDocument(uuid, this.collection, ctx)
 }

@@ -3,6 +3,7 @@ package api
 import (
 	"app/app/controller"
 	"app/app/middleware"
+	"app/app/model"
 	authService "app/app/service/auth"
 
 	"github.com/kataras/iris/v12"
@@ -57,6 +58,7 @@ func initCampaignGroupApi(app *iris.Application) {
 					Claims: []authService.AuthorizationClaim{auth_post_claim},
 					//Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
+				middleware.BindRequestBody[model.Campaign](),
 			)
 
 			activator.Handle(
@@ -65,6 +67,7 @@ func initCampaignGroupApi(app *iris.Application) {
 					Fields: campaignField,
 					//Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
+				middleware.BindRequestBody[model.Campaign](),
 			)
 
 			activator.Handle(
