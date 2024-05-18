@@ -2,7 +2,6 @@ package adminService
 
 import (
 	"app/app/db"
-	"app/app/model"
 	"app/app/repository"
 	"context"
 
@@ -14,28 +13,32 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
-type CampaignAdminService struct {
-	DBClient            *mongo.Client
-	CandidateCollection *db.MongoCandidateCollection
-	CampaignRepo        repository.ICampaignRepository
-	CandidateRepo       repository.ICandidateRepository
+type (
+	IDeleteCampaign interface {
+		Execute(string) error
+	}
+
+	AdminDeleteCampaignService struct {
+		DBClient            *mongo.Client
+		CandidateCollection *db.MongoCandidateCollection
+		CampaignRepo        repository.ICampaignRepository
+		//CandidateRepo       repository.ICandidateRepository
+	}
+)
+
+func (this *AdminDeleteCampaignService) Execute(inputUUID string) error {
+
+	uuid, err := uuid.Parse(inputUUID)
+
+	if err != nil {
+
+		return err
+	}
+
+	return this.deleteCampain(uuid)
 }
 
-func (this *CampaignAdminService) LaunchNewCampaign(model *model.Campaign) error {
-
-	model.UUID = uuid.New()
-
-	return this.CampaignRepo.Create(model, nil)
-}
-
-func (this *CampaignAdminService) ModifyExistingCampaign(uuid uuid.UUID, model *model.Campaign) error {
-
-	model.UUID = uuid
-
-	return this.CampaignRepo.Update(model, nil)
-}
-
-func (this *CampaignAdminService) DeleteCampaign(uuid uuid.UUID) error {
+func (this *AdminDeleteCampaignService) deleteCampain(uuid uuid.UUID) error {
 
 	session, err := this.DBClient.StartSession()
 
@@ -51,14 +54,14 @@ func (this *CampaignAdminService) DeleteCampaign(uuid uuid.UUID) error {
 
 	_, err = session.WithTransaction(
 		context.TODO(),
-		delectCampain(uuid, this.CampaignRepo, this.CandidateCollection),
+		delectOperation(uuid, this.CampaignRepo, this.CandidateCollection),
 		transactionOpts,
 	)
 
 	return err
 }
 
-func delectCampain(
+func delectOperation(
 	uuid uuid.UUID,
 	campaignRepo repository.ICampaignRepository,
 	candidateCollection *db.MongoCandidateCollection,

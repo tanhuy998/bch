@@ -23,7 +23,7 @@ func applyRoutes(f func(*mvc.ControllerActivator)) mvc.OptionFunc {
 
 func Init(app *iris.Application) {
 
-	initCandidateSigningApi(app)
-	initCampaignGroupApi(app)
-	initCandidateGroupApi(app)
+	initCandidateSigningApi(app).EnableStructDependents()
+	initCampaignGroupApi(app).EnableStructDependents()
+	initCandidateGroupApi(app).EnableStructDependents()
 }

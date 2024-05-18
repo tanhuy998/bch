@@ -11,7 +11,7 @@ import (
 
 func BindDependency[AbstractType any, ConcreteType any](
 	container *hero.Container, concreteVal *ConcreteType,
-) {
+) *hero.Dependency {
 
 	abstractType := libCommon.Wrap[AbstractType]()
 
@@ -30,11 +30,13 @@ func BindDependency[AbstractType any, ConcreteType any](
 	dep := container.Register(concreteVal)
 	dep.DestType = abstractType
 	dep.StructDependents = autowireField
+
+	return dep
 }
 
 func BindAndMapDependencyToContext[AbstractType any, ConcreteType any](
 	container *hero.Container, concreteVal *ConcreteType, contextKey string,
-) {
+) *hero.Dependency {
 
 	aType := libCommon.Wrap[AbstractType]()
 
@@ -59,6 +61,8 @@ func BindAndMapDependencyToContext[AbstractType any, ConcreteType any](
 		return mappedObj
 	})
 	dep.StructDependents = autowireField
+
+	return dep
 }
 
 func checkInterfaceOrPanic(t reflect.Type) {

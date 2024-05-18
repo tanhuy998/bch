@@ -17,7 +17,7 @@ import (
 // 	})
 // }
 
-func initCampaignGroupApi(app *iris.Application) {
+func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 
 	router := app.Party("/campaign")
 
@@ -27,7 +27,7 @@ func initCampaignGroupApi(app *iris.Application) {
 	})
 
 	wrapper := mvc.New(router)
-	wrapper.Handle(
+	return wrapper.Handle(
 		new(controller.CampaignController),
 		applyRoutes(func(activator *mvc.ControllerActivator) {
 

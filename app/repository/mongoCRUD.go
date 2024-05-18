@@ -3,6 +3,7 @@ package repository
 import (
 	libCommon "app/app/lib/common"
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -92,7 +93,17 @@ func updateDocument[T any](uuid uuid.UUID, model *T, collection *mongo.Collectio
 
 	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
 
-	collection.FindOneAndUpdate(ctx, bson.D{{"uuid", uuid}}, model)
+	result, err := collection.UpdateOne(ctx, bson.D{{"uuid", uuid}}, bson.D{{"$set", model}})
+
+	if err != nil {
+
+		return err
+	}
+
+	if result.ModifiedCount == 0 {
+
+		return errors.New("No matched document to update")
+	}
 
 	return nil
 }

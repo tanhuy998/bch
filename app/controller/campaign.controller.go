@@ -1,19 +1,20 @@
 package controller
 
 import (
-	"app/app/config"
-	libCommon "app/app/lib/common"
 	"app/app/model"
-	"app/app/repository"
+	adminService "app/app/service/admin"
 	authService "app/app/service/auth"
 	"fmt"
 	"reflect"
-	"time"
 
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/mvc"
 )
 
 type CampaignController struct {
+	DeleteCampaignOperation    adminService.IDeleteCampaign
+	LaunchNewCampaignOperation adminService.ILaunchNewCampaign
+	ModifyExistingOperation    adminService.IModifyExistingCampaign
 }
 
 /*
@@ -30,31 +31,39 @@ func (this *CampaignController) GetCampaignListOnPage() {
 
 }
 
-func (this *CampaignController) NewCampaign(ctx iris.Context, campaignRepo repository.ICampaignRepository) {
+func (this *CampaignController) NewCampaign(ctx iris.Context, inputCampaign *model.Campaign) mvc.Response {
 
 	//repository.TestCampaignRepo()
+	err := this.LaunchNewCampaignOperation.Execute(inputCampaign)
 
-	reqBody, ok := ctx.Values().Get(config.REQUEST_BODY).(*model.Campaign)
+	if err != nil {
 
-	var newCampaign *model.Campaign = libCommon.Ternary(ok, reqBody, new(model.Campaign))
+		return BadRequest(err)
+	}
 
-	newCampaign.IssueTime = libCommon.PointerPrimitive(time.Now())
-
-	campaignRepo.Create(newCampaign)
+	return Created()
 }
 
-func (this *CampaignController) UpdateCampaign() {
+func (this *CampaignController) UpdateCampaign(uuid string, inputModel *model.Campaign) mvc.Response {
 
+	err := this.ModifyExistingOperation.Execute(uuid, inputModel)
+
+	if err != nil {
+
+		return BadRequest(err)
+	}
+
+	return Ok()
 }
 
-func (this *CampaignController) DeleteCampaign() {
+func (this *CampaignController) DeleteCampaign(uuid string) mvc.Response {
 
-}
+	err := this.DeleteCampaignOperation.Execute(uuid)
 
-func (this *CandidateController) HealthCheck() {
+	if err != nil {
 
-}
+		return BadRequest(err)
+	}
 
-func (this *CandidateController) H() {
-
+	return Ok()
 }

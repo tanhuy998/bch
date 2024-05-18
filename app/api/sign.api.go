@@ -7,12 +7,12 @@ import (
 	"github.com/kataras/iris/v12/mvc"
 )
 
-func initCandidateSigningApi(app *iris.Application) {
+func initCandidateSigningApi(app *iris.Application) *mvc.Application {
 
 	router := app.Party("/sign")
 
 	wrapper := mvc.New(router)
-	wrapper.Handle(
+	return wrapper.Handle(
 		new(controller.SignController),
 		applyRoutes(func(activator *mvc.ControllerActivator) {
 

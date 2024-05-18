@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Candidate struct {
@@ -15,6 +14,6 @@ type Candidate struct {
 	IDNumber    *string               `json:"idNumber" bson:"idNumber" validate:"required, len=12"`
 	Address     *string               `json:"address" bson:"uuid" validate:"require"`
 	SigningInfo *CandidateSigningInfo `json:"signingInfo" bson:"signingInfo"`
-	CampaignID  *primitive.ObjectID   `json:"campaignID" bson:"campaignID"`
+	CampaignID  *uuid.UUID            `json:"campaignID" bson:"campaignID"`
 	Version     *time.Time            `json:"version" bson:"version"`
 }

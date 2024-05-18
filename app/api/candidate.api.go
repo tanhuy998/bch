@@ -10,7 +10,7 @@ import (
 	"github.com/kataras/iris/v12/mvc"
 )
 
-func initCandidateGroupApi(app *iris.Application) {
+func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 
 	router := app.Party("/candidate")
 
@@ -22,7 +22,7 @@ func initCandidateGroupApi(app *iris.Application) {
 	})
 
 	wrapper := mvc.New(router)
-	wrapper.Handle(
+	return wrapper.Handle(
 		new(controller.CandidateController),
 		applyRoutes(func(activator *mvc.ControllerActivator) {
 

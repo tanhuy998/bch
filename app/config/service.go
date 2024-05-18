@@ -4,6 +4,7 @@ import (
 	libService "app/app/config/lib"
 	"app/app/db"
 	"app/app/repository"
+	adminService "app/app/service/admin"
 	authService "app/app/service/auth"
 	"fmt"
 
@@ -75,6 +76,20 @@ func RegisterServices(app *iris.Application) {
 	// })
 	libService.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticateService](container, nil, AUTH)
 	fmt.Println("Auth service initialized.")
+
+	/*
+		Bind Admin Campaign controller dependent services
+	*/
+	libService.BindDependency[adminService.IDeleteCampaign, adminService.AdminDeleteCampaignService](container, nil)
+	libService.BindDependency[adminService.ILaunchNewCampaign, adminService.AdminLaunchNewCampaignService](container, nil)
+	libService.BindDependency[adminService.IModifyExistingCampaign, adminService.AdminModifyExistingCampaign](container, nil)
+
+	/*
+		Bind Admin Candidate controller dependent services
+	*/
+	libService.BindDependency[adminService.IDeleteCandidate, adminService.AdminDeleteCandidateService](container, nil)
+	libService.BindDependency[adminService.IAddNewCandidate, adminService.AdminAddNewCandidateToCampaign](container, nil)
+	libService.BindDependency[adminService.IModifyCandidate, adminService.AdminModifyCandidate](container, nil)
 }
 
 // func GetComponent[AbstractType](ctx iris.Context) {
