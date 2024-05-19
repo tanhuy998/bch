@@ -1,7 +1,7 @@
 package repository
 
 import (
-	libCommon "app/app/lib/common"
+	libCommon "app/lib/common"
 	"context"
 	"errors"
 

@@ -1,11 +1,11 @@
 package config
 
 import (
-	libService "app/app/config/lib"
-	"app/app/db"
-	"app/app/repository"
-	adminService "app/app/service/admin"
-	authService "app/app/service/auth"
+	"app/internal/db"
+	libConfig "app/lib/config"
+	"app/repository"
+	adminService "app/service/admin"
+	authService "app/service/auth"
 	"fmt"
 
 	"github.com/kataras/iris/v12"
@@ -49,10 +49,10 @@ func InitializeDatabase(app *iris.Application) {
 	fmt.Println("DBMS client initialized.")
 
 	fmt.Println("Initialize Repositories...")
-	libService.BindDependency[repository.ICampaignRepository](
+	libConfig.BindDependency[repository.ICampaignRepository](
 		container, new(repository.CampaignRepository).Init(db),
 	)
-	libService.BindDependency[repository.ICandidateRepository](
+	libConfig.BindDependency[repository.ICandidateRepository](
 		container, new(repository.CandidateRepository).Init(db),
 	)
 	fmt.Println("Repositories Initialized.")
@@ -74,22 +74,22 @@ func RegisterServices(app *iris.Application) {
 
 	// 	return auth
 	// })
-	libService.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticateService](container, nil, AUTH)
+	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticateService](container, nil, AUTH)
 	fmt.Println("Auth service initialized.")
 
 	/*
 		Bind Admin Campaign controller dependent services
 	*/
-	libService.BindDependency[adminService.IDeleteCampaign, adminService.AdminDeleteCampaignService](container, nil)
-	libService.BindDependency[adminService.ILaunchNewCampaign, adminService.AdminLaunchNewCampaignService](container, nil)
-	libService.BindDependency[adminService.IModifyExistingCampaign, adminService.AdminModifyExistingCampaign](container, nil)
+	libConfig.BindDependency[adminService.IDeleteCampaign, adminService.AdminDeleteCampaignService](container, nil)
+	libConfig.BindDependency[adminService.ILaunchNewCampaign, adminService.AdminLaunchNewCampaignService](container, nil)
+	libConfig.BindDependency[adminService.IModifyExistingCampaign, adminService.AdminModifyExistingCampaign](container, nil)
 
 	/*
 		Bind Admin Candidate controller dependent services
 	*/
-	libService.BindDependency[adminService.IDeleteCandidate, adminService.AdminDeleteCandidateService](container, nil)
-	libService.BindDependency[adminService.IAddNewCandidate, adminService.AdminAddNewCandidateToCampaign](container, nil)
-	libService.BindDependency[adminService.IModifyCandidate, adminService.AdminModifyCandidate](container, nil)
+	libConfig.BindDependency[adminService.IDeleteCandidate, adminService.AdminDeleteCandidateService](container, nil)
+	libConfig.BindDependency[adminService.IAddNewCandidate, adminService.AdminAddNewCandidateToCampaign](container, nil)
+	libConfig.BindDependency[adminService.IModifyCandidate, adminService.AdminModifyCandidate](container, nil)
 }
 
 // func GetComponent[AbstractType](ctx iris.Context) {

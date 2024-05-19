@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	authService "app/app/service/auth"
+	authService "app/service/auth"
 	"fmt"
 
 	jwt "github.com/golang-jwt/jwt/v5"

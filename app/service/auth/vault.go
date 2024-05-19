@@ -1,7 +1,7 @@
 package authService
 
 import (
-	libCommon "app/app/lib/common"
+	libCommon "app/lib/common"
 	"context"
 	"fmt"
 	"time"

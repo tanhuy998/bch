@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"app/app/db"
-	"app/app/model"
+	"app/domain/model"
+	"app/internal/db"
 	"fmt"
 )
 

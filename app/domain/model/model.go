@@ -1,7 +1,7 @@
 package model
 
 import (
-	"app/app/db"
+	"app/internal/db"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )

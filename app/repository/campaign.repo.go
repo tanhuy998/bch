@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"app/app/model"
+	"app/domain/model"
 	"context"
 
 	"github.com/google/uuid"

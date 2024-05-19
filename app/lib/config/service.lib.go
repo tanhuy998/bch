@@ -1,7 +1,7 @@
-package libService
+package libConfig
 
 import (
-	libCommon "app/app/lib/common"
+	libCommon "app/lib/common"
 	"fmt"
 	"reflect"
 

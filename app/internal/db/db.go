@@ -1,8 +1,9 @@
 package db
 
 import (
-	"app/app/bootstrap"
+	"app/internal/bootstrap"
 	"context"
+	"fmt"
 	"regexp"
 	"time"
 
@@ -34,6 +35,20 @@ type (
 	MongoCampaignCollection  = mongo.Collection
 	MongoCandidateCollection = mongo.Collection
 )
+
+func init() {
+
+	var err error
+
+	dbClient, err = newClient()
+
+	if err != nil {
+
+		panic(err)
+	}
+
+	fmt.Println("Initialize database connection")
+}
 
 func GetClient() (*mongo.Client, error) {
 

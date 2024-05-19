@@ -1,7 +1,7 @@
 package api
 
 import (
-	authService "app/app/service/auth"
+	authService "app/service/auth"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"

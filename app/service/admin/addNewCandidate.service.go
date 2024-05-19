@@ -1,9 +1,9 @@
 package adminService
 
 import (
-	libCommon "app/app/lib/common"
-	"app/app/model"
-	"app/app/repository"
+	"app/domain/model"
+	libCommon "app/lib/common"
+	"app/repository"
 	"errors"
 
 	"github.com/google/uuid"

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"app/app/controller"
+	"app/internal/controller"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"

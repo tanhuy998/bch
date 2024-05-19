@@ -1,12 +1,12 @@
 package main
 
 import (
-	"app/app/api"
-	"app/app/bootstrap"
-	"app/app/config"
-	"app/app/db"
-	libCommon "app/app/lib/common"
-	authService "app/app/service/auth"
+	"app/internal/api"
+	"app/internal/bootstrap"
+	"app/internal/config"
+	"app/internal/db"
+	libCommon "app/lib/common"
+	authService "app/service/auth"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofor-little/env"

@@ -1,13 +1,12 @@
 package controller
 
 import (
-	"app/app/model"
-	adminService "app/app/service/admin"
-	authService "app/app/service/auth"
+	"app/domain/model"
+	adminService "app/service/admin"
+	authService "app/service/auth"
 	"fmt"
 	"reflect"
 
-	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 )
 
@@ -31,7 +30,7 @@ func (this *CampaignController) GetCampaignListOnPage() {
 
 }
 
-func (this *CampaignController) NewCampaign(ctx iris.Context, inputCampaign *model.Campaign) mvc.Response {
+func (this *CampaignController) NewCampaign(inputCampaign *model.Campaign) mvc.Response {
 
 	//repository.TestCampaignRepo()
 	err := this.LaunchNewCampaignOperation.Execute(inputCampaign)

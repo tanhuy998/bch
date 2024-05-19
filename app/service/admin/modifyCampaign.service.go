@@ -1,8 +1,8 @@
 package adminService
 
 import (
-	"app/app/model"
-	"app/app/repository"
+	"app/domain/model"
+	"app/repository"
 
 	"github.com/google/uuid"
 )

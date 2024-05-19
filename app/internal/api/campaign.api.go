@@ -1,10 +1,10 @@
 package api
 
 import (
-	"app/app/controller"
-	"app/app/middleware"
-	"app/app/model"
-	authService "app/app/service/auth"
+	"app/domain/model"
+	"app/internal/controller"
+	"app/internal/middleware"
+	authService "app/service/auth"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
