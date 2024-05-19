@@ -80,9 +80,12 @@ func RegisterServices(app *iris.Application) {
 	/*
 		Bind Admin Campaign controller dependent services
 	*/
+	libConfig.BindDependency[adminService.IGetCampaign, adminService.AdminGetCampaignService](container, nil)
 	libConfig.BindDependency[adminService.IDeleteCampaign, adminService.AdminDeleteCampaignService](container, nil)
 	libConfig.BindDependency[adminService.ILaunchNewCampaign, adminService.AdminLaunchNewCampaignService](container, nil)
 	libConfig.BindDependency[adminService.IModifyExistingCampaign, adminService.AdminModifyExistingCampaign](container, nil)
+	libConfig.BindDependency[adminService.IGetCampaignList, adminService.AdminGetCampaignListService](container, nil)
+	libConfig.BindDependency[adminService.IGetPendingCampaigns, adminService.AdminGetPendingCampaigns](container, nil)
 
 	/*
 		Bind Admin Candidate controller dependent services

@@ -2,37 +2,87 @@ package controller
 
 import (
 	"app/domain/model"
+	requestPresenter "app/domain/presenter/request"
+	libCommon "app/lib/common"
 	adminService "app/service/admin"
-	authService "app/service/auth"
-	"fmt"
-	"reflect"
+	"errors"
 
 	"github.com/kataras/iris/v12/mvc"
 )
 
 type CampaignController struct {
-	DeleteCampaignOperation    adminService.IDeleteCampaign
-	LaunchNewCampaignOperation adminService.ILaunchNewCampaign
-	ModifyExistingOperation    adminService.IModifyExistingCampaign
+	GetPendingCampaignOperation adminService.IGetPendingCampaigns
+	GetCampaignListOperation    adminService.IGetCampaignList
+	GetCampaignOperation        adminService.IGetCampaign
+	DeleteCampaignOperation     adminService.IDeleteCampaign
+	LaunchNewCampaignOperation  adminService.ILaunchNewCampaign
+	ModifyExistingOperation     adminService.IModifyExistingCampaign
 }
 
 /*
 GET /campaign/{uuid:string}?p={number}
 */
-func (this *CampaignController) GetCampaign(auth authService.IAuthService) string {
+func (this *CampaignController) GetCampaign(presenter *requestPresenter.GetCampaignRequest) mvc.Response {
 
-	fmt.Println(auth)
+	if libCommon.Or(presenter == nil, presenter.UUID == "") {
 
-	return fmt.Sprintf("type %s", reflect.TypeOf(auth).String())
+		return BadRequest(errors.New("invalid input"))
+	}
+
+	_, err := this.GetCampaignOperation.Execute(presenter.UUID)
+
+	if err != nil {
+
+		return BadRequest(err)
+	}
+
+	return Ok()
 }
 
-func (this *CampaignController) GetCampaignListOnPage() {
+func (this *CampaignController) GetCampaignListOnPage(presenter *requestPresenter.GetCampaignListRequest) mvc.Response {
 
+	if presenter == nil {
+
+		return BadRequest(errors.New("Invalid input"))
+	}
+
+	_, err := this.GetCampaignListOperation.Execute(presenter.PageNumber)
+
+	if err != nil {
+
+		return BadRequest(err)
+	}
+
+	return Ok()
 }
 
-func (this *CampaignController) NewCampaign(inputCampaign *model.Campaign) mvc.Response {
+func (this *CampaignController) GetPendingCampaigns(presenter *requestPresenter.GetPendingCampaignRequest) mvc.Response {
+
+	if presenter == nil {
+
+		return BadRequest(errors.New("Invalid input"))
+	}
+
+	_, err := this.GetPendingCampaignOperation.Execute(presenter.PageNumber)
+
+	if err != nil {
+
+		return BadRequest(err)
+	}
+
+	return Ok()
+}
+
+func (this *CampaignController) NewCampaign(presenter *requestPresenter.LaunchNewCampaignRequest) mvc.Response {
 
 	//repository.TestCampaignRepo()
+	var inputCampaign *model.Campaign = presenter.Data
+
+	if inputCampaign == nil {
+
+		return BadRequest(errors.New("invalid input"))
+	}
+
 	err := this.LaunchNewCampaignOperation.Execute(inputCampaign)
 
 	if err != nil {
@@ -43,7 +93,17 @@ func (this *CampaignController) NewCampaign(inputCampaign *model.Campaign) mvc.R
 	return Created()
 }
 
-func (this *CampaignController) UpdateCampaign(uuid string, inputModel *model.Campaign) mvc.Response {
+func (this *CampaignController) UpdateCampaign(presenter *requestPresenter.UpdateCampaignRequest) mvc.Response {
+
+	var (
+		uuid       string          = presenter.UUID
+		inputModel *model.Campaign = presenter.Data
+	)
+
+	if libCommon.Or(uuid == "", inputModel == nil) {
+
+		return BadRequest(errors.New("invalid input"))
+	}
 
 	err := this.ModifyExistingOperation.Execute(uuid, inputModel)
 
@@ -55,7 +115,11 @@ func (this *CampaignController) UpdateCampaign(uuid string, inputModel *model.Ca
 	return Ok()
 }
 
-func (this *CampaignController) DeleteCampaign(uuid string) mvc.Response {
+func (this *CampaignController) DeleteCampaign(presenter *requestPresenter.DeleteCampaignRequest) mvc.Response {
+
+	var (
+		uuid string = presenter.UUID
+	)
 
 	err := this.DeleteCampaignOperation.Execute(uuid)
 

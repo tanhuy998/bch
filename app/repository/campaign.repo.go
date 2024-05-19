@@ -73,3 +73,10 @@ func (this *CampaignRepository) Delete(uuid uuid.UUID, ctx context.Context) erro
 
 	return deleteDocument(uuid, this.collection, ctx)
 }
+
+func (this *CampaignRepository) GetCampaignList(page int64) ([]*model.Campaign, error) {
+
+	page = this.returnPageThresholdIfOutOfRange(page)
+
+	return getDocuments[model.Campaign](page, this.collection, nil)
+}

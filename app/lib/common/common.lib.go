@@ -20,6 +20,19 @@ func PointerPrimitive[T any](val T) *T {
 	return &ret
 }
 
+func Or(expressions ...bool) bool {
+
+	for _, isTrue := range expressions {
+
+		if isTrue {
+
+			return true
+		}
+	}
+
+	return false
+}
+
 func GetOriginalTypeOf(value interface{}) reflect.Type {
 
 	t := reflect.TypeOf(value)

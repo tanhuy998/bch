@@ -26,6 +26,7 @@ type (
 		FindByUUID(uuid.UUID, context.Context) (*model.Campaign, error)
 		Get(page int, ctx context.Context) ([]*model.Campaign, error)
 		GetPendingCampaigns(page int, ctx context.Context) ([]*model.Campaign, error)
+		GetCampaignList(page int64) ([]*model.Campaign, error)
 		Create(*model.Campaign, context.Context) error
 		//CreateMany([]*model.Campaign) error
 		Update(*model.Campaign, context.Context) error
