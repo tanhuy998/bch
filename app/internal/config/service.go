@@ -1,7 +1,7 @@
 package config
 
 import (
-	"app/internal/db"
+	"app/infrastructure/db"
 	libConfig "app/lib/config"
 	"app/repository"
 	adminService "app/service/admin"

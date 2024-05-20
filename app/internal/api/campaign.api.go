@@ -31,7 +31,7 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 		new(controller.CampaignController),
 		applyRoutes(func(activator *mvc.ControllerActivator) {
 
-			campaignField := authService.AuthorizationField("campaign")
+			campaignField := authService.AuthorizationField("campaigns")
 
 			//activator.Handle("GET", "/", "HealthCheck")
 
@@ -45,7 +45,7 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 			).SetName("GET_SINGLE_CAMPAIGN")
 
 			activator.Handle(
-				"Get", "/page/{pageNumer:int}", "GetCampaignListOnPage",
+				"Get", "/", "GetCampaignListOnPage",
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: campaignField,
 					Groups: []authService.AuthorizationGroup{auth_commander_group},
@@ -54,7 +54,7 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 			).SetName("GET_LIST_CAMPAIGNS")
 
 			activator.Handle(
-				"GET", "/pending/page/{pageNumber:int}", "GetPendingCampaigns",
+				"GET", "/pending", "GetPendingCampaigns",
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: campaignField,
 				}),

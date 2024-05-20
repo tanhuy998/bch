@@ -1,9 +1,7 @@
 package db
 
 import (
-	"app/internal/bootstrap"
 	"context"
-	"fmt"
 	"regexp"
 	"time"
 
@@ -36,19 +34,21 @@ type (
 	MongoCandidateCollection = mongo.Collection
 )
 
-func init() {
+// func init() {
 
-	var err error
+// 	var err error
 
-	dbClient, err = newClient()
+// 	dbClient, err = newClient()
 
-	if err != nil {
+// 	if err != nil {
 
-		panic(err)
-	}
+// 		panic(err)
+// 	}
 
-	fmt.Println("Initialize database connection")
-}
+// 	GetDB()
+
+// 	fmt.Println("Initialize database connection")
+// }
 
 func GetClient() (*mongo.Client, error) {
 
@@ -79,13 +79,6 @@ func GetDB() *mongo.Database {
 }
 
 func newClient() (*mongo.Client, error) {
-
-	err := bootstrap.InitEnv()
-
-	if err != nil {
-
-		return nil, err
-	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), CONN_TIMEOUT*time.Second)
 	defer cancel()

@@ -1,7 +1,7 @@
 package adminService
 
 import (
-	"app/internal/db"
+	"app/infrastructure/db"
 	"app/repository"
 	"context"
 

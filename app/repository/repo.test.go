@@ -2,7 +2,7 @@ package repository
 
 import (
 	"app/domain/model"
-	"app/internal/db"
+	"app/infrastructure/db"
 	"fmt"
 )
 

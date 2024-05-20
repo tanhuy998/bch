@@ -1,24 +1,44 @@
 package main
 
 import (
+	"app/infrastructure/db"
 	"app/internal/api"
 	"app/internal/bootstrap"
 	"app/internal/config"
-	"app/internal/db"
-	libCommon "app/lib/common"
-	authService "app/service/auth"
+	"os"
+	"path/filepath"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofor-little/env"
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/hero"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func main() {
+const (
+	ENV_HOSTS = "HOSTS"
+)
 
-	loadConfig()
+var (
+	HOSTNAMES []string
+)
+
+func init() {
+
+	cwd, err := os.Getwd()
+
+	if err != nil {
+
+		panic(err)
+	}
+
+	env.Load(filepath.Join(cwd, ".env"))
+
+	HOSTNAMES = bootstrap.RetrieveCORSHosts()
+
+	db.GetDB()
+}
+
+func main() {
 
 	var app *iris.Application = iris.New()
 
@@ -27,7 +47,7 @@ func main() {
 	//app.UseGlobal(middleware.RedirectInternalError())
 	app.UseRouter(
 		cors.New(cors.Options{
-			AllowedOrigins:   bootstrap.RetrieveCORSHosts(),
+			AllowedOrigins:   HOSTNAMES,
 			AllowCredentials: true,
 		}),
 	)
@@ -39,62 +59,57 @@ func main() {
 	// registerDependencies(app)
 
 	api.Init(app)
-	app.Listen(env.Get("HTTP_PORT", ":80"))
+	app.Listen(
+		env.Get("HTTP_PORT", ":80"),
+		iris.WithoutBodyConsumptionOnUnmarshal,
+		iris.WithOptimizations,
+	)
 }
 
-// func initIrisApp() *iris.Application {
+// func registerDependencies(app *iris.Application) {
+
+// 	var container *hero.Container = app.ConfigureContainer().Container
+
+// 	container.Register(loadDbClient())
+// 	container.Register(db.GetDB())
+
+// 	app.RegisterDependency(loadDbClient())
+// 	// app.RegisterDependency(db.GetDB())
+// }
+
+// func registerServices(app *iris.Application) {
+
+// 	//app.RegisterDependency(initAuthService())
+
+// 	var container *hero.Container = app.ConfigureContainer().Container
+
+// 	// container.Register(func(auth *authService.AuthenticateService) authService.IAuthService {
+
+// 	// 	return auth
+// 	// })
+
+// 	auth := new(authService.AuthenticateService)
+// 	Dep := container.Register(auth)
+// 	Dep.DestType = libCommon.Wrap[authService.IAuthService]()
 
 // }
 
-func loadConfig() {
+// // func initAuthService() *authService.AuthenticateService {
 
-	bootstrap.InitEnv()
-}
+// // 	s := new(authService.AuthenticateService)
+// // 	//s.SetDB(db.GetDB())
 
-func registerDependencies(app *iris.Application) {
+// // 	return s
+// // }
 
-	var container *hero.Container = app.ConfigureContainer().Container
+// func loadDbClient() *mongo.Client {
 
-	container.Register(loadDbClient())
-	container.Register(db.GetDB())
+// 	client, err := db.GetClient()
 
-	app.RegisterDependency(loadDbClient())
-	// app.RegisterDependency(db.GetDB())
-}
+// 	if err != nil {
 
-func registerServices(app *iris.Application) {
+// 		panic(err)
+// 	}
 
-	//app.RegisterDependency(initAuthService())
-
-	var container *hero.Container = app.ConfigureContainer().Container
-
-	// container.Register(func(auth *authService.AuthenticateService) authService.IAuthService {
-
-	// 	return auth
-	// })
-
-	auth := new(authService.AuthenticateService)
-	Dep := container.Register(auth)
-	Dep.DestType = libCommon.Wrap[authService.IAuthService]()
-
-}
-
-// func initAuthService() *authService.AuthenticateService {
-
-// 	s := new(authService.AuthenticateService)
-// 	//s.SetDB(db.GetDB())
-
-// 	return s
+// 	return client
 // }
-
-func loadDbClient() *mongo.Client {
-
-	client, err := db.GetClient()
-
-	if err != nil {
-
-		panic(err)
-	}
-
-	return client
-}
