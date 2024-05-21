@@ -2,6 +2,8 @@ package middleware
 
 import (
 	requestPresenter "app/domain/presenter/request"
+	libError "app/lib/error"
+	"io"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
@@ -18,15 +20,18 @@ func BindRequest[RequestPresenter_T any]() iris.Handler {
 
 		if p, ok := any(presenter).(requestPresenter.IRequestBinder); ok {
 
-			p.Bind(ctx)
+			err = p.Bind(ctx)
 
 		} else {
 
 			err = bindDefault(presenter, ctx)
 		}
 
-		if err == nil {
-
+		if libError.IsErrorExcepts(err, io.EOF) {
+			/*
+				io.EOF is just signal that indicates the read operation reaches eof,
+				not an impact error.
+			*/
 			ctx.RegisterDependency(presenter)
 		}
 
@@ -34,7 +39,7 @@ func BindRequest[RequestPresenter_T any]() iris.Handler {
 	}
 }
 
-func bindDefault[RequestPresenter_T any](presenter RequestPresenter_T, ctx iris.Context) error {
+func bindDefault[RequestPresenter_T any](presenter *RequestPresenter_T, ctx iris.Context) error {
 
 	err := ctx.ReadParams(presenter)
 

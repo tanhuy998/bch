@@ -5,12 +5,11 @@ import (
 	"app/internal/api"
 	"app/internal/bootstrap"
 	"app/internal/config"
-	"os"
-	"path/filepath"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofor-little/env"
 	"github.com/iris-contrib/middleware/cors"
+	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
 )
 
@@ -24,16 +23,25 @@ var (
 
 func init() {
 
-	cwd, err := os.Getwd()
+	// cwd, err := os.Getwd()
+
+	// if err != nil {
+
+	// 	panic(err)
+	// }
+
+	// env.Load(filepath.Join(cwd, ".env"))
+
+	godotenv.Load()
+
+	HOSTNAMES = bootstrap.RetrieveCORSHosts()
+
+	err := db.CheckDBConnection()
 
 	if err != nil {
 
 		panic(err)
 	}
-
-	env.Load(filepath.Join(cwd, ".env"))
-
-	HOSTNAMES = bootstrap.RetrieveCORSHosts()
 
 	db.GetDB()
 }

@@ -3,8 +3,8 @@ package authService
 import (
 	"context"
 	"fmt"
+	"os"
 
-	"github.com/gofor-little/env"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -123,7 +123,7 @@ func retrievePrivateKey() ([]byte, error) {
 		return private_key, nil
 	}
 
-	env := env.Get(ENV_JWT_PRIVATE_KEY, "")
+	env := os.Getenv(ENV_JWT_PRIVATE_KEY)
 
 	if env == "" {
 

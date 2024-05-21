@@ -1,5 +1,5 @@
 package requestPresenter
 
-type GetCampaignRequest struct {
-	UUID string `param:"uuid"`
+type GetSingleCampaignRequest struct {
+	UUID string `param:"uuid" validate:"required"`
 }

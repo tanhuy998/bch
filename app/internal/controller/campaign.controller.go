@@ -3,11 +3,17 @@ package controller
 import (
 	"app/domain/model"
 	requestPresenter "app/domain/presenter/request"
+	responsePresenter "app/domain/presenter/response"
 	libCommon "app/lib/common"
 	adminService "app/service/admin"
+	"encoding/json"
 	"errors"
 
 	"github.com/kataras/iris/v12/mvc"
+)
+
+const (
+	CONTENT_TYPE = "application/json"
 )
 
 type CampaignController struct {
@@ -22,21 +28,37 @@ type CampaignController struct {
 /*
 GET /campaign/{uuid:string}?p={number}
 */
-func (this *CampaignController) GetCampaign(presenter *requestPresenter.GetCampaignRequest) mvc.Response {
+func (this *CampaignController) GetCampaign(presenter *requestPresenter.GetSingleCampaignRequest) mvc.Response {
 
 	if libCommon.Or(presenter == nil, presenter.UUID == "") {
 
 		return BadRequest(errors.New("invalid input"))
 	}
 
-	_, err := this.GetCampaignOperation.Execute(presenter.UUID)
+	data, err := this.GetCampaignOperation.Execute(presenter.UUID)
 
 	if err != nil {
 
 		return BadRequest(err)
 	}
 
-	return Ok()
+	response := responsePresenter.GetSingleCampaignResponse{
+		Message: "success",
+		Data:    *data,
+	}
+
+	resContent, err := json.Marshal(response)
+
+	if err != nil {
+
+		return BadRequest(err)
+	}
+
+	return mvc.Response{
+		Code:        200,
+		ContentType: "application",
+		Content:     resContent,
+	}
 }
 
 func (this *CampaignController) GetCampaignListOnPage(presenter *requestPresenter.GetCampaignListRequest) mvc.Response {

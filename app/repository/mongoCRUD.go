@@ -7,28 +7,44 @@ import (
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func ParseCursor[T any](cursor *mongo.Cursor, ctx context.Context) ([]*T, error) {
+
+	defer cursor.Close(context.TODO())
 
 	var ret []*T
 
 	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
 
-	for cursor.Next(ctx) {
+	// for {
 
-		var parsedModel = new(T)
+	// 	if cursor.TryNext(ctx) {
 
-		if err := cursor.Decode(&parsedModel); err != nil {
+	// 		var parsedModel *T = new(T)
 
-			return nil, err
-		}
+	// 		if err := cursor.Decode(&parsedModel); err != nil {
 
-		ret = append(ret, parsedModel)
-	}
+	// 			return nil, err
+	// 		}
 
-	if err := cursor.Err(); err != nil {
+	// 		ret = append(ret, parsedModel)
+
+	// 		continue
+	// 	}
+
+	// 	if err := cursor.Err(); err != nil {
+
+	// 		return nil, err
+	// 	}
+	// }
+
+	// return ret, nil
+
+	if err := cursor.All(ctx, &ret); err != nil {
 
 		return nil, err
 	}
@@ -36,7 +52,12 @@ func ParseCursor[T any](cursor *mongo.Cursor, ctx context.Context) ([]*T, error)
 	return ret, nil
 }
 
-func getDocuments[T any](page int64, collection *mongo.Collection, ctx context.Context) ([]*T, error) {
+func getDocuments[T any](
+	page int64,
+	collection *mongo.Collection,
+	ctx context.Context,
+	filters ...interface{},
+) ([]*T, error) {
 
 	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
 
@@ -51,6 +72,50 @@ func getDocuments[T any](page int64, collection *mongo.Collection, ctx context.C
 	}
 
 	return ParseCursor[T](cursor, ctx)
+}
+
+func getDocumentsPageByID[T any](
+	_id primitive.ObjectID,
+	pageLimit int64,
+	projection interface{},
+	collection *mongo.Collection,
+	ctx context.Context,
+	extraFilters ...interface{},
+) ([]*T, error) {
+
+	filters := libCommon.Ternary[[]interface{}](
+		len(extraFilters) == 0,
+		make([]interface{}, 0),
+		extraFilters,
+	)
+
+	paginationQuery := libCommon.Ternary[bson.D](
+		_id == [12]byte{},
+		bson.D{},
+		bson.D{
+			{
+				"_id", bson.D{
+					{"$gt", _id},
+				},
+			},
+		},
+	)
+
+	filters = append([]interface{}{paginationQuery}, filters...)
+
+	option := options.Find()
+	option.Sort = bson.D{{"_id", -1}}
+	option.Limit = &pageLimit
+	option.Projection = projection
+
+	cursor, err := collection.Find(ctx, filters, option)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return ParseCursor[T](cursor, context.TODO())
 }
 
 func findDocumentByUUID[T any](uuid uuid.UUID, collection *mongo.Collection, ctx context.Context) (*T, error) {

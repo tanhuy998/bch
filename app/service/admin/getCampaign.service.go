@@ -17,9 +17,14 @@ type (
 	}
 )
 
-func (this *AdminGetCampaignService) Execute(string) (*model.Campaign, error) {
+func (this *AdminGetCampaignService) Execute(inputUUID string) (*model.Campaign, error) {
 
-	uuid := uuid.New()
+	uuid, err := uuid.Parse(inputUUID)
+
+	if err != nil {
+
+		return nil, err
+	}
 
 	return this.CampaignRepo.FindByUUID(uuid, nil)
 }

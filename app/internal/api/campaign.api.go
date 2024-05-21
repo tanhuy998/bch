@@ -41,7 +41,7 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 					Fields: campaignField,
 					//Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
-				//middleware.BindRequest[]()
+				middleware.BindRequest[requestPresenter.GetSingleCampaignRequest](),
 			).SetName("GET_SINGLE_CAMPAIGN")
 
 			activator.Handle(

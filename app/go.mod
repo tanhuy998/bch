@@ -8,6 +8,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/iris-contrib/middleware/cors v0.0.0-20240502084239-34f27409ce72
+	github.com/joho/godotenv v1.5.1
 	github.com/kataras/iris/v12 v12.2.11
 	go.mongodb.org/mongo-driver v1.15.0
 )
