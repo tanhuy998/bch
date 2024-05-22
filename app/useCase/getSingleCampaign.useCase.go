@@ -3,9 +3,11 @@ package usecase
 import (
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
+	"app/internal/common"
 	libCommon "app/lib/common"
 	adminService "app/service/admin"
-	"errors"
+
+	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
@@ -13,7 +15,7 @@ type (
 		Execute(
 			*requestPresenter.GetSingleCampaignRequest,
 			*responsePresenter.GetSingleCampaignResponse,
-		) (*responsePresenter.GetSingleCampaignResponse, error)
+		) (mvc.Result, error)
 	}
 
 	GetSingleCampaignUseCase struct {
@@ -24,11 +26,11 @@ type (
 func (this *GetSingleCampaignUseCase) Execute(
 	input *requestPresenter.GetSingleCampaignRequest,
 	output *responsePresenter.GetSingleCampaignResponse,
-) (*responsePresenter.GetSingleCampaignResponse, error) {
+) (mvc.Result, error) {
 
 	if libCommon.Or(input == nil, input.UUID == "") {
 
-		return nil, errors.New("invalid input")
+		return nil, common.ERR_INVALID_HTTP_INPUT
 	}
 
 	data, err := this.GetSingleCampaignService.Execute(input.UUID)
@@ -43,15 +45,21 @@ func (this *GetSingleCampaignUseCase) Execute(
 	// 	Data:    *data,
 	// }
 
-	// resContent, err := json.Marshal(response)
-
-	// if err != nil {
-
-	// 	return nil, err
-	// }
-
 	output.Message = "succes"
 	output.Data = data
 
-	return output, nil
+	res := newResponse()
+
+	err = marshalResponseContent(input, res)
+
+	// resContent, err := json.Marshal(response)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	res.Code = 200
+
+	return res, nil
 }

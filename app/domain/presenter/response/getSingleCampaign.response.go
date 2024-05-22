@@ -1,6 +1,8 @@
 package responsePresenter
 
-import "app/domain/model"
+import (
+	"app/domain/model"
+)
 
 type (
 	GetSingleCampaignResponse struct {

@@ -1,13 +1,9 @@
 package controller
 
 import (
-	"app/domain/model"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
-	libCommon "app/lib/common"
-	adminService "app/service/admin"
 	usecase "app/useCase"
-	"errors"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -17,14 +13,20 @@ const (
 )
 
 type CampaignController struct {
-	GetPendingCampaignOperation adminService.IGetPendingCampaigns
-	GetCampaignListOperation    adminService.IGetCampaignList
-	//GetCampaignOperation        adminService.IGetCampaign
-	GetSingleCampaignUseCase   usecase.IGetSingleCampaign
-	DeleteCampaignOperation    adminService.IDeleteCampaign
-	LaunchNewCampaignOperation adminService.ILaunchNewCampaign
-	ModifyExistingOperation    adminService.IModifyExistingCampaign
+	GetPendingCampaignsUseCase    usecase.IGetPendingCampaigns
+	GetCampaignListUseCase        usecase.IGetCampaignList
+	GetSingleCampaignUseCase      usecase.IGetSingleCampaign
+	DeleteCampaignUseCase         usecase.DeleteCampaignUseCase
+	LaunNewCampaignUseCase        usecase.ILaunchNewCampaign
+	UpdateExistingCampaignUseCase usecase.IUpdateCampaign
 }
+
+// func (this *CampaignController) HandleHTTPError(err mvc.Err, statusCode mvc.Code) mvc.Response {
+
+// 	return mvc.Response{
+
+// 	}
+// }
 
 /*
 GET /campaign/{uuid:string}?p={number}
@@ -32,99 +34,49 @@ GET /campaign/{uuid:string}?p={number}
 func (this *CampaignController) GetCampaign(
 	input *requestPresenter.GetSingleCampaignRequest,
 	output *responsePresenter.GetSingleCampaignResponse,
-) (*responsePresenter.GetSingleCampaignResponse, error) {
+) (mvc.Result, error) {
 
 	return this.GetSingleCampaignUseCase.Execute(input, output)
 }
 
-func (this *CampaignController) GetCampaignListOnPage(presenter *requestPresenter.GetCampaignListRequest) mvc.Response {
+func (this *CampaignController) GetCampaignListOnPage(
+	input *requestPresenter.GetCampaignListRequest,
+	output *responsePresenter.GetCampaignListResponse,
+) (mvc.Result, error) {
 
-	if presenter == nil {
-
-		return BadRequest(errors.New("Invalid input"))
-	}
-
-	_, err := this.GetCampaignListOperation.Execute(presenter.PageNumber)
-
-	if err != nil {
-
-		return BadRequest(err)
-	}
-
-	return Ok()
+	return this.GetCampaignListUseCase.Execute(input, output)
 }
 
-func (this *CampaignController) GetPendingCampaigns(presenter *requestPresenter.GetPendingCampaignRequest) mvc.Response {
+func (this *CampaignController) GetPendingCampaigns(
+	input *requestPresenter.GetPendingCampaignRequest,
+	output *responsePresenter.GetPendingCampaingsResponse,
+) (mvc.Result, error) {
 
-	if presenter == nil {
-
-		return BadRequest(errors.New("Invalid input"))
-	}
-
-	_, err := this.GetPendingCampaignOperation.Execute(presenter.PageNumber)
-
-	if err != nil {
-
-		return BadRequest(err)
-	}
-
-	return Ok()
+	return this.GetPendingCampaignsUseCase.Execute(input, output)
 }
 
-func (this *CampaignController) NewCampaign(presenter *requestPresenter.LaunchNewCampaignRequest) mvc.Response {
+func (this *CampaignController) NewCampaign(
+	input *requestPresenter.LaunchNewCampaignRequest,
+	output *responsePresenter.LaunchNewCampaignResponse,
+) (mvc.Result, error) {
 
 	//repository.TestCampaignRepo()
-	var inputCampaign *model.Campaign = presenter.Data
 
-	if inputCampaign == nil {
-
-		return BadRequest(errors.New("invalid input"))
-	}
-
-	err := this.LaunchNewCampaignOperation.Execute(inputCampaign)
-
-	if err != nil {
-
-		return BadRequest(err)
-	}
-
-	return Created()
+	return this.LaunNewCampaignUseCase.Execute(input, output)
 }
 
-func (this *CampaignController) UpdateCampaign(presenter *requestPresenter.UpdateCampaignRequest) mvc.Response {
+func (this *CampaignController) UpdateCampaign(
+	input *requestPresenter.UpdateCampaignRequest,
+	output *responsePresenter.UpdateCampaignResponse,
+) (mvc.Result, error) {
 
-	var (
-		uuid       string          = presenter.UUID
-		inputModel *model.Campaign = presenter.Data
-	)
-
-	if libCommon.Or(uuid == "", inputModel == nil) {
-
-		return BadRequest(errors.New("invalid input"))
-	}
-
-	err := this.ModifyExistingOperation.Execute(uuid, inputModel)
-
-	if err != nil {
-
-		return BadRequest(err)
-	}
-
-	return Ok()
+	return this.UpdateExistingCampaignUseCase.Execute(input, output)
 }
 
-func (this *CampaignController) DeleteCampaign(presenter *requestPresenter.DeleteCampaignRequest) mvc.Response {
+func (this *CampaignController) DeleteCampaign(
+	input *requestPresenter.DeleteCampaignRequest,
+	output *responsePresenter.DeleteCampaignResponse,
+) (mvc.Result, error) {
 
-	var (
-		uuid string = presenter.UUID
-	)
-
-	err := this.DeleteCampaignOperation.Execute(uuid)
-
-	if err != nil {
-
-		return BadRequest(err)
-	}
-
-	return Ok()
+	return this.DeleteCampaignUseCase.Execute(input, output)
 }
