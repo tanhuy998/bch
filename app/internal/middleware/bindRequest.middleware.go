@@ -27,7 +27,7 @@ func BindRequest[RequestPresenter_T any]() iris.Handler {
 			err = bindDefault(presenter, ctx)
 		}
 
-		if libError.IsErrorExcepts(err, io.EOF) {
+		if libError.IsAcceptable(err, io.EOF) {
 			/*
 				io.EOF is just signal that indicates the read operation reaches eof,
 				not an impact error.

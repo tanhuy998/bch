@@ -6,6 +6,7 @@ import (
 	"app/repository"
 	adminService "app/service/admin"
 	authService "app/service/auth"
+	usecase "app/useCase"
 	"fmt"
 
 	"github.com/kataras/iris/v12"
@@ -93,6 +94,11 @@ func RegisterServices(app *iris.Application) {
 	libConfig.BindDependency[adminService.IDeleteCandidate, adminService.AdminDeleteCandidateService](container, nil)
 	libConfig.BindDependency[adminService.IAddNewCandidate, adminService.AdminAddNewCandidateToCampaign](container, nil)
 	libConfig.BindDependency[adminService.IModifyCandidate, adminService.AdminModifyCandidate](container, nil)
+
+	/*
+		Bind Usecase Objects
+	*/
+	libConfig.BindDependency[usecase.IGetSingleCampaign, usecase.GetSingleCampaignUseCase](container, nil)
 }
 
 // func GetComponent[AbstractType](ctx iris.Context) {

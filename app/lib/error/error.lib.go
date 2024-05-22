@@ -1,20 +1,25 @@
 package libError
 
-func IsErrorExcepts(target error, exceptions ...error) bool {
+func IsAcceptable(target error, exceptions ...error) bool {
 
 	if target == nil {
 
 		return false
 	}
 
-	for _, errVal := range exceptions {
+	for _, exceptErr := range exceptions {
 
-		if target == errVal {
+		if exceptErr == nil {
+
+			continue
+		}
+
+		if target == exceptErr {
 
 			return true
 		}
 
 	}
 
-	return true
+	return false
 }

@@ -6,7 +6,7 @@ import (
 	responsePresenter "app/domain/presenter/response"
 	libCommon "app/lib/common"
 	adminService "app/service/admin"
-	"encoding/json"
+	usecase "app/useCase"
 	"errors"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -19,46 +19,22 @@ const (
 type CampaignController struct {
 	GetPendingCampaignOperation adminService.IGetPendingCampaigns
 	GetCampaignListOperation    adminService.IGetCampaignList
-	GetCampaignOperation        adminService.IGetCampaign
-	DeleteCampaignOperation     adminService.IDeleteCampaign
-	LaunchNewCampaignOperation  adminService.ILaunchNewCampaign
-	ModifyExistingOperation     adminService.IModifyExistingCampaign
+	//GetCampaignOperation        adminService.IGetCampaign
+	GetSingleCampaignUseCase   usecase.IGetSingleCampaign
+	DeleteCampaignOperation    adminService.IDeleteCampaign
+	LaunchNewCampaignOperation adminService.ILaunchNewCampaign
+	ModifyExistingOperation    adminService.IModifyExistingCampaign
 }
 
 /*
 GET /campaign/{uuid:string}?p={number}
 */
-func (this *CampaignController) GetCampaign(presenter *requestPresenter.GetSingleCampaignRequest) mvc.Response {
+func (this *CampaignController) GetCampaign(
+	input *requestPresenter.GetSingleCampaignRequest,
+	output *responsePresenter.GetSingleCampaignResponse,
+) (*responsePresenter.GetSingleCampaignResponse, error) {
 
-	if libCommon.Or(presenter == nil, presenter.UUID == "") {
-
-		return BadRequest(errors.New("invalid input"))
-	}
-
-	data, err := this.GetCampaignOperation.Execute(presenter.UUID)
-
-	if err != nil {
-
-		return BadRequest(err)
-	}
-
-	response := responsePresenter.GetSingleCampaignResponse{
-		Message: "success",
-		Data:    *data,
-	}
-
-	resContent, err := json.Marshal(response)
-
-	if err != nil {
-
-		return BadRequest(err)
-	}
-
-	return mvc.Response{
-		Code:        200,
-		ContentType: "application",
-		Content:     resContent,
-	}
+	return this.GetSingleCampaignUseCase.Execute(input, output)
 }
 
 func (this *CampaignController) GetCampaignListOnPage(presenter *requestPresenter.GetCampaignListRequest) mvc.Response {
