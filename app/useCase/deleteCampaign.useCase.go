@@ -38,9 +38,9 @@ func (this *DeleteCampaignUseCase) Execute(
 	}
 
 	output.Message = "success"
-	res := newResponse()
+	res := NewResponse()
 
-	err = marshalResponseContent(output, res)
+	err = MarshalResponseContent(output, res)
 
 	if err != nil {
 

@@ -48,9 +48,9 @@ func (this *GetSingleCampaignUseCase) Execute(
 	output.Message = "succes"
 	output.Data = data
 
-	res := newResponse()
+	res := NewResponse()
 
-	err = marshalResponseContent(input, res)
+	err = MarshalResponseContent(input, res)
 
 	// resContent, err := json.Marshal(response)
 

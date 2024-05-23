@@ -3,7 +3,9 @@ package controller
 import (
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
+	"app/port"
 	usecase "app/useCase"
+	"fmt"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -13,6 +15,7 @@ const (
 )
 
 type CampaignController struct {
+	ErrorResponseUseCase          port.IActionResult
 	GetPendingCampaignsUseCase    usecase.IGetPendingCampaigns
 	GetCampaignListUseCase        usecase.IGetCampaignList
 	GetSingleCampaignUseCase      usecase.IGetSingleCampaign
@@ -21,12 +24,27 @@ type CampaignController struct {
 	UpdateExistingCampaignUseCase usecase.IUpdateCampaign
 }
 
-// func (this *CampaignController) HandleHTTPError(err mvc.Err, statusCode mvc.Code) mvc.Response {
+func (this *CampaignController) HandleHTTPError(err mvc.Err, statusCode mvc.Code) *mvc.Response {
 
-// 	return mvc.Response{
+	var msg string
 
-// 	}
-// }
+	if err != nil {
+
+		msg = err.Error()
+	} else {
+
+		msg = "error"
+	}
+
+	res := this.ErrorResponseUseCase.NewActionResponse()
+	errOutput := &(responsePresenter.ErrorResponse{
+		Message: msg,
+	})
+
+	this.ErrorResponseUseCase.MarshallOutput(errOutput, res)
+
+	return res
+}
 
 /*
 GET /campaign/{uuid:string}?p={number}
@@ -36,6 +54,7 @@ func (this *CampaignController) GetCampaign(
 	output *responsePresenter.GetSingleCampaignResponse,
 ) (mvc.Result, error) {
 
+	fmt.Printf("c %s \n", input.UUID)
 	return this.GetSingleCampaignUseCase.Execute(input, output)
 }
 

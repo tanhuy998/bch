@@ -3,6 +3,7 @@ package config
 import (
 	"app/infrastructure/db"
 	libConfig "app/lib/config"
+	"app/port"
 	"app/repository"
 	adminService "app/service/admin"
 	authService "app/service/auth"
@@ -61,7 +62,7 @@ func InitializeDatabase(app *iris.Application) {
 
 func RegisterServices(app *iris.Application) {
 
-	var container *hero.Container = app.ConfigureContainer().Container
+	var container *hero.Container = app.ConfigureContainer().EnableStructDependents().Container
 
 	// auth := new(authService.AuthenticateService)
 	// Dep := container.Register(auth)
@@ -77,6 +78,8 @@ func RegisterServices(app *iris.Application) {
 	// })
 	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticateService](container, nil, AUTH)
 	fmt.Println("Auth service initialized.")
+
+	libConfig.BindDependency[port.IActionResult, usecase.ActionResultUseCase](container, nil)
 
 	/*
 		Bind Admin Campaign controller dependent services

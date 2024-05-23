@@ -60,6 +60,24 @@ func main() {
 		}),
 	)
 
+	// app.ConfigureContainer().
+	// 	UseResultHandler(func(next iris.ResultHandler) iris.ResultHandler {
+	// 		return func(ctx iris.Context, v interface{}) error {
+	// 			fmt.Println("error catcher")
+	// 			switch val := v.(type) {
+	// 			case error:
+	// 				fmt.Println("err")
+	// 				return next(ctx, val)
+	// 			case *mvc.Response:
+	// 				fmt.Println("err res")
+	// 				return next(ctx, val)
+	// 			default:
+	// 				fmt.Println(reflect.TypeOf(val).String())
+	// 				return next(ctx, val)
+	// 			}
+	// 		}
+	// 	})
+
 	config.InitializeDatabase(app)
 	config.RegisterServices(app)
 

@@ -35,10 +35,10 @@ func (this *ModifyCandidateUseCase) Execute(
 		return nil, err
 	}
 
-	res := newResponse()
+	res := NewResponse()
 	output.Message = "success"
 
-	marshalResponseContent(output, res)
+	MarshalResponseContent(output, res)
 
 	return res, nil
 }

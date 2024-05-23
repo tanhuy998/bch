@@ -39,10 +39,10 @@ func (this *GetCampaignListUseCase) Execute(
 		return nil, err
 	}
 
-	res := newResponse()
+	res := NewResponse()
 	output.Message = "success"
 
-	err = marshalResponseContent(output, res)
+	err = MarshalResponseContent(output, res)
 
 	if err != nil {
 

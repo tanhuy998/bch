@@ -13,16 +13,31 @@ type (
 	ResponseWrapper[T any] struct {
 		Target T
 	}
+
+	ActionResultUseCase struct {
+	}
 )
 
-func newResponse() *mvc.Response {
+func (this *ActionResultUseCase) MarshallOutput(resultContent interface{}, response *mvc.Response) error {
+
+	res := NewResponse()
+
+	return MarshalResponseContent(resultContent, res)
+}
+
+func (this *ActionResultUseCase) NewActionResponse() *mvc.Response {
+
+	return NewResponse()
+}
+
+func NewResponse() *mvc.Response {
 
 	return &mvc.Response{
 		ContentType: "application/json",
 	}
 }
 
-func marshalResponseContent(context interface{}, res *mvc.Response) error {
+func MarshalResponseContent(context interface{}, res *mvc.Response) error {
 
 	data, err := json.Marshal(context)
 
