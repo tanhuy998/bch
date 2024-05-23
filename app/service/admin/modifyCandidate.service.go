@@ -26,7 +26,7 @@ func (this *AdminModifyCandidate) Execute(inputUUID string, model *model.Candida
 		return err
 	}
 
-	model.UUID = uuid
+	model.UUID = &uuid
 
 	return this.CandidateRepoo.Update(model, nil)
 }

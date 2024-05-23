@@ -1,56 +1,45 @@
 package controller
 
 import (
-	"app/domain/model"
-	adminService "app/service/admin"
+	requestPresenter "app/domain/presenter/request"
+	responsePresenter "app/domain/presenter/response"
+	usecase "app/useCase"
 
 	"github.com/kataras/iris/v12/mvc"
 )
 
 type CandidateController struct {
-	AddnewCandidateOperation adminService.IAddNewCandidate
-	DeleteCandidateOperation adminService.IDeleteCandidate
-	ModifyCandidateOperation adminService.IModifyCandidate
+	AddNewCandidateUseCase usecase.IAddNewCandidate
+	ModifyCandidateUseCase usecase.IModifyCandidate
+	DeleteCandidateUseCase usecase.IDeleteCandidate
 }
 
 func (this *CandidateController) GetCandidate() {
 
 }
 
-func (this *CandidateController) PostCandidate(inputCampaignUUID string, inputCandidate *model.Candidate) mvc.Response {
+func (this *CandidateController) PostCandidate(
+	input *requestPresenter.AddCandidateRequest,
+	output *responsePresenter.AddNewCandidateResponse,
+) (mvc.Result, error) {
 
-	err := this.AddnewCandidateOperation.Execute(inputCampaignUUID, inputCandidate)
-
-	if err != nil {
-
-		return BadRequest(err)
-	}
-
-	return Ok()
+	return this.AddNewCandidateUseCase.Execute(input, output)
 }
 
-func (this *CandidateController) UpdateCandidate(inputUUID string, inputModel *model.Candidate) mvc.Response {
+func (this *CandidateController) UpdateCandidate(
+	input *requestPresenter.ModifyCandidateRequest,
+	output *responsePresenter.ModifyCandidateResponse,
+) (mvc.Result, error) {
 
-	err := this.ModifyCandidateOperation.Execute(inputUUID, inputModel)
-
-	if err != nil {
-
-		return BadRequest(err)
-	}
-
-	return Ok()
+	return this.ModifyCandidateUseCase.Execute(input, output)
 }
 
-func (this *CandidateController) DeleteCandidate(inputUUID string) mvc.Response {
+func (this *CandidateController) DeleteCandidate(
+	input *requestPresenter.DeleteCandidateRequest,
+	output *responsePresenter.DeleteCandidateResponse,
+) (mvc.Result, error) {
 
-	err := this.DeleteCandidateOperation.Execute(inputUUID)
-
-	if err != nil {
-
-		return BadRequest(err)
-	}
-
-	return Ok()
+	return this.DeleteCandidateUseCase.Execute(input, output)
 }
 
 func (this *CandidateController) GetCandidateByPage() {

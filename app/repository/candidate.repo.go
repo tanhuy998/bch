@@ -40,7 +40,7 @@ func (this *CandidateRepository) Create(candidate *model.Candidate, ctx context.
 
 func (this *CandidateRepository) Update(candidate *model.Candidate, ctx context.Context) error {
 
-	return updateDocument(candidate.UUID, candidate, this.collection, ctx)
+	return updateDocument(*candidate.UUID, candidate, this.collection, ctx)
 }
 
 func (this *CandidateRepository) Delete(uuid uuid.UUID, ctx context.Context) error {

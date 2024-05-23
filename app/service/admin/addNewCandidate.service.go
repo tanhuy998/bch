@@ -41,7 +41,7 @@ func (this *AdminAddNewCandidateToCampaign) Execute(inputCampaignUUID string, mo
 		return errors.New("Invalid Campaign")
 	}
 
-	model.UUID = uuid.New()
+	model.UUID = libCommon.PointerPrimitive(uuid.New())
 	model.CampaignID = libCommon.PointerPrimitive(camUUID)
 
 	return this.CandidateRepo.Create(model, nil)

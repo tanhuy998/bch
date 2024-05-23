@@ -104,6 +104,10 @@ func RegisterServices(app *iris.Application) {
 	libConfig.BindDependency[usecase.IDeleteCampaign, usecase.DeleteCampaignUseCase](container, nil)
 	libConfig.BindDependency[usecase.IGetCampaignList, usecase.GetCampaignListUseCase](container, nil)
 	libConfig.BindDependency[usecase.IGetPendingCampaigns, usecase.GetPendingCampaignsUseCase](container, nil)
+
+	libConfig.BindDependency[usecase.IAddNewCandidate, usecase.AddNewCandidateUseCase](container, nil)
+	libConfig.BindDependency[usecase.IModifyCandidate, usecase.ModifyCandidateUseCase](container, nil)
+	libConfig.BindDependency[usecase.IDeleteCandidate, usecase.DeleteCandidateUseCase](container, nil)
 }
 
 // func GetComponent[AbstractType](ctx iris.Context) {
