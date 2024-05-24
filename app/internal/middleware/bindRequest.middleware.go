@@ -41,14 +41,14 @@ func BindRequest[RequestPresenter_T any]() iris.Handler {
 
 func bindDefault[RequestPresenter_T any](presenter *RequestPresenter_T, ctx iris.Context) error {
 
-	err := ctx.ReadParams(presenter)
+	err := ctx.ReadQuery(presenter)
 
 	if err != nil {
 
 		return err
 	}
 
-	err = ctx.ReadQuery(presenter)
+	err = ctx.ReadParams(presenter)
 
 	if err != nil {
 

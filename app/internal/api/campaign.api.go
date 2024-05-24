@@ -26,17 +26,44 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 		api.Use(middleware.Authentication())
 	})
 
+	controller := new(controller.CampaignController)
+	campaignField := authService.AuthorizationField("campaigns")
+
+	// mvc.New(router).Handle(
+	// 	controller,
+	// 	applyRoutes(func(activator *mvc.ControllerActivator) {
+
+	// 		activator.Handle(
+	// 			"GET", "/", "GetCampaignListOnPage",
+	// 			middleware.Authorize(authService.AuthorizationLicense{
+	// 				Fields: campaignField,
+	// 				Groups: []authService.AuthorizationGroup{auth_commander_group},
+	// 			}),
+	// 			middleware.BindRequest[requestPresenter.GetPendingCampaignRequest](),
+	// 		).SetName("GET_LIST_CAMPAIGNS")
+	// 	}),
+	// ).EnableStructDependents()
+
+	// router = router.Party("/")
+
 	wrapper := mvc.New(router)
 	return wrapper.Handle(
-		new(controller.CampaignController),
+		controller,
 		applyRoutes(func(activator *mvc.ControllerActivator) {
-
-			campaignField := authService.AuthorizationField("campaigns")
 
 			//activator.Handle("GET", "/", "HealthCheck")
 
 			activator.Handle(
-				"GET", "/{uuid:string}", "GetCampaign",
+				"GET", "/", "GetCampaignListOnPage",
+				middleware.Authorize(authService.AuthorizationLicense{
+					Fields: campaignField,
+					Groups: []authService.AuthorizationGroup{auth_commander_group},
+				}),
+				middleware.BindRequest[requestPresenter.GetCampaignListRequest](),
+			).SetName("GET_LIST_CAMPAIGNS")
+
+			activator.Handle(
+				"GET", "/{uuid:uuid}", "GetCampaign",
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: campaignField,
 					//Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
@@ -45,19 +72,11 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 			).SetName("GET_SINGLE_CAMPAIGN")
 
 			activator.Handle(
-				"Get", "/", "GetCampaignListOnPage",
-				middleware.Authorize(authService.AuthorizationLicense{
-					Fields: campaignField,
-					Groups: []authService.AuthorizationGroup{auth_commander_group},
-				}),
-				middleware.BindRequest[requestPresenter.GetPendingCampaignRequest](),
-			).SetName("GET_LIST_CAMPAIGNS")
-
-			activator.Handle(
 				"GET", "/pending", "GetPendingCampaigns",
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: campaignField,
 				}),
+				middleware.BindRequest[requestPresenter.GetPendingCampaignRequest](),
 			).SetName("GET_PENDING_CAMPAIGNS")
 
 			activator.Handle(

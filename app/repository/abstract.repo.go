@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -26,7 +27,8 @@ type (
 		FindByUUID(uuid.UUID, context.Context) (*model.Campaign, error)
 		Get(page int, ctx context.Context) ([]*model.Campaign, error)
 		GetPendingCampaigns(page int, ctx context.Context) ([]*model.Campaign, error)
-		GetCampaignList(page int64) ([]*model.Campaign, error)
+
+		GetCampaignList(id primitive.ObjectID, pageLimit int64, direction int64) ([]*model.Campaign, error)
 		Create(*model.Campaign, context.Context) error
 		//CreateMany([]*model.Campaign) error
 		Update(*model.Campaign, context.Context) error

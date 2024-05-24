@@ -32,7 +32,7 @@ func (this *GetCampaignListUseCase) Execute(
 		return nil, common.ERR_INVALID_HTTP_INPUT
 	}
 
-	_, err := this.GetCampaignListService.Execute(input.PageNumber)
+	_, err := this.GetCampaignListService.Execute(input.PivotID, input.Direction, input.PageSizeLimit)
 
 	if err != nil {
 

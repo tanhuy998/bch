@@ -3,11 +3,13 @@ package adminService
 import (
 	"app/domain/model"
 	"app/repository"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
 	IGetCampaignList interface {
-		Execute(page int) ([]*model.Campaign, error)
+		Execute(_id string, limit int, direction int) ([]*model.Campaign, error)
 	}
 
 	AdminGetCampaignListService struct {
@@ -15,7 +17,14 @@ type (
 	}
 )
 
-func (this *AdminGetCampaignListService) Execute(page int) ([]*model.Campaign, error) {
+func (this *AdminGetCampaignListService) Execute(_id string, limit int, direction int) ([]*model.Campaign, error) {
 
-	return this.CampaignRepo.GetCampaignList(int64(page))
+	objID, err := primitive.ObjectIDFromHex(_id)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return this.CampaignRepo.GetCampaignList(objID, int64(limit), int64(direction))
 }

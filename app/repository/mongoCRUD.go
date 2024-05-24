@@ -77,11 +77,14 @@ func getDocuments[T any](
 func getDocumentsPageByID[T any](
 	_id primitive.ObjectID,
 	pageLimit int64,
+	direction int64,
 	projection interface{},
 	collection *mongo.Collection,
 	ctx context.Context,
 	extraFilters ...interface{},
 ) ([]*T, error) {
+
+	dir_op := libCommon.Ternary(direction == 0 || direction < -1 || direction > 1, "$gt", "$lte")
 
 	filters := libCommon.Ternary[[]interface{}](
 		len(extraFilters) == 0,
@@ -95,7 +98,7 @@ func getDocumentsPageByID[T any](
 		bson.D{
 			{
 				"_id", bson.D{
-					{"$gt", _id},
+					{dir_op, _id},
 				},
 			},
 		},

@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -74,9 +75,14 @@ func (this *CampaignRepository) Delete(uuid uuid.UUID, ctx context.Context) erro
 	return deleteDocument(uuid, this.collection, ctx)
 }
 
-func (this *CampaignRepository) GetCampaignList(page int64) ([]*model.Campaign, error) {
+func (this *CampaignRepository) GetCampaignList(
+	_id primitive.ObjectID,
+	pageLimit int64,
+	direction int64,
+) ([]*model.Campaign, error) {
 
-	page = this.returnPageThresholdIfOutOfRange(page)
+	//page = this.returnPageThresholdIfOutOfRange(page)
 
-	return getDocuments[model.Campaign](page, this.collection, nil)
+	//return getDocuments[model.Campaign](page, this.collection, nil)
+	return getDocumentsPageByID[model.Campaign](_id, pageLimit, direction, nil, this.collection, nil)
 }

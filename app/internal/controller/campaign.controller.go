@@ -41,6 +41,7 @@ func (this *CampaignController) HandleHTTPError(err mvc.Err, statusCode mvc.Code
 		Message: msg,
 	})
 
+	res.Code = 403
 	this.ErrorResponseUseCase.MarshallOutput(errOutput, res)
 
 	return res
@@ -62,7 +63,7 @@ func (this *CampaignController) GetCampaignListOnPage(
 	input *requestPresenter.GetCampaignListRequest,
 	output *responsePresenter.GetCampaignListResponse,
 ) (mvc.Result, error) {
-
+	fmt.Println("get campaign list controller")
 	return this.GetCampaignListUseCase.Execute(input, output)
 }
 
