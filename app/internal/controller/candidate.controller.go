@@ -18,6 +18,10 @@ func (this *CandidateController) GetCandidate() {
 
 }
 
+func (this *CandidateController) UpdateCandidateDetailInfo() {
+
+}
+
 func (this *CandidateController) PostCandidate(
 	input *requestPresenter.AddCandidateRequest,
 	output *responsePresenter.AddNewCandidateResponse,

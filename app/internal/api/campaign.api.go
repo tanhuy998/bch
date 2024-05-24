@@ -19,7 +19,7 @@ import (
 
 func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 
-	router := app.Party("/campaign")
+	router := app.Party("/campaigns")
 
 	router.ConfigureContainer(func(api *iris.APIContainer) {
 

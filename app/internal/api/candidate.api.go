@@ -12,7 +12,7 @@ import (
 
 func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 
-	router := app.Party("/candidate")
+	router := app.Party("/candidates")
 
 	router.ConfigureContainer(func(api *iris.APIContainer) {
 		/*
@@ -97,6 +97,16 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 					Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
 				middleware.BindRequestBody[model.Candidate](),
+			)
+
+			activator.Handle(
+				"PATCH", "/detail/{uuid:string}", "UpdateCandidateDetailInfo",
+				middleware.Authorize(
+					authService.AuthorizationLicense{
+						Fields: candidateField,
+						Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
+					},
+				),
 			)
 
 			/*
