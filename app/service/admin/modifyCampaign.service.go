@@ -31,7 +31,7 @@ func (this *AdminModifyExistingCampaign) Execute(inputUUID string, model *model.
 
 func (this *AdminModifyExistingCampaign) modifyExistingCampaign(uuid uuid.UUID, model *model.Campaign) error {
 
-	model.UUID = uuid
+	model.UUID = &uuid
 
 	return this.CampaignRepo.Update(model, nil)
 }

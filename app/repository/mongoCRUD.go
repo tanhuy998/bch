@@ -154,7 +154,7 @@ func createDocument[T any](model *T, collection *mongo.Collection, ctx context.C
 	return nil
 }
 
-func updateDocument[T any](uuid uuid.UUID, model *T, collection *mongo.Collection, ctx context.Context) error {
+func updateDocument[T any](uuid *uuid.UUID, model *T, collection *mongo.Collection, ctx context.Context) error {
 
 	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
 

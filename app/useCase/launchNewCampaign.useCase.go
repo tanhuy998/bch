@@ -5,14 +5,16 @@ import (
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
+	libCommon "app/lib/common"
 	adminService "app/service/admin"
+	"time"
 
 	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
 	ILaunchNewCampaign interface {
-		Execute(*requestPresenter.LaunchNewCampaignRequest, *responsePresenter.LaunchNewCampaignResponse) (mvc.Result, error)
+		Execute(*requestPresenter.LaunchNewCampaignRequest, responsePresenter.ILaunchNewCampaignResponsePresenter) (mvc.Result, error)
 	}
 
 	LaunchNewCampaignUseCase struct {
@@ -22,8 +24,11 @@ type (
 
 func (this *LaunchNewCampaignUseCase) Execute(
 	input *requestPresenter.LaunchNewCampaignRequest,
-	output *responsePresenter.LaunchNewCampaignResponse,
+	output responsePresenter.ILaunchNewCampaignResponsePresenter,
 ) (mvc.Result, error) {
+
+	input.Data.UUID = nil
+	input.Data.IssueTime = libCommon.PointerPrimitive(time.Now())
 
 	var inputCampaign *model.Campaign = input.Data
 
@@ -32,7 +37,7 @@ func (this *LaunchNewCampaignUseCase) Execute(
 		return nil, common.ERR_INVALID_HTTP_INPUT
 	}
 
-	err := this.LaunchNewCampaignService.Execute(inputCampaign)
+	createdUUID, err := this.LaunchNewCampaignService.Execute(inputCampaign)
 
 	if err != nil {
 
@@ -41,7 +46,8 @@ func (this *LaunchNewCampaignUseCase) Execute(
 
 	res := NewResponse()
 
-	output.Message = "success"
+	output.SetMessage("success")
+	output.GetData().CreatedUUID = createdUUID
 	err = MarshalResponseContent(output, res)
 
 	if err != nil {

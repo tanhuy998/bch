@@ -60,6 +60,8 @@ func main() {
 		}),
 	)
 
+	defer config.ConfigureLogger(app).Close()
+
 	// app.ConfigureContainer().
 	// 	UseResultHandler(func(next iris.ResultHandler) iris.ResultHandler {
 	// 		return func(ctx iris.Context, v interface{}) error {

@@ -50,7 +50,7 @@ func (this *GetSingleCampaignUseCase) Execute(
 
 	res := NewResponse()
 
-	err = MarshalResponseContent(input, res)
+	err = MarshalResponseContent(output, res)
 
 	// resContent, err := json.Marshal(response)
 
@@ -60,6 +60,5 @@ func (this *GetSingleCampaignUseCase) Execute(
 	}
 
 	res.Code = 200
-
 	return res, nil
 }
