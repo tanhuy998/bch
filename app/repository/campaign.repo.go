@@ -2,6 +2,7 @@ package repository
 
 import (
 	"app/domain/model"
+	libCommon "app/lib/common"
 	"context"
 
 	"github.com/google/uuid"
@@ -78,11 +79,19 @@ func (this *CampaignRepository) Delete(uuid uuid.UUID, ctx context.Context) erro
 func (this *CampaignRepository) GetCampaignList(
 	_id primitive.ObjectID,
 	pageLimit int64,
-	direction int64,
-) ([]*model.Campaign, error) {
+	isPrevDir bool,
+	ctx context.Context,
+) (data []*model.Campaign, docCount int64, err error) {
 
 	//page = this.returnPageThresholdIfOutOfRange(page)
-
+	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
 	//return getDocuments[model.Campaign](page, this.collection, nil)
-	return getDocumentsPageByID[model.Campaign](_id, pageLimit, direction, nil, this.collection, nil)
+	ret, docCount, err := getDocumentsPageByID[model.Campaign](_id, pageLimit, isPrevDir, nil, this.collection, ctx)
+
+	if err != nil {
+
+		panic(err)
+	}
+
+	return ret, docCount, nil
 }

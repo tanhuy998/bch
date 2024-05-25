@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"app/domain/model"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
@@ -10,6 +11,8 @@ import (
 )
 
 type (
+	RetrievedData_T []*model.Campaign
+
 	IGetCampaignList interface {
 		Execute(
 			input *requestPresenter.GetCampaignListRequest,
@@ -32,7 +35,7 @@ func (this *GetCampaignListUseCase) Execute(
 		return nil, common.ERR_INVALID_HTTP_INPUT
 	}
 
-	_, err := this.GetCampaignListService.Execute(input.PivotID, input.Direction, input.PageSizeLimit)
+	data, pageNumber, err := this.GetCampaignListService.Execute(input.PivotID, input.PageSizeLimit, input.IsPrev)
 
 	if err != nil {
 
@@ -41,6 +44,10 @@ func (this *GetCampaignListUseCase) Execute(
 
 	res := NewResponse()
 	output.Message = "success"
+	output.Data = data
+
+	resolveNext(output, data, pageNumber)
+	resolvePrev(output, data, pageNumber)
 
 	err = MarshalResponseContent(output, res)
 
@@ -50,4 +57,23 @@ func (this *GetCampaignListUseCase) Execute(
 	}
 
 	return res, nil
+}
+
+func resolveNext(
+	output *responsePresenter.GetCampaignListResponse,
+	retrievedData RetrievedData_T,
+	pageNumber common.PaginationPage,
+) {
+
+	lastIndex := len(retrievedData) - 1
+
+	output.Navigation.Next = retrievedData[lastIndex].ObjectID.Hex()
+}
+
+func resolvePrev(
+	output *responsePresenter.GetCampaignListResponse,
+	retrievedData RetrievedData_T,
+	pageNumber common.PaginationPage,
+) {
+
 }

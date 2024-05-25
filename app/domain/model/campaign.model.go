@@ -4,16 +4,18 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const MONGOD_CAMPAIGN_MODEL_COLLECTION = "campaigns"
 
 type Campaign struct {
-	UUID      *uuid.UUID `json:"uuid" bson:"uuid"`
-	Title     *string    `json:"title" bson:"title" validate:"required"`
-	IssueTime *time.Time `json:"issueTime" bson:"issueTime"`
-	Expire    *time.Time `json:"expire" bson:"expire" validate:"required"`
-	Version   *time.Time `json:"version" bson:"version"`
+	ObjectID  primitive.ObjectID `bson:"_id"`
+	UUID      *uuid.UUID         `json:"uuid" bson:"uuid"`
+	Title     *string            `json:"title" bson:"title" validate:"required"`
+	IssueTime *time.Time         `json:"issueTime" bson:"issueTime"`
+	Expire    *time.Time         `json:"expire" bson:"expire" validate:"required"`
+	Version   *time.Time         `json:"version" bson:"version"`
 	//Candidates []primitive.ObjectID `json:"candidate_ids" bson:"candidate_ids"`
 }
 

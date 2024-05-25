@@ -24,28 +24,28 @@ type CampaignController struct {
 	UpdateExistingCampaignUseCase usecase.IUpdateCampaign
 }
 
-func (this *CampaignController) HandleHTTPError(err mvc.Err, statusCode mvc.Code) *mvc.Response {
+// func (this *CampaignController) HandleHTTPError(err mvc.Err, statusCode mvc.Code) *mvc.Response {
 
-	var msg string
+// 	var msg string
 
-	if err != nil {
+// 	if err != nil {
 
-		msg = err.Error()
-	} else {
+// 		msg = err.Error()
+// 	} else {
 
-		msg = "error"
-	}
+// 		msg = "error"
+// 	}
 
-	res := this.ErrorResponseUseCase.NewActionResponse()
-	errOutput := &(responsePresenter.ErrorResponse{
-		Message: msg,
-	})
+// 	res := this.ErrorResponseUseCase.NewActionResponse()
+// 	errOutput := &(responsePresenter.ErrorResponse{
+// 		Message: msg,
+// 	})
 
-	res.Code = 403
-	this.ErrorResponseUseCase.MarshallOutput(errOutput, res)
+// 	res.Code = 400
+// 	this.ErrorResponseUseCase.MarshallOutput(errOutput, res)
 
-	return res
-}
+// 	return res
+// }
 
 /*
 GET /campaign/{uuid:string}?p={number}

@@ -2,6 +2,7 @@ package adminService
 
 import (
 	"app/domain/model"
+	"app/internal/common"
 	"app/repository"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -9,7 +10,7 @@ import (
 
 type (
 	IGetCampaignList interface {
-		Execute(_id string, limit int, direction int) ([]*model.Campaign, error)
+		Execute(_id string, limit int, isPrevDir bool) (data []*model.Campaign, pageNumber common.PaginationPage, err error)
 	}
 
 	AdminGetCampaignListService struct {
@@ -17,14 +18,28 @@ type (
 	}
 )
 
-func (this *AdminGetCampaignListService) Execute(_id string, limit int, direction int) ([]*model.Campaign, error) {
+func (this *AdminGetCampaignListService) Execute(
+	_id string, limit int, isPrevDir bool,
+) (data []*model.Campaign, pageNumber common.PaginationPage, err error) {
 
 	objID, err := primitive.ObjectIDFromHex(_id)
 
 	if err != nil {
 
-		return nil, err
+		objID = primitive.NilObjectID
 	}
 
-	return this.CampaignRepo.GetCampaignList(objID, int64(limit), int64(direction))
+	data, docCount, err := this.CampaignRepo.GetCampaignList(objID, int64(limit), isPrevDir, nil)
+
+	if err != nil {
+
+		return nil, 0, err
+	}
+
+	return data, calculatePageNumber(objID, docCount), nil
+}
+
+func calculatePageNumber(_id primitive.ObjectID, docCount int64) common.PaginationPage {
+
+	return common.PAGINATION_FIRST_PAGE
 }

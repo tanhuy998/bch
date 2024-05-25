@@ -4,12 +4,32 @@ import (
 	libCommon "app/lib/common"
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+const (
+	DESC                  = -1
+	ASC                   = 1
+	OP_LTE                = "$lte"
+	OP_GT                 = "$gt"
+	PAGINATION_FIRST_PAGE = 0
+	PAGINATION_LAST_PAGE  = 1
+)
+
+var (
+	empty_bson = bson.D{{}}
+)
+
+type (
+	Bson_Expression_Type interface {
+		bson.D | bson.M
+	}
 )
 
 func ParseCursor[T any](cursor *mongo.Cursor, ctx context.Context) ([]*T, error) {
@@ -20,31 +40,19 @@ func ParseCursor[T any](cursor *mongo.Cursor, ctx context.Context) ([]*T, error)
 
 	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
 
-	// for {
+	for cursor.Next(ctx) {
 
-	// 	if cursor.TryNext(ctx) {
+		var model *T = new(T)
 
-	// 		var parsedModel *T = new(T)
+		if err := cursor.Decode(model); err != nil {
 
-	// 		if err := cursor.Decode(&parsedModel); err != nil {
+			return nil, err
+		}
 
-	// 			return nil, err
-	// 		}
+		ret = append(ret, model)
+	}
 
-	// 		ret = append(ret, parsedModel)
-
-	// 		continue
-	// 	}
-
-	// 	if err := cursor.Err(); err != nil {
-
-	// 		return nil, err
-	// 	}
-	// }
-
-	// return ret, nil
-
-	if err := cursor.All(ctx, &ret); err != nil {
+	if err := cursor.Err(); err != nil {
 
 		return nil, err
 	}
@@ -74,51 +82,105 @@ func getDocuments[T any](
 	return ParseCursor[T](cursor, ctx)
 }
 
-func getDocumentsPageByID[T any](
+func getDocumentsPageByID[Model_Type any](
 	_id primitive.ObjectID,
 	pageLimit int64,
-	direction int64,
-	projection interface{},
+	isPrevDir bool,
+	projection *bson.D,
 	collection *mongo.Collection,
 	ctx context.Context,
-	extraFilters ...interface{},
-) ([]*T, error) {
+	extraFilters ...bson.E,
+) ([]*Model_Type, int64, error) {
 
-	dir_op := libCommon.Ternary(direction == 0 || direction < -1 || direction > 1, "$gt", "$lte")
+	if collection == nil {
 
-	filters := libCommon.Ternary[[]interface{}](
-		len(extraFilters) == 0,
-		make([]interface{}, 0),
-		extraFilters,
-	)
+		panic("no collection provided to retrieve data")
+	}
 
-	paginationQuery := libCommon.Ternary[bson.D](
-		_id == [12]byte{},
-		bson.D{},
-		bson.D{
-			{
-				"_id", bson.D{
-					{dir_op, _id},
-				},
-			},
-		},
-	)
+	var paginationQuery bson.D = preparePaginationQuery(_id, isPrevDir, extraFilters)
 
-	filters = append([]interface{}{paginationQuery}, filters...)
+	fmt.Println(paginationQuery)
 
 	option := options.Find()
-	option.Sort = bson.D{{"_id", -1}}
+	option.Sort = bson.D{{"_id", DESC}}
 	option.Limit = &pageLimit
-	option.Projection = projection
 
-	cursor, err := collection.Find(ctx, filters, option)
+	if projection != nil {
+
+		option.Projection = projection
+	}
+
+	cursor, err := collection.Find(ctx, paginationQuery, option)
 
 	if err != nil {
 
-		return nil, err
+		return nil, 0, err
 	}
 
-	return ParseCursor[T](cursor, context.TODO())
+	data, err := ParseCursor[Model_Type](cursor, context.TODO())
+
+	if err != nil {
+
+		return nil, 0, err
+	}
+
+	docCount, err := collection.CountDocuments(ctx, extraFilters)
+
+	if err != nil {
+
+		return nil, 0, err
+	}
+
+	return data, docCount, nil
+}
+
+func preparePaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters []bson.E) bson.D {
+
+	dir_op := libCommon.Ternary(isPrevDir, OP_LTE, OP_GT)
+
+	//var paginationQuery bson.D
+
+	if _id.IsZero() {
+
+		//paginationQuery = extraFilters
+
+		return bson.D(extraFilters)
+	}
+	// } else {
+
+	// 	// paginationQuery = bson.D{
+	// 	// 	{
+	// 	// 		"_id", bson.D{
+	// 	// 			{dir_op, _id},
+	// 	// 		},
+	// 	// 	},
+	// 	// }
+
+	// 	// pivotQuery := bson.D{
+	// 	// 	{
+	// 	// 		"_id", bson.D{
+	// 	// 			{dir_op, _id},
+	// 	// 		},
+	// 	// 	},
+	// 	// }
+
+	// 	//paginationQuery = append(pivotQuery, extraFilters...)
+	// }
+
+	// if len(extraFilters) > 0 {
+
+	// 	paginationQuery = append(paginationQuery, extraFilters...)
+	// }
+
+	//return paginationQuery
+
+	return append(bson.D{
+		{
+			"_id", bson.D{
+				{dir_op, _id},
+			},
+		},
+	}, extraFilters...)
 }
 
 func findDocumentByUUID[T any](uuid uuid.UUID, collection *mongo.Collection, ctx context.Context) (*T, error) {
@@ -188,4 +250,14 @@ func deleteDocument(uuid uuid.UUID, collection *mongo.Collection, ctx context.Co
 	}
 
 	return nil
+}
+
+func count(collection *mongo.Collection, ctx context.Context, filter ...bson.E) (int64, error) {
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	return collection.CountDocuments(ctx, filter)
 }

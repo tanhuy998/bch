@@ -28,7 +28,7 @@ type (
 		Get(page int, ctx context.Context) ([]*model.Campaign, error)
 		GetPendingCampaigns(page int, ctx context.Context) ([]*model.Campaign, error)
 
-		GetCampaignList(id primitive.ObjectID, pageLimit int64, direction int64) ([]*model.Campaign, error)
+		GetCampaignList(id primitive.ObjectID, pageLimit int64, direction bool, ctx context.Context) (data []*model.Campaign, docCount int64, err error)
 		Create(*model.Campaign, context.Context) error
 		//CreateMany([]*model.Campaign) error
 		Update(*model.Campaign, context.Context) error
