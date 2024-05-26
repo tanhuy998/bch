@@ -80,6 +80,12 @@ func main() {
 	// 		}
 	// 	})
 
+	// app.Use(versioning.Aliases(versioning.AliasMap{
+	// 	versioning.Empty: "1.0.0",
+	// }))
+
+	// v1 := versioning.NewGroup(app, ">=1.0.1 <2.0.0")
+
 	config.InitializeDatabase(app)
 	config.RegisterServices(app)
 

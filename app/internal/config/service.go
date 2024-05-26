@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/hero"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -22,7 +23,7 @@ const (
 	REQUEST_BODY = "request_body"
 )
 
-func InitializeDatabase(app *iris.Application) {
+func InitializeDatabase(app router.Party) {
 
 	var container *hero.Container = app.ConfigureContainer().Container
 
@@ -60,7 +61,7 @@ func InitializeDatabase(app *iris.Application) {
 	fmt.Println("Repositories Initialized.")
 }
 
-func RegisterServices(app *iris.Application) {
+func RegisterServices(app router.Party) {
 
 	var container *hero.Container = app.ConfigureContainer().EnableStructDependents().Container
 
