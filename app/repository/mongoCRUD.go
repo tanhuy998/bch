@@ -4,13 +4,14 @@ import (
 	libCommon "app/lib/common"
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readconcern"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
 const (
@@ -18,6 +19,7 @@ const (
 	ASC                   = 1
 	OP_LTE                = "$lte"
 	OP_GT                 = "$gt"
+	OP_GTE                = "$gte"
 	PAGINATION_FIRST_PAGE = 0
 	PAGINATION_LAST_PAGE  = 1
 )
@@ -90,48 +92,94 @@ func getDocumentsPageByID[Model_Type any](
 	collection *mongo.Collection,
 	ctx context.Context,
 	extraFilters ...bson.E,
-) ([]*Model_Type, int64, error) {
+) (*PaginationPack[Model_Type], error) {
 
 	if collection == nil {
 
 		panic("no collection provided to retrieve data")
 	}
 
-	var paginationQuery bson.D = preparePaginationQuery(_id, isPrevDir, extraFilters)
-
-	fmt.Println(paginationQuery)
-
-	option := options.Find()
-	option.Sort = bson.D{{"_id", DESC}}
-	option.Limit = &pageLimit
-
-	if projection != nil {
-
-		option.Projection = projection
-	}
-
-	cursor, err := collection.Find(ctx, paginationQuery, option)
+	session, err := collection.Database().Client().StartSession()
 
 	if err != nil {
 
-		return nil, 0, err
+		return nil, err
 	}
+	defer session.EndSession(ctx)
 
-	data, err := ParseCursor[Model_Type](cursor, context.TODO())
+	writeConcern := writeconcern.Majority()
+	readConcern := readconcern.Snapshot()
+	transactionOpts := options.Transaction().SetWriteConcern(writeConcern).SetReadConcern(readConcern)
+
+	pack, err := session.WithTransaction(
+		ctx,
+		func(mongo.SessionContext) (interface{}, error) {
+
+			var paginationQuery bson.D = preparePaginationQuery(_id, isPrevDir, extraFilters)
+
+			option := options.Find()
+			option.Sort = bson.D{{"_id", DESC}}
+			option.Limit = &pageLimit
+
+			if projection != nil {
+
+				option.Projection = projection
+			}
+
+			cursor, err := collection.Find(ctx, paginationQuery, option)
+
+			if err != nil {
+
+				return nil, err
+			}
+
+			data, err := ParseCursor[Model_Type](cursor, context.TODO())
+
+			if err != nil {
+
+				return nil, err
+			}
+
+			docCount, err := collection.CountDocuments(ctx, libCommon.Ternary(len(extraFilters) == 0, empty_bson, extraFilters))
+
+			if err != nil {
+
+				return nil, err
+			}
+
+			dataPack := PaginationPack[Model_Type]{
+				Data:  data,
+				Count: docCount,
+			}
+
+			return dataPack, nil
+		},
+		transactionOpts,
+	)
 
 	if err != nil {
 
-		return nil, 0, err
+		return nil, err
 	}
 
-	docCount, err := collection.CountDocuments(ctx, extraFilters)
+	if packActualVal, ok := pack.(PaginationPack[Model_Type]); ok {
+
+		return &packActualVal, nil
+	}
+
+	return nil, errors.New("error while unpacking pagination data")
+}
+
+func initDBTransaction(client *mongo.Client) (*mongo.Session, error) {
+
+	session, err := client.StartSession()
 
 	if err != nil {
 
-		return nil, 0, err
+		return nil, err
 	}
 
-	return data, docCount, nil
+	return &session, nil
 }
 
 func preparePaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters []bson.E) bson.D {

@@ -23,12 +23,16 @@ type (
 		Init(*mongo.Database)
 	}
 
+	PaginationPack[Model_T any] struct {
+		Data  []*Model_T
+		Count int64
+	}
+
 	ICampaignRepository interface {
 		FindByUUID(uuid.UUID, context.Context) (*model.Campaign, error)
 		Get(page int, ctx context.Context) ([]*model.Campaign, error)
-		GetPendingCampaigns(page int, ctx context.Context) ([]*model.Campaign, error)
-
-		GetCampaignList(id primitive.ObjectID, pageLimit int64, direction bool, ctx context.Context) (data []*model.Campaign, docCount int64, err error)
+		GetPendingCampaigns(id primitive.ObjectID, pageLimit int64, direction bool, ctx context.Context) (data *PaginationPack[model.Campaign], err error)
+		GetCampaignList(id primitive.ObjectID, pageLimit int64, direction bool, ctx context.Context) (data *PaginationPack[model.Campaign], err error)
 		Create(*model.Campaign, context.Context) error
 		//CreateMany([]*model.Campaign) error
 		Update(*model.Campaign, context.Context) error

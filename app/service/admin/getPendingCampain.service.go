@@ -3,11 +3,13 @@ package adminService
 import (
 	"app/domain/model"
 	"app/repository"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
 	IGetPendingCampaigns interface {
-		Execute(page int) ([]*model.Campaign, error)
+		Serve(_id string, limit int, isPrevDir bool) (*repository.PaginationPack[model.Campaign], error)
 	}
 
 	AdminGetPendingCampaigns struct {
@@ -15,7 +17,23 @@ type (
 	}
 )
 
-func (this *AdminGetPendingCampaigns) Execute(page int) ([]*model.Campaign, error) {
+func (this *AdminGetPendingCampaigns) Serve(
+	_id string, limit int, isPrevDir bool,
+) (*repository.PaginationPack[model.Campaign], error) {
 
-	return this.CampaignRepo.GetPendingCampaigns(page, nil)
+	objID, err := primitive.ObjectIDFromHex(_id)
+
+	if err != nil {
+
+		objID = primitive.NilObjectID
+	}
+
+	data, err := this.CampaignRepo.GetPendingCampaigns(objID, int64(limit), isPrevDir, nil)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return data, nil
 }

@@ -30,6 +30,7 @@ func BindDependency[AbstractType any, ConcreteType any](
 	dep := container.Register(concreteVal)
 	dep.DestType = abstractType
 	dep.StructDependents = autowireField
+	dep.Explicitly()
 
 	return dep
 }

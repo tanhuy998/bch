@@ -5,13 +5,14 @@ import (
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
+	"app/repository"
 	adminService "app/service/admin"
 
 	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
-	RetrievedData_T []*model.Campaign
+	RetrievedData_T = repository.PaginationPack[model.Campaign]
 
 	IGetCampaignList interface {
 		Execute(
@@ -35,19 +36,21 @@ func (this *GetCampaignListUseCase) Execute(
 		return nil, common.ERR_INVALID_HTTP_INPUT
 	}
 
-	data, pageNumber, err := this.GetCampaignListService.Execute(input.PivotID, input.PageSizeLimit, input.IsPrev)
+	dataPack, err := this.GetCampaignListService.Serve(input.PivotID, input.PageSizeLimit, input.IsPrev)
 
 	if err != nil {
 
 		return nil, err
 	}
 
+	pageNumber := common.PaginationPage(1)
+
 	res := NewResponse()
 	output.Message = "success"
-	output.Data = data
+	output.Data = dataPack.Data
 
-	resolveNext(output, data, pageNumber)
-	resolvePrev(output, data, pageNumber)
+	resolveNext(output, dataPack, pageNumber)
+	resolvePrev(output, dataPack, pageNumber)
 
 	err = MarshalResponseContent(output, res)
 
@@ -61,18 +64,23 @@ func (this *GetCampaignListUseCase) Execute(
 
 func resolveNext(
 	output *responsePresenter.GetCampaignListResponse,
-	retrievedData RetrievedData_T,
+	dataPack *RetrievedData_T,
 	pageNumber common.PaginationPage,
 ) {
 
-	lastIndex := len(retrievedData) - 1
+	lastIndex := len(dataPack.Data) - 1
 
-	output.Navigation.Next = retrievedData[lastIndex].ObjectID.Hex()
+	if lastIndex <= 0 {
+
+		return
+	}
+
+	output.Navigation.Next = dataPack.Data[lastIndex].ObjectID.Hex()
 }
 
 func resolvePrev(
 	output *responsePresenter.GetCampaignListResponse,
-	retrievedData RetrievedData_T,
+	retrievedData *RetrievedData_T,
 	pageNumber common.PaginationPage,
 ) {
 

@@ -32,7 +32,7 @@ func (this *GetPendingCampaignsUseCase) Execute(
 		return nil, common.ERR_INVALID_HTTP_INPUT
 	}
 
-	_, err := this.GetPendingCampaignsService.Execute(input.PageNumber)
+	_, err := this.GetPendingCampaignsService.Serve(input.PivotID, input.PageSizeLimit, input.IsPrev)
 
 	if err != nil {
 

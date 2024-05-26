@@ -10,7 +10,7 @@ import (
 
 type (
 	IGetCampaignList interface {
-		Execute(_id string, limit int, isPrevDir bool) (data []*model.Campaign, pageNumber common.PaginationPage, err error)
+		Serve(_id string, limit int, isPrevDir bool) (data *repository.PaginationPack[model.Campaign], err error)
 	}
 
 	AdminGetCampaignListService struct {
@@ -18,9 +18,9 @@ type (
 	}
 )
 
-func (this *AdminGetCampaignListService) Execute(
+func (this *AdminGetCampaignListService) Serve(
 	_id string, limit int, isPrevDir bool,
-) (data []*model.Campaign, pageNumber common.PaginationPage, err error) {
+) (data *repository.PaginationPack[model.Campaign], err error) {
 
 	objID, err := primitive.ObjectIDFromHex(_id)
 
@@ -29,14 +29,14 @@ func (this *AdminGetCampaignListService) Execute(
 		objID = primitive.NilObjectID
 	}
 
-	data, docCount, err := this.CampaignRepo.GetCampaignList(objID, int64(limit), isPrevDir, nil)
+	data, err = this.CampaignRepo.GetCampaignList(objID, int64(limit), isPrevDir, nil)
 
 	if err != nil {
 
-		return nil, 0, err
+		return nil, err
 	}
 
-	return data, calculatePageNumber(objID, docCount), nil
+	return data, nil
 }
 
 func calculatePageNumber(_id primitive.ObjectID, docCount int64) common.PaginationPage {
