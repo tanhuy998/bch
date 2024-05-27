@@ -9,7 +9,7 @@ import (
 
 type (
 	IGetCampaign interface {
-		Execute(uuid string) (*model.Campaign, error)
+		Serve(uuid string) (*model.Campaign, error)
 	}
 
 	AdminGetCampaignService struct {
@@ -17,7 +17,7 @@ type (
 	}
 )
 
-func (this *AdminGetCampaignService) Execute(inputUUID string) (*model.Campaign, error) {
+func (this *AdminGetCampaignService) Serve(inputUUID string) (*model.Campaign, error) {
 
 	uuid, err := uuid.Parse(inputUUID)
 

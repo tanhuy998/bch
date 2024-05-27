@@ -28,9 +28,10 @@ func (this *DeleteCampaignUseCase) Execute(
 
 	var (
 		uuid string = input.UUID
+		err  error
 	)
 
-	err := this.DeleteCampaignService.Execute(uuid)
+	err = this.DeleteCampaignService.Execute(uuid)
 
 	if err != nil {
 

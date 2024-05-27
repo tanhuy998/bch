@@ -90,16 +90,16 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 			).SetName("LAUNCH_NEW_CAMPAIGN")
 
 			activator.Handle(
-				"PATCH", "/{uuid:string}", "UpdateCampaign",
+				"PATCH", "/{uuid:uuid}", "UpdateCampaign",
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: campaignField,
-					//Groups: []authService.AuthorizationGroup{auth_commander_group},
+					Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
 				middleware.BindRequest[requestPresenter.UpdateCampaignRequest](),
 			).SetName("UPDATE_CAMPAIGN")
 
 			activator.Handle(
-				"DELETE", "/{uuid:string}", "DeleteCampaign",
+				"DELETE", "/{uuid:uuid}", "DeleteCampaign",
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: campaignField,
 					Claims: []authService.AuthorizationClaim{auth_post_claim},
@@ -107,6 +107,15 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 				}),
 				middleware.BindRequest[requestPresenter.DeleteCampaignRequest](),
 			).SetName("DELETE_CAMPAIGN")
+
+			activator.Handle(
+				"PATCH", "/test/{uuid:uuid}", "TestPatch",
+				middleware.Authorize(authService.AuthorizationLicense{
+					Fields: campaignField,
+					Groups: []authService.AuthorizationGroup{auth_commander_group},
+				}),
+				middleware.BindRequest[requestPresenter.UpdateCampaignRequest](),
+			)
 		}),
 	)
 }

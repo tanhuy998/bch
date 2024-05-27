@@ -9,7 +9,7 @@ import (
 
 type (
 	IModifyExistingCampaign interface {
-		Execute(string, *model.Campaign) error
+		Serve(string, *model.Campaign) error
 	}
 
 	AdminModifyExistingCampaign struct {
@@ -17,7 +17,7 @@ type (
 	}
 )
 
-func (this *AdminModifyExistingCampaign) Execute(inputUUID string, model *model.Campaign) error {
+func (this *AdminModifyExistingCampaign) Serve(inputUUID string, model *model.Campaign) error {
 
 	uuid, err := uuid.Parse(inputUUID)
 

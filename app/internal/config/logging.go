@@ -3,11 +3,11 @@ package config
 import (
 	"os"
 
-	"github.com/kataras/iris/v12/core/router"
+	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/accesslog"
 )
 
-func ConfigureLogger(app router.Party) *accesslog.AccessLog {
+func ConfigureLogger(app *iris.Application) *accesslog.AccessLog {
 
 	ac := accesslog.New(os.Stdout)
 	ac.RequestBody = true

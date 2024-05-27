@@ -7,6 +7,7 @@ import (
 	"app/internal/common"
 	libCommon "app/lib/common"
 	adminService "app/service/admin"
+	"errors"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -17,7 +18,8 @@ type (
 	}
 
 	UpdateCampaignUseCase struct {
-		ModifyCampaignService adminService.IModifyExistingCampaign
+		GetSingleCampaignService adminService.IGetCampaign
+		ModifyCampaignService    adminService.IModifyExistingCampaign
 	}
 )
 
@@ -27,16 +29,28 @@ func (this *UpdateCampaignUseCase) Execute(
 ) (mvc.Result, error) {
 
 	var (
-		uuid       string          = input.UUID
-		inputModel *model.Campaign = input.Data
+		uuid            string          = input.UUID
+		campaignUpdated *model.Campaign = new(model.Campaign)
 	)
+
+	inputModel := input.Data
 
 	if libCommon.Or(uuid == "", inputModel == nil) {
 
 		return nil, common.ERR_INVALID_HTTP_INPUT
 	}
 
-	err := this.ModifyCampaignService.Execute(uuid, inputModel)
+	targetCampaingn, err := this.GetSingleCampaignService.Serve(uuid)
+
+	if err != nil || targetCampaingn == nil {
+
+		return nil, errors.New("not found")
+	}
+
+	campaignUpdated.Title = libCommon.Ternary(inputModel.Title != nil || *inputModel.Title != "", inputModel.Title, nil)
+	campaignUpdated.Expire = inputModel.Expire
+
+	err = this.ModifyCampaignService.Serve(uuid, campaignUpdated)
 
 	if err != nil {
 

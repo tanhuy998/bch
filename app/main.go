@@ -5,9 +5,10 @@ import (
 	"app/internal/api"
 	"app/internal/bootstrap"
 	"app/internal/config"
+	"os"
+	"path"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/gofor-little/env"
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
@@ -18,23 +19,20 @@ const (
 )
 
 var (
-	HOSTNAMES []string
+	host_names           []string
+	cors_allowed_methods []string = []string{
+		"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"}
+	server_ssl_cert string
+	server_ssl_key  string
 )
 
 func init() {
 
-	// cwd, err := os.Getwd()
-
-	// if err != nil {
-
-	// 	panic(err)
-	// }
-
-	// env.Load(filepath.Join(cwd, ".env"))
+	readSSlCert()
 
 	godotenv.Load()
 
-	HOSTNAMES = bootstrap.RetrieveCORSHosts()
+	host_names = bootstrap.RetrieveCORSHosts()
 
 	err := db.CheckDBConnection()
 
@@ -52,10 +50,22 @@ func main() {
 
 	app.Validator = validator.New()
 
+	// app.UseGlobal(func(ctx iris.Context) {
+
+	// 	fmt.Println(ctx.Method(), ctx.RequestPath(false))
+
+	// 	ctx.Next()
+	// })
+
+	// app.WrapRouter(methodoverride.New(
+	// 	methodoverride.SaveOriginalMethod("_originalMethod"),
+	// ))
+
 	//app.UseGlobal(middleware.RedirectInternalError())
 	app.UseRouter(
 		cors.New(cors.Options{
-			AllowedOrigins:   HOSTNAMES,
+			AllowedOrigins:   host_names,
+			AllowedMethods:   cors_allowed_methods,
 			AllowCredentials: true,
 		}),
 	)
@@ -72,7 +82,7 @@ func main() {
 	// 				return next(ctx, val)
 	// 			case *mvc.Response:
 	// 				fmt.Println("err res")
-	// 				return next(ctx, val)
+	// 				return next(ctx, val)"_originalMethod"
 	// 			default:
 	// 				fmt.Println(reflect.TypeOf(val).String())
 	// 				return next(ctx, val)
@@ -93,57 +103,47 @@ func main() {
 	// registerDependencies(app)
 
 	api.Init(app)
-	app.Listen(
-		env.Get("HTTP_PORT", ":80"),
+
+	app.Run(
+		iris.TLS(
+			os.Getenv("HTTP_PORT"),
+			server_ssl_cert,
+			server_ssl_key,
+		),
 		iris.WithoutBodyConsumptionOnUnmarshal,
 		iris.WithOptimizations,
 	)
+
+	// app.Listen(
+	// 	env.Get("HTTP_PORT", ":80"),
+	// 	iris.WithoutBodyConsumptionOnUnmarshal,
+	// 	iris.WithOptimizations,
+	// )
 }
 
-// func registerDependencies(app *iris.Application) {
+func readSSlCert() {
+	__dir, err := os.Getwd()
 
-// 	var container *hero.Container = app.ConfigureContainer().Container
+	if err != nil {
 
-// 	container.Register(loadDbClient())
-// 	container.Register(db.GetDB())
+		panic(err)
+	}
 
-// 	app.RegisterDependency(loadDbClient())
-// 	// app.RegisterDependency(db.GetDB())
-// }
+	d, err := os.ReadFile(path.Join(__dir, "cert.pem"))
 
-// func registerServices(app *iris.Application) {
+	if err != nil {
 
-// 	//app.RegisterDependency(initAuthService())
+		panic(err)
+	}
 
-// 	var container *hero.Container = app.ConfigureContainer().Container
+	server_ssl_cert = string(d)
 
-// 	// container.Register(func(auth *authService.AuthenticateService) authService.IAuthService {
+	d, err = os.ReadFile(path.Join(__dir, "key.pem"))
 
-// 	// 	return auth
-// 	// })
+	if err != nil {
 
-// 	auth := new(authService.AuthenticateService)
-// 	Dep := container.Register(auth)
-// 	Dep.DestType = libCommon.Wrap[authService.IAuthService]()
+		panic(err)
+	}
 
-// }
-
-// // func initAuthService() *authService.AuthenticateService {
-
-// // 	s := new(authService.AuthenticateService)
-// // 	//s.SetDB(db.GetDB())
-
-// // 	return s
-// // }
-
-// func loadDbClient() *mongo.Client {
-
-// 	client, err := db.GetClient()
-
-// 	if err != nil {
-
-// 		panic(err)
-// 	}
-
-// 	return client
-// }
+	server_ssl_key = string(d)
+}

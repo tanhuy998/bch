@@ -59,6 +59,13 @@ func (this *CampaignController) GetCampaign(
 	return this.GetSingleCampaignUseCase.Execute(input, output)
 }
 
+func (this *CampaignController) TestPatch(
+	input *requestPresenter.UpdateCampaignRequest,
+) string {
+
+	return "true"
+}
+
 func (this *CampaignController) GetCampaignListOnPage(
 	input *requestPresenter.GetCampaignListRequest,
 	output *responsePresenter.GetCampaignListResponse,

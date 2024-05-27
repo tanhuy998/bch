@@ -3,6 +3,7 @@ package middleware
 import (
 	requestPresenter "app/domain/presenter/request"
 	libError "app/lib/error"
+	"fmt"
 	"io"
 
 	"github.com/kataras/iris/v12"
@@ -40,16 +41,16 @@ func BindRequest[RequestPresenter_T any]() iris.Handler {
 }
 
 func bindDefault[RequestPresenter_T any](presenter *RequestPresenter_T, ctx iris.Context) error {
-
-	err := ctx.ReadQuery(presenter)
-
+	fmt.Println((ctx.Params().Len()), ctx.Params())
+	err := ctx.ReadParams(presenter)
+	fmt.Println("a")
 	if err != nil {
 
 		return err
 	}
 
-	err = ctx.ReadParams(presenter)
-
+	err = ctx.ReadQuery(presenter)
+	fmt.Println("b")
 	if err != nil {
 
 		return err
@@ -58,6 +59,6 @@ func bindDefault[RequestPresenter_T any](presenter *RequestPresenter_T, ctx iris
 	err = ctx.ReadJSON(presenter, context.JSONReader{
 		DisallowUnknownFields: true,
 	})
-
+	fmt.Println("c", err)
 	return err
 }

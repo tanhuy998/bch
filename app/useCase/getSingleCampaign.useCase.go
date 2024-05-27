@@ -33,7 +33,7 @@ func (this *GetSingleCampaignUseCase) Execute(
 		return nil, common.ERR_INVALID_HTTP_INPUT
 	}
 
-	data, err := this.GetSingleCampaignService.Execute(input.UUID)
+	data, err := this.GetSingleCampaignService.Serve(input.UUID)
 
 	if err != nil {
 

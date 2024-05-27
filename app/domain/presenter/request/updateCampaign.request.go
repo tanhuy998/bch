@@ -1,8 +1,13 @@
 package requestPresenter
 
-import "app/domain/model"
+import "time"
+
+type UpdatedCampaignData struct {
+	Title  *string    `json:"title" validate:"required_without_all"`
+	Expire *time.Time `json:"expire" validate:"required_without_all"`
+}
 
 type UpdateCampaignRequest struct {
-	UUID string          `json:"uuid" param:"uuid"`
-	Data *model.Campaign `json:"data"`
+	UUID string               `param:"uuid" validate:"required"`
+	Data *UpdatedCampaignData `json:"data" validate:"required"`
 }
