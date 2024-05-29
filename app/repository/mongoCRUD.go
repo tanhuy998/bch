@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	DESC                  = -1
-	ASC                   = 1
+	SORT_DESC             = -1
+	SORT_ASC              = 1
 	OP_LTE                = "$lte"
 	OP_GT                 = "$gt"
 	OP_GTE                = "$gte"
@@ -118,7 +118,7 @@ func getDocumentsPageByID[Model_Type any](
 			var paginationQuery bson.D = preparePaginationQuery(_id, isPrevDir, extraFilters)
 
 			option := options.Find()
-			option.Sort = bson.D{{"_id", DESC}}
+			option.Sort = bson.D{{"_id", SORT_DESC}}
 			option.Limit = &pageLimit
 
 			if projection != nil {
@@ -186,41 +186,13 @@ func preparePaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters
 
 	dir_op := libCommon.Ternary(isPrevDir, OP_LTE, OP_GT)
 
-	//var paginationQuery bson.D
-
 	if _id.IsZero() {
 
 		//paginationQuery = extraFilters
+		extraFilters = libCommon.Ternary(len(extraFilters) == 0, empty_bson, extraFilters)
 
 		return bson.D(extraFilters)
 	}
-	// } else {
-
-	// 	// paginationQuery = bson.D{
-	// 	// 	{
-	// 	// 		"_id", bson.D{
-	// 	// 			{dir_op, _id},
-	// 	// 		},
-	// 	// 	},
-	// 	// }
-
-	// 	// pivotQuery := bson.D{
-	// 	// 	{
-	// 	// 		"_id", bson.D{
-	// 	// 			{dir_op, _id},
-	// 	// 		},
-	// 	// 	},
-	// 	// }
-
-	// 	//paginationQuery = append(pivotQuery, extraFilters...)
-	// }
-
-	// if len(extraFilters) > 0 {
-
-	// 	paginationQuery = append(paginationQuery, extraFilters...)
-	// }
-
-	//return paginationQuery
 
 	return append(bson.D{
 		{
