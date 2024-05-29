@@ -1,6 +1,8 @@
 package api
 
 import (
+	requestPresenter "app/domain/presenter/request"
+	responsePresenter "app/domain/presenter/response"
 	"app/internal/controller"
 	"app/internal/middleware"
 	authService "app/service/auth"
@@ -13,12 +15,12 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 
 	router := app.Party("/candidates")
 
-	router.ConfigureContainer(func(api *iris.APIContainer) {
+	container := router.ConfigureContainer(func(api *iris.APIContainer) {
 		/*
 			for dependencies injection
 		*/
 		api.Use(middleware.Authentication())
-	})
+	}).Container
 
 	wrapper := mvc.New(router)
 	return wrapper.Handle(
@@ -32,7 +34,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 				Get Candidate list in pagination form of a specific campaign
 			*/
 			activator.Handle(
-				"GET", "/campaign/{uuid:string}", "GetCandidateByPage",
+				"GET", "/campaign/{campaignUUID}", "GetCampaignCandidateList",
 				middleware.Authorize(
 					authService.AuthorizationLicense{
 						Fields: candidateField,
@@ -43,6 +45,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 						Claims: []authService.AuthorizationClaim{auth_get_claim},
 					},
 				),
+				middleware.BindPresenters[requestPresenter.GetCampaignCandidateListRequest, responsePresenter.GetCampaignCandidateListResponse](container),
 			)
 
 			/*
@@ -60,7 +63,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 				Get a specific candidate by uuid
 			*/
 			activator.Handle(
-				"GET", "/{uuid:string}", "GetCandidate",
+				"GET", "/{uuid}", "GetCandidate",
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: candidateField,
 					Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
@@ -71,7 +74,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 				Post a candidate to a specific campaign
 			*/
 			activator.Handle(
-				"POST", "/campaign/{uuid:string}", "PostCandidate",
+				"POST", "/campaign/{uuid}", "PostCandidate",
 				middleware.Authorize(
 					authService.AuthorizationLicense{
 						Fields: candidateField,
@@ -90,7 +93,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 				Update information of a candidate
 			*/
 			activator.Handle(
-				"PATCH", "/{uuid:string}", "UpdateCandidate",
+				"PATCH", "/{uuid}", "UpdateCandidate",
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: candidateField,
 					Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
@@ -99,7 +102,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 			)
 
 			activator.Handle(
-				"PATCH", "/detail/{uuid:string}", "UpdateCandidateDetailInfo",
+				"PATCH", "/detail/{uuid}", "UpdateCandidateDetailInfo",
 				middleware.Authorize(
 					authService.AuthorizationLicense{
 						Fields: candidateField,
@@ -112,7 +115,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 				Delete a
 			*/
 			activator.Handle(
-				"DELETE", "/{uuid:string}", "DeleteCandidate",
+				"DELETE", "/{uuid}", "DeleteCandidate",
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: candidateField,
 					//Groups: []authService.AuthorizationGroup{auth_commander_group},

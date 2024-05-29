@@ -7,8 +7,6 @@ import (
 )
 
 type CandidateSigningInfo struct {
-	IModel
-	Model
 	//UUID       uuid.UUID       `json:"uuid" bson:"uuid" validate:"required"`
 	Identitity CitizenIdentity `json:"civilIdentity" bson:"civilIdentity" validate:"required"`
 	Job        *string         `json:"job" bson:"job"`

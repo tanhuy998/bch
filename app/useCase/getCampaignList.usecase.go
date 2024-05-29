@@ -49,8 +49,12 @@ func (this *GetCampaignListUseCase) Execute(
 	output.Message = "success"
 	output.Data = dataPack.Data
 
-	resolveNext(output, dataPack, pageNumber)
-	resolvePrev(output, dataPack, pageNumber)
+	err = preparePaginationNavigation[model.Campaign](output, dataPack, pageNumber)
+
+	if err != nil {
+
+		return nil, err
+	}
 
 	err = MarshalResponseContent(output, res)
 
@@ -60,28 +64,4 @@ func (this *GetCampaignListUseCase) Execute(
 	}
 
 	return res, nil
-}
-
-func resolveNext(
-	output *responsePresenter.GetCampaignListResponse,
-	dataPack *RetrievedData_T,
-	pageNumber common.PaginationPage,
-) {
-
-	lastIndex := len(dataPack.Data) - 1
-
-	if lastIndex <= 0 {
-
-		return
-	}
-
-	output.Navigation.Next = dataPack.Data[lastIndex].ObjectID.Hex()
-}
-
-func resolvePrev(
-	output *responsePresenter.GetCampaignListResponse,
-	retrievedData *RetrievedData_T,
-	pageNumber common.PaginationPage,
-) {
-
 }

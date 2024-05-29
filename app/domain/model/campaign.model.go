@@ -19,6 +19,11 @@ type Campaign struct {
 	//Candidates []primitive.ObjectID `json:"candidate_ids" bson:"candidate_ids"`
 }
 
+func (this *Campaign) GetObjectID() *primitive.ObjectID {
+
+	return this.ObjectID
+}
+
 // func (this *Campaign) CollectionName() string {
 
 // 	return MONGOD_CAMPAIGN_MODEL_COLLECTION

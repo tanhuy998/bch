@@ -2,13 +2,13 @@ package responsePresenter
 
 import "app/domain/model"
 
-type GetPendingCampaingsResponse struct {
+type GetCampaignCandidateListResponse struct {
 	Message    string               `json:"message"`
-	Data       []*model.Campaign    `json:"data"`
+	Data       []*model.Candidate   `json:"data"`
 	Navigation PaginationNavigation `json:"navigation"`
 }
 
-func (this *GetPendingCampaingsResponse) GetNavigation() *PaginationNavigation {
+func (this *GetCampaignCandidateListResponse) GetNavigation() *PaginationNavigation {
 
 	return &this.Navigation
 }

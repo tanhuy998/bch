@@ -9,9 +9,10 @@ import (
 )
 
 type CandidateController struct {
-	AddNewCandidateUseCase usecase.IAddNewCandidate
-	ModifyCandidateUseCase usecase.IModifyCandidate
-	DeleteCandidateUseCase usecase.IDeleteCandidate
+	AddNewCandidateUseCase          usecase.IAddNewCandidate
+	ModifyCandidateUseCase          usecase.IModifyCandidate
+	DeleteCandidateUseCase          usecase.IDeleteCandidate
+	GetCampaignCandidateListUseCase usecase.IGetCampaignCandidateList
 }
 
 func (this *CandidateController) GetCandidate() {
@@ -46,8 +47,12 @@ func (this *CandidateController) DeleteCandidate(
 	return this.DeleteCandidateUseCase.Execute(input, output)
 }
 
-func (this *CandidateController) GetCandidateByPage() {
+func (this *CandidateController) GetCampaignCandidateList(
+	input *requestPresenter.GetCampaignCandidateListRequest,
+	output *responsePresenter.GetCampaignCandidateListResponse,
+) (mvc.Result, error) {
 
+	return this.GetCampaignCandidateListUseCase.Execute(input, output)
 }
 
 func (this *CandidateController) SearchByInformation() {

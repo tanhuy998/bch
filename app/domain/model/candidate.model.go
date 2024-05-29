@@ -4,11 +4,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Candidate struct {
-	IModel
-	Model
+	ObjectID    *primitive.ObjectID   `bson:"_id,omitempty"`
 	UUID        *uuid.UUID            `json:"uuid" bson:"uuid,omitempty" validate:"required"`
 	Name        *string               `json:"name" bson:"name,omitempty" validate:"required"`
 	IDNumber    *string               `json:"idNumber" bson:"idNumber,omitempty" validate:"required, len=12"`
@@ -16,4 +16,9 @@ type Candidate struct {
 	SigningInfo *CandidateSigningInfo `json:"signingInfo" bson:"signingInfo,omitempty"`
 	CampaignID  *uuid.UUID            `json:"campaignID" bson:"campaignID,omitempty"`
 	Version     *time.Time            `json:"version" bson:"version,omitempty"`
+}
+
+func (this *Candidate) GetObjectID() *primitive.ObjectID {
+
+	return this.ObjectID
 }

@@ -11,3 +11,8 @@ type (
 		Navigation PaginationNavigation `json:"navigation"`
 	}
 )
+
+func (this *GetCampaignListResponse) GetNavigation() *PaginationNavigation {
+
+	return &this.Navigation
+}
