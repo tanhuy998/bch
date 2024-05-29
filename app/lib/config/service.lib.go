@@ -58,10 +58,17 @@ func BindAndMapDependencyToContext[AbstractType any, ConcreteType any](
 	dep := container.Register(func(ctx iris.Context) AbstractType {
 
 		ctx.Values().Set(contextKey, concreteVal)
-
 		return mappedObj
 	})
+
+	container.Handler(func(dep AbstractType) AbstractType {
+
+		return dep
+	})
+
 	dep.StructDependents = autowireField
+	dep.DestType = aType
+	//dep.Explicitly()
 
 	return dep
 }

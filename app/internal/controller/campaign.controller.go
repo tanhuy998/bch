@@ -63,6 +63,7 @@ func (this *CampaignController) TestPatch(
 	input *requestPresenter.UpdateCampaignRequest,
 ) string {
 
+	//fmt.Println(input)
 	return "true"
 }
 

@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
@@ -48,7 +47,7 @@ func main() {
 
 	var app *iris.Application = iris.New()
 
-	app.Validator = validator.New()
+	//app.Validator = validator.New()
 
 	// app.UseGlobal(func(ctx iris.Context) {
 

@@ -4,7 +4,7 @@ func IsAcceptable(target error, exceptions ...error) bool {
 
 	if target == nil {
 
-		return false
+		return true
 	}
 
 	for _, exceptErr := range exceptions {

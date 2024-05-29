@@ -2,63 +2,115 @@ package middleware
 
 import (
 	requestPresenter "app/domain/presenter/request"
+	responsePresenter "app/domain/presenter/response"
+	libCommon "app/lib/common"
 	libError "app/lib/error"
-	"fmt"
 	"io"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
+	"github.com/kataras/iris/v12/hero"
 )
 
-func BindRequest[RequestPresenter_T any]() iris.Handler {
+type (
+	PresenterInitializer[RequestPresenter_T, ResponsePresenter_T any] func(req *RequestPresenter_T, res *ResponsePresenter_T)
+)
 
-	return func(ctx iris.Context) {
+func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
+	container *hero.Container,
+	initializers ...PresenterInitializer[RequestPresenter_T, ResponsePresenter_T],
+) iris.Handler {
+
+	if container == nil {
+
+		panic("BindPresenter middleware need container to function")
+	}
+
+	return container.Handler(func(ctx iris.Context, validator context.Validator) {
+
+		if validator == nil {
+
+			ctx.StopWithJSON(500, &responsePresenter.ErrorResponse{
+				Message: "no validator",
+			})
+			return
+		}
 
 		var (
-			presenter *RequestPresenter_T = new(RequestPresenter_T)
-			err       error
+			request  *RequestPresenter_T  = new(RequestPresenter_T)
+			response *ResponsePresenter_T = new(ResponsePresenter_T)
+			err      error
 		)
 
-		if p, ok := any(presenter).(requestPresenter.IRequestBinder); ok {
+		runInitializers(request, response, initializers)
+
+		if p, ok := any(request).(requestPresenter.IRequestBinder); ok {
 
 			err = p.Bind(ctx)
 
 		} else {
 
-			err = bindDefault(presenter, ctx)
+			err = bindDefault(request, ctx)
 		}
 
-		if libError.IsAcceptable(err, io.EOF) {
+		if !libError.IsAcceptable(err, io.EOF) {
 			/*
-				io.EOF is just signal that indicates the read operation reaches eof,
-				not an impact error.
+				io.EOF returned when request body is empty
 			*/
-			ctx.RegisterDependency(presenter)
+			ctx.StopWithJSON(400, &responsePresenter.ErrorResponse{
+				Message: err.Error(),
+			})
+			return
 		}
 
+		err = validator.Struct(request)
+
+		if err != nil {
+
+			ctx.StopWithJSON(400, &responsePresenter.ErrorResponse{
+				Message: libCommon.Ternary(isValidationError(err), "invalid input", err.Error()),
+			})
+			return
+		}
+
+		ctx.RegisterDependency(request)
+		ctx.RegisterDependency(response)
 		ctx.Next()
+	})
+}
+
+func runInitializers[RequestPresenter_T, ResponsePresenter_T any](
+	req *RequestPresenter_T,
+	res *ResponsePresenter_T,
+	initializers []PresenterInitializer[RequestPresenter_T, ResponsePresenter_T],
+) {
+
+	for _, f := range initializers {
+
+		f(req, res)
 	}
 }
 
 func bindDefault[RequestPresenter_T any](presenter *RequestPresenter_T, ctx iris.Context) error {
-	fmt.Println((ctx.Params().Len()), ctx.Params())
-	err := ctx.ReadParams(presenter)
-	fmt.Println("a")
-	if err != nil {
 
-		return err
+	ctx.ReadURL(presenter)
+	ctx.ReadJSON(presenter)
+
+	return nil
+}
+
+func isValidationError(err error) bool {
+
+	if _, ok := err.(*validator.InvalidValidationError); ok {
+
+		return true
 	}
 
-	err = ctx.ReadQuery(presenter)
-	fmt.Println("b")
-	if err != nil {
+	if _, ok := err.(validator.ValidationErrors); ok {
 
-		return err
+		return true
 	}
 
-	err = ctx.ReadJSON(presenter, context.JSONReader{
-		DisallowUnknownFields: true,
-	})
-	fmt.Println("c", err)
-	return err
+	return false
 }

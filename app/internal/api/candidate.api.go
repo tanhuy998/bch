@@ -1,7 +1,6 @@
 package api
 
 import (
-	"app/domain/model"
 	"app/internal/controller"
 	"app/internal/middleware"
 	authService "app/service/auth"
@@ -84,7 +83,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 						Claims: []authService.AuthorizationClaim{auth_post_claim},
 					},
 				),
-				middleware.BindRequestBody[model.Candidate](),
+				//middleware.BindPresenters[model.Candidate](),
 			)
 
 			/*
@@ -96,7 +95,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 					Fields: candidateField,
 					Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
-				middleware.BindRequestBody[model.Candidate](),
+				//middleware.BindPresenters[model.Candidate](),
 			)
 
 			activator.Handle(

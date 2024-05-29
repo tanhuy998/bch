@@ -2,6 +2,7 @@ package api
 
 import (
 	requestPresenter "app/domain/presenter/request"
+	responsePresenter "app/domain/presenter/response"
 	"app/internal/controller"
 	"app/internal/middleware"
 	authService "app/service/auth"
@@ -21,10 +22,10 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 
 	router := app.Party("/campaigns")
 
-	router.ConfigureContainer(func(api *iris.APIContainer) {
+	container := router.ConfigureContainer(func(api *iris.APIContainer) {
 
 		api.Use(middleware.Authentication())
-	})
+	}).Container
 
 	controller := new(controller.CampaignController)
 	campaignField := authService.AuthorizationField("campaigns")
@@ -59,7 +60,7 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 					Fields: campaignField,
 					Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
-				middleware.BindRequest[requestPresenter.GetCampaignListRequest](),
+				middleware.BindPresenters[requestPresenter.GetCampaignListRequest, responsePresenter.GetCampaignListResponse](container),
 			).SetName("GET_LIST_CAMPAIGNS")
 
 			activator.Handle(
@@ -68,7 +69,7 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 					Fields: campaignField,
 					//Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
-				middleware.BindRequest[requestPresenter.GetSingleCampaignRequest](),
+				middleware.BindPresenters[requestPresenter.GetSingleCampaignRequest, responsePresenter.GetSingleCampaignResponse](container),
 			).SetName("GET_SINGLE_CAMPAIGN")
 
 			activator.Handle(
@@ -76,7 +77,7 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: campaignField,
 				}),
-				middleware.BindRequest[requestPresenter.GetPendingCampaignRequest](),
+				middleware.BindPresenters[requestPresenter.GetPendingCampaignRequest, responsePresenter.GetPendingCampaingsResponse](container),
 			).SetName("GET_PENDING_CAMPAIGNS")
 
 			activator.Handle(
@@ -86,7 +87,7 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 					Claims: []authService.AuthorizationClaim{auth_post_claim},
 					//Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
-				middleware.BindRequest[requestPresenter.LaunchNewCampaignRequest](),
+				middleware.BindPresenters[requestPresenter.LaunchNewCampaignRequest, responsePresenter.LaunchNewCampaignResponse](container),
 			).SetName("LAUNCH_NEW_CAMPAIGN")
 
 			activator.Handle(
@@ -95,7 +96,7 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 					Fields: campaignField,
 					Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
-				middleware.BindRequest[requestPresenter.UpdateCampaignRequest](),
+				middleware.BindPresenters[requestPresenter.UpdateCampaignRequest, responsePresenter.UpdateCampaignResponse](container),
 			).SetName("UPDATE_CAMPAIGN")
 
 			activator.Handle(
@@ -105,7 +106,7 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 					Claims: []authService.AuthorizationClaim{auth_post_claim},
 					//Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
-				middleware.BindRequest[requestPresenter.DeleteCampaignRequest](),
+				middleware.BindPresenters[requestPresenter.DeleteCampaignRequest, responsePresenter.DeleteCampaignResponse](container),
 			).SetName("DELETE_CAMPAIGN")
 
 			activator.Handle(
@@ -114,7 +115,7 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 					Fields: campaignField,
 					Groups: []authService.AuthorizationGroup{auth_commander_group},
 				}),
-				middleware.BindRequest[requestPresenter.UpdateCampaignRequest](),
+				middleware.BindPresenters[requestPresenter.UpdateCampaignRequest, responsePresenter.UpdateCampaignResponse](container),
 			)
 		}),
 	)

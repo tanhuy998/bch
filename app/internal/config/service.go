@@ -10,13 +10,16 @@ import (
 	usecase "app/useCase"
 	"fmt"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/hero"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
+	VALIDATOR    = "validator"
 	AUTH         = "auth_service"
 	DBMS_CLIENT  = "dbms_client"
 	DB           = "db_instancce"
@@ -77,10 +80,17 @@ func RegisterServices(app router.Party) {
 
 	// 	return auth
 	// })
+
 	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticateService](container, nil, AUTH)
+
 	fmt.Println("Auth service initialized.")
 
 	libConfig.BindDependency[port.IActionResult, usecase.ActionResultUseCase](container, nil)
+
+	/*
+		init app validator
+	*/
+	libConfig.BindDependency[context.Validator, validator.Validate](container, validator.New())
 
 	/*
 		Bind Admin Campaign controller dependent services
