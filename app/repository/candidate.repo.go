@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -21,6 +22,27 @@ func (this *CandidateRepository) Init(db *mongo.Database) *CandidateRepository {
 	this.AbstractRepository.Init(db, CANDIDATE_COLLECTION_NAME)
 
 	return this
+}
+
+func (this *CandidateRepository) GetCollection() *mongo.Collection {
+
+	return this.collection
+}
+
+func (this *CandidateRepository) GetCandidaiteList(
+	campaign_id primitive.ObjectID,
+	pivot_id primitive.ObjectID,
+	pageLimit int64,
+	isPrevDir bool,
+	ctx context.Context,
+) (*PaginationPack[model.Candidate], error) {
+
+	return nil, nil
+}
+
+func (this *CandidateRepository) GetDBClient() *mongo.Client {
+
+	return this.collection.Database().Client()
 }
 
 func (this *CandidateRepository) FindByUUID(uuid uuid.UUID, ctx context.Context) (*model.Campaign, error) {

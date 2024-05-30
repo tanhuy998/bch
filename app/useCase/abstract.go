@@ -22,6 +22,15 @@ type (
 	ActionResultUseCase struct {
 	}
 
+	/*
+		Interface that is is used for pagination purposes.
+		Because pagination functions just accept some specific
+		intefaces as generic type.
+		Therefore, it's implementations must implement this interface
+		as value receiver in order to not catching compile
+		time error when passing the model type to a any
+		pagination functions.
+	*/
 	ModelInterfaceForPagination interface {
 		model.IModel
 	}

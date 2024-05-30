@@ -18,7 +18,7 @@ type Candidate struct {
 	Version     *time.Time            `json:"version" bson:"version,omitempty"`
 }
 
-func (this *Candidate) GetObjectID() *primitive.ObjectID {
+func (this Candidate) GetObjectID() primitive.ObjectID {
 
-	return this.ObjectID
+	return *(this.ObjectID)
 }

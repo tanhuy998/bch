@@ -28,6 +28,16 @@ func (this *CampaignRepository) Init(db *mongo.Database) *CampaignRepository {
 	return this
 }
 
+func (this *CampaignRepository) GetCollection() *mongo.Collection {
+
+	return this.collection
+}
+
+func (this *CampaignRepository) GetDBClient() *mongo.Client {
+
+	return this.collection.Database().Client()
+}
+
 func (this *CampaignRepository) FindByUUID(uuid uuid.UUID, ctx context.Context) (*model.Campaign, error) {
 
 	return findDocumentByUUID[model.Campaign](uuid, this.collection, ctx)

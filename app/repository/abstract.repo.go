@@ -19,8 +19,14 @@ type (
 		model.Campaign | model.Candidate
 	}
 
-	IRepository interface {
+	IAbstractRepository[DBClient_T any] interface {
+		GetDBClient() *DBClient_T
+	}
+
+	IMongoDBRepository interface {
+		IAbstractRepository[mongo.Client]
 		Init(*mongo.Database)
+		GetCollection() *mongo.Collection
 	}
 
 	PaginationPack[Model_T any] struct {
@@ -29,10 +35,21 @@ type (
 	}
 
 	ICampaignRepository interface {
+		IMongoDBRepository
 		FindByUUID(uuid.UUID, context.Context) (*model.Campaign, error)
 		Get(page int, ctx context.Context) ([]*model.Campaign, error)
-		GetPendingCampaigns(id primitive.ObjectID, pageLimit int64, direction bool, ctx context.Context) (data *PaginationPack[model.Campaign], err error)
-		GetCampaignList(id primitive.ObjectID, pageLimit int64, direction bool, ctx context.Context) (data *PaginationPack[model.Campaign], err error)
+		GetPendingCampaigns(
+			id primitive.ObjectID,
+			pageLimit int64,
+			direction bool,
+			ctx context.Context,
+		) (data *PaginationPack[model.Campaign], err error)
+		GetCampaignList(
+			id primitive.ObjectID,
+			pageLimit int64,
+			direction bool,
+			ctx context.Context,
+		) (data *PaginationPack[model.Campaign], err error)
 		Create(*model.Campaign, context.Context) error
 		//CreateMany([]*model.Campaign) error
 		Update(*model.Campaign, context.Context) error
@@ -41,11 +58,19 @@ type (
 	}
 
 	ICandidateRepository interface {
+		IMongoDBRepository
 		FindByUUID(uuid.UUID, context.Context) (*model.Campaign, error)
 		Get(page int, ctx context.Context) ([]*model.Campaign, error)
 		Create(*model.Candidate, context.Context) error
 		Update(*model.Candidate, context.Context) error
 		Delete(uuid.UUID, context.Context) error
+		GetCandidaiteList(
+			campaign_id primitive.ObjectID,
+			pivot_id primitive.ObjectID,
+			pageLimit int64,
+			isPrevDir bool,
+			ctx context.Context,
+		) (*PaginationPack[model.Candidate], error)
 		//Remove(uuid uuid.UUID) (bool, error)
 	}
 

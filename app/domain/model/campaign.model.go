@@ -19,9 +19,9 @@ type Campaign struct {
 	//Candidates []primitive.ObjectID `json:"candidate_ids" bson:"candidate_ids"`
 }
 
-func (this *Campaign) GetObjectID() *primitive.ObjectID {
+func (this Campaign) GetObjectID() primitive.ObjectID {
 
-	return this.ObjectID
+	return *(this.ObjectID)
 }
 
 // func (this *Campaign) CollectionName() string {

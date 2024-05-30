@@ -2,7 +2,23 @@ package adminService
 
 import (
 	"app/domain/model"
+	libCommon "app/lib/common"
 	"app/repository"
+	"context"
+	"errors"
+	"reflect"
+	"time"
+
+	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readconcern"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
+)
+
+const (
+	DEADLINE_DURATION = 5 * time.Second
 )
 
 type (
@@ -11,13 +27,96 @@ type (
 	}
 
 	AdminGetCampaignCandidateListService struct {
-		CampaignRepo  repository.ICampaignRepository
-		CandidateRepo repository.ICandidateRepository
+		AbstractRepositoryInterface reflect.Type
+		CampaignRepo                repository.ICampaignRepository
+		CandidateRepo               repository.ICandidateRepository
 	}
 )
 
 func (this *AdminGetCampaignCandidateListService) Serve(
-	campaignUUID string, candiatePivot_id string, limit int, isPrevDir bool,
+	str_campaignUUID string, str_candiatePivot_id string, limit int, isPrevDir bool,
 ) (*repository.PaginationPack[model.Candidate], error) {
 
+	campaignUUID, err := uuid.Parse(str_campaignUUID)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	candidateObjID, err := primitive.ObjectIDFromHex(str_candiatePivot_id)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	deadlineCtx, cancel := context.WithTimeout(context.Background(), DEADLINE_DURATION)
+	defer cancel()
+
+	session, err := initAggregateTransaction(this.CampaignRepo.GetDBClient())
+
+	if err != nil {
+
+		return nil, err
+	}
+	defer (*session).EndSession(deadlineCtx)
+
+	return this.Query(session, campaignUUID, candidateObjID, int64(limit), isPrevDir, deadlineCtx)
+}
+
+func (this *AdminGetCampaignCandidateListService) Query(
+	session *mongo.Session,
+	campaignUUID uuid.UUID,
+	candidatePivot_id primitive.ObjectID,
+	limit int64,
+	isPrevDir bool,
+	ctx context.Context,
+) (*repository.PaginationPack[model.Candidate], error) {
+
+	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+
+	pack, err := (*session).WithTransaction(ctx, func(ctx mongo.SessionContext) (interface{}, error) {
+
+		campaign, err := this.CampaignRepo.FindByUUID(campaignUUID, ctx)
+
+		if err != nil {
+
+			return nil, err
+
+		} else if campaign == nil {
+
+			return nil, errors.New("campaign not found")
+		}
+
+		return this.CandidateRepo.GetCandidaiteList(*campaign.ObjectID, candidatePivot_id, limit, isPrevDir, ctx)
+	})
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	if actualDataPack, ok := pack.(*repository.PaginationPack[model.Candidate]); ok {
+
+		return actualDataPack, nil
+	}
+
+	return nil, errors.New("internal error")
+}
+
+func initAggregateTransaction(dbClient *mongo.Client) (*mongo.Session, error) {
+
+	writeConcern := writeconcern.Majority()
+	readConcern := readconcern.Snapshot()
+	transactionOpts := options.Transaction().SetWriteConcern(writeConcern).SetReadConcern(readConcern)
+
+	session, err := dbClient.StartSession(transactionOpts)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return &session, nil
 }
