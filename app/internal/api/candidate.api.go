@@ -74,7 +74,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 				Post a candidate to a specific campaign
 			*/
 			activator.Handle(
-				"POST", "/campaign/{uuid}", "PostCandidate",
+				"POST", "/campaign/{campaignUUID}", "PostCandidate",
 				middleware.Authorize(
 					authService.AuthorizationLicense{
 						Fields: candidateField,
@@ -86,7 +86,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 						Claims: []authService.AuthorizationClaim{auth_post_claim},
 					},
 				),
-				//middleware.BindPresenters[model.Candidate](),
+				middleware.BindPresenters[requestPresenter.AddCandidateRequest, responsePresenter.AddNewCandidateResponse](container),
 			)
 
 			/*

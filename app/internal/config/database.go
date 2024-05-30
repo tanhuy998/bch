@@ -32,6 +32,13 @@ func InitDomainIndexes(db *mongo.Database) {
 					Unique: libCommon.PointerPrimitive(true),
 				},
 			},
+			mongo.IndexModel{
+				Keys: "idNumber",
+				Options: &options.IndexOptions{
+					Name:   libCommon.PointerPrimitive("idNumber"),
+					Unique: libCommon.PointerPrimitive(true),
+				},
+			},
 		},
 	)
 }

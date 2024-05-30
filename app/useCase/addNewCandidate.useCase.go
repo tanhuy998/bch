@@ -1,10 +1,13 @@
 package usecase
 
 import (
+	"app/domain/model"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
+	libCommon "app/lib/common"
 	adminService "app/service/admin"
+	"time"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -32,7 +35,16 @@ func (this *AddNewCandidateUseCase) Execute(
 		return nil, common.ERR_INVALID_HTTP_INPUT
 	}
 
-	err := this.AddNewCandidateService.Execute(input.CampaignUUID, input.CandidateDetail)
+	if input.InputCandidate == nil {
+
+		return nil, common.ERR_BAD_REQUEST
+	}
+
+	inputCandidate := input.InputCandidate
+	inputCandidate.SigningInfo = new(model.CandidateSigningInfo)
+	inputCandidate.Version = libCommon.PointerPrimitive(time.Now())
+
+	err := this.AddNewCandidateService.Execute(input.CampaignUUID, inputCandidate)
 
 	if err != nil {
 
