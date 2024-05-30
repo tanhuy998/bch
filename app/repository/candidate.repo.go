@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -14,30 +15,50 @@ const (
 )
 
 type CandidateRepository struct {
-	AbstractRepository
+	AbstractMongoRepository
 }
 
 func (this *CandidateRepository) Init(db *mongo.Database) *CandidateRepository {
 
-	this.AbstractRepository.Init(db, CANDIDATE_COLLECTION_NAME)
+	this.AbstractMongoRepository.Init(db, CANDIDATE_COLLECTION_NAME)
 
 	return this
 }
+
+/*
+# IMPLEMENT AbstractMongoRepository
+*/
 
 func (this *CandidateRepository) GetCollection() *mongo.Collection {
 
 	return this.collection
 }
 
+/*
+# END IMPLEMENT AbstractMongoRepository
+*/
+
+/*
+# IMPLEMENT ICandidateRepository
+*/
+
 func (this *CandidateRepository) GetCandidaiteList(
-	campaign_id primitive.ObjectID,
+	campaignUUID uuid.UUID,
 	pivot_id primitive.ObjectID,
 	pageLimit int64,
 	isPrevDir bool,
 	ctx context.Context,
 ) (*PaginationPack[model.Candidate], error) {
 
-	return nil, nil
+	return getDocumentsPageByID[model.Candidate](
+		pivot_id,
+		pageLimit,
+		isPrevDir,
+		&bson.D{{"campaignUUID", 0}},
+		this.collection,
+		ctx,
+		bson.E{"campaignUUID", campaignUUID},
+	)
 }
 
 func (this *CandidateRepository) GetDBClient() *mongo.Client {
@@ -69,3 +90,7 @@ func (this *CandidateRepository) Delete(uuid uuid.UUID, ctx context.Context) err
 
 	return deleteDocument(uuid, this.collection, ctx)
 }
+
+/*
+# END IMPLEMENT ICandidateRepository
+*/

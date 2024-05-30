@@ -33,7 +33,12 @@ func (this *GetCampaignCandidateListUseCase) Execute(
 		err               error
 	)
 
-	dataPack, err := this.GetCampaignCandidateListService.Serve(input.CampaignUUID, candidatePivot_id, input.PageSizeLimit, input.IsPrev)
+	dataPack, err := this.GetCampaignCandidateListService.Serve(
+		input.CampaignUUID,
+		candidatePivot_id,
+		input.PageSizeLimit,
+		input.IsPrev,
+	)
 
 	if err != nil {
 

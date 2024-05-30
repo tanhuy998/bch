@@ -25,7 +25,7 @@ type (
 
 	IMongoDBRepository interface {
 		IAbstractRepository[mongo.Client]
-		Init(*mongo.Database)
+		//Init(*mongo.Database)
 		GetCollection() *mongo.Collection
 	}
 
@@ -65,7 +65,7 @@ type (
 		Update(*model.Candidate, context.Context) error
 		Delete(uuid.UUID, context.Context) error
 		GetCandidaiteList(
-			campaign_id primitive.ObjectID,
+			campaignUUID uuid.UUID,
 			pivot_id primitive.ObjectID,
 			pageLimit int64,
 			isPrevDir bool,
@@ -74,17 +74,17 @@ type (
 		//Remove(uuid uuid.UUID) (bool, error)
 	}
 
-	AbstractRepository struct {
+	AbstractMongoRepository struct {
 		collection *mongo.Collection
 	}
 )
 
-func (this *AbstractRepository) Init(db *mongo.Database, collectionName string) {
+func (this *AbstractMongoRepository) Init(db *mongo.Database, collectionName string) {
 
 	this.collection = db.Collection(collectionName)
 }
 
-func (this *AbstractRepository) CountPage() (int64, error) {
+func (this *AbstractMongoRepository) CountPage() (int64, error) {
 
 	docNum, err := this.collection.CountDocuments(context.TODO(), struct{}{})
 
@@ -99,7 +99,7 @@ func (this *AbstractRepository) CountPage() (int64, error) {
 	return even + odd, nil
 }
 
-func (this *AbstractRepository) returnPageThresholdIfOutOfRange(inputPageNum int64) int64 {
+func (this *AbstractMongoRepository) returnPageThresholdIfOutOfRange(inputPageNum int64) int64 {
 
 	inputPageNum = libCommon.Ternary(inputPageNum <= 0, 1, inputPageNum)
 
@@ -113,7 +113,7 @@ func (this *AbstractRepository) returnPageThresholdIfOutOfRange(inputPageNum int
 	return libCommon.Ternary[int64](inputPageNum > pageCount, pageCount, inputPageNum)
 }
 
-func (this *AbstractRepository) Collection() *mongo.Collection {
+func (this *AbstractMongoRepository) Collection() *mongo.Collection {
 
 	return this.collection
 }

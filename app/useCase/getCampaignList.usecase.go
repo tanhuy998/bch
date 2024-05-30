@@ -7,6 +7,7 @@ import (
 	"app/internal/common"
 	"app/repository"
 	adminService "app/service/admin"
+	"fmt"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -50,7 +51,7 @@ func (this *GetCampaignListUseCase) Execute(
 	output.Data = dataPack.Data
 
 	err = preparePaginationNavigation[model.Campaign](output, dataPack, pageNumber)
-
+	fmt.Println("usecase", err)
 	if err != nil {
 
 		return nil, err

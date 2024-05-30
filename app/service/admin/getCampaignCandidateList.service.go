@@ -23,7 +23,12 @@ const (
 
 type (
 	IGetCampaignCandidateList interface {
-		Serve(campaignUUID string, candiatePivot_id string, limit int, isPrevDir bool) (*repository.PaginationPack[model.Candidate], error)
+		Serve(
+			campaignUUID string,
+			candiatePivot_id string,
+			limit int,
+			isPrevDir bool,
+		) (*repository.PaginationPack[model.Candidate], error)
 	}
 
 	AdminGetCampaignCandidateListService struct {
@@ -62,7 +67,14 @@ func (this *AdminGetCampaignCandidateListService) Serve(
 	}
 	defer (*session).EndSession(deadlineCtx)
 
-	return this.Query(session, campaignUUID, candidateObjID, int64(limit), isPrevDir, deadlineCtx)
+	return this.Query(
+		session,
+		campaignUUID,
+		candidateObjID,
+		int64(limit),
+		isPrevDir,
+		deadlineCtx,
+	)
 }
 
 func (this *AdminGetCampaignCandidateListService) Query(
@@ -76,21 +88,32 @@ func (this *AdminGetCampaignCandidateListService) Query(
 
 	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
 
-	pack, err := (*session).WithTransaction(ctx, func(ctx mongo.SessionContext) (interface{}, error) {
+	pack, err := (*session).WithTransaction(
+		ctx,
+		func(sessionCtx mongo.SessionContext) (interface{}, error) {
 
-		campaign, err := this.CampaignRepo.FindByUUID(campaignUUID, ctx)
+			campaign, err := this.CampaignRepo.FindByUUID(campaignUUID, sessionCtx)
 
-		if err != nil {
+			if err != nil {
 
-			return nil, err
+				return nil, err
 
-		} else if campaign == nil {
+			} else if campaign == nil {
 
-			return nil, errors.New("campaign not found")
-		}
+				return nil, errors.New("campaign not found")
+			}
 
-		return this.CandidateRepo.GetCandidaiteList(*campaign.ObjectID, candidatePivot_id, limit, isPrevDir, ctx)
-	})
+			return this.CandidateRepo.
+				GetCandidaiteList(
+					*campaign.UUID,
+					candidatePivot_id,
+					limit,
+					isPrevDir,
+					sessionCtx,
+				)
+		},
+		initAggregateTransactionOption(),
+	)
 
 	if err != nil {
 
@@ -105,13 +128,16 @@ func (this *AdminGetCampaignCandidateListService) Query(
 	return nil, errors.New("internal error")
 }
 
-func initAggregateTransaction(dbClient *mongo.Client) (*mongo.Session, error) {
+func initAggregateTransactionOption() *options.TransactionOptions {
 
 	writeConcern := writeconcern.Majority()
 	readConcern := readconcern.Snapshot()
-	transactionOpts := options.Transaction().SetWriteConcern(writeConcern).SetReadConcern(readConcern)
+	return options.Transaction().SetWriteConcern(writeConcern).SetReadConcern(readConcern)
+}
 
-	session, err := dbClient.StartSession(transactionOpts)
+func initAggregateTransaction(dbClient *mongo.Client) (*mongo.Session, error) {
+
+	session, err := dbClient.StartSession()
 
 	if err != nil {
 

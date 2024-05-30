@@ -42,7 +42,7 @@ func (this *AdminAddNewCandidateToCampaign) Execute(inputCampaignUUID string, mo
 	}
 
 	model.UUID = libCommon.PointerPrimitive(uuid.New())
-	model.CampaignID = libCommon.PointerPrimitive(camUUID)
+	model.CampaignUUID = libCommon.PointerPrimitive(camUUID)
 
 	return this.CandidateRepo.Create(model, nil)
 }

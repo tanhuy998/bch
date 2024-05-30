@@ -6,7 +6,6 @@ import (
 	"app/internal/common"
 	"app/repository"
 	"encoding/json"
-	"errors"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -81,15 +80,13 @@ func resolveNext[Model_T ModelInterfaceForPagination](
 
 		return nil
 	}
+	/*
+		implementation state is checked at compile time,
+		no need any assertions at runtime
+	*/
+	lastElement := dataPack.Data[lastIndex]
 
-	lastElement, ok := any(dataPack.Data[lastIndex]).(Model_T)
-
-	if !ok {
-
-		return errors.New("")
-	}
-
-	output.GetNavigation().Next = lastElement.GetObjectID().Hex()
+	output.GetNavigation().Next = (*lastElement).GetObjectID().Hex()
 
 	return nil
 }
@@ -100,18 +97,14 @@ func resolvePrev[Model_T ModelInterfaceForPagination](
 	pageNumber common.PaginationPage,
 ) error {
 
-	// firstIndex := 0
-
-	// firstElement, ok := any(dataPack.Data[firstIndex]).(Model_T)
-
-	// if !ok {
-
-	// 	return errors.New("")
-	// }
-
 	return nil
 }
 
+/*
+preparePaginationNavigation expects the input generic type implements
+ModelInterfaceForPagination and whose methods must be implemeted as value
+receiver
+*/
 func preparePaginationNavigation[Model_T ModelInterfaceForPagination](
 	output responsePresenter.IPaginationResult,
 	dataPack *repository.PaginationPack[Model_T],

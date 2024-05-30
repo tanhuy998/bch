@@ -17,16 +17,20 @@ const (
 )
 
 type CampaignRepository struct {
-	AbstractRepository
+	AbstractMongoRepository
 	//collection *mongo.Collection
 }
 
 func (this *CampaignRepository) Init(db *mongo.Database) *CampaignRepository {
 
-	this.AbstractRepository.Init(db, CAMPAIGN_COLLECTION_NAME)
+	this.AbstractMongoRepository.Init(db, CAMPAIGN_COLLECTION_NAME)
 
 	return this
 }
+
+/*
+# IMPLEMENT AbstractMongoRepository
+*/
 
 func (this *CampaignRepository) GetCollection() *mongo.Collection {
 
@@ -38,6 +42,13 @@ func (this *CampaignRepository) GetDBClient() *mongo.Client {
 	return this.collection.Database().Client()
 }
 
+/*
+# END OVERRIDE AbstractMongoRepository
+*/
+
+/*
+# IMPLEMENT ICampaignRepository
+*/
 func (this *CampaignRepository) FindByUUID(uuid uuid.UUID, ctx context.Context) (*model.Campaign, error) {
 
 	return findDocumentByUUID[model.Campaign](uuid, this.collection, ctx)
@@ -56,25 +67,6 @@ func (this *CampaignRepository) GetPendingCampaigns(
 	isPrevDir bool,
 	ctx context.Context,
 ) (data *PaginationPack[model.Campaign], err error) {
-
-	// cursor, err := this.collection.Aggregate(context.TODO(), bson.D{
-	// 	{
-	// 		"$search", bson.D{
-	// 			{"index", "issueTime_index"},
-	// 			{"searchBefore", "$$NOW"},
-	// 		},
-	// 	},
-	// 	{"$kip", int64(page)},
-	// 	{"$limit", ITEM_PER_PAGE},
-	// 	{"$sort", bson.D{{"issueTime", -1}}},
-	// })
-
-	// if err != nil {
-
-	// 	return nil, err
-	// }
-
-	// return ParseCursor[model.Campaign](cursor, ctx)
 
 	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
 
@@ -128,3 +120,7 @@ func (this *CampaignRepository) GetCampaignList(
 
 	return ret, nil
 }
+
+/*
+# END IMPLEMENT ICampaignRepository
+*/
