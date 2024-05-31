@@ -7,6 +7,7 @@ import (
 	"app/repository"
 	adminService "app/service/admin"
 	authService "app/service/auth"
+	candidateService "app/service/candidate"
 	usecase "app/useCase"
 	"fmt"
 
@@ -111,6 +112,8 @@ func RegisterServices(app router.Party) {
 	libConfig.BindDependency[adminService.IGetCampaignCandidateList, adminService.AdminGetCampaignCandidateListService](container, nil)
 	libConfig.BindDependency[adminService.IGetSingleCandidateByUUID, adminService.AdminGetSingleCandidateByUUIDService](container, nil)
 
+	libConfig.BindDependency[candidateService.ICommitCandidateSigningInfo, candidateService.CommitCandidateSigningInfoService](container, nil)
+
 	/*
 		Bind Usecase Objects
 	*/
@@ -127,6 +130,8 @@ func RegisterServices(app router.Party) {
 
 	libConfig.BindDependency[usecase.IGetCampaignCandidateList, usecase.GetCampaignCandidateListUseCase](container, nil)
 	libConfig.BindDependency[usecase.IGetSingleCandidateByUUID, usecase.GetSingleCandidateByUUIDUseCase](container, nil)
+
+	libConfig.BindDependency[usecase.ICommitCandidateSigningInfo, usecase.CommitCandidateSigningInfoUseCase](container, nil)
 }
 
 // func GetComponent[AbstractType](ctx iris.Context) {

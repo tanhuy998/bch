@@ -2,6 +2,7 @@ package repository
 
 import (
 	"app/domain/model"
+	libCommon "app/lib/common"
 	"context"
 
 	"github.com/google/uuid"
@@ -15,9 +16,11 @@ const (
 	CANDIDATE_SIGNING_INFO_KEY = "signingInfo"
 )
 
-type CandidateRepository struct {
-	AbstractMongoRepository
-}
+type (
+	CandidateRepository struct {
+		AbstractMongoRepository
+	}
+)
 
 func (this *CandidateRepository) Init(db *mongo.Database) *CandidateRepository {
 
@@ -85,6 +88,20 @@ func (this *CandidateRepository) Create(candidate *model.Candidate, ctx context.
 func (this *CandidateRepository) Update(candidate *model.Candidate, ctx context.Context) error {
 
 	return updateDocument(candidate.UUID, candidate, this.collection, ctx)
+}
+
+func (this *CandidateRepository) UpdateSigningInfo(
+	candidateUUID uuid.UUID,
+	query *CandidateSigninInfoUpdateQuery,
+	ctx context.Context,
+) error {
+
+	return updateDocument(
+		libCommon.PointerPrimitive(candidateUUID),
+		query,
+		this.collection,
+		ctx,
+	)
 }
 
 func (this *CandidateRepository) Delete(uuid uuid.UUID, ctx context.Context) error {
