@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	CANDIDATE_COLLECTION_NAME = "candidates"
+	CANDIDATE_COLLECTION_NAME  = "candidates"
+	CANDIDATE_SIGNING_INFO_KEY = "signingInfo"
 )
 
 type CandidateRepository struct {
@@ -66,14 +67,14 @@ func (this *CandidateRepository) GetDBClient() *mongo.Client {
 	return this.collection.Database().Client()
 }
 
-func (this *CandidateRepository) FindByUUID(uuid uuid.UUID, ctx context.Context) (*model.Campaign, error) {
+func (this *CandidateRepository) FindByUUID(uuid uuid.UUID, ctx context.Context) (*model.Candidate, error) {
 
-	return findDocumentByUUID[model.Campaign](uuid, this.collection, ctx)
+	return findDocumentByUUID[model.Candidate](uuid, this.collection, ctx, bson.E{CANDIDATE_SIGNING_INFO_KEY, 0})
 }
 
-func (this *CandidateRepository) Get(page int, ctx context.Context) ([]*model.Campaign, error) {
+func (this *CandidateRepository) Get(page int, ctx context.Context) ([]*model.Candidate, error) {
 
-	return getDocuments[model.Campaign](int64(page), this.collection, ctx)
+	return getDocuments[model.Candidate](int64(page), this.collection, ctx)
 }
 
 func (this *CandidateRepository) Create(candidate *model.Candidate, ctx context.Context) error {

@@ -64,8 +64,8 @@ type (
 
 	ICandidateRepository interface {
 		IMongoDBRepository
-		FindByUUID(uuid.UUID, context.Context) (*model.Campaign, error)
-		Get(page int, ctx context.Context) ([]*model.Campaign, error)
+		FindByUUID(uuid.UUID, context.Context) (*model.Candidate, error)
+		Get(page int, ctx context.Context) ([]*model.Candidate, error)
 		Create(*model.Candidate, context.Context) error
 		Update(*model.Candidate, context.Context) error
 		Delete(uuid.UUID, context.Context) error

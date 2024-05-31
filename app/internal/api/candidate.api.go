@@ -46,7 +46,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 					},
 				),
 				middleware.BindPresenters[requestPresenter.GetCampaignCandidateListRequest, responsePresenter.GetCampaignCandidateListResponse](container),
-			)
+			).SetName("GET_CANDIDATE_LIST_OF_EXISTING_CAMPAIGN")
 
 			/*
 				Seach Candidates by given infomations
@@ -63,12 +63,13 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 				Get a specific candidate by uuid
 			*/
 			activator.Handle(
-				"GET", "/{uuid}", "GetCandidate",
+				"GET", "/{uuid}", "GetSingleCandidateByUUID",
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: candidateField,
 					Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
-			)
+				middleware.BindPresenters[requestPresenter.GetSingleCandidateRequest, responsePresenter.GetSingleCandidateResponse](container),
+			).SetName("GET_SINGLE_CANDIDATE_BY_UUID")
 
 			/*
 				Post a candidate to a specific campaign
@@ -87,7 +88,7 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 					},
 				),
 				middleware.BindPresenters[requestPresenter.AddCandidateRequest, responsePresenter.AddNewCandidateResponse](container),
-			)
+			).SetName("ADD_NEW_CANDIDATE_TO_EXISTING_CAMPAIGN")
 
 			/*
 				Update information of a candidate

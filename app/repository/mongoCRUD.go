@@ -203,13 +203,20 @@ func preparePaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters
 	}, extraFilters...)
 }
 
-func findDocumentByUUID[T any](uuid uuid.UUID, collection *mongo.Collection, ctx context.Context) (*T, error) {
+func findDocumentByUUID[T any](uuid uuid.UUID, collection *mongo.Collection, ctx context.Context, projections ...bson.E) (*T, error) {
 
 	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
 
-	res := collection.FindOne(ctx, bson.M{
-		"uuid": uuid,
-	})
+	opts := options.FindOne()
+	opts.Projection = libCommon.Ternary(len(projections) > 0, projections, nil)
+
+	res := collection.FindOne(
+		ctx,
+		bson.M{
+			"uuid": uuid,
+		},
+		opts,
+	)
 
 	var camp *T
 

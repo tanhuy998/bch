@@ -13,10 +13,15 @@ type CandidateController struct {
 	ModifyCandidateUseCase          usecase.IModifyCandidate
 	DeleteCandidateUseCase          usecase.IDeleteCandidate
 	GetCampaignCandidateListUseCase usecase.IGetCampaignCandidateList
+	GetSingleCandidateByUUIDUseCase usecase.IGetSingleCandidateByUUID
 }
 
-func (this *CandidateController) GetCandidate() {
+func (this *CandidateController) GetSingleCandidateByUUID(
+	input *requestPresenter.GetSingleCandidateRequest,
+	output *responsePresenter.GetSingleCandidateResponse,
+) (mvc.Result, error) {
 
+	return this.GetSingleCandidateByUUIDUseCase.Execute(input, output)
 }
 
 func (this *CandidateController) UpdateCandidateDetailInfo() {

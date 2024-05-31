@@ -109,6 +109,7 @@ func RegisterServices(app router.Party) {
 	libConfig.BindDependency[adminService.IAddNewCandidate, adminService.AdminAddNewCandidateToCampaign](container, nil)
 	libConfig.BindDependency[adminService.IModifyCandidate, adminService.AdminModifyCandidate](container, nil)
 	libConfig.BindDependency[adminService.IGetCampaignCandidateList, adminService.AdminGetCampaignCandidateListService](container, nil)
+	libConfig.BindDependency[adminService.IGetSingleCandidateByUUID, adminService.AdminGetSingleCandidateByUUIDService](container, nil)
 
 	/*
 		Bind Usecase Objects
@@ -125,6 +126,7 @@ func RegisterServices(app router.Party) {
 	libConfig.BindDependency[usecase.IDeleteCandidate, usecase.DeleteCandidateUseCase](container, nil)
 
 	libConfig.BindDependency[usecase.IGetCampaignCandidateList, usecase.GetCampaignCandidateListUseCase](container, nil)
+	libConfig.BindDependency[usecase.IGetSingleCandidateByUUID, usecase.GetSingleCandidateByUUIDUseCase](container, nil)
 }
 
 // func GetComponent[AbstractType](ctx iris.Context) {
