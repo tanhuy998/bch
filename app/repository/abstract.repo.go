@@ -72,7 +72,7 @@ type (
 		Get(page int, ctx context.Context) ([]*model.Candidate, error)
 		Create(*model.Candidate, context.Context) error
 		Update(*model.Candidate, context.Context) error
-		UpdateSigningInfo(candidateUUID uuid.UUID, query CandidateSigninInfoUpdateQuery, ctx context.Context) error
+		UpdateSigningInfo(candidateUUID uuid.UUID, query *CandidateSigninInfoUpdateQuery, ctx context.Context) error
 		Delete(uuid.UUID, context.Context) error
 		GetCandidaiteList(
 			campaignUUID uuid.UUID,

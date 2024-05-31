@@ -33,7 +33,7 @@ func (this *CommitCandidateSigningInfoService) Serve(
 		SigningInfo: data,
 	}
 
-	this.CandidateRepo.UpdateSigningInfo(uuid, updateQuery, nil)
+	this.CandidateRepo.UpdateSigningInfo(uuid, &updateQuery, nil)
 
 	return nil
 }
