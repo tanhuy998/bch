@@ -8,16 +8,16 @@ import (
 )
 
 type (
-	IModifyCandidate interface {
-		Execute(inputUUID string, model *model.Candidate) error
+	IModifyExistingCandidate interface {
+		Serve(inputUUID string, model *model.Candidate) error
 	}
 
-	AdminModifyCandidate struct {
+	AdminModifyExistingCandidate struct {
 		CandidateRepoo repository.ICandidateRepository
 	}
 )
 
-func (this *AdminModifyCandidate) Execute(inputUUID string, model *model.Candidate) error {
+func (this *AdminModifyExistingCandidate) Serve(inputUUID string, model *model.Candidate) error {
 
 	uuid, err := uuid.Parse(inputUUID)
 

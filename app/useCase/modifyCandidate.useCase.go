@@ -1,34 +1,48 @@
 package usecase
 
 import (
+	"app/domain/model"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
+	"app/internal/common"
 	adminService "app/service/admin"
 
 	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
-	IModifyCandidate interface {
+	IModifyExistingCandidate interface {
 		Execute(
-			input *requestPresenter.ModifyCandidateRequest,
-			output *responsePresenter.ModifyCandidateResponse,
+			input *requestPresenter.ModifyExistingCandidateRequest,
+			output *responsePresenter.ModifyExistingCandidateResponse,
 		) (mvc.Result, error)
 	}
 
-	ModifyCandidateUseCase struct {
-		ModifyCandidateService adminService.IModifyCandidate
+	ModifyExistingCandidateUseCase struct {
+		ModifyCandidateService adminService.IModifyExistingCandidate
 	}
 )
 
-func (this *ModifyCandidateUseCase) Execute(
-	input *requestPresenter.ModifyCandidateRequest,
-	output *responsePresenter.ModifyCandidateResponse,
+func (this *ModifyExistingCandidateUseCase) Execute(
+	input *requestPresenter.ModifyExistingCandidateRequest,
+	output *responsePresenter.ModifyExistingCandidateResponse,
 ) (mvc.Result, error) {
 
-	input.Candidate.UUID = nil
+	if input.UUID == "" {
 
-	err := this.ModifyCandidateService.Execute(input.UUID, input.Candidate)
+		return nil, common.ERR_INVALID_HTTP_INPUT
+	}
+
+	inputData := input.Data
+
+	var updatedCandidate *model.Candidate = &model.Candidate{
+		Name:     inputData.Name,
+		IDNumber: inputData.IDNumber,
+		Phone:    inputData.Phone,
+		Address:  inputData.Address,
+	}
+
+	err := this.ModifyCandidateService.Serve(input.UUID, updatedCandidate)
 
 	if err != nil {
 

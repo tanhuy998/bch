@@ -10,7 +10,7 @@ import (
 
 type CandidateController struct {
 	AddNewCandidateUseCase          usecase.IAddNewCandidate
-	ModifyCandidateUseCase          usecase.IModifyCandidate
+	ModifyCandidateUseCase          usecase.IModifyExistingCandidate
 	DeleteCandidateUseCase          usecase.IDeleteCandidate
 	GetCampaignCandidateListUseCase usecase.IGetCampaignCandidateList
 	GetSingleCandidateByUUIDUseCase usecase.IGetSingleCandidateByUUID
@@ -37,8 +37,8 @@ func (this *CandidateController) PostCandidate(
 }
 
 func (this *CandidateController) UpdateCandidate(
-	input *requestPresenter.ModifyCandidateRequest,
-	output *responsePresenter.ModifyCandidateResponse,
+	input *requestPresenter.ModifyExistingCandidateRequest,
+	output *responsePresenter.ModifyExistingCandidateResponse,
 ) (mvc.Result, error) {
 
 	return this.ModifyCandidateUseCase.Execute(input, output)

@@ -99,18 +99,18 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 					Fields: candidateField,
 					Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
 				}),
-				//middleware.BindPresenters[model.Candidate](),
-			)
+				middleware.BindPresenters[requestPresenter.ModifyExistingCandidateRequest, responsePresenter.ModifyExistingCandidateResponse](container),
+			).SetName("MODIFY_EXISTING_CANDIDATE")
 
-			activator.Handle(
-				"PATCH", "/detail/{uuid}", "UpdateCandidateDetailInfo",
-				middleware.Authorize(
-					authService.AuthorizationLicense{
-						Fields: candidateField,
-						Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
-					},
-				),
-			)
+			// activator.Handle(
+			// 	"PATCH", "/detail/{uuid}", "UpdateCandidateDetailInfo",
+			// 	middleware.Authorize(
+			// 		authService.AuthorizationLicense{
+			// 			Fields: candidateField,
+			// 			Groups: []authService.AuthorizationGroup{auth_commander_group, auth_member_group},
+			// 		},
+			// 	),
+			// )
 
 			/*
 				Delete a
