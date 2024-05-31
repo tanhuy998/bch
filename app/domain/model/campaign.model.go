@@ -11,11 +11,11 @@ const MONGOD_CAMPAIGN_MODEL_COLLECTION = "campaigns"
 
 type Campaign struct {
 	ObjectID  *primitive.ObjectID `bson:"_id,omitempty"`
-	UUID      *uuid.UUID          `json:"uuid" bson:"uuid,omitempty"`
-	Title     *string             `json:"title" bson:"title,omitempty" validate:"required"`
-	IssueTime *time.Time          `json:"issueTime" bson:"issueTime,omitempty"`
-	Expire    *time.Time          `json:"expire" bson:"expire,omitempty" validate:"required"`
-	Version   *time.Time          `json:"version" bson:"version,omitempty"`
+	UUID      *uuid.UUID          `json:"uuid,omitempty" bson:"uuid,omitempty"`
+	Title     *string             `json:"title,omitempty" bson:"title,omitempty" validate:"required"`
+	IssueTime *time.Time          `json:"issueTime,omitempty" bson:"issueTime,omitempty"`
+	Expire    *time.Time          `json:"expire,omitempty" bson:"expire,omitempty" validate:"required"`
+	Version   *time.Time          `json:"version,omitempty" bson:"version,omitempty"`
 	//Candidates []primitive.ObjectID `json:"candidate_ids" bson:"candidate_ids"`
 }
 

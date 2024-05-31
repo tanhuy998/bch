@@ -34,6 +34,11 @@ type (
 		Count int64
 	}
 
+	PaginationPackWithHeader[Model_T, Header_T any] struct {
+		Header *Header_T
+		*PaginationPack[Model_T]
+	}
+
 	ICampaignRepository interface {
 		IMongoDBRepository
 		FindByUUID(uuid.UUID, context.Context) (*model.Campaign, error)

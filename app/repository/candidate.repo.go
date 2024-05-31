@@ -54,7 +54,7 @@ func (this *CandidateRepository) GetCandidaiteList(
 		pivot_id,
 		pageLimit,
 		isPrevDir,
-		&bson.D{{"campaignUUID", 0}},
+		&bson.D{{"campaignUUID", 0}, {"signingInfo", 0}},
 		this.collection,
 		ctx,
 		bson.E{"campaignUUID", campaignUUID},

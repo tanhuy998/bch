@@ -28,7 +28,7 @@ type (
 			candiatePivot_id string,
 			limit int,
 			isPrevDir bool,
-		) (*repository.PaginationPack[model.Candidate], error)
+		) (*repository.PaginationPackWithHeader[model.Candidate, model.Campaign], error)
 	}
 
 	AdminGetCampaignCandidateListService struct {
@@ -40,7 +40,7 @@ type (
 
 func (this *AdminGetCampaignCandidateListService) Serve(
 	str_campaignUUID string, str_candiatePivot_id string, limit int, isPrevDir bool,
-) (*repository.PaginationPack[model.Candidate], error) {
+) (*repository.PaginationPackWithHeader[model.Candidate, model.Campaign], error) {
 
 	campaignUUID, err := uuid.Parse(str_campaignUUID)
 
@@ -84,9 +84,10 @@ func (this *AdminGetCampaignCandidateListService) Query(
 	limit int64,
 	isPrevDir bool,
 	ctx context.Context,
-) (*repository.PaginationPack[model.Candidate], error) {
+) (*repository.PaginationPackWithHeader[model.Candidate, model.Campaign], error) {
 
 	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+	defer (*session).EndSession(ctx)
 
 	pack, err := (*session).WithTransaction(
 		ctx,
@@ -103,7 +104,7 @@ func (this *AdminGetCampaignCandidateListService) Query(
 				return nil, errors.New("campaign not found")
 			}
 
-			return this.CandidateRepo.
+			paginationPack, err := this.CandidateRepo.
 				GetCandidaiteList(
 					*campaign.UUID,
 					candidatePivot_id,
@@ -111,6 +112,17 @@ func (this *AdminGetCampaignCandidateListService) Query(
 					isPrevDir,
 					sessionCtx,
 				)
+
+			if err != nil {
+
+				return nil, err
+			}
+
+			ret := &repository.PaginationPackWithHeader[model.Candidate, model.Campaign]{
+				campaign, paginationPack,
+			}
+
+			return ret, nil
 		},
 		initAggregateTransactionOption(),
 	)
@@ -120,7 +132,12 @@ func (this *AdminGetCampaignCandidateListService) Query(
 		return nil, err
 	}
 
-	if actualDataPack, ok := pack.(*repository.PaginationPack[model.Candidate]); ok {
+	// if actualDataPack, ok := pack.(*repository.PaginationPack[model.Candidate]); ok {
+
+	// 	return actualDataPack, nil
+	// }
+
+	if actualDataPack, ok := pack.(*repository.PaginationPackWithHeader[model.Candidate, model.Campaign]); ok {
 
 		return actualDataPack, nil
 	}

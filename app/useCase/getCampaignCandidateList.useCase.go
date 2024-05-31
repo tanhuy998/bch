@@ -49,9 +49,14 @@ func (this *GetCampaignCandidateListUseCase) Execute(
 	output.Message = "success"
 	output.Data = dataPack.Data
 
+	if input.ExposeHeader {
+
+		output.Header.Campaign = dataPack.Header
+	}
+
 	pageNumber := common.PAGINATION_FIRST_PAGE
 
-	err = preparePaginationNavigation[model.Candidate](output, dataPack, pageNumber)
+	err = preparePaginationNavigation[model.Candidate](output, dataPack.PaginationPack, pageNumber)
 
 	if err != nil {
 
