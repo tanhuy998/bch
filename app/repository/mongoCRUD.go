@@ -1,7 +1,6 @@
 package repository
 
 import (
-	libCommon "app/lib/common"
 	"context"
 	"errors"
 
@@ -40,7 +39,10 @@ func ParseCursor[T any](cursor *mongo.Cursor, ctx context.Context) ([]*T, error)
 
 	var ret []*T
 
-	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
 
 	for cursor.Next(ctx) {
 
@@ -69,7 +71,10 @@ func getDocuments[T any](
 	filters ...interface{},
 ) ([]*T, error) {
 
-	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
 
 	cursor, err := collection.Aggregate(ctx, bson.D{
 		{"$skip", page},
@@ -140,7 +145,17 @@ func getDocumentsPageByID[Model_Type any](
 				return nil, err
 			}
 
-			docCount, err := collection.CountDocuments(ctx, libCommon.Ternary(len(extraFilters) == 0, empty_bson, extraFilters))
+			var filters bson.D
+
+			if len(extraFilters) == 0 {
+
+				filters = empty_bson
+			} else {
+
+				filters = extraFilters
+			}
+
+			docCount, err := collection.CountDocuments(ctx, filters)
 
 			if err != nil {
 
@@ -184,12 +199,24 @@ func initDBTransaction(client *mongo.Client) (*mongo.Session, error) {
 
 func preparePaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters []bson.E) bson.D {
 
-	dir_op := libCommon.Ternary(isPrevDir, OP_LTE, OP_GT)
+	var dir_op string
+
+	if isPrevDir {
+
+		dir_op = OP_LTE
+	} else {
+
+		dir_op = OP_GT
+	}
 
 	if _id.IsZero() {
 
 		//paginationQuery = extraFilters
-		extraFilters = libCommon.Ternary(len(extraFilters) == 0, empty_bson, extraFilters)
+
+		if len(extraFilters) == 0 {
+
+			return empty_bson
+		}
 
 		return bson.D(extraFilters)
 	}
@@ -205,10 +232,17 @@ func preparePaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters
 
 func findDocumentByUUID[T any](uuid uuid.UUID, collection *mongo.Collection, ctx context.Context, projections ...bson.E) (*T, error) {
 
-	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
 
 	opts := options.FindOne()
-	opts.Projection = libCommon.Ternary(len(projections) > 0, projections, nil)
+
+	if len(projections) > 0 {
+
+		opts.Projection = projections
+	}
 
 	res := collection.FindOne(
 		ctx,
@@ -234,7 +268,10 @@ func createDocument[T any](model *T, collection *mongo.Collection, ctx context.C
 
 	//(*model).UUID = uuid.New()
 
-	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
 
 	_, err := collection.InsertOne(ctx, model)
 
@@ -246,11 +283,21 @@ func createDocument[T any](model *T, collection *mongo.Collection, ctx context.C
 	return nil
 }
 
-func updateDocument[T any](uuid *uuid.UUID, model *T, collection *mongo.Collection, ctx context.Context) error {
+func updateDocument[T any](uuid *uuid.UUID, model *T, collection *mongo.Collection, ctx context.Context, extraFilters ...bson.E) error {
 
-	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+	if ctx == nil {
 
-	result, err := collection.UpdateOne(ctx, bson.D{{"uuid", uuid}}, bson.D{{"$set", model}})
+		ctx = context.TODO()
+	}
+
+	var targetFilter bson.D = bson.D{{"uuid", uuid}}
+
+	if len(extraFilters) > 0 {
+
+		targetFilter = append(targetFilter, extraFilters...)
+	}
+
+	result, err := collection.UpdateOne(ctx, targetFilter, bson.D{{"$set", model}})
 
 	if err != nil {
 
@@ -267,7 +314,10 @@ func updateDocument[T any](uuid *uuid.UUID, model *T, collection *mongo.Collecti
 
 func deleteDocument(uuid uuid.UUID, collection *mongo.Collection, ctx context.Context) error {
 
-	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
 
 	_, err := collection.DeleteOne(ctx, bson.D{{"uuid", uuid}})
 

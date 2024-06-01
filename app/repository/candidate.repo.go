@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	CANDIDATE_COLLECTION_NAME  = "candidates"
-	CANDIDATE_SIGNING_INFO_KEY = "signingInfo"
+	CANDIDATE_COLLECTION_NAME   = "candidates"
+	CANDIDATE_SIGNING_INFO_KEY  = "signingInfo"
+	CANDIDATE_CAMPAIGN_UUID_KEY = "campaignUUID"
 )
 
 type (
@@ -92,15 +93,19 @@ func (this *CandidateRepository) Update(candidate *model.Candidate, ctx context.
 
 func (this *CandidateRepository) UpdateSigningInfo(
 	candidateUUID uuid.UUID,
+	campaignUUID uuid.UUID,
 	query *CandidateSigninInfoUpdateQuery,
 	ctx context.Context,
 ) error {
 
-	return updateDocument(
+	return updateDocument[bson.D](
 		libCommon.PointerPrimitive(candidateUUID),
-		query,
+		&bson.D{
+			{CANDIDATE_SIGNING_INFO_KEY, query},
+		},
 		this.collection,
 		ctx,
+		bson.E{CANDIDATE_CAMPAIGN_UUID_KEY, campaignUUID},
 	)
 }
 

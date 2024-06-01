@@ -2,7 +2,6 @@ package repository
 
 import (
 	"app/domain/model"
-	libCommon "app/lib/common"
 	"context"
 	"time"
 
@@ -68,7 +67,10 @@ func (this *CampaignRepository) GetPendingCampaigns(
 	ctx context.Context,
 ) (data *PaginationPack[model.Campaign], err error) {
 
-	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
 
 	ret, err := getDocumentsPageByID[model.Campaign](_id, pageLimit, isPrevDir, nil, this.collection, ctx,
 		bson.E{
@@ -109,7 +111,10 @@ func (this *CampaignRepository) GetCampaignList(
 ) (data *PaginationPack[model.Campaign], err error) {
 
 	//page = this.returnPageThresholdIfOutOfRange(page)
-	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
 	//return getDocuments[model.Campaign](page, this.collection, nil)
 	ret, err := getDocumentsPageByID[model.Campaign](_id, pageLimit, isPrevDir, nil, this.collection, ctx)
 

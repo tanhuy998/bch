@@ -47,7 +47,15 @@ func (this *UpdateCampaignUseCase) Execute(
 		return nil, errors.New("not found")
 	}
 
-	campaignUpdated.Title = libCommon.Ternary(inputModel.Title != nil || *inputModel.Title != "", inputModel.Title, nil)
+	if inputModel.Title != nil || *inputModel.Title != "" {
+
+		campaignUpdated.Title = inputModel.Title
+
+	} else {
+
+		campaignUpdated.Title = nil
+	}
+
 	campaignUpdated.Expire = inputModel.Expire
 
 	err = this.ModifyCampaignService.Serve(uuid, campaignUpdated)

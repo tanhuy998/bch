@@ -9,7 +9,7 @@ import (
 
 type (
 	ICommitCandidateSigningInfo interface {
-		Serve(candidateUUID string, data *model.CandidateSigningInfo) error
+		Serve(candidateUUID_str string, campaignUUID_str string, data *model.CandidateSigningInfo) error
 	}
 
 	CommitCandidateSigningInfoService struct {
@@ -19,10 +19,18 @@ type (
 
 func (this *CommitCandidateSigningInfoService) Serve(
 	candidateUUID_str string,
+	campaignUUID_str string,
 	data *model.CandidateSigningInfo,
 ) error {
 
-	uuid, err := uuid.Parse(candidateUUID_str)
+	candidateUUID, err := uuid.Parse(candidateUUID_str)
+
+	if err != nil {
+
+		return err
+	}
+
+	campaignUUID, err := uuid.Parse(campaignUUID_str)
 
 	if err != nil {
 
@@ -33,7 +41,7 @@ func (this *CommitCandidateSigningInfoService) Serve(
 		SigningInfo: data,
 	}
 
-	this.CandidateRepo.UpdateSigningInfo(uuid, &updateQuery, nil)
+	this.CandidateRepo.UpdateSigningInfo(candidateUUID, campaignUUID, &updateQuery, nil)
 
 	return nil
 }

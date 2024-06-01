@@ -2,7 +2,6 @@ package adminService
 
 import (
 	"app/domain/model"
-	libCommon "app/lib/common"
 	"app/repository"
 	"context"
 	"errors"
@@ -86,7 +85,10 @@ func (this *AdminGetCampaignCandidateListService) Query(
 	ctx context.Context,
 ) (*repository.PaginationPackWithHeader[model.Candidate, model.Campaign], error) {
 
-	ctx = libCommon.Ternary(ctx == nil, context.TODO(), ctx)
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
 	defer (*session).EndSession(ctx)
 
 	pack, err := (*session).WithTransaction(

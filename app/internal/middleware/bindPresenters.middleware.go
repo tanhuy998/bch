@@ -3,7 +3,6 @@ package middleware
 import (
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
-	libCommon "app/lib/common"
 	libError "app/lib/error"
 	"io"
 
@@ -69,7 +68,7 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 		if err != nil {
 
 			ctx.StopWithJSON(400, &responsePresenter.ErrorResponse{
-				Message: libCommon.Ternary(isValidationError(err), "invalid input", err.Error()),
+				Message: err.Error(),
 			})
 			return
 		}

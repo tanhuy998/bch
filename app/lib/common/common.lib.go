@@ -1,13 +1,14 @@
 package libCommon
 
 import (
+	"fmt"
 	"reflect"
 )
 
 func Ternary[T any](criteria bool, valIfTrue T, valIfFalse T) T {
 
 	if criteria {
-
+		fmt.Println("true", criteria)
 		return valIfTrue
 	}
 
