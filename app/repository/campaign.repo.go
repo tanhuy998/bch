@@ -13,6 +13,7 @@ import (
 
 const (
 	CAMPAIGN_COLLECTION_NAME = "campaigns"
+	CAMPAIGN_UUID_KEY        = "campaignUUID"
 )
 
 type CampaignRepository struct {

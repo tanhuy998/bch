@@ -24,13 +24,16 @@ func initCandidateSigningApi(app *iris.Application) *mvc.Application {
 			/*
 				Get Signing info of a candidate
 			*/
-			activator.Handle("GET", "/campaign/{campaignUUID:string}/candidate/{candidateUUID:string}", "GetSigningInfo")
+			activator.Handle(
+				"GET", "/campaign/{campaignUUID}/candidate/{candidateUUID}", "GetSingleCandidateSigningInfo",
+				middleware.BindPresenters[requestPresenter.GetSingleCandidateSigningInfoRequest, responsePresenter.GetSingleCandidateSigningInfoResponse](container),
+			)
 
 			/*
 				Post signing info of a candidate
 			*/
 			activator.Handle(
-				"PATCH", "/campaign/{campaignUUID:string}/candidate/{candidateUUID:string}", "CommitCandidateSigningInfo",
+				"PATCH", "/campaign/{campaignUUID}/candidate/{candidateUUID}", "CommitCandidateSigningInfo",
 				middleware.BindPresenters[requestPresenter.CommitCandidateSigningInfoRequest, responsePresenter.CommitCandidateSigningInfoResponse](container),
 			)
 		}),

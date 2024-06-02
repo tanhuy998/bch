@@ -64,6 +64,37 @@ func ParseCursor[T any](cursor *mongo.Cursor, ctx context.Context) ([]*T, error)
 	return ret, nil
 }
 
+func findOneDocument[T any](
+	query bson.D,
+	collection *mongo.Collection,
+	ctx context.Context,
+	projections ...bson.E,
+) (*T, error) {
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	var model *T = new(T)
+
+	opts := options.FindOne()
+
+	if len(projections) > 0 {
+
+		opts.Projection = projections
+	}
+
+	err := collection.FindOne(ctx, query, opts).Decode(model)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return model, nil
+}
+
 func getDocuments[T any](
 	page int64,
 	collection *mongo.Collection,

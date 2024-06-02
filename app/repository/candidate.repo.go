@@ -71,6 +71,13 @@ func (this *CandidateRepository) GetDBClient() *mongo.Client {
 	return this.collection.Database().Client()
 }
 
+func (this *CandidateRepository) Find(
+	query bson.D, ctx context.Context,
+) (*model.Candidate, error) {
+
+	return findOneDocument[model.Candidate](query, this.collection, ctx)
+}
+
 func (this *CandidateRepository) FindByUUID(uuid uuid.UUID, ctx context.Context) (*model.Candidate, error) {
 
 	return findDocumentByUUID[model.Candidate](uuid, this.collection, ctx, bson.E{CANDIDATE_SIGNING_INFO_KEY, 0})
@@ -119,6 +126,13 @@ func (this *CandidateRepository) UpdateSigningInfo(
 	}
 
 	return CheckUpdateOneResult(result)
+}
+
+func (this *CandidateRepository) GetOneSigningInfo(
+	query bson.D, ctx context.Context, projections ...bson.E,
+) (*model.CandidateSigningInfo, error) {
+
+	return findOneDocument[model.CandidateSigningInfo](query, this.collection, ctx, projections...)
 }
 
 func (this *CandidateRepository) Delete(uuid uuid.UUID, ctx context.Context) error {

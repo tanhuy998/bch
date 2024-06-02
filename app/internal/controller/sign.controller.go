@@ -9,11 +9,16 @@ import (
 )
 
 type SignController struct {
-	CommitCandidateSigningInfoUseCase usecase.ICommitCandidateSigningInfo
+	CommitCandidateSigningInfoUseCase    usecase.ICommitCandidateSigningInfo
+	GetSingleCandidateSigningInfoUseCase usecase.IGetSingleCandidateSigningInfo
 }
 
-func (this *SignController) GetSigningInfo() {
+func (this *SignController) GetSingleCandidateSigningInfo(
+	input *requestPresenter.GetSingleCandidateSigningInfoRequest,
+	output *responsePresenter.GetSingleCandidateSigningInfoResponse,
+) (mvc.Result, error) {
 
+	return this.GetSingleCandidateSigningInfoUseCase.Execute(input, output)
 }
 
 func (this *SignController) CommitCandidateSigningInfo(

@@ -7,6 +7,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -74,9 +75,11 @@ type (
 
 	ICandidateRepository interface {
 		IMongoDBRepository
+		Find(query bson.D, ctx context.Context) (*model.Candidate, error)
 		FindByUUID(uuid.UUID, context.Context) (*model.Candidate, error)
 		Get(page int, ctx context.Context) ([]*model.Candidate, error)
 		Create(*model.Candidate, context.Context) error
+		GetOneSigningInfo(query bson.D, ctx context.Context, projections ...bson.E) (*model.CandidateSigningInfo, error)
 		Update(*model.Candidate, context.Context) error
 		UpdateSigningInfo(candidateUUID uuid.UUID, campaignUUID uuid.UUID, query *CandidateSigninInfoUpdateQuery, ctx context.Context) error
 		Delete(uuid.UUID, context.Context) error
