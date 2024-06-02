@@ -4,9 +4,9 @@ import (
 	"app/domain/model"
 	"app/internal/common"
 	"app/repository"
-	"fmt"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
@@ -38,7 +38,13 @@ func (this *GetSingleCandidateSigningInfoService) Serve(
 		return nil, err
 	}
 
-	candidate, err := this.CandidateRepo.FindByUUID(candidateUUID, nil)
+	candidate, err := this.CandidateRepo.Find(
+		bson.D{
+			{"uuid", candidateUUID},
+			{repository.CAMPAIGN_UUID_KEY, campaignUUID},
+		},
+		nil,
+	)
 
 	if err != nil {
 
@@ -49,6 +55,6 @@ func (this *GetSingleCandidateSigningInfoService) Serve(
 
 		return nil, common.ERR_HTTP_NOT_FOUND
 	}
-	fmt.Println(candidate)
+
 	return candidate.SigningInfo, nil
 }

@@ -1,11 +1,11 @@
 package usecase
 
 import (
+	"app/domain/model"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
 	candidateService "app/service/candidate"
-	"fmt"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -42,9 +42,11 @@ func (this *GetSingleCandidateSigningInfoUseCase) Execute(
 
 	res := NewResponse()
 
+	HideSensitiveInfo(singingInfo)
+
 	output.Message = "success"
 	output.Data = singingInfo
-	fmt.Println(output)
+
 	err = MarshalResponseContent(output, res)
 
 	if err != nil {
@@ -53,4 +55,9 @@ func (this *GetSingleCandidateSigningInfoUseCase) Execute(
 	}
 
 	return res, nil
+}
+
+func HideSensitiveInfo(signingInfo *model.CandidateSigningInfo) {
+
+	signingInfo.CivilIndentity.IDNumber = ""
 }
