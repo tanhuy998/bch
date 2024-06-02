@@ -95,7 +95,14 @@ func (this *CampaignRepository) Create(model *model.Campaign, ctx context.Contex
 
 func (this *CampaignRepository) Update(model *model.Campaign, ctx context.Context) error {
 
-	return updateDocument(model.UUID, model, this.collection, ctx)
+	result, err := updateDocument(model.UUID, model, this.collection, ctx)
+
+	if err != nil {
+
+		return err
+	}
+
+	return CheckUpdateOneResult(result)
 }
 
 func (this *CampaignRepository) Delete(uuid uuid.UUID, ctx context.Context) error {

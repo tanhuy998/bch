@@ -4,6 +4,7 @@ import (
 	"app/domain/model"
 	libCommon "app/lib/common"
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -12,6 +13,11 @@ import (
 
 const (
 	ITEM_PER_PAGE = 10
+)
+
+var (
+	ERR_UPDATE_NO_MATCH       error = errors.New("no match document to update")
+	NOTHING_CHANGED_ON_UPDATE error = errors.New("nothing changed")
 )
 
 type (
@@ -126,4 +132,18 @@ func (this *AbstractMongoRepository) returnPageThresholdIfOutOfRange(inputPageNu
 func (this *AbstractMongoRepository) Collection() *mongo.Collection {
 
 	return this.collection
+}
+
+func CheckUpdateOneResult(result *mongo.UpdateResult) error {
+
+	if result.MatchedCount < 1 {
+
+		return ERR_UPDATE_NO_MATCH
+
+	} else if result.ModifiedCount == 0 {
+
+		return NOTHING_CHANGED_ON_UPDATE
+	}
+
+	return nil
 }

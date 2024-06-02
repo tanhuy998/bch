@@ -88,7 +88,14 @@ func (this *CandidateRepository) Create(candidate *model.Candidate, ctx context.
 
 func (this *CandidateRepository) Update(candidate *model.Candidate, ctx context.Context) error {
 
-	return updateDocument(candidate.UUID, candidate, this.collection, ctx)
+	result, err := updateDocument(candidate.UUID, candidate, this.collection, ctx)
+
+	if err != nil {
+
+		return err
+	}
+
+	return CheckUpdateOneResult(result)
 }
 
 func (this *CandidateRepository) UpdateSigningInfo(
@@ -98,15 +105,20 @@ func (this *CandidateRepository) UpdateSigningInfo(
 	ctx context.Context,
 ) error {
 
-	return updateDocument[bson.D](
+	result, err := updateDocument[CandidateSigninInfoUpdateQuery](
 		libCommon.PointerPrimitive(candidateUUID),
-		&bson.D{
-			{CANDIDATE_SIGNING_INFO_KEY, query},
-		},
+		query,
 		this.collection,
 		ctx,
 		bson.E{CANDIDATE_CAMPAIGN_UUID_KEY, campaignUUID},
 	)
+
+	if err != nil {
+
+		return err
+	}
+
+	return CheckUpdateOneResult(result)
 }
 
 func (this *CandidateRepository) Delete(uuid uuid.UUID, ctx context.Context) error {

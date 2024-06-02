@@ -283,7 +283,7 @@ func createDocument[T any](model *T, collection *mongo.Collection, ctx context.C
 	return nil
 }
 
-func updateDocument[T any](uuid *uuid.UUID, model *T, collection *mongo.Collection, ctx context.Context, extraFilters ...bson.E) error {
+func updateDocument[T any](uuid *uuid.UUID, model *T, collection *mongo.Collection, ctx context.Context, extraFilters ...bson.E) (*mongo.UpdateResult, error) {
 
 	if ctx == nil {
 
@@ -301,15 +301,10 @@ func updateDocument[T any](uuid *uuid.UUID, model *T, collection *mongo.Collecti
 
 	if err != nil {
 
-		return err
+		return nil, err
 	}
 
-	if result.ModifiedCount == 0 {
-
-		return errors.New("No matched document to update")
-	}
-
-	return nil
+	return result, nil
 }
 
 func deleteDocument(uuid uuid.UUID, collection *mongo.Collection, ctx context.Context) error {

@@ -41,7 +41,12 @@ func (this *CommitCandidateSigningInfoService) Serve(
 		SigningInfo: data,
 	}
 
-	this.CandidateRepo.UpdateSigningInfo(candidateUUID, campaignUUID, &updateQuery, nil)
+	err = this.CandidateRepo.UpdateSigningInfo(candidateUUID, campaignUUID, &updateQuery, nil)
+
+	if err != nil {
+
+		return err
+	}
 
 	return nil
 }

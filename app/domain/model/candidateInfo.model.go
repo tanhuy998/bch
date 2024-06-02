@@ -71,7 +71,7 @@ type FamilyMember struct {
 
 type CivilHistory struct {
 	BeforeReunification string `json:"beforeReunification" bson:"beforeReunification"`
-	AfterReunification  string `json:"afterReunification" bson:"beforeReunification"`
+	AfterReunification  string `json:"afterReunification" bson:"afterReunification"`
 }
 
 // type FamilyInfo struct {
