@@ -3,8 +3,8 @@ package config
 import (
 	"app/infrastructure/db"
 	libConfig "app/lib/config"
-	"app/port"
 	"app/repository"
+	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 	authService "app/service/auth"
 	candidateService "app/service/candidate"
@@ -86,13 +86,13 @@ func RegisterServices(app router.Party) {
 
 	fmt.Println("Auth service initialized.")
 
-	libConfig.BindDependency[port.IActionResult, usecase.ActionResultUseCase](container, nil)
+	//libConfig.BindDependency[port.IActionResult, usecase.ActionResultUseCase](container, nil)
 
 	/*
 		init app validator
 	*/
 	libConfig.BindDependency[context.Validator, validator.Validate](container, validator.New())
-
+	libConfig.BindDependency[actionResultService.IActionResult, actionResultService.ResponseResultService](container, nil)
 	/*
 		Bind Admin Campaign controller dependent services
 	*/

@@ -5,6 +5,7 @@ import (
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
 	libCommon "app/lib/common"
+	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -20,6 +21,7 @@ type (
 
 	GetSingleCampaignUseCase struct {
 		GetSingleCampaignService adminService.IGetCampaign
+		ActionResult             actionResultService.IActionResult
 	}
 )
 
@@ -37,7 +39,8 @@ func (this *GetSingleCampaignUseCase) Execute(
 
 	if err != nil {
 
-		return nil, err
+		//return nil, err
+		return this.ActionResult.ServeErrorResponse(err)
 	}
 
 	// response := responsePresenter.GetSingleCampaignResponse{
@@ -48,17 +51,19 @@ func (this *GetSingleCampaignUseCase) Execute(
 	output.Message = "succes"
 	output.Data = data
 
-	res := NewResponse()
+	// res := NewResponse()
 
-	err = MarshalResponseContent(output, res)
+	// err = MarshalResponseContent(output, res)
 
-	// resContent, err := json.Marshal(response)
+	// // resContent, err := json.Marshal(response)
 
-	if err != nil {
+	// if err != nil {
 
-		return nil, err
-	}
+	// 	return nil, err
+	// }
 
-	res.Code = 200
-	return res, nil
+	//res.Code = 200
+	// return res, nil
+
+	return this.ActionResult.ServeResponse(output)
 }
