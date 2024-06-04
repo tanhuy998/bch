@@ -5,6 +5,7 @@ import (
 	"app/repository"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
@@ -26,5 +27,10 @@ func (this *AdminGetSingleCandidateByUUIDService) Serve(uuid_str string) (*model
 		return nil, err
 	}
 
-	return this.CandidateRepo.FindByUUID(uuid, nil)
+	return this.CandidateRepo.Find(
+		bson.D{
+			{"uuid", uuid},
+		},
+		nil,
+	)
 }
