@@ -5,6 +5,7 @@ import (
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
+	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -20,6 +21,7 @@ type (
 
 	GetCampaignCandidateListUseCase struct {
 		GetCampaignCandidateListService adminService.IGetCampaignCandidateList
+		ActionResultService             actionResultService.IActionResult
 	}
 )
 
@@ -42,10 +44,9 @@ func (this *GetCampaignCandidateListUseCase) Execute(
 
 	if err != nil {
 
-		return nil, err
+		return this.ActionResultService.ServeErrorResponse(err)
 	}
 
-	res := NewResponse()
 	output.Message = "success"
 	output.Data = dataPack.Data
 
@@ -60,15 +61,8 @@ func (this *GetCampaignCandidateListUseCase) Execute(
 
 	if err != nil {
 
-		return nil, err
+		return this.ActionResultService.ServeErrorResponse(err)
 	}
 
-	err = MarshalResponseContent(output, res)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	return res, nil
+	return this.ActionResultService.ServeResponse(output)
 }

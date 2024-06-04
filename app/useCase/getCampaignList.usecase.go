@@ -6,8 +6,8 @@ import (
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
 	"app/repository"
+	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
-	"fmt"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -24,6 +24,7 @@ type (
 
 	GetCampaignListUseCase struct {
 		GetCampaignListService adminService.IGetCampaignList
+		ActionResultService    actionResultService.IActionResult
 	}
 )
 
@@ -34,35 +35,27 @@ func (this *GetCampaignListUseCase) Execute(
 
 	if input == nil {
 
-		return nil, common.ERR_INVALID_HTTP_INPUT
+		return this.ActionResultService.ServeErrorResponse(common.ERR_INVALID_HTTP_INPUT)
 	}
 
 	dataPack, err := this.GetCampaignListService.Serve(input.PivotID, input.PageSizeLimit, input.IsPrev)
 
 	if err != nil {
 
-		return nil, err
+		return this.ActionResultService.ServeErrorResponse(err)
 	}
 
 	pageNumber := common.PaginationPage(1)
 
-	res := NewResponse()
 	output.Message = "success"
 	output.Data = dataPack.Data
 
 	err = preparePaginationNavigation[model.Campaign](output, dataPack, pageNumber)
-	fmt.Println("usecase", err)
-	if err != nil {
-
-		return nil, err
-	}
-
-	err = MarshalResponseContent(output, res)
 
 	if err != nil {
 
-		return nil, err
+		return this.ActionResultService.ServeErrorResponse(err)
 	}
 
-	return res, nil
+	return this.ActionResultService.ServeResponse(output)
 }

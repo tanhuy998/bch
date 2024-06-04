@@ -4,6 +4,7 @@ import (
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
+	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -19,6 +20,7 @@ type (
 
 	GetPendingCampaignsUseCase struct {
 		GetPendingCampaignsService adminService.IGetPendingCampaigns
+		ActionResultService        actionResultService.IActionResult
 	}
 )
 
@@ -29,25 +31,17 @@ func (this *GetPendingCampaignsUseCase) Execute(
 
 	if input == nil {
 
-		return nil, common.ERR_INVALID_HTTP_INPUT
+		return this.ActionResultService.ServeErrorResponse(common.ERR_INVALID_HTTP_INPUT)
 	}
 
 	_, err := this.GetPendingCampaignsService.Serve(input.PivotID, input.PageSizeLimit, input.IsPrev)
 
 	if err != nil {
 
-		return nil, err
+		return this.ActionResultService.ServeErrorResponse(err)
 	}
 
-	res := NewResponse()
 	output.Message = "success"
 
-	err = MarshalResponseContent(output, res)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	return res, nil
+	return this.ActionResultService.ServeResponse(output)
 }

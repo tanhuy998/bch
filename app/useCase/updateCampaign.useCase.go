@@ -6,8 +6,8 @@ import (
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
 	libCommon "app/lib/common"
+	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
-	"errors"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -20,6 +20,7 @@ type (
 	UpdateCampaignUseCase struct {
 		GetSingleCampaignService adminService.IGetCampaign
 		ModifyCampaignService    adminService.IModifyExistingCampaign
+		ActionResultService      actionResultService.IActionResult
 	}
 )
 
@@ -37,14 +38,14 @@ func (this *UpdateCampaignUseCase) Execute(
 
 	if libCommon.Or(uuid == "", inputModel == nil) {
 
-		return nil, common.ERR_INVALID_HTTP_INPUT
+		return this.ActionResultService.Prepare().ServeErrorResponse(common.ERR_INVALID_HTTP_INPUT)
 	}
 
 	targetCampaingn, err := this.GetSingleCampaignService.Serve(uuid)
 
 	if err != nil || targetCampaingn == nil {
 
-		return nil, errors.New("not found")
+		return this.ActionResultService.Prepare().ServeErrorResponse(common.ERR_HTTP_NOT_FOUND)
 	}
 
 	if inputModel.Title != nil || *inputModel.Title != "" {
@@ -62,19 +63,10 @@ func (this *UpdateCampaignUseCase) Execute(
 
 	if err != nil {
 
-		return nil, err
+		return this.ActionResultService.ServeErrorResponse(err)
 	}
 
-	res := NewResponse()
 	output.Message = "success"
-	err = MarshalResponseContent(output, res)
 
-	if err != nil {
-
-		return nil, err
-	}
-
-	res.Code = 200
-
-	return res, nil
+	return this.ActionResultService.Prepare().ServeResponse(output)
 }

@@ -6,6 +6,7 @@ import (
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
 	libCommon "app/lib/common"
+	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 	"time"
 
@@ -22,6 +23,7 @@ type (
 
 	AddNewCandidateUseCase struct {
 		AddNewCandidateService adminService.IAddNewCandidate
+		ActionResultService    actionResultService.IActionResult
 	}
 )
 
@@ -30,14 +32,9 @@ func (this *AddNewCandidateUseCase) Execute(
 	output *responsePresenter.AddNewCandidateResponse,
 ) (mvc.Result, error) {
 
-	if input.CampaignUUID == "" {
+	if input.CampaignUUID == "" || input.InputCandidate == nil {
 
-		return nil, common.ERR_INVALID_HTTP_INPUT
-	}
-
-	if input.InputCandidate == nil {
-
-		return nil, common.ERR_BAD_REQUEST
+		return this.ActionResultService.ServeErrorResponse(common.ERR_INVALID_HTTP_INPUT)
 	}
 
 	inputCandidate := input.InputCandidate
@@ -48,18 +45,13 @@ func (this *AddNewCandidateUseCase) Execute(
 
 	if err != nil {
 
-		return nil, err
+		return this.ActionResultService.ServeErrorResponse(err)
 	}
 
-	res := NewResponse()
 	output.Message = "success"
 
-	err = MarshalResponseContent(output, res)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	return res, nil
+	return this.ActionResultService.
+		Prepare().
+		SetCode(201).
+		ServeResponse(output)
 }

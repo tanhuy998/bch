@@ -9,24 +9,26 @@ import (
 
 type (
 	IActionResult interface {
-		ServeResponse(content interface{}) (IResponseBuilder, error)
-		ServeErrorResponse(error) (IResponseBuilder, error)
+		Prepare() IResponse
+		ServeResponse(content interface{}) (IResponse, error)
+		ServeErrorResponse(error) (IResponse, error)
 	}
 
-	IResponseBuilder interface {
+	IResponse interface {
 		mvc.Result
-		SetCode(int) IResponseBuilder
-		Redirect(link string) IResponseBuilder
-		ContentType(string) IResponseBuilder
-		SetContent([]byte) IResponseBuilder
+		SetCode(int) IResponse
+		Redirect(link string) IResponse
+		ContentType(string) IResponse
+		SetContent([]byte) IResponse
+		ServeResponse(content interface{}) (IResponse, error)
+		ServeErrorResponse(error) (IResponse, error)
 	}
 
 	/*
 		ResponseResultService defines preset for application/json content type
 		for Iris result.
 	*/
-	ResponseResultService struct {
-	}
+	ResponseResultService struct{}
 
 	Iris_Response = mvc.Response
 
@@ -39,9 +41,7 @@ type (
 	}
 )
 
-func (this *ResponseResultService) ServeResponse(content interface{}) (IResponseBuilder, error) {
-
-	res := NewResponseEntity()
+func _ServeResponse(res IResponse, content interface{}) (IResponse, error) {
 
 	bytes, err := json.Marshal(content)
 
@@ -56,9 +56,7 @@ func (this *ResponseResultService) ServeResponse(content interface{}) (IResponse
 	return res, nil
 }
 
-func (this *ResponseResultService) ServeErrorResponse(err error) (IResponseBuilder, error) {
-
-	res := NewResponseEntity()
+func _ServeErrorResponse(res IResponse, err error) (IResponse, error) {
 
 	content := &ErrorResponseFormat{
 		Message: err.Error(),
@@ -77,7 +75,22 @@ func (this *ResponseResultService) ServeErrorResponse(err error) (IResponseBuild
 	return res, nil
 }
 
-func NewResponseEntity() IResponseBuilder {
+func (this *ResponseResultService) Prepare() IResponse {
+
+	return NewResponseEntity()
+}
+
+func (this *ResponseResultService) ServeResponse(content interface{}) (IResponse, error) {
+
+	return _ServeResponse(NewResponseEntity(), content)
+}
+
+func (this *ResponseResultService) ServeErrorResponse(err error) (IResponse, error) {
+
+	return _ServeErrorResponse(NewResponseEntity(), err)
+}
+
+func NewResponseEntity() IResponse {
 
 	return &ResponseEntity{
 		Iris_Response: &mvc.Response{
@@ -91,30 +104,40 @@ func (this *ResponseEntity) Dispatch(ctx iris.Context) {
 	this.Iris_Response.Dispatch(ctx)
 }
 
-func (this *ResponseEntity) SetCode(code int) IResponseBuilder {
+func (this *ResponseEntity) SetCode(code int) IResponse {
 
 	this.Iris_Response.Code = code
 
 	return this
 }
 
-func (this *ResponseEntity) Redirect(link string) IResponseBuilder {
+func (this *ResponseEntity) Redirect(link string) IResponse {
 
 	this.Iris_Response.Path = link
 
 	return this
 }
 
-func (this *ResponseEntity) ContentType(t string) IResponseBuilder {
+func (this *ResponseEntity) ContentType(t string) IResponse {
 
 	this.Iris_Response.ContentType = t
 
 	return this
 }
 
-func (this *ResponseEntity) SetContent(content []byte) IResponseBuilder {
+func (this *ResponseEntity) SetContent(content []byte) IResponse {
 
 	this.Iris_Response.Content = content
 
 	return this
+}
+
+func (this *ResponseEntity) ServeResponse(content interface{}) (IResponse, error) {
+
+	return _ServeResponse(this, content)
+}
+
+func (this *ResponseEntity) ServeErrorResponse(err error) (IResponse, error) {
+
+	return _ServeErrorResponse(this, err)
 }

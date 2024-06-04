@@ -99,15 +99,15 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 				middleware.BindPresenters[requestPresenter.UpdateCampaignRequest, responsePresenter.UpdateCampaignResponse](container),
 			).SetName("UPDATE_CAMPAIGN")
 
-			activator.Handle(
-				"DELETE", "/{uuid:uuid}", "DeleteCampaign",
-				middleware.Authorize(authService.AuthorizationLicense{
-					Fields: campaignField,
-					Claims: []authService.AuthorizationClaim{auth_post_claim},
-					//Groups: []authService.AuthorizationGroup{auth_commander_group},
-				}),
-				middleware.BindPresenters[requestPresenter.DeleteCampaignRequest, responsePresenter.DeleteCampaignResponse](container),
-			).SetName("DELETE_CAMPAIGN")
+			// activator.Handle(
+			// 	"DELETE", "/{uuid:uuid}", "DeleteCampaign",
+			// 	middleware.Authorize(authService.AuthorizationLicense{
+			// 		Fields: campaignField,
+			// 		Claims: []authService.AuthorizationClaim{auth_post_claim},
+			// 		//Groups: []authService.AuthorizationGroup{auth_commander_group},
+			// 	}),
+			// 	middleware.BindPresenters[requestPresenter.DeleteCampaignRequest, responsePresenter.DeleteCampaignResponse](container),
+			// ).SetName("DELETE_CAMPAIGN")
 
 			activator.Handle(
 				"PATCH", "/test/{uuid:uuid}", "TestPatch",

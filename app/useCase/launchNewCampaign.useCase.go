@@ -6,6 +6,7 @@ import (
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
 	libCommon "app/lib/common"
+	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 	"time"
 
@@ -19,6 +20,7 @@ type (
 
 	LaunchNewCampaignUseCase struct {
 		LaunchNewCampaignService adminService.ILaunchNewCampaign
+		ActionResultService      actionResultService.IActionResult
 	}
 )
 
@@ -34,28 +36,21 @@ func (this *LaunchNewCampaignUseCase) Execute(
 
 	if inputCampaign == nil {
 
-		return nil, common.ERR_INVALID_HTTP_INPUT
+		return this.ActionResultService.ServeErrorResponse(common.ERR_INVALID_HTTP_INPUT)
 	}
 
 	createdUUID, err := this.LaunchNewCampaignService.Execute(inputCampaign)
 
 	if err != nil {
 
-		return nil, err
+		return this.ActionResultService.ServeErrorResponse(err)
 	}
-
-	res := NewResponse()
 
 	output.SetMessage("success")
 	output.GetData().CreatedUUID = createdUUID
-	err = MarshalResponseContent(output, res)
 
-	if err != nil {
-
-		return nil, err
-	}
-
-	res.Code = 201
-
-	return res, nil
+	return this.ActionResultService.
+		Prepare().
+		SetCode(201).
+		ServeResponse(output)
 }

@@ -115,14 +115,14 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 			/*
 				Delete a
 			*/
-			activator.Handle(
-				"DELETE", "/{uuid}", "DeleteCandidate",
-				middleware.Authorize(authService.AuthorizationLicense{
-					Fields: candidateField,
-					//Groups: []authService.AuthorizationGroup{auth_commander_group},
-					Claims: []authService.AuthorizationClaim{auth_delete_claim},
-				}),
-			)
+			// activator.Handle(
+			// 	"DELETE", "/{uuid}", "DeleteCandidate",
+			// 	middleware.Authorize(authService.AuthorizationLicense{
+			// 		Fields: candidateField,
+			// 		//Groups: []authService.AuthorizationGroup{auth_commander_group},
+			// 		Claims: []authService.AuthorizationClaim{auth_delete_claim},
+			// 	}),
+			// )
 		}),
 	)
 }

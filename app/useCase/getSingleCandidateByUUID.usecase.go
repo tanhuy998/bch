@@ -4,6 +4,7 @@ import (
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
+	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -19,6 +20,7 @@ type (
 
 	GetSingleCandidateByUUIDUseCase struct {
 		GetSingleCandidateService adminService.IGetSingleCandidateByUUID
+		ActionResultService       actionResultService.IActionResult
 	}
 )
 
@@ -29,31 +31,23 @@ func (this *GetSingleCandidateByUUIDUseCase) Execute(
 
 	if input.UUID == "" {
 
-		return nil, common.ERR_INVALID_HTTP_INPUT
+		return this.ActionResultService.ServeErrorResponse(common.ERR_INVALID_HTTP_INPUT)
 	}
 
 	candidate, err := this.GetSingleCandidateService.Serve(input.UUID)
 
 	if err != nil {
 
-		return nil, err
+		return this.ActionResultService.ServeErrorResponse(err)
 	}
 
 	if candidate == nil {
 
-		return nil, common.ERR_HTTP_NOT_FOUND
+		return this.ActionResultService.ServeErrorResponse(common.ERR_HTTP_NOT_FOUND)
 	}
 
-	res := NewResponse()
 	output.Data = candidate
 	output.Message = "success"
 
-	err = MarshalResponseContent(output, res)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	return res, nil
+	return this.ActionResultService.ServeResponse(output)
 }

@@ -32,38 +32,18 @@ func (this *GetSingleCampaignUseCase) Execute(
 
 	if libCommon.Or(input == nil, input.UUID == "") {
 
-		return nil, common.ERR_INVALID_HTTP_INPUT
+		return this.ActionResult.ServeErrorResponse(common.ERR_INVALID_HTTP_INPUT)
 	}
 
 	data, err := this.GetSingleCampaignService.Serve(input.UUID)
 
 	if err != nil {
 
-		//return nil, err
 		return this.ActionResult.ServeErrorResponse(err)
 	}
 
-	// response := responsePresenter.GetSingleCampaignResponse{
-	// 	Message: "success",
-	// 	Data:    *data,
-	// }
-
 	output.Message = "succes"
 	output.Data = data
-
-	// res := NewResponse()
-
-	// err = MarshalResponseContent(output, res)
-
-	// // resContent, err := json.Marshal(response)
-
-	// if err != nil {
-
-	// 	return nil, err
-	// }
-
-	//res.Code = 200
-	// return res, nil
 
 	return this.ActionResult.ServeResponse(output)
 }

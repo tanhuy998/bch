@@ -5,6 +5,7 @@ import (
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
+	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -20,6 +21,7 @@ type (
 
 	ModifyExistingCandidateUseCase struct {
 		ModifyCandidateService adminService.IModifyExistingCandidate
+		ActionResultService    actionResultService.IActionResult
 	}
 )
 
@@ -30,7 +32,7 @@ func (this *ModifyExistingCandidateUseCase) Execute(
 
 	if input.UUID == "" {
 
-		return nil, common.ERR_INVALID_HTTP_INPUT
+		return this.ActionResultService.Prepare().ServeErrorResponse(common.ERR_INVALID_HTTP_INPUT)
 	}
 
 	inputData := input.Data
@@ -46,13 +48,10 @@ func (this *ModifyExistingCandidateUseCase) Execute(
 
 	if err != nil {
 
-		return nil, err
+		return this.ActionResultService.Prepare().ServeErrorResponse(err)
 	}
 
-	res := NewResponse()
 	output.Message = "success"
 
-	MarshalResponseContent(output, res)
-
-	return res, nil
+	return this.ActionResultService.Prepare().ServeResponse(output)
 }

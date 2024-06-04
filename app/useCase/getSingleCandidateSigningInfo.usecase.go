@@ -5,6 +5,7 @@ import (
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
+	actionResultService "app/service/actionResult"
 	candidateService "app/service/candidate"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -20,6 +21,7 @@ type (
 
 	GetSingleCandidateSigningInfoUseCase struct {
 		GetSingleCanidateSigingInfoServoce candidateService.IGetSingleCandidateSigningInfo
+		ActionResultService                actionResultService.IActionResult
 	}
 )
 
@@ -30,31 +32,22 @@ func (this *GetSingleCandidateSigningInfoUseCase) Execute(
 
 	if input.CampaignUUID == "" || input.CandidateUUID == "" {
 
-		return nil, common.ERR_INVALID_HTTP_INPUT
+		return this.ActionResultService.ServeErrorResponse(common.ERR_INVALID_HTTP_INPUT)
 	}
 
 	singingInfo, err := this.GetSingleCanidateSigingInfoServoce.Serve(input.CampaignUUID, input.CandidateUUID)
 
 	if err != nil {
 
-		return nil, err
+		return this.ActionResultService.ServeErrorResponse(err)
 	}
-
-	res := NewResponse()
 
 	HideSensitiveInfo(singingInfo)
 
 	output.Message = "success"
 	output.Data = singingInfo
 
-	err = MarshalResponseContent(output, res)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	return res, nil
+	return this.ActionResultService.ServeResponse(output)
 }
 
 func HideSensitiveInfo(signingInfo *model.CandidateSigningInfo) {
