@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/gofor-little/env"
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
@@ -103,21 +104,21 @@ func main() {
 
 	api.Init(app)
 
-	app.Run(
-		iris.TLS(
-			os.Getenv("HTTP_PORT"),
-			server_ssl_cert,
-			server_ssl_key,
-		),
-		iris.WithoutBodyConsumptionOnUnmarshal,
-		iris.WithOptimizations,
-	)
-
-	// app.Listen(
-	// 	env.Get("HTTP_PORT", ":80"),
+	// app.Run(
+	// 	iris.TLS(
+	// 		os.Getenv("HTTP_PORT"),
+	// 		server_ssl_cert,
+	// 		server_ssl_key,
+	// 	),
 	// 	iris.WithoutBodyConsumptionOnUnmarshal,
 	// 	iris.WithOptimizations,
 	// )
+
+	app.Listen(
+		env.Get("HTTP_PORT", ":80"),
+		iris.WithoutBodyConsumptionOnUnmarshal,
+		iris.WithOptimizations,
+	)
 }
 
 func readSSlCert() {
