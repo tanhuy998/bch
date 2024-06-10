@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react"
-import toggleSideBar from "../states/toggleSideBar"
-import { useSelector } from "react-redux"
 
 
-export default function SideBar (props) {
+// export default connect(
+//     function mapStateToProp(state) {
+//         console.log(state)
+//         return {
+//             sideBarCollapseState: state.toggleSideBar,
+//         }
+//     },
+// )(SideBar);
 
-    //const [sideBarActive, SetSideBareActive] = useState("active")
-
-    const toggleSideBar = useSelector(state => state.toggleSideBar)
+export default function SideBar({sideBarActive}) {
 
     return (
-        <nav id="sidebar" class={toggleSideBar}>
+        <nav id="sidebar" class={sideBarActive}>
             <div class="sidebar-header">
                 <img src="assets/img/bootstraper-logo.png" alt="bootraper logo" class="app-logo"/>
             </div>

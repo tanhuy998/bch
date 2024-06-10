@@ -9,9 +9,17 @@ import AdminTemplate from './components/adminTemplate';
 import AdminDashboad from './components/adminDashboard';
 import AdminCampaignsTable from './components/adminCampaignTable';
 import PaginationTable from './components/paginationTable';
+import { Provider } from 'react-redux';
 
+import { createContext } from 'react';
+import CampaignList from './api/aggregates/campaignList.api';
+
+const getCampaignList = new CampaignList()
 
 function App() {
+
+
+  
   return (
     
       <BrowserRouter>
@@ -19,10 +27,9 @@ function App() {
           <Route path='/' element={<Home />} />
           <Route path='/login' element={<Login />} />
           <Route path='/admin' element={<AdminTemplate />}>
-            <Route index element={<AdminDashboad/>}/>
-            <Route path="campaigns" element={<PaginationTable headers={['ID', 'Name', 'Salary', 'Contry', 'City']} title="Campaigns" />} />
+            <Route index element={<AdminDashboad />} />
+            <Route path="campaigns" element={<PaginationTable endpoint={getCampaignList} headers={['ID', 'Name', 'Salary', 'Contry', 'City']} title="Campaigns" />} />
           </Route>
-
           {/* <Route path='/admin/campaigns' element={<AdminTemplate renderContent={AdminCampaignsTable}/>}/>
           <Route path='/admin/camoaigns/pending' element={<AdminTemplate renderContent={() => PaginationTable({title: "Pending Campaigns", headers: ['ID', 'Name', 'Salary', 'Contry', 'City']})}/>}/>
           <Route path='/admin/campaigns/new' element={<AdminTemplate />}/>

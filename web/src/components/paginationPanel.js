@@ -1,3 +1,5 @@
+import {Link} from 'react-router-dom'
+
 function PaginationNavButton({label, endpoint, isPrevious}) {
 
     const direction = isPrevious ? "previous" : "next";
@@ -6,7 +8,8 @@ function PaginationNavButton({label, endpoint, isPrevious}) {
 
     return (
         <li class={tagClass} id={tagId}>
-            <a href={endpoint} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</a>
+            {/* <a href={endpoint} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</a> */}
+            <button to={endpoint} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</button>
         </li>
     )
 }

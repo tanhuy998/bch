@@ -1,19 +1,15 @@
-import { Component } from "react";
-import { toggleSideBar } from "../states/toggleSideBar";
-import { useDispatch } from "react-redux"
 
-export default function NavBar() {
 
-    const dispatch = useDispatch();
+export default function NavBar({toggleSideBar}) {
 
     return (
         <nav class="navbar navbar-expand-lg navbar-white bg-white">
-            <button type="button" id="sidebarCollapse" class="btn btn-light" onClick={() => { dispatch(toggleSideBar) }}>
+            <button type="button" id="sidebarCollapse" class="btn btn-light" onClick={() => { if (typeof toggleSideBar === 'function') toggleSideBar() }}>
                 <i class="fas fa-bars"></i><span></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="nav navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
+                    {/* <li class="nav-item dropdown">
                         <div class="nav-dropdown">
                             <a href="#" id="nav1" class="nav-item nav-link dropdown-toggle text-secondary" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-link"></i> <span>Quick Links</span> <i style={{ "font-size": ".8em" }} class="fas fa-caret-down"></i>
@@ -30,7 +26,7 @@ export default function NavBar() {
                                 </ul>
                             </div>
                         </div>
-                    </li>
+                    </li> */}
                     <li class="nav-item dropdown">
                         <div class="nav-dropdown">
                             <a href="#" id="nav2" class="nav-item nav-link dropdown-toggle text-secondary" data-bs-toggle="dropdown" aria-expanded="false">
