@@ -3,7 +3,7 @@ import HttpEndpoint from "../../backend/endpoint";
 const DEFAULT_PAGE_LIMIT = 3;
 
 
-export default class CampaignList extends HttpEndpoint {
+export default class CampaignListEndpoint extends HttpEndpoint {
 
     constructor({scheme, host, uri} = {}) {
 
@@ -11,7 +11,6 @@ export default class CampaignList extends HttpEndpoint {
 
         super({scheme, host, uri});
     }
-
 
     async fetch(query = {}) {
 

@@ -1,45 +1,46 @@
+import { Link } from "react-router-dom";
+import CampaignListUseCase from "../domain/usecases/campaignListUseCase.usecase";
+
 function Button({url, icon}) {
 
-    return (
-        <a href={url} class="btn btn-outline-info btn-rounded"><i class={"fas " + icon}></i></a>
-    )
-}
-
-function RowModificationPanel({ endpoint, rowData, detailUrl, modfifyUrl, deleteUrl }) {
-
-    if (typeof crud != 'object') {
+    if (typeof url !== 'string' || url === '') {
 
         return <></>
     }
 
-    const buttons = [];
+    return (
+        <Link to={url} class="btn btn-outline-info btn-rounded"><i class={"fas " + icon}></i></Link>
+    )
+}
 
-    if (typeof detailUrl === 'string') {
+function RowModificationPanel({endpoint, crud, rowData, idField}) {
 
-        buttons.push(<Button url={detailUrl} icon="fa-info-circle"/>)
+    if (
+        typeof idField !== 'string' 
+        || idField === '' 
+        || !(endpoint instanceof CampaignListUseCase)
+    ) {
+
+        return <></>
     }
 
-    if (typeof modfifyUrl === 'string') {
-
-        buttons.push(<Button url={modfifyUrl} icon="fa-pen"/>)
-    }
-
-    if (typeof deleteUrl === 'string') {
-
-        buttons.push(<Button url={deleteUrl} icon="fa-trash"/>)
-    }
+    const detailUrl = endpoint.generateGetSingleCampaignURL(rowData[idField]);
+    const modfifyUrl = endpoint.generateModifySingleCampaignURL(rowData[idField]);
+    const deleteUrl = endpoint.generateDeleteSingleCampaignURL();
 
     return (
         <td class="text-end">
             {/* <a href={detailUrl} class="btn btn-outline-info btn-rounded"><i class="fas fa-info-circle"></i></a>
             <a href={modfifyUrl} class="btn btn-outline-info btn-rounded"><i class="fas fa-pen"></i></a>
             <a href={deleteUrl} class="btn btn-outline-danger btn-rounded"><i class="fas fa-trash"></i></a> */}
-            {buttons}
+            <Button url={detailUrl} icon="fa-info-circle"/>
+            <Button url={modfifyUrl} icon="fa-pen"/>
+            <Button url={deleteUrl} icon="fa-trash"/>
         </td>
     )
 }
 
-export default function TableRow({ exposedFields, dataObject, crud , endpoint}) {
+export default function TableRow({ idField, exposedFields, dataObject, crud , endpoint}) {
 
     exposedFields = Array.isArray(exposedFields) ? exposedFields : [];
 
@@ -52,7 +53,7 @@ export default function TableRow({ exposedFields, dataObject, crud , endpoint}) 
                 <td>United States</td>
                 <td>Oud-Turnhout</td> */}
                 {exposedFields.map(header => <td>{dataObject?.[header]}</td>)}
-                <RowModificationPanel crud={crud} endpoint={endpoint}/>
+                <RowModificationPanel idField={idField} rowData={dataObject} crud={crud} endpoint={endpoint}/>
             </tr>
         </>
     )

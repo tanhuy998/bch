@@ -7,5 +7,8 @@ export default class CampaignCRUD extends HttpEndpoint {
         super(...arguments);
     }
 
-    
+    laucnhNewCampaign() {
+
+
+    }
 }

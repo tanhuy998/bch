@@ -13,8 +13,9 @@ import { Provider } from 'react-redux';
 
 import { createContext } from 'react';
 import CampaignList from './api/aggregates/campaignList.api';
+import CampaignListUseCase from './domain/usecases/campaignListUseCase.usecase';
 
-const getCampaignList = new CampaignList()
+const campaignlistUse = new CampaignListUseCase()
 
 function App() {
 
@@ -28,7 +29,7 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/admin' element={<AdminTemplate />}>
             <Route index element={<AdminDashboad />} />
-            <Route path="campaigns" element={<PaginationTable endpoint={getCampaignList} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} />
+            <Route path="campaigns" element={<PaginationTable idField={"uuid"} endpoint={campaignlistUse} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} />
           </Route>
           {/* <Route path='/admin/campaigns' element={<AdminTemplate renderContent={AdminCampaignsTable}/>}/>
           <Route path='/admin/camoaigns/pending' element={<AdminTemplate renderContent={() => PaginationTable({title: "Pending Campaigns", headers: ['ID', 'Name', 'Salary', 'Contry', 'City']})}/>}/>
