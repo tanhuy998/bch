@@ -5,7 +5,7 @@ function Button({url, icon}) {
     )
 }
 
-function RowModificationPanel({ rowData, detailUrl, modfifyUrl, deleteUrl }) {
+function RowModificationPanel({ endpoint, rowData, detailUrl, modfifyUrl, deleteUrl }) {
 
     if (typeof crud != 'object') {
 
@@ -39,17 +39,20 @@ function RowModificationPanel({ rowData, detailUrl, modfifyUrl, deleteUrl }) {
     )
 }
 
-export default function TableRow({ dataObject, crud }) {
+export default function TableRow({ exposedFields, dataObject, crud , endpoint}) {
+
+    exposedFields = Array.isArray(exposedFields) ? exposedFields : [];
 
     return (
         <>
             <tr>
-                <td>1</td>
+                {/* <td>1</td>
                 <td>Dakota Rice</td>
                 <td>$36,738</td>
                 <td>United States</td>
-                <td>Oud-Turnhout</td>
-                <RowModificationPanel crud={crud} />
+                <td>Oud-Turnhout</td> */}
+                {exposedFields.map(header => <td>{dataObject?.[header]}</td>)}
+                <RowModificationPanel crud={crud} endpoint={endpoint}/>
             </tr>
         </>
     )

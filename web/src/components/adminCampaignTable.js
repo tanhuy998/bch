@@ -1,4 +1,4 @@
-import PaginationPanel from "./paginationPanel";
+import PaginationPanel from "./paginationController";
 
 export default function AdminCampaignsTable() {
 

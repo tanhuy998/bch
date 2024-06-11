@@ -28,7 +28,7 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/admin' element={<AdminTemplate />}>
             <Route index element={<AdminDashboad />} />
-            <Route path="campaigns" element={<PaginationTable endpoint={getCampaignList} headers={['ID', 'Name', 'Salary', 'Contry', 'City']} title="Campaigns" />} />
+            <Route path="campaigns" element={<PaginationTable endpoint={getCampaignList} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} />
           </Route>
           {/* <Route path='/admin/campaigns' element={<AdminTemplate renderContent={AdminCampaignsTable}/>}/>
           <Route path='/admin/camoaigns/pending' element={<AdminTemplate renderContent={() => PaginationTable({title: "Pending Campaigns", headers: ['ID', 'Name', 'Salary', 'Contry', 'City']})}/>}/>

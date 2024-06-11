@@ -13,15 +13,16 @@ export default class CampaignList extends HttpEndpoint {
     }
 
 
-    async fetch(pivot, pageLimit = DEFAULT_PAGE_LIMIT, isPrev) {
+    async fetch(query = {}) {
 
+        
         const res =  await super.fetch(
             undefined,
             {
-                p_pivot: pivot,
-                p_limit: pageLimit,
-                p_isPrev: isPrev,
-            }
+                p_pivot: query.p_pivot || undefined,
+                p_limit: query.p_limit || DEFAULT_PAGE_LIMIT,
+                p_prev: query.p_prev || false,
+            },
         )
 
         return await res.json();
