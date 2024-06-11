@@ -1,14 +1,14 @@
-import HttpEndpoint from "../backend/endpoint";
 import AuthEndpoint from "../backend/autEndpoint";
 
-export default class CampaignCandidateEnpoint extends AuthEndpoint {
+export default class CampaignCandidateListEndpoing extends AuthEndpoint {
 
-    #campaignUUID
+    constructor({host, scheme, port }) {
 
-    constructor(campaignUUID) {
+        super({host, scheme, port, uri: '/candidates/canpaigns'});
+    }
 
-        super({uri: "candidates"});
+    async fetch(campaignUUID, query = {}) {
 
-        this.#campaignUUID = campaignUUID;
+        return super.fetch(undefined, query, '/' + campaignUUID);
     }
 }

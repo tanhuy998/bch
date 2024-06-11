@@ -5,6 +5,8 @@ const DEFAULT_SCHEME = 'http';
 const DEFAULT_URI = '';
 const DEFAULT_PORT = 8000;
 
+const REGEX_DOUBLE_SLASH = /\/\//
+
 export default class HttpEndpoint {
 
     /**@type {String} */
@@ -27,7 +29,7 @@ export default class HttpEndpoint {
         this.#scheme = scheme || DEFAULT_SCHEME;
         this.#uri = uri || DEFAULT_URI;
 
-        this.#initUrl = `${this.#scheme}://${this.#host}${typeof this.#port === 'number' ? ":"+this.#port : ""}/${this.#uri}`;
+        this.#initUrl = `${this.#scheme}://${this.#host}${typeof this.#port === 'number' ? ":"+this.#port : ""}${this.#uri}`;
     }
 
     prepareOptions() {
@@ -35,13 +37,14 @@ export default class HttpEndpoint {
         return new HttpRequestBuilder(this);
     }
 
-    async fetch(options = {}, query) {
+    async fetch(options = {}, query, extraURI) {
 
         options.mode = 'cors';
 
+        extraURI = typeof extraURI === 'string' && extraURI !== '' ? extraURI : '';
+
         const queryStr = typeof query === 'object'? '?' + new URLSearchParams(query) : '';
 
-        return (await fetch(this.#initUrl + queryStr, options)).json();
+        return (await fetch(this.#initUrl + extraURI + queryStr, options)).json();
     }
-
 }

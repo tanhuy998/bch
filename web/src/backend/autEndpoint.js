@@ -12,7 +12,7 @@ export default class AuthEndpoint extends HttpEndpoint {
         this.#authStore = store;
     }
 
-    async fetch(options = {}, query) {
+    async fetch(options = {}, query, extraURI) {
 
         /** 
          *  in development, cors is setted to all( *), then authorization header will
@@ -25,7 +25,7 @@ export default class AuthEndpoint extends HttpEndpoint {
         options.headers ||= {};
         options.headers['Authorization'] = `bearer ${this.#accessToken || ''}`;
 
-        return super.fetch(options, query)
+        return super.fetch(options, query, extraURI);
     }
 
     #prepareToken() {

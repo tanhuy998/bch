@@ -6,11 +6,9 @@ const DEFAULT_PAGE_LIMIT = 3;
 
 export default class CampaignListEndpoint extends AuthEndpoint {
 
-    constructor({scheme, host, uri} = {}) {
+    constructor({scheme, host, port} = {}) {
 
-        uri = "campaigns"
-
-        super({scheme, host, uri});
+        super({scheme, host, uri: '/campaigns', port});
     }
 
     async fetch(query = {}) {
