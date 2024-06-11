@@ -35,11 +35,13 @@ export default class HttpEndpoint {
         return new HttpRequestBuilder(this);
     }
 
-    async fetch(options, query) {
+    async fetch(options = {}, query) {
+
+        options.mode = 'cors';
 
         const queryStr = typeof query === 'object'? '?' + new URLSearchParams(query) : '';
 
-        return fetch(this.#initUrl + queryStr, options);
+        return (await fetch(this.#initUrl + queryStr, options)).json();
     }
 
 }

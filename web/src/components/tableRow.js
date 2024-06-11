@@ -20,7 +20,7 @@ function RowModificationPanel({endpoint, crud, rowData, idField}) {
         || idField === '' 
         || !(endpoint instanceof CampaignListUseCase)
     ) {
-
+        console.log("nothing", idField)
         return <></>
     }
 

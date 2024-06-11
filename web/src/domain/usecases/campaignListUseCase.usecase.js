@@ -1,4 +1,4 @@
-import CampaignListEndpoint from "../../api/aggregates/campaignList.api";
+import CampaignListEndpoint from "../../api/campaignList.api";
 
 export default class CampaignListUseCase extends CampaignListEndpoint {
 

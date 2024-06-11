@@ -1,9 +1,10 @@
-import HttpEndpoint from "../../backend/endpoint";
+import HttpEndpoint from "../backend/endpoint";
+import AuthEndpoint from "../backend/autEndpoint";
 
 const DEFAULT_PAGE_LIMIT = 3;
 
 
-export default class CampaignListEndpoint extends HttpEndpoint {
+export default class CampaignListEndpoint extends AuthEndpoint {
 
     constructor({scheme, host, uri} = {}) {
 
@@ -15,7 +16,7 @@ export default class CampaignListEndpoint extends HttpEndpoint {
     async fetch(query = {}) {
 
         
-        const res =  await super.fetch(
+        const res = super.fetch(
             undefined,
             {
                 p_pivot: query.p_pivot || undefined,
@@ -24,6 +25,6 @@ export default class CampaignListEndpoint extends HttpEndpoint {
             },
         )
 
-        return await res.json();
+        return res;
     }
 }

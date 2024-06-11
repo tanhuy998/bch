@@ -1,4 +1,4 @@
-import HttpEndpoint from "../../backend/endpoint";
+import HttpEndpoint from "../backend/endpoint";
 
 export default class CampaignCRUD extends HttpEndpoint {
 

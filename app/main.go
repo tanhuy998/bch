@@ -21,7 +21,11 @@ const (
 var (
 	host_names           []string
 	cors_allowed_methods []string = []string{
-		"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"}
+		"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH",
+	}
+	cors_allowed_headers []string = []string{
+		"Authorization",
+	}
 	server_ssl_cert string
 	server_ssl_key  string
 )
@@ -66,6 +70,7 @@ func main() {
 		cors.New(cors.Options{
 			AllowedOrigins:   host_names,
 			AllowedMethods:   cors_allowed_methods,
+			AllowedHeaders:   cors_allowed_headers,
 			AllowCredentials: true,
 		}),
 	)

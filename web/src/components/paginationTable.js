@@ -54,7 +54,7 @@ function PaginationTable({ idField, endpoint, exposedFields, headers, title }) {
                                     {
                                         tableData.map( row => {
 
-                                            return <TableRow idField={idField} exposedFields={exposedFields} dataObject={row}/>
+                                            return <TableRow idField={idField} endpoint={endpoint} exposedFields={exposedFields} dataObject={row}/>
                                         })
                                     }
                                 </tbody>
