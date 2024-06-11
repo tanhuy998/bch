@@ -234,10 +234,10 @@ func preparePaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters
 
 	if isPrevDir {
 
-		dir_op = OP_LTE
+		dir_op = OP_GT
 	} else {
 
-		dir_op = OP_GT
+		dir_op = OP_LTE
 	}
 
 	if _id.IsZero() {
