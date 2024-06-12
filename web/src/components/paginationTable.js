@@ -1,6 +1,7 @@
 import { useEffect, useState, Component, memo, createContext } from "react";
 import TableRow from "./tableRow";
 import PaginationController from "./paginationController";
+import HttpEndpoint from "../backend/endpoint";
 
 /**
  * 
@@ -23,11 +24,13 @@ export default memo(PaginationTable);
 
 function PaginationTable({ idField, endpoint, exposedFields, headers, title }) {
 
+    if (!(endpoint instanceof HttpEndpoint)) {
+
+        throw new Error('invalid endpoint object to for fetching data');
+    }
+
     const exposedHeaders = (Array.isArray(headers) ? headers : []).map(header => <th>{header}</th>)
     const [endpointData, setEndpointData] = useState(null);
-    //const [tableData, setTableData] = useState([]);
-
-    const tableData = endpointData?.data || [];
 
     return (
         <>
@@ -52,7 +55,7 @@ function PaginationTable({ idField, endpoint, exposedFields, headers, title }) {
                                 </thead>
                                 <tbody>
                                     {
-                                        tableData.map( row => {
+                                        (endpointData?.data || []).map( row => {
 
                                             return <TableRow idField={idField} endpoint={endpoint} exposedFields={exposedFields} dataObject={row}/>
                                         })
@@ -60,7 +63,7 @@ function PaginationTable({ idField, endpoint, exposedFields, headers, title }) {
                                 </tbody>
                             </table>
                         </div>
-                        <PaginationController initDebounce={false} endpointData={endpointData} endpoint={endpoint} navigator={endpointData?.navigation} setEndpointData={setEndpointData} />
+                        <PaginationController dataTotalCount={endpointData?.dataTotalCount} endpoint={endpoint} navigator={endpointData?.navigation} setEndpointData={setEndpointData} />
                     </div>
                 </div>
             </div>

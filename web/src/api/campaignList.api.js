@@ -1,7 +1,6 @@
 import HttpEndpoint from "../backend/endpoint";
 import AuthEndpoint from "../backend/autEndpoint";
-
-const DEFAULT_PAGE_LIMIT = 3;
+import { DEFAULT_PAGINATION_LIMIT } from "./constant";
 
 
 export default class CampaignListEndpoint extends AuthEndpoint {
@@ -18,7 +17,7 @@ export default class CampaignListEndpoint extends AuthEndpoint {
             undefined,
             {
                 p_pivot: query.p_pivot || undefined,
-                p_limit: query.p_limit || DEFAULT_PAGE_LIMIT,
+                p_limit: query.p_limit || DEFAULT_PAGINATION_LIMIT,
                 p_prev: query.p_prev || false,
             },
         )
