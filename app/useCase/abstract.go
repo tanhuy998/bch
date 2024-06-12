@@ -99,20 +99,14 @@ func resolvePrev[Model_T ModelInterfaceForPagination](
 	pageNumber common.PaginationPage,
 ) error {
 
-	lastIndex := len(dataPack.Data) - 1
-
-	if lastIndex <= 0 {
-
-		return nil
-	}
 	/*
 		implementation state is checked at compile time,
 		no need any assertions at runtime
 	*/
-	lastElement := dataPack.Data[0]
+	firstElement := dataPack.Data[0]
 
 	output.GetNavigation().Previous = &responsePresenter.NavigationQuery{
-		Cursor: (*lastElement).GetObjectID(),
+		Cursor: (*firstElement).GetObjectID(),
 		IsPrev: true,
 	}
 
@@ -129,6 +123,8 @@ func preparePaginationNavigation[Model_T ModelInterfaceForPagination](
 	dataPack *repository.PaginationPack[Model_T],
 	pageNumber common.PaginationPage,
 ) error {
+
+	output.SetTotalCount(dataPack.Count)
 
 	err := resolveNext[Model_T](output, dataPack, pageNumber)
 

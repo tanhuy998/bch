@@ -17,6 +17,7 @@ const (
 	SORT_DESC             = -1
 	SORT_ASC              = 1
 	OP_LTE                = "$lte"
+	OP_LT                 = "$lt"
 	OP_GT                 = "$gt"
 	OP_GTE                = "$gte"
 	PAGINATION_FIRST_PAGE = 0
@@ -234,10 +235,10 @@ func preparePaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters
 
 	if isPrevDir {
 
-		dir_op = OP_GT
+		dir_op = OP_GTE
 	} else {
 
-		dir_op = OP_LTE
+		dir_op = OP_LT
 	}
 
 	if _id.IsZero() {

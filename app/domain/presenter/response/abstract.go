@@ -12,6 +12,7 @@ type (
 
 	IPaginationResult interface {
 		GetNavigation() *PaginationNavigation
+		SetTotalCount(int64)
 	}
 
 	NavigationQuery struct {
