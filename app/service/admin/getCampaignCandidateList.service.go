@@ -48,11 +48,22 @@ func (this *AdminGetCampaignCandidateListService) Serve(
 		return nil, err
 	}
 
-	candidateObjID, err := primitive.ObjectIDFromHex(str_candiatePivot_id)
+	var candidateObjID primitive.ObjectID
 
-	if err != nil {
+	if str_candiatePivot_id != "" {
 
-		return nil, err
+		objID, err := primitive.ObjectIDFromHex(str_candiatePivot_id)
+
+		if err != nil {
+
+			return nil, err
+		}
+
+		candidateObjID = objID
+
+	} else {
+
+		candidateObjID = primitive.NilObjectID
 	}
 
 	deadlineCtx, cancel := context.WithTimeout(context.Background(), DEADLINE_DURATION)

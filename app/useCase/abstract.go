@@ -74,6 +74,11 @@ func resolveNext[Model_T ModelInterfaceForPagination](
 	pageNumber common.PaginationPage,
 ) error {
 
+	if len(dataPack.Data) == 0 {
+
+		return nil
+	}
+
 	lastIndex := len(dataPack.Data) - 1
 
 	if lastIndex <= 0 {
@@ -98,6 +103,11 @@ func resolvePrev[Model_T ModelInterfaceForPagination](
 	dataPack *repository.PaginationPack[Model_T],
 	pageNumber common.PaginationPage,
 ) error {
+
+	if len(dataPack.Data) == 0 {
+
+		return nil
+	}
 
 	/*
 		implementation state is checked at compile time,
