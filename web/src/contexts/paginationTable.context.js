@@ -11,6 +11,7 @@ const PaginationTableContext =  createContext({
     headers: [], 
     title: '',
     rowManipulator,
+    columnTransform: null,
 });
 
 export const EXTRA_FETCH_ARGS = 'EXTRA_FETCH_ARGS'

@@ -5,7 +5,7 @@ import TableRowContext from "../contexts/tableRow.context";
 import PaginationTableContext from "../contexts/paginationTable.context";
 import TableRowManipulator from "./lib/tableRowDataAction";
 
-function Button({navigate, url, icon}) {
+function NavigateButton({navigate, url, icon}) {
 
     if (typeof url !== 'string' || url === '') {
 
@@ -14,6 +14,18 @@ function Button({navigate, url, icon}) {
 
     return (
         <button onClick={() => {navigate(url, {replace: true})}} class="btn btn-outline-info btn-rounded"><i class={"fas " + icon}></i></button>
+    )
+}
+
+function DeleteButton({endpointUrl}) {
+
+    if (typeof endpointUrl !== 'string' || endpointUrl === '') {
+
+        return <></>
+    }
+
+    return (
+        <button class="btn btn-outline-info btn-rounded"><i class="fas fa-trash"></i></button>
     )
 }
 
@@ -47,15 +59,17 @@ function RowManipulator({ endpoint, crud, rowData, idField}) {
             {/* <a href={detailUrl} class="btn btn-outline-info btn-rounded"><i class="fas fa-info-circle"></i></a>
             <a href={modfifyUrl} class="btn btn-outline-info btn-rounded"><i class="fas fa-pen"></i></a>
             <a href={deleteUrl} class="btn btn-outline-danger btn-rounded"><i class="fas fa-trash"></i></a> */}
-            {detailUrl && <Button navigate={navigate} url={detailUrl} icon="fa-info-circle"/>}
-            {modfifyUrl &&  <Button navigate={navigate} url={modfifyUrl} icon="fa-pen"/>}
-            {deleteUrl && <Button navigate={navigate} url={deleteUrl} icon="fa-trash"/>}
+            {detailUrl && <NavigateButton navigate={navigate} url={detailUrl} icon="fa-info-circle"/>}
+            {modfifyUrl &&  <NavigateButton navigate={navigate} url={modfifyUrl} icon="fa-pen"/>}
+            {/* {deleteUrl && <Button navigate={navigate} url={deleteUrl} icon="fa-trash"/>} */}
+            {deleteUrl && <DeleteButton endpointUrl={deleteUrl} />}
         </td>
     )
 }
 
 export default function TableRow({ idField, exposedFields, dataObject, crud , endpoint}) {
 
+    const {columnTransform} = useContext(TableRowContext);
     exposedFields = Array.isArray(exposedFields) ? exposedFields : [];
 
     return (
@@ -66,7 +80,17 @@ export default function TableRow({ idField, exposedFields, dataObject, crud , en
                 <td>$36,738</td>
                 <td>United States</td>
                 <td>Oud-Turnhout</td> */}
-                {exposedFields.map(header => <td>{dataObject?.[header]}</td>)}
+                {
+                    exposedFields.map(header => {
+
+                        const value = dataObject?.[header];
+
+                        // return <td>{dataObject?.[header]}</td>
+                        const transform = columnTransform?.[header];
+
+                        return <td>{typeof transform === 'function' ? transform(value) : value}</td>
+                    })
+                }
                 <RowManipulator idField={idField} rowData={dataObject} crud={crud} endpoint={endpoint}/>
             </tr>
         </>

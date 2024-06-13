@@ -24,7 +24,7 @@ async function fetchData(setDataFunc, endpoint, query) {
 
 export default memo(PaginationTable);
 
-function PaginationTable({ rowManipulator, idField, endpoint, exposedFields, headers, title }) {
+function PaginationTable({ columnTransform, rowManipulator, idField, endpoint, exposedFields, headers, title }) {
 
     const context = useContext(PaginationTableContext);
 
@@ -34,6 +34,7 @@ function PaginationTable({ rowManipulator, idField, endpoint, exposedFields, hea
     headers = headers || context?.headers;
     title = title || context?.title;
     rowManipulator = rowManipulator || context?.rowManipulator;
+    columnTransform =  columnTransform || context?.columnTransform;
     
     const exposedHeaders = (Array.isArray(headers) ? headers : []).map(header => <th>{header}</th>)
     const [endpointData, setEndpointData] = useState(null);
@@ -47,7 +48,7 @@ function PaginationTable({ rowManipulator, idField, endpoint, exposedFields, hea
                     </tr>
                 </thead>
                 <tbody>
-                    <TableRowContext.Provider value={{rowManipulator}}>
+                    <TableRowContext.Provider value={{rowManipulator, columnTransform}}>
                     {
                         (endpointData?.data || []).map(row => {
 
