@@ -1,7 +1,13 @@
 import PaginationTable from "../components/paginationTable";
+import CampaignListUseCase from "../domain/usecases/campaignListUseCase.usecase";
 
 export default function ({usecase}) {
 
+    if (!(usecase instanceof CampaignListUseCase)) {
+
+        throw new Error('invalid usecase for CampaignList page');
+    }
+    
     return (
         <>
             <div class="page-title">
@@ -18,7 +24,7 @@ export default function ({usecase}) {
                         <div class="card-header">Basic DataTables Table</div>
                         <div class="card-body">
                             <p class="card-title"></p>
-                            <PaginationTable idField={"uuid"} endpoint={usecase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />
+                            <PaginationTable rowManipulator={usecase.tableRowManipulator} idField={"uuid"} endpoint={usecase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />
                         </div>
                     </div>
                 </div>

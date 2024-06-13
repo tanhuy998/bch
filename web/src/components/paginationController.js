@@ -1,23 +1,28 @@
-import { useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { DEFAULT_PAGINATION_LIMIT } from '../api/constant';
-import PaginationTableContext, { EXTRA_FETCH_ARGS } from '../contexts/paginationTableContext';
+import PaginationTableContext, { EXTRA_FETCH_ARGS } from '../contexts/paginationTable.context';
 import HttpEndpoint from '../backend/endpoint';
 
+const PaginationControllerContext = createContext({
+    isLastDataPage: null, 
+    pageCounter: null, 
+    debounce: null, 
+    setQuery: null,
+})
+
 function PaginationNavButton({
-    isLastDataPage, 
-    pageReducer, 
-    pageCounter, 
-    debounce, 
-    label, 
-    isPrevious, 
-    navigationQuery, 
-    setQuery,
+    pageReducer,
+    label,
+    isPrevious,
+    navigationQuery,
 }) {
-   
+
+    const { isLastDataPage, pageCounter, debounce, setQuery } = useContext(PaginationControllerContext);
+
     if (
         typeof navigationQuery !== 'object' ||
         typeof pageCounter !== 'number' ||
-        pageCounter === 1 && isPrevious 
+        pageCounter === 1 && isPrevious
         || isLastDataPage && !isPrevious
     ) {
 
@@ -42,13 +47,13 @@ function PaginationNavButton({
     return (
         <li class={tagClass} id={tagId}>
             {/* <a href={endpoint} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</a> */}
-            <button onClick={() => { debounce === false && emitQuery()} } aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</button>
+            <button onClick={() => { debounce === false && emitQuery() }} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</button>
         </li>
     )
 }
 
-export default function PaginationController({dataTotalCount, currentPageNumber, navigator, setEndpointData, endpoint}) {
-    
+export default function PaginationController({ dataTotalCount, currentPageNumber, navigator, setEndpointData, endpoint }) {
+
     if (!(endpoint instanceof HttpEndpoint)) {
 
         throw new Error('invalid endpoint object to for fetching data');
@@ -65,24 +70,24 @@ export default function PaginationController({dataTotalCount, currentPageNumber,
     function fetchData() {
 
         endpoint.fetch(query || {}, ...(extra_fetch_args || []))
-        .then((data) => {
-            setDebounce(false);
-            setEndpointData(data)
-        });
+            .then((data) => {
+                setDebounce(false);
+                setEndpointData(data)
+            });
 
         setDebounce(true);
     }
 
     useEffect(() => {
 
-       fetchData();
+        fetchData();
 
     }, [query])
 
     useEffect(() => {
 
         if (
-            dataTotalCount > 0 
+            dataTotalCount > 0
             && pageCounter === null
         ) {
 
@@ -91,31 +96,39 @@ export default function PaginationController({dataTotalCount, currentPageNumber,
     })
 
     const isLastDataPage = calculatePage(dataTotalCount, DEFAULT_PAGINATION_LIMIT) === pageCounter
+    const context = {
+        isLastDataPage,
+        pageCounter,
+        debounce,
+        setQuery,
+    }
 
     return (
-        <div class="row">
-            <div class="col-sm-12 col-md-5">
-                <div class="dataTables_info" id="dataTables-example_info" role="status"
-                    aria-live="polite"></div>
-            </div>
+        <PaginationControllerContext.Provider value={context}>
+            <div class="row">
+                <div class="col-sm-12 col-md-5">
+                    <div class="dataTables_info" id="dataTables-example_info" role="status"
+                        aria-live="polite"></div>
+                </div>
 
-            <div class="col-sm-12 col-md-7">
-                <div class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
-                    <ul class="pagination">
-                        <PaginationNavButton pageCounter={pageCounter} pageReducer={() => {setPageCounter(pageCounter - 1)}} debounce={debounce} setQuery={setQuery} navigationQuery={navigator?.previous}  isPrevious={true} label="Trước"/>
-                        {/* {pageCounterPlaceHolder} */}
-                        { pageCounter > 0 && 
-                            <li class="paginate_button page-item active">
-                                <a href="#"aria-controls="dataTables-example" data-dt-idx="1" tabindex="0" class="page-link">
-                                    {pageCounter}
-                                </a>
-                            </li>
-                        }
-                        <PaginationNavButton isLastDataPage={isLastDataPage} pageCounter={pageCounter} pageReducer={() => {setPageCounter(pageCounter + 1)}} debounce={debounce} setQuery={setQuery} navigationQuery={navigator?.next} label="sau"/>
-                    </ul>
+                <div class="col-sm-12 col-md-7">
+                    <div class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <ul class="pagination">
+                            <PaginationNavButton  pageReducer={() => { setPageCounter(pageCounter - 1) }} navigationQuery={navigator?.previous} isPrevious={true} label="Trước" />
+                            {/* {pageCounterPlaceHolder} */}
+                            {pageCounter > 0 &&
+                                <li class="paginate_button page-item active">
+                                    <a href="#" aria-controls="dataTables-example" data-dt-idx="1" tabindex="0" class="page-link">
+                                        {pageCounter}
+                                    </a>
+                                </li>
+                            }
+                            <PaginationNavButton pageReducer={() => { setPageCounter(pageCounter + 1) }} navigationQuery={navigator?.next} label="sau" />
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
+        </PaginationControllerContext.Provider>
     )
 }
 

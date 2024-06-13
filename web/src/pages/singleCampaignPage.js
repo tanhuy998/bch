@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import PaginationTable from "../components/paginationTable";
 import SingleCampaignUseCase from "../domain/usecases/singleCampaignUseCase.usecase";
-import PaginationTableContext from "../contexts/paginationTableContext";
+import PaginationTableContext from "../contexts/paginationTable.context";
 import { useEffect, useState } from "react";
 import { tab } from "@testing-library/user-event/dist/tab";
 import Tab from "../components/Tab";
@@ -33,14 +33,29 @@ export default function SingleCampaignPage({ usecase }) {
 
     }, [])
 
-    const contextValues = {
+    const defaultTableContext = {
+        idField: "uuid",
+        exposedFields: ['name', 'idNumber', 'address'],
+        headers: ['Tên', 'Số CCDD', 'Địa Chỉ'],
+        endpoint: usecase.campaignCandidateListEndpoint,
+        title: "Canidates", 
+        rowManipulator: usecase.candidateListTableRowManipulator
+    }
+
+    const allCandidateExtraContextValues = {
         EXTRA_FETCH_ARGS: [uuid]
     }
 
+    const candidateDisplayTable =  (
+        // <PaginationTable idField="uuid" exposedFields={['name', 'idNumber', 'address']} headers={['Tên', 'Số CCDD', 'Địa Chỉ']} endpoint={usecase.campaignCandidateListEndpoint} title="Canidates" />
+        <PaginationTable />
+    )
+
     const tabs = {
-        All: (<PaginationTableContext.Provider value={contextValues}>
-            <PaginationTable idField="uuid" exposedFields={['name', 'idNumber', 'address']} headers={['Tên', 'Số CCDD', 'Địa Chỉ']} endpoint={usecase.campaignCandidateListEndpoint} title="Canidates" />
-        </PaginationTableContext.Provider>
+        All: (
+            <PaginationTableContext.Provider value={{...defaultTableContext, ...allCandidateExtraContextValues}}>
+                <PaginationTable />
+            </PaginationTableContext.Provider>
         ),
         Signed: '',
         Unsigned: ''

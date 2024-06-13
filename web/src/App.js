@@ -35,7 +35,7 @@ function App() {
             <Route index element={<AdminDashboad />} />
             {/* <Route path="campaigns" element={<PaginationTable idField={"uuid"} endpoint={campaignlistUseCase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} /> */}
             <Route path="campaigns" element={<CampaignListPage usecase={campaignlistUseCase}/>} />
-            <Route path="campaigns/:uuid" element={<SingleCampaignPage usecase={singleCampaignUseCase}/>} />
+            <Route path="campaign/:uuid" element={<SingleCampaignPage usecase={singleCampaignUseCase}/>} />
           </Route>
         </Routes>
       </BrowserRouter>

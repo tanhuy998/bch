@@ -1,7 +1,9 @@
-import { useEffect, useState, Component, memo, createContext } from "react";
+import { useEffect, useState, Component, memo, createContext, useContext } from "react";
 import TableRow from "./tableRow";
 import PaginationController from "./paginationController";
 import HttpEndpoint from "../backend/endpoint";
+import PaginationTableContext from "../contexts/paginationTable.context";
+import TableRowContext from "../contexts/tableRow.context";
 
 /**
  * 
@@ -22,8 +24,17 @@ async function fetchData(setDataFunc, endpoint, query) {
 
 export default memo(PaginationTable);
 
-function PaginationTable({ idField, endpoint, exposedFields, headers, title }) {
+function PaginationTable({ rowManipulator, idField, endpoint, exposedFields, headers, title }) {
 
+    const context = useContext(PaginationTableContext);
+
+    idField = idField || context?.idField;
+    endpoint = endpoint || context?.endpoint;
+    exposedFields = exposedFields || context?.exposedFields;
+    headers = headers || context?.headers;
+    title = title || context?.title;
+    rowManipulator = rowManipulator || context?.rowManipulator;
+    
     const exposedHeaders = (Array.isArray(headers) ? headers : []).map(header => <th>{header}</th>)
     const [endpointData, setEndpointData] = useState(null);
 
@@ -36,12 +47,14 @@ function PaginationTable({ idField, endpoint, exposedFields, headers, title }) {
                     </tr>
                 </thead>
                 <tbody>
+                    <TableRowContext.Provider value={{rowManipulator}}>
                     {
                         (endpointData?.data || []).map(row => {
 
-                            return <TableRow idField={idField} endpoint={endpoint} exposedFields={exposedFields} dataObject={row} />
+                            return <TableRow  idField={idField} endpoint={endpoint} exposedFields={exposedFields} dataObject={row} />
                         })
                     }
+                    </TableRowContext.Provider>
                 </tbody>
                 <br />
                 <PaginationController dataTotalCount={endpointData?.dataTotalCount} endpoint={endpoint} navigator={endpointData?.navigation} setEndpointData={setEndpointData} />
