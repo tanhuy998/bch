@@ -13,9 +13,9 @@ export default class CandidateListTableRowManipulator extends TableRowManipulato
         this.#endpointHost = endpointHost;
     }
 
-    generateRowDeletePath(uuid) {
+    generateRowModificationPath(uuid) {
 
-        return `${UI_PATH}/${uuid}`;
+        return `${UI_PATH}/edit/${uuid}`;
     }
 
     generateRowDetailPath(uuid) {
@@ -23,7 +23,7 @@ export default class CandidateListTableRowManipulator extends TableRowManipulato
         return `${UI_PATH}/${uuid}`;
     }
 
-    generateRowModificationPath(uuid) {
+    generateRowDeletePath(uuid) {
 
         return `${this.#endpointHost}/candidates/${uuid}`;
     }

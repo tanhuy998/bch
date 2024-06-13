@@ -1,5 +1,16 @@
 import PaginationTable from "../components/paginationTable";
 import CampaignListUseCase from "../domain/usecases/campaignListUseCase.usecase";
+import formatLocalDate from "../lib/formatLocalDate";
+
+const COLUMN_TRANSFORM = {
+    issueTime: transformDateString,
+    expire: transformDateString,
+}
+
+function transformDateString(value) {
+
+    return formatLocalDate(new Date(value));
+}
 
 export default function ({usecase}) {
 
@@ -7,7 +18,7 @@ export default function ({usecase}) {
 
         throw new Error('invalid usecase for CampaignList page');
     }
-    
+
     return (
         <>
             <div class="page-title">
@@ -24,7 +35,7 @@ export default function ({usecase}) {
                         <div class="card-header">Basic DataTables Table</div>
                         <div class="card-body">
                             <p class="card-title"></p>
-                            <PaginationTable rowManipulator={usecase.tableRowManipulator} idField={"uuid"} endpoint={usecase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />
+                            <PaginationTable columnTransform={COLUMN_TRANSFORM} rowManipulator={usecase.tableRowManipulator} idField={"uuid"} endpoint={usecase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />
                         </div>
                     </div>
                 </div>

@@ -38,7 +38,7 @@ export default function SingleCampaignPage({ usecase }) {
         exposedFields: ['name', 'idNumber', 'address'],
         headers: ['Tên', 'Số CCDD', 'Địa Chỉ'],
         endpoint: usecase.campaignCandidateListEndpoint,
-        title: "Canidates", 
+        title: "Canidates",
         rowManipulator: usecase.candidateListTableRowManipulator
     }
 
@@ -46,14 +46,14 @@ export default function SingleCampaignPage({ usecase }) {
         EXTRA_FETCH_ARGS: [uuid]
     }
 
-    const candidateDisplayTable =  (
+    const candidateDisplayTable = (
         // <PaginationTable idField="uuid" exposedFields={['name', 'idNumber', 'address']} headers={['Tên', 'Số CCDD', 'Địa Chỉ']} endpoint={usecase.campaignCandidateListEndpoint} title="Canidates" />
         <PaginationTable />
     )
 
     const tabs = {
         All: (
-            <PaginationTableContext.Provider value={{...defaultTableContext, ...allCandidateExtraContextValues}}>
+            <PaginationTableContext.Provider value={{ ...defaultTableContext, ...allCandidateExtraContextValues }}>
                 <PaginationTable />
             </PaginationTableContext.Provider>
         ),
@@ -73,7 +73,23 @@ export default function SingleCampaignPage({ usecase }) {
                                 <div class="card-body">
                                     <h1 class="card-title">{campaignData?.title || 'Unknown'}</h1>
                                     <br />
-                                    <h4 class="card-text">Ngày Bắt Đầu: {campaignData?.issueTime || ''} Ngày Kết Thúc: {campaignData?.expire || ''}</h4>
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <h4 class="card-text">Ngày Bắt Đầu: </h4>
+                                            </td>
+                                            <td>
+                                                <h4 class="card-text">{campaignData?.issueTime || ''}</h4>
+                                            </td>
+                                            <td>
+                                                <h4 class="card-text">Ngày Kết Thúc: </h4>
+                                            </td>
+                                            <td>
+                                                <h4 class="card-text">{campaignData?.expire || ''}</h4>
+                                            </td>
+                                        </tr>
+                                    </table>
+
                                     <p class="card-text">This is some text within a card body...</p>
                                     <Link to="#" class="btn btn-primary">Chỉnh sửa</Link>
                                     <br />
