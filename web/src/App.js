@@ -15,11 +15,14 @@ import { createContext } from 'react';
 import CampaignList from './api/campaignList.api';
 import CampaignListUseCase from './domain/usecases/campaignListUseCase.usecase';
 import SingleCampaignPage from './pages/singleCampaignPage';
+import SingleCampaignEndPoint from './api/singleCampaign.api';
+import SingleCampaignUseCase from './domain/usecases/singleCampaignUseCase.usecase';
+import CampaignListPage from './pages/campaignListPage';
 
-const campaignlistUse = new CampaignListUseCase()
+const campaignlistUseCase = new CampaignListUseCase()
+const singleCampaignUseCase = new SingleCampaignUseCase();
 
 function App() {
-
 
   
   return (
@@ -30,17 +33,10 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/admin' element={<AdminTemplate />}>
             <Route index element={<AdminDashboad />} />
-            <Route path="campaigns" element={<PaginationTable idField={"uuid"} endpoint={campaignlistUse} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} />
-            <Route path="campaigns/:uuid" element={<SingleCampaignPage />} />
+            {/* <Route path="campaigns" element={<PaginationTable idField={"uuid"} endpoint={campaignlistUseCase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} /> */}
+            <Route path="campaigns" element={<CampaignListPage usecase={campaignlistUseCase}/>} />
+            <Route path="campaigns/:uuid" element={<SingleCampaignPage usecase={singleCampaignUseCase}/>} />
           </Route>
-          {/* <Route path='/admin/campaigns' element={<AdminTemplate renderContent={AdminCampaignsTable}/>}/>
-          <Route path='/admin/camoaigns/pending' element={<AdminTemplate renderContent={() => PaginationTable({title: "Pending Campaigns", headers: ['ID', 'Name', 'Salary', 'Contry', 'City']})}/>}/>
-          <Route path='/admin/campaigns/new' element={<AdminTemplate />}/>
-          <Route path='/admin/campaigns/:uuid' element={<AdminTemplate />}/>
-
-          <Route path='/admin/candidates/campaign/:campaignUUID' element={<AdminTemplate />}/>
-          <Route path='/admin/candidates/:uuid' element={<AdminTemplate />}/> */}
-          {/* <Route path='/sign/:campaignUUID/:candidateUUID' element={<CandidateSigning />} /> */}
         </Routes>
       </BrowserRouter>
   );

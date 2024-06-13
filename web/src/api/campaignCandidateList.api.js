@@ -1,14 +1,21 @@
 import AuthEndpoint from "../backend/autEndpoint";
+import preprocessPaginationQuery from "./lib/preprocessPaginationQuery.lib";
 
-export default class CampaignCandidateListEndpoing extends AuthEndpoint {
+export default class CampaignCandidateListEndpoint extends AuthEndpoint {
 
-    constructor({host, scheme, port }) {
+    constructor({host, scheme, port } = {}) {
 
-        super({host, scheme, port, uri: '/candidates/canpaigns'});
+        super({host, scheme, port, uri: '/candidates/campaign'});
     }
 
-    async fetch(campaignUUID, query = {}) {
+    async fetch(query = {}, campaignUUID) {
 
-        return super.fetch(undefined, query, '/' + campaignUUID);
+        const res = await super.fetch(
+            undefined, preprocessPaginationQuery(query), '/' + campaignUUID
+        );
+
+        console.log('api', res)
+
+        return res;
     }
 }

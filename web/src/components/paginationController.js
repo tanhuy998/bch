@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { DEFAULT_PAGINATION_LIMIT } from '../api/constant';
+import PaginationTableContext, { EXTRA_FETCH_ARGS } from '../contexts/paginationTableContext';
+import HttpEndpoint from '../backend/endpoint';
 
 function PaginationNavButton({
     isLastDataPage, 
@@ -46,14 +48,23 @@ function PaginationNavButton({
 }
 
 export default function PaginationController({dataTotalCount, currentPageNumber, navigator, setEndpointData, endpoint}) {
+    
+    if (!(endpoint instanceof HttpEndpoint)) {
+
+        throw new Error('invalid endpoint object to for fetching data');
+    }
 
     const [query, setQuery] = useState(null)
     const [debounce, setDebounce] = useState(false);
     const [pageCounter, setPageCounter] = useState(dataTotalCount > 0 ? 1 : null);
 
+    const tableContext = useContext(PaginationTableContext);
+    const extra_fetch_args = tableContext?.[EXTRA_FETCH_ARGS];
+
+
     function fetchData() {
 
-        endpoint.fetch(query || {})
+        endpoint.fetch(query || {}, ...(extra_fetch_args || []))
         .then((data) => {
             setDebounce(false);
             setEndpointData(data)
@@ -87,6 +98,7 @@ export default function PaginationController({dataTotalCount, currentPageNumber,
                 <div class="dataTables_info" id="dataTables-example_info" role="status"
                     aria-live="polite"></div>
             </div>
+
             <div class="col-sm-12 col-md-7">
                 <div class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
                     <ul class="pagination">

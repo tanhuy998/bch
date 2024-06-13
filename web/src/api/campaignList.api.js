@@ -1,6 +1,7 @@
 import HttpEndpoint from "../backend/endpoint";
 import AuthEndpoint from "../backend/autEndpoint";
 import { DEFAULT_PAGINATION_LIMIT } from "./constant";
+import preprocessPaginationQuery from "./lib/preprocessPaginationQuery.lib";
 
 
 export default class CampaignListEndpoint extends AuthEndpoint {
@@ -15,11 +16,7 @@ export default class CampaignListEndpoint extends AuthEndpoint {
         
         const res = super.fetch(
             undefined,
-            {
-                p_pivot: query.p_pivot || undefined,
-                p_limit: query.p_limit || DEFAULT_PAGINATION_LIMIT,
-                p_prev: query.p_prev || false,
-            },
+            preprocessPaginationQuery(query),
         )
 
         return res;
