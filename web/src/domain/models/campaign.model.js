@@ -4,15 +4,15 @@ export function campaign_model_t() {
     /**
      * @type {string}
      */
-    this.title;
+    this.title = '';
 
     /**
      * @type {string}
      */
-    this.expire;
+    this.expire = '';
 
     /**
      * @type {string}
      */
-    this.issueTime;
+    this.issueTime = '';
 }
