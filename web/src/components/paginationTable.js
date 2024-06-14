@@ -58,8 +58,9 @@ function PaginationTable({ columnTransform, rowManipulator, idField, endpoint, e
                     </TableRowContext.Provider>
                 </tbody>
                 <br />
-                <PaginationController dataTotalCount={endpointData?.dataTotalCount} endpoint={endpoint} navigator={endpointData?.navigation} setEndpointData={setEndpointData} />
+               
             </table>
+            <PaginationController dataTotalCount={endpointData?.dataTotalCount} endpoint={endpoint} navigator={endpointData?.navigation} setEndpointData={setEndpointData} />
         </>
     )
 }

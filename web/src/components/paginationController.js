@@ -19,19 +19,7 @@ function PaginationNavButton({
 
     const { isLastDataPage, pageCounter, debounce, setQuery } = useContext(PaginationControllerContext);
 
-    if (
-        typeof navigationQuery !== 'object' ||
-        typeof pageCounter !== 'number' ||
-        pageCounter === 1 && isPrevious
-        || isLastDataPage && !isPrevious
-    ) {
-
-        return <></>
-    }
-
-    const direction = isPrevious ? "previous" : "next";
-    const tagClass = `paginate_button page-item ` + direction;
-    const tagId = `dataTables-example_` + direction;
+    let exposedButton;
 
     function emitQuery() {
 
@@ -44,10 +32,29 @@ function PaginationNavButton({
         setQuery(navigationQuery);
     }
 
+    
+    const direction = isPrevious ? "previous" : "next";
+    const tagClass = `paginate_button page-item ` + direction;
+    const tagId = `dataTables-example_` + direction;
+
+    if (
+        typeof navigationQuery !== 'object' ||
+        typeof pageCounter !== 'number' ||
+        pageCounter === 1 && isPrevious
+        || isLastDataPage && !isPrevious
+    ) {
+
+        exposedButton = <></>;
+    }
+    else {
+
+        exposedButton = <button onClick={() => { debounce === false && emitQuery() }} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</button>;
+    }
+
     return (
         <li class={tagClass} id={tagId}>
             {/* <a href={endpoint} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</a> */}
-            <button onClick={() => { debounce === false && emitQuery() }} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</button>
+            {exposedButton}
         </li>
     )
 }
@@ -114,7 +121,9 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
                 <div class="col-sm-12 col-md-7">
                     <div class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
                         <ul class="pagination">
+                            
                             <PaginationNavButton  pageReducer={() => { setPageCounter(pageCounter - 1) }} navigationQuery={navigator?.previous} isPrevious={true} label="Trước" />
+                           
                             {/* {pageCounterPlaceHolder} */}
                             {pageCounter > 0 &&
                                 <li class="paginate_button page-item active">
@@ -123,7 +132,10 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
                                     </a>
                                 </li>
                             }
+
+                            
                             <PaginationNavButton pageReducer={() => { setPageCounter(pageCounter + 1) }} navigationQuery={navigator?.next} label="sau" />
+                            
                         </ul>
                     </div>
                 </div>
