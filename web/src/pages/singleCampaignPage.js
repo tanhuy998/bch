@@ -5,6 +5,8 @@ import PaginationTableContext from "../contexts/paginationTable.context";
 import { useEffect, useState } from "react";
 import { tab } from "@testing-library/user-event/dist/tab";
 import Tab from "../components/Tab";
+import PillTab from "../components/pillTab";
+import BasicTab from "../components/basicTab";
 
 
 
@@ -98,7 +100,7 @@ export default function SingleCampaignPage({ usecase }) {
 
                                 <div class="card-body">
                                     <h3 class="card-title">Candidates Detail</h3>
-                                    <Tab tabs={tabs} />
+                                    <PillTab tabs={tabs}/>
                                 </div>
 
                             </div>
