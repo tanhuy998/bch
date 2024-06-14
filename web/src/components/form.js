@@ -1,3 +1,4 @@
+import { useState } from "react";
 import FormContext from "../contexts/form.context";
 
 /**
@@ -12,19 +13,21 @@ import FormContext from "../contexts/form.context";
  */
 export default function Form({ handleFormData, children, validateFunc }) {
 
+    
     const allProps = arguments[0];
+    const handleSubmit = (function handleSubmit() {
 
-    function handleSubmit(e) {
+        const event = arguments[0];
 
         if (typeof handleFormData === 'function') {
 
-            e.preventDefault();
+            event.preventDefault();
 
-            handleFormData(e.target);
+            handleFormData(event.target);
 
             return;
         }
-    }
+    });
 
     return (
         <FormContext.Provider>
@@ -34,3 +37,4 @@ export default function Form({ handleFormData, children, validateFunc }) {
         </FormContext.Provider>
     )
 } 
+
