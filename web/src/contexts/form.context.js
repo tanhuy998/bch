@@ -1,7 +1,15 @@
 import { createContext } from "react";
 
-const FormContext = createContext({
-    validate: null
-});
+
+
+export const defaultFormContextValue = {
+    validate: null,
+    dataModel: undefined,
+    onValidInput: null, 
+    onInvalidInput: null, 
+    onAfterDebounce: null,
+}
+
+const FormContext = createContext(defaultFormContextValue);
 
 export default FormContext;

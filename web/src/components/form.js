@@ -1,5 +1,5 @@
 import { useState } from "react";
-import FormContext from "../contexts/form.context";
+import FormContext, { defaultFormContextValue } from "../contexts/form.context";
 
 /**
  * This component is wrapper for default html <form> element. This component
@@ -11,7 +11,7 @@ import FormContext from "../contexts/form.context";
  * 
  * @returns 
  */
-export default function Form({ handleFormData, children, validateFunc }) {
+export default function Form({ handleFormData, children, validate, dataModel }) {
 
     
     const allProps = arguments[0];
@@ -30,7 +30,11 @@ export default function Form({ handleFormData, children, validateFunc }) {
     });
 
     return (
-        <FormContext.Provider>
+        <FormContext.Provider value={{
+            ...defaultFormContextValue, 
+            'dataModel': dataModel, 
+            validate
+        }}>
             <form method="post" onSubmit={handleSubmit} {...allProps}>
                 {children}
             </form>

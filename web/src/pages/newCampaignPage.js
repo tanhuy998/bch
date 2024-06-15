@@ -26,17 +26,24 @@ export default function NewCampaignPage({ usecase }) {
                 <div class="card-body">
                     <h3 class="card-title">Launch New Campaign</h3>
                     <br />
-                    <Form handleFormData={() => {}} class="needs-validation" novalidate="" accept-charset="utf-8">    
+                    <Form handleFormData={() => {}} className="needs-validation" novalidate="" accept-charset="utf-8">    
                         <div class="mb-3">
-                            <label for="address" class="form-label">Campaign Title</label>
-                            <FormInput type="text" class="form-control" name="" required="true" />
+                            <label for="address" className="form-label">Campaign Title</label>
+                            <FormInput type="text" className="form-control" name="title" required="true" />
+                            {/* <div class="valid-feedback">Looks good!</div>
+                            <div class="invalid-feedback">Please enter your address.</div> */}
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Description</label>
+                            <textarea className="form-control" name="description">
+                            </textarea>
                             {/* <div class="valid-feedback">Looks good!</div>
                             <div class="invalid-feedback">Please enter your address.</div> */}
                         </div>
                         <div class="row g-2">
                             <div class="mb-3 col-md-4">
-                                <label for="state" class="form-label">End Date</label>
-                                <FormInput onChange={() => { }} type="date" class="form-control" value={expireDateThreshold} required="true" min={expireDateThreshold} />
+                                <label for="state" className="form-label" >End Date</label>
+                                <FormInput onChange={() => { }} name="expire" type="date" className="form-control" value={expireDateThreshold} required="true" min={expireDateThreshold} />
                             </div>
                         </div>
                         <br />

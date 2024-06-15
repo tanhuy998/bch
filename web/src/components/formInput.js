@@ -6,7 +6,7 @@ const INIT_STATE = Symbol('init_state');
 
 export const IGNORE_VALIDATION = Symbol('input_ignore_validator');
 
-export default function FormInput({validate, onValidInput, onInvalidInput, onAfterDebounce}) {
+export default function FormInput({validate, onValidInput, onInvalidInput, onAfterDebounce, name}) {
 
     const context = useContext(FormContext);
 
@@ -21,6 +21,10 @@ export default function FormInput({validate, onValidInput, onInvalidInput, onAft
     const [debounceTimeout, setDebounceTimeout] = useState(null);
     const [inputCurrentValue, setInputCurrentValue] = useState(null);
     const [isValidInput, setIsValidInput] = useState(INIT_STATE);
+    const [dataModelFieldValue, setDataModelFieldValue] = useState(null);
+
+    const dataModel = context?.dataModel;
+    const hasDataModel = typeof dataModel !== 'object' && typeof dataModel !== 'function';
 
     const isIgnoreValidation = (validate === IGNORE_VALIDATION);
 
@@ -60,6 +64,17 @@ export default function FormInput({validate, onValidInput, onInvalidInput, onAft
 
     useEffect(() => {
 
+        if (!hasDataModel) {
+
+            return;
+        }
+
+        dataModel[name] = dataModelFieldValue;
+
+    }, [dataModelFieldValue]);
+
+    useEffect(() => {
+
         if (isValidInput === INIT_STATE) {
 
             return;
@@ -67,7 +82,7 @@ export default function FormInput({validate, onValidInput, onInvalidInput, onAft
 
         (
             isValidInput ? 
-            hasValidationSuccessListener ? onValidInput(inputCurrentValue) : undefined
+            hasValidationSuccessListener ? !setDataModelFieldValue(inputCurrentValue) && onValidInput(inputCurrentValue) : undefined
             : hasValidationFailedListener ? onValidInput(inputCurrentValue) : undefined
         )
 
@@ -96,12 +111,13 @@ export default function FormInput({validate, onValidInput, onInvalidInput, onAft
                 onAfterDebounce(inputCurrentValue);
             }
 
-            if (!hasValidation) {
+            if (!hasValidation || validate(inputCurrentValue)) {
 
+                setIsValidInput(true);
                 return;
             }
 
-            validate(inputCurrentValue) ? setIsValidInput(true) : setIsValidInput(false);
+            setIsValidInput(false);
 
         }, INPUT_DEBOUNCE_DURATION));
 
