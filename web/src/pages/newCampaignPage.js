@@ -4,6 +4,8 @@ import Form from "../components/form";
 import FormInput from "../components/formInput";
 import NewCampaignUseCase from "../domain/usecases/newCampaign.usecase";
 import { required } from "../components/lib/validator.";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default memo(NewCampaignPage);
 
@@ -35,7 +37,7 @@ function NewCampaignPage({ usecase }) {
                 <div class="card-body">
                     <h3 class="card-title">Launch New Campaign</h3>
                     <br />
-                    <Form interceptSubmit={(data) => {console.log('submit', data)}} dataModel={usecase.dataModel} className="needs-validation" novalidate="" accept-charset="utf-8">    
+                    <Form delegate={usecase} className="needs-validation" novalidate="" accept-charset="utf-8">    
                         <div class="mb-3">
                             <label for="address" className="form-label">Campaign Title</label>
                             <FormInput validate={required} type="text" className="form-control" name="title" required="true" />
@@ -47,7 +49,9 @@ function NewCampaignPage({ usecase }) {
                         <div class="row g-2">
                             <div class="mb-3 col-md-4">
                                 <label for="state" className="form-label" >End Date</label>
-                                <FormInput validate={usecase.campaignExpireDateValidateFunc} name="expire" type="date" className="form-control" value={expireDateThreshold} required="true" min={expireDateThreshold} />
+                                <br/>
+                                <FormInput validate={usecase.campaignExpireDateValidateFunc} name="expire" type="date" data-date-format="DD-MM-YYYY" className="form-control" value={expireDateThreshold} required="true" min={expireDateThreshold} />
+                                {/* <DatePicker className="form-control"/> */}
                             </div>
                         </div>
                         <br />

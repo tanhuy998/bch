@@ -122,8 +122,8 @@ export default function FormInput({validate, onValidInput, onInvalidInput, inval
 
     return (
         textArea === true ?
-        <textarea {...{...htmlElementAttributes, onChange: handleInputChange, name}} ></textarea> 
-        : <input {...{...htmlElementAttributes, onChange: handleInputChange, name}} />
+        <textarea {...{...htmlElementAttributes, onChange: handleInputChange, name}} >{inputCurrentValue}</textarea> 
+        : <input {...{...htmlElementAttributes, onChange: handleInputChange, name}} value={inputCurrentValue}/>
     )
 }
 
@@ -165,4 +165,11 @@ function prepareRenderAttributes(props = {}) {
         onInvalidInput:undefined, 
         onAfterDebounce:undefined,
     };
+}
+
+function formatDateInput(val) {
+
+    const d = new Date(val);
+
+    return `${d.getDate()}-${d.getMonth()}-${d.getFullYear}`;
 }

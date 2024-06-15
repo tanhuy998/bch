@@ -2,7 +2,7 @@ export default class ErrorResponse extends Error {
 
     #res
 
-    get fetchResponse() {
+    get responseObject() {
 
         return this.#res
     }
