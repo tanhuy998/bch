@@ -1,38 +1,29 @@
 import { useContext, useEffect, useState } from "react";
 import FormContext from "../contexts/form.context";
+import Validator from "./lib/validator.";
 
-const INPUT_DEBOUNCE_DURATION = 1500;
+const FIRST = 0;
+const INPUT_DEBOUNCE_DELAY = 1500;
 const INIT_STATE = Symbol('init_state');
 
 export const IGNORE_VALIDATION = Symbol('input_ignore_validator');
 
-export default function FormInput({validate, onValidInput, onInvalidInput, onAfterDebounce, name}) {
+export default function FormInput({validate, onValidInput, onInvalidInput, invalidMessage, onAfterDebounce, name, textArea}) {
 
     const context = useContext(FormContext);
-
-    const htmlElementAttributes = {
-        ...arguments[0], 
-        validate:undefined, 
-        onValidInput:undefined, 
-        onInvalidInput:undefined, 
-        onAfterDebounce:undefined,
-    };
+    const htmlElementAttributes = prepareRenderAttributes(arguments[FIRST]);
+    const [dataModel, hasDataModel] = prepareDataModel(context);    
 
     const [debounceTimeout, setDebounceTimeout] = useState(null);
     const [inputCurrentValue, setInputCurrentValue] = useState(null);
     const [isValidInput, setIsValidInput] = useState(INIT_STATE);
-    const [dataModelFieldValue, setDataModelFieldValue] = useState(null);
+    const [dataModelFieldValue, setDataModelFieldValue] = useState(dataModel?.[name]);
+    
+    const isIgnoreValidation = validate === IGNORE_VALIDATION;
 
-    const dataModel = context?.dataModel;
-    const hasDataModel = typeof dataModel !== 'object' && typeof dataModel !== 'function';
-
-    const isIgnoreValidation = (validate === IGNORE_VALIDATION);
-
-    validate = (!isIgnoreValidation ? 
-                typeof validate === 'function' ? validate : context?.validate 
-                : undefined);
-
+    validate = prepareValidateFunction(validate, context);
     const hasValidation = typeof validate === 'function';
+    
 
     onAfterDebounce = onAfterDebounce || context?.onAfterDebounce;
     
@@ -50,7 +41,7 @@ export default function FormInput({validate, onValidInput, onInvalidInput, onAft
 
     const handleInputChange = (function() {
 
-        const event = arguments[0];
+        const event = arguments[FIRST];
 
         setInputCurrentValue(event.target.value);
         
@@ -61,7 +52,7 @@ export default function FormInput({validate, onValidInput, onInvalidInput, onAft
             onChangeProp(event);
         }
     })
-
+    
     useEffect(() => {
 
         if (!hasDataModel) {
@@ -74,19 +65,25 @@ export default function FormInput({validate, onValidInput, onInvalidInput, onAft
     }, [dataModelFieldValue]);
 
     useEffect(() => {
-
+       
         if (isValidInput === INIT_STATE) {
 
             return;
         }
-
+        
+        console.log('is input', [name], 'valid', isValidInput);
         (
-            isValidInput ? 
-            hasValidationSuccessListener ? !setDataModelFieldValue(inputCurrentValue) && onValidInput(inputCurrentValue) : undefined
+            isValidInput && !setDataModelFieldValue(inputCurrentValue) ? 
+            hasValidationSuccessListener ?  onValidInput(inputCurrentValue) : undefined
             : hasValidationFailedListener ? onValidInput(inputCurrentValue) : undefined
         )
 
     }, [isValidInput]);
+
+    useEffect(() => {
+
+        console.log('model field assign', dataModelFieldValue)
+    }, [dataModelFieldValue])
 
     useEffect(() => {
 
@@ -119,11 +116,53 @@ export default function FormInput({validate, onValidInput, onInvalidInput, onAft
 
             setIsValidInput(false);
 
-        }, INPUT_DEBOUNCE_DURATION));
+        }, INPUT_DEBOUNCE_DELAY));
 
     }, [inputCurrentValue])
 
     return (
-        <input onChange={handleInputChange} {...htmlElementAttributes}/>
+        textArea === true ?
+        <textarea {...{...htmlElementAttributes, onChange: handleInputChange, name}} ></textarea> 
+        : <input {...{...htmlElementAttributes, onChange: handleInputChange, name}} />
     )
+}
+
+/**
+ * 
+ * @param {*} validate 
+ * @param {*} context 
+ * @returns {function name(params): Boolean {}} 
+ */
+function prepareValidateFunction(validate, context) {
+
+    const isIgnoreValidation = (validate === IGNORE_VALIDATION);
+
+    let isValidator = validate instanceof Validator;
+    validate = (!isIgnoreValidation ? 
+                typeof validate === 'function' || isValidator ? validate : context?.validate 
+                : undefined);
+    isValidator = validate instanceof Validator;
+
+    validate = isValidator ? (val) => validate.validate(val) : validate;
+
+    return validate;
+}
+
+function prepareDataModel(context) {
+
+    const dataModel = context?.dataModel;
+    const hasDataModel = typeof dataModel === 'object' || typeof dataModel === 'function';
+    
+    return [hasDataModel ? dataModel : undefined, hasDataModel];
+}
+
+function prepareRenderAttributes(props = {}) {
+
+    return {
+        ...props, 
+        validate:undefined, 
+        onValidInput:undefined, 
+        onInvalidInput:undefined, 
+        onAfterDebounce:undefined,
+    };
 }
