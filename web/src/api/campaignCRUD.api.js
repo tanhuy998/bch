@@ -1,8 +1,9 @@
 import AuthEndpoint from "../backend/autEndpoint";
+import CRUDEndpoint from "../backend/crudEndpoint";
 import HttpEndpoint from "../backend/endpoint";
 import { campaign_model_t } from "../domain/models/campaign.model";
 
-export default class CampaignCRUD extends AuthEndpoint {
+export default class CampaignCRUD extends CRUDEndpoint {
 
     constructor({scheme, host, port} = {}) {
 
@@ -18,12 +19,7 @@ export default class CampaignCRUD extends AuthEndpoint {
      */
     async create(campaignModel) {
 
-        return super.fetch(
-            {
-                method: 'POST',
-                body: JSON.stringify(campaignModel),
-            }
-        )
+        super.create(campaignModel);
     }
 
     async read() {
@@ -31,13 +27,21 @@ export default class CampaignCRUD extends AuthEndpoint {
 
     }
 
-    async update() {
+    /**
+     * 
+     * @param {campaign_model_t} campaignModel 
+     */
+    async update(campaignModel) {
 
-
+        super.update(campaignModel)
     }
 
-    async delete() {
+    /**
+     * 
+     * @param {string} uuid 
+     */
+    async delete(uuid) {
 
-
+        super.delete(uuid);
     }
 }

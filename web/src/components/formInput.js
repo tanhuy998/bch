@@ -11,6 +11,7 @@ export const IGNORE_VALIDATION = Symbol('input_ignore_validator');
 export default function FormInput({validate, onValidInput, onInvalidInput, invalidMessage, onAfterDebounce, name, textArea}) {
 
     const context = useContext(FormContext);
+    const contextDelayingDebounces = context.delayingDebounces; 
     const htmlElementAttributes = prepareRenderAttributes(arguments[FIRST]);
     const [dataModel, hasDataModel] = prepareDataModel(context);    
 
@@ -96,10 +97,11 @@ export default function FormInput({validate, onValidInput, onInvalidInput, inval
             typeof debounceTimeout === 'number'
         ) {
 
+            contextDelayingDebounces.delete(debounceTimeout);
             clearTimeout(debounceTimeout);
         }
 
-        setDebounceTimeout(setTimeout(() => {
+        const newDebounceTimeout = setTimeout(() => {
 
             console.log('end input');
 
@@ -116,7 +118,10 @@ export default function FormInput({validate, onValidInput, onInvalidInput, inval
 
             setIsValidInput(false);
 
-        }, INPUT_DEBOUNCE_DELAY));
+        }, INPUT_DEBOUNCE_DELAY)
+
+        contextDelayingDebounces.add(newDebounceTimeout);
+        setDebounceTimeout(newDebounceTimeout);
 
     }, [inputCurrentValue])
 

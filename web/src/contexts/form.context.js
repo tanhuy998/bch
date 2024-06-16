@@ -8,6 +8,7 @@ export const defaultFormContextValue = {
     onValidInput: null, 
     onInvalidInput: null, 
     onAfterDebounce: null,
+    delayingDebounces: null,
 }
 
 const FormContext = createContext(defaultFormContextValue);
