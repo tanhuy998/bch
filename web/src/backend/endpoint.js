@@ -1,5 +1,6 @@
 import ErrorResponse from "./error/errorResponse";
 import HttpRequestBuilder from "./httpRequestBuilder";
+import MockEndpoint from "./mockEndpoint";
 
 const DEFAULT_HOST = '127.0.0.1';
 const DEFAULT_SCHEME = 'http';
@@ -8,7 +9,14 @@ const DEFAULT_PORT = 8000;
 
 const REGEX_DOUBLE_SLASH = /\/\//
 
-export default class HttpEndpoint {
+export default class HttpEndpoint extends MockEndpoint{
+
+    static #mock = false;
+
+    static useMock() {
+
+        this.#mock = true;
+    }
 
     /**@type {String} */
     #host;
@@ -32,6 +40,8 @@ export default class HttpEndpoint {
     }
 
     constructor({ scheme, host, port, uri }) {
+
+        super();
 
         this.#port = port || DEFAULT_PORT;
         this.#host = host || DEFAULT_HOST;
@@ -73,5 +83,10 @@ export default class HttpEndpoint {
         }
 
         return res.json();
+    }
+
+    #fetchMock() {
+
+
     }
 }

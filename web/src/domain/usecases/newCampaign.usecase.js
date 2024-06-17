@@ -1,14 +1,29 @@
-import CampaignCRUD from "../../api/campaignCRUD.api";
 import ErrorResponse from "../../backend/error/errorResponse";
 import FormDelegator from "../../components/lib/formDelegator";
 import { campaign_model_t } from "../models/campaign.model";
-
-const NOT_VALIDATE_MODEL_FIELDS = new Set(['desciption']);
+import NewCampaignResponsePresenter from "../../api/presenter/response/newCampaignResponsePresenter";
+import CampaignCRUDEndpoint from "../../api/campaignCRUD.api";
+import Schema from "validate";
 
 export default class NewCampaignUseCase extends FormDelegator {
 
-    #endpoint = new CampaignCRUD();
+    #endpoint = new CampaignCRUDEndpoint();
     #dataModel = new campaign_model_t();
+    #validator = new Schema({
+        title: {
+            type: String,
+            required: true,
+            length: {min: 5},
+        },
+        expire: {
+            type: Date,
+            required: true,
+            message: {
+                type: 'invalid date format of exipre.',
+                required: 'expire is required.'
+            }
+        }
+    })
 
     #campaignExpireDateValidateFunc = function(val) {
 
@@ -35,10 +50,12 @@ export default class NewCampaignUseCase extends FormDelegator {
         console.log('submit', this.#dataModel)
         try {
 
-            await this.#endpoint.create(this.#dataModel);
+            const presenter = await this.#endpoint.create(this.#dataModel);
+
+            this.navigate(`/admin/campaign/${presenter.createdUUID}`);
         }
         catch (e) {
-
+            console.log('endpoint throw error')
             this.#handleError(e);
         }
     }
@@ -69,39 +86,31 @@ export default class NewCampaignUseCase extends FormDelegator {
      * @override
      */
     validateModel() {
-
+        
         const issueTime = new Date();
-        let expireTime;
+        let expireTime = this.#dataModel.expire;
+        expireTime = !(expireTime instanceof Date) ? new Date(expireTime) : expireTime;
 
-        for (const field in campaign_model_t) {
+        this.#dataModel.issueTime = issueTime;
+        
+        console.log('validate form', this.#dataModel, JSON.stringify(this.#dataModel))
 
-            if (NOT_VALIDATE_MODEL_FIELDS.has(field)) {
+        const errors = this.#validator.validate(this.#dataModel);
 
-                continue;
-            }
+        if (errors.length > 0) {
 
-            const value = this.#dataModel[field];
-
-            if ( !value ) {
-
-                return false;
-            }
-
-            if (field === 'expire') {
-                console.log(value)
-                expireTime = new Date(value);
-                continue;
-            }
+            this.setValidationFailedFootPrint(errors);
+            return false;
         }
-
-        // if (
-        //     expireTime.getDate() - issueTime.getDate() < 1
-        //     || expireTime.getMonth() - issueTime.getMonth() <= 0
-        //     || expireTime.getFullYear() - issueTime.getFullYear() <= 0
-        // ) {
-
-        //     return false;
-        // }
+        
+        if (
+           !(expireTime.getDate() - issueTime.getDate() < 1
+            || expireTime.getMonth() - issueTime.getMonth() <= 0
+            || expireTime.getFullYear() - issueTime.getFullYear() <= 0)
+        ) {
+            this.setValidationFailedFootPrint(new Error('expire date must be at least the day after present'));
+            return false;
+        }
 
         return true;
     }
@@ -111,7 +120,23 @@ export default class NewCampaignUseCase extends FormDelegator {
      */
     onValidationFailed() {
 
-        
+        const errors = this.validationFailedFootPrint;
+
+        if (!errors) {
+
+            alert('form validation failed')
+        }
+
+        if (Array.isArray(errors)) {
+
+            const msg = errors.map(
+                err => err.message
+            ).join("\n");
+
+            alert(msg);
+        }
+
+        alert(errors?.message || errors);
     }
 
     /**

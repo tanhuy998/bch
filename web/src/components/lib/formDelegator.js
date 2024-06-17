@@ -1,10 +1,54 @@
+import { useNavigate } from "react-router-dom";
+
 export default class FormDelegator {
+
+    /**@type {Function} */
+    #navigator;
+    #validationFailedFootprint;
+
+    get validationFailedFootPrint() {
+
+        return this.#validationFailedFootprint;
+    }
 
     get dataModel() {
 
         return undefined;
     }
 
+    setValidationFailedFootPrint(any) {
+
+        this.#validationFailedFootprint = any;
+    }
+
+    setNavigator(hook) {
+
+        if (typeof hook !== 'function') {
+
+            throw new Error('FormDelegator navigator must be hook function');
+        }
+
+        this.#navigator = hook;
+    }
+
+    navigate(path) {
+
+        this.#navigator.call(undefined, path, {replace: true});   
+    }
+
+    /**
+     * 
+     * @returns {string?}
+     */
+    shouldNavigate() {
+
+        return undefined;
+    }
+
+    onSuccess() {
+
+
+    }
 
     /**
      * if dataModel evaluated, formData will be the dataModel.

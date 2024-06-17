@@ -2,6 +2,7 @@ import { useState } from "react";
 import FormContext, { defaultFormContextValue } from "../contexts/form.context";
 import Validator from "./lib/validator.";
 import FormDelegator from "./lib/formDelegator";
+import {useNavigate} from "react-router-dom";
 
 /**
  * This component is wrapper for default html <form> element. This component
@@ -35,9 +36,20 @@ export default function Form({
      */
     dataModel,
     children, 
+    shouldNavigate,
 }) {
 
     const hasDelegator = delegate instanceof FormDelegator;
+    const navigate = useNavigate();
+
+    if (
+        typeof shouldNavigate !== 'string'
+        && shouldNavigate !== undefined
+        && shouldNavigate !== null
+    ) {
+
+        throw new Error('form shouldNavigate attribute must be a string');
+    } 
 
     if (
         delegate !== null && delegate !== undefined 
@@ -47,11 +59,14 @@ export default function Form({
         throw new Error('invalid delegator passed to form whose type is not instance of FormDelegator');
     }
     
-    dataModel = hasDelegator ? delegate.dataModel : dataModel;
-    interceptSubmit = hasDelegator ? delegate.interceptSubmission.bind(delegate) : interceptSubmit;
+    /**@type {FormDelegator} */
+    const delegator = hasDelegator ? delegate : null;
+
+    dataModel = hasDelegator ? delegator.dataModel : dataModel;
+    interceptSubmit = hasDelegator ? delegator.interceptSubmission.bind(delegator) : interceptSubmit;
 
     const allProps = arguments[0];
-    const hasDataModel = (hasDelegator ? delegate.dataModel : undefined) || typeof dataModel === 'object' || typeof dataModel === 'function';
+    const hasDataModel = (hasDelegator ? delegator.dataModel : undefined) || typeof dataModel === 'object' || typeof dataModel === 'function';
 
     const hasInterceptor = hasDelegator || typeof interceptSubmit === 'function';
     const hasSubmissionListener = hasDelegator || typeof onSubmit === 'function';
@@ -59,16 +74,23 @@ export default function Form({
     const isValidator = validateSubmit instanceof Validator;
     const hasSubmissionValidation = hasDelegator || typeof validateSubmit === 'function' || isValidator;
 
-    const validateFunc = (hasDelegator ? delegate.validateModel.bind(delegate) : undefined) 
+    const validateFunc = (hasDelegator ? delegator.validateModel.bind(delegator) : undefined) 
                         || (    isValidator ? 
                                 function(dataObject) { return validateSubmit.validate(dataObject)}
                                 : hasSubmissionValidation ? validateSubmit : undefined
                             );
 
-    const emitValidationFailed = (hasDelegator ? delegate.onValidationFailed.bind(delegate) : undefined) 
+    const emitValidationFailed = (hasDelegator ? delegator.onValidationFailed.bind(delegator) : undefined) 
                                     || (typeof onValidationFailed === 'function' ? onValidationFailed : () => {});
     
     const delayingDebounceTimeouts = new Set();
+
+    
+
+    if (hasInterceptor) {
+
+        delegator.setNavigator(navigate);
+    }
 
     const handleSubmit = !hasInterceptor ? hasSubmissionListener ? onSubmit : undefined
     : (function() {
@@ -92,7 +114,7 @@ export default function Form({
         if (
             !validationOK
         ) {
-
+            console.log('form validation failed')
             emitValidationFailed(targetDataObj);
             return;
         }

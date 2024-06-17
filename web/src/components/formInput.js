@@ -4,11 +4,16 @@ import Validator from "./lib/validator.";
 
 const FIRST = 0;
 const INPUT_DEBOUNCE_DELAY = 1500;
+const DATE_INPUT_DEBOUNCE_DELAY = 500;
 const INIT_STATE = Symbol('init_state');
+
+const NEED_DEBOUNCE_DELAY = new Set([
+    'text', 'email', 'password', 'number', 'url', 
+]);
 
 export const IGNORE_VALIDATION = Symbol('input_ignore_validator');
 
-export default function FormInput({validate, onValidInput, onInvalidInput, invalidMessage, onAfterDebounce, name, textArea}) {
+export default function FormInput({validate, onValidInput, onInvalidInput, invalidMessage, onAfterDebounce, name, textArea, type}) {
 
     const context = useContext(FormContext);
     const contextDelayingDebounces = context.delayingDebounces; 
@@ -40,6 +45,11 @@ export default function FormInput({validate, onValidInput, onInvalidInput, inval
     const hasValidationSuccessListener = typeof onValidInput === 'function';
     const hasValidationFailedListener = typeof onInvalidInput === 'function';
 
+    if (hasDataModel) {
+
+        dataModel[name] = inputCurrentValue;
+    }
+
     const handleInputChange = (function() {
 
         const event = arguments[FIRST];
@@ -61,7 +71,7 @@ export default function FormInput({validate, onValidInput, onInvalidInput, inval
             return;
         }
 
-        dataModel[name] = dataModelFieldValue;
+        dataModel[name] = type === 'date' ? convertToDate(dataModelFieldValue) :  dataModelFieldValue;
 
     }, [dataModelFieldValue]);
 
@@ -101,7 +111,7 @@ export default function FormInput({validate, onValidInput, onInvalidInput, inval
             clearTimeout(debounceTimeout);
         }
 
-        const newDebounceTimeout = setTimeout(() => {
+        const emitEventAndValidate = () => {
 
             console.log('end input');
 
@@ -118,7 +128,15 @@ export default function FormInput({validate, onValidInput, onInvalidInput, inval
 
             setIsValidInput(false);
 
-        }, INPUT_DEBOUNCE_DELAY)
+        };
+
+        if (textArea || !NEED_DEBOUNCE_DELAY.has(type)) {
+
+            emitEventAndValidate();
+            return;
+        }
+
+        const newDebounceTimeout = setTimeout(emitEventAndValidate, INPUT_DEBOUNCE_DELAY)
 
         contextDelayingDebounces.add(newDebounceTimeout);
         setDebounceTimeout(newDebounceTimeout);
@@ -177,4 +195,9 @@ function formatDateInput(val) {
     const d = new Date(val);
 
     return `${d.getDate()}-${d.getMonth()}-${d.getFullYear}`;
+}
+
+function convertToDate(value) {
+
+    return new Date(value);
 }

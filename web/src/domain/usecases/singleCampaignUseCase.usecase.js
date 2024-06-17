@@ -1,6 +1,6 @@
 import CampaignCandidateListEndpoint from "../../api/campaignCandidateList.api";
+import SingleCampaignRespnsePresenter from "../../api/presenter/response/singleCampaignResponse.presenter";
 import SingleCampaignEndPoint from "../../api/singleCampaign.api";
-import SingleCampaignRespnsePresenter from "../presenter/response/singleCampaignResponse.presenter";
 import CandidateListTableRowManipulator from "../valueObject/candidateLisitTableRowManipulation";
 
 export default class SingleCampaignUseCase extends SingleCampaignEndPoint {
