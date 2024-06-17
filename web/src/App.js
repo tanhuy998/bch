@@ -20,29 +20,33 @@ import SingleCampaignUseCase from './domain/usecases/singleCampaignUseCase.useca
 import CampaignListPage from './pages/campaignListPage';
 import NewCampaignPage from './pages/newCampaignPage';
 import NewCampaignUseCase from './domain/usecases/newCampaign.usecase';
+import NewCandidatePage from './pages/newCandidatePage';
+import NewCandidateUseCase from './domain/usecases/newCandidate.usecase';
 
 const campaignlistUseCase = new CampaignListUseCase()
 const singleCampaignUseCase = new SingleCampaignUseCase();
 const newCampaignUseCase = new NewCampaignUseCase();
+const newCandidateUseCase = new NewCandidateUseCase();
 
 function App() {
 
-  
+
   return (
-    
-      <BrowserRouter>
-        <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/admin' element={<AdminTemplate />}>
-            <Route index element={<AdminDashboad />} />
-            {/* <Route path="campaigns" element={<PaginationTable idField={"uuid"} endpoint={campaignlistUseCase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} /> */}
-            <Route path="campaigns" element={<CampaignListPage usecase={campaignlistUseCase}/>} />
-            <Route path="campaign/:uuid" element={<SingleCampaignPage usecase={singleCampaignUseCase}/>} />
-            <Route path="campaign/new" element={<NewCampaignPage usecase={newCampaignUseCase}/>}/>
-          </Route>
-        </Routes>
-      </BrowserRouter>
+
+    <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<Home />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/admin' element={<AdminTemplate />}>
+          <Route index element={<AdminDashboad />} />
+          {/* <Route path="campaigns" element={<PaginationTable idField={"uuid"} endpoint={campaignlistUseCase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} /> */}
+          <Route path="campaigns" element={<CampaignListPage usecase={campaignlistUseCase} />} />
+          <Route path="campaign/:uuid" element={<SingleCampaignPage usecase={singleCampaignUseCase} />} />
+          <Route path="campaign/new" element={<NewCampaignPage usecase={newCampaignUseCase} />} />
+          <Route path="campaign/:campaignUUID/new/candidate" element={<NewCandidatePage usecase={newCandidateUseCase} />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

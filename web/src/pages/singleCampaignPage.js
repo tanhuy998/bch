@@ -7,6 +7,9 @@ import { tab } from "@testing-library/user-event/dist/tab";
 import Tab from "../components/Tab";
 import PillTab from "../components/pillTab";
 import BasicTab from "../components/basicTab";
+import Form from "../components/form";
+import FormInput from "../components/formInput";
+import { required } from "../components/lib/validator.";
 
 
 
@@ -35,33 +38,35 @@ export default function SingleCampaignPage({ usecase }) {
 
     }, [])
 
-    const defaultTableContext = {
-        idField: "uuid",
-        exposedFields: ['name', 'idNumber', 'address'],
-        headers: ['Tên', 'Số CCDD', 'Địa Chỉ'],
-        endpoint: usecase.campaignCandidateListEndpoint,
-        title: "Canidates",
-        rowManipulator: usecase.candidateListTableRowManipulator
-    }
 
-    const allCandidateExtraContextValues = {
-        EXTRA_FETCH_ARGS: [uuid]
-    }
 
     const candidateDisplayTable = (
         // <PaginationTable idField="uuid" exposedFields={['name', 'idNumber', 'address']} headers={['Tên', 'Số CCDD', 'Địa Chỉ']} endpoint={usecase.campaignCandidateListEndpoint} title="Canidates" />
         <PaginationTable />
     )
 
-    const tabs = {
-        All: (
-            <PaginationTableContext.Provider value={{ ...defaultTableContext, ...allCandidateExtraContextValues }}>
-                <PaginationTable />
-            </PaginationTableContext.Provider>
-        ),
+    const candidateTabs = {
+        All: <CompactCampaignCandidateTable usecase={usecase} uuid={uuid} />,
         Signed: '',
         Unsigned: ''
     }
+
+    const mainTabs = {
+        'Mô tả': `
+
+Lorem ipsum dolor sit amet. Eos neque dolor id accusantium reprehenderit et impedit ipsam quo illo praesentium. Ut porro amet aut autem ducimus At voluptas repellat. Est accusamus sequi est fuga voluptate ut aliquid minima 33 dolores nisi est maxime aspernatur qui sunt voluptatum. Ad sequi iure nam vero quis et aliquam repellat et eaque soluta et galisum quaerat ut rerum esse.
+
+Qui nesciunt corporis in praesentium nemo ut vitae dolores et accusantium vitae. Ut nihil earum et iste quis id provident molestiae non voluptas veritatis ut ducimus similique et nulla pariatur et sint officia. In eius quibusdam qui facilis neque qui rerum consequatur. Qui reprehenderit possimus quo repellat quasi aut asperiores labore rem neque veritatis ut veniam distinctio est Quis dolor sit velit optio.
+
+A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo eligendi veritatis sit eaque perferendis et atque modi aut cumque odio ex dolorum provident! Ut vero impedit ad voluptatem optio ut Quis velit. Sit suscipit dolor sit voluptatem voluptatum eum inventore tenetur est quas quia qui eligendi minima.`,
+        'Candidates': (
+            <div class="card-body">
+                {/* <h3 class="card-title">Candidates Detail</h3> */}
+
+                <PillTab tabs={candidateTabs} />
+            </div>
+        )
+    };
 
     console.log('usecase', usecase.campaignCandidateListEndpoint)
     return (
@@ -85,26 +90,19 @@ export default function SingleCampaignPage({ usecase }) {
                                             </div>
                                         </div>
                                     </div>
-                                    <br/>
-                                    <BasicTab tabs={{'Mô tả': `
-
-Lorem ipsum dolor sit amet. Eos neque dolor id accusantium reprehenderit et impedit ipsam quo illo praesentium. Ut porro amet aut autem ducimus At voluptas repellat. Est accusamus sequi est fuga voluptate ut aliquid minima 33 dolores nisi est maxime aspernatur qui sunt voluptatum. Ad sequi iure nam vero quis et aliquam repellat et eaque soluta et galisum quaerat ut rerum esse.
-
-Qui nesciunt corporis in praesentium nemo ut vitae dolores et accusantium vitae. Ut nihil earum et iste quis id provident molestiae non voluptas veritatis ut ducimus similique et nulla pariatur et sint officia. In eius quibusdam qui facilis neque qui rerum consequatur. Qui reprehenderit possimus quo repellat quasi aut asperiores labore rem neque veritatis ut veniam distinctio est Quis dolor sit velit optio.
-
-A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo eligendi veritatis sit eaque perferendis et atque modi aut cumque odio ex dolorum provident! Ut vero impedit ad voluptatem optio ut Quis velit. Sit suscipit dolor sit voluptatem voluptatum eum inventore tenetur est quas quia qui eligendi minima.
-`}}/>
-                                    <br/>
-                                    
-                                    <Link to="#" class="btn btn-primary">Chỉnh sửa</Link>
                                     <br />
 
+                                    <Link to="#" class="btn btn-primary">Chỉnh sửa</Link>
+                                    <br />
+                                    <br />
+                                    <BasicTab tabs={mainTabs} initTabIndex={0} />
                                 </div>
 
-                                <div class="card-body">
+                                {/* <div class="card-body">
                                     <h3 class="card-title">Candidates Detail</h3>
-                                    <PillTab tabs={tabs} />
-                                </div>
+
+                                    <PillTab tabs={candidateTabs} />
+                                </div> */}
 
                             </div>
                         </div>
@@ -113,4 +111,86 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
             </div>
         </>
     )
+}
+
+function CompactCampaignCandidateTable({ uuid, usecase }) {
+
+    const [formVisible, setFormVisible] = useState(false);
+
+    const allCandidateExtraContextValues = {
+        EXTRA_FETCH_ARGS: [uuid]
+    }
+
+    const defaultTableContext = {
+        idField: "uuid",
+        exposedFields: ['name', 'idNumber', 'address'],
+        headers: ['Tên', 'Số CCDD', 'Địa Chỉ'],
+        endpoint: usecase.campaignCandidateListEndpoint,
+        title: "Canidates",
+        rowManipulator: usecase.candidateListTableRowManipulator
+    }
+
+    return (
+        <>
+            {!formVisible && (
+                <>
+                    <h5>
+                        All Candidates
+                        <button onClick={() => { toggleCompactTableForm(formVisible, setFormVisible) }} class="btn btn-sm btn-outline-primary float-end"><i class="fas fa-plus-circle"></i> Thêm mới</button>
+                        {/* <a href="users.html" class="btn btn-sm btn-outline-info float-end me-1"><i class="fas fa-angle-left"></i> <span class="btn-header">Return</span></a> */}
+                    </h5>
+                    <br/>
+                </>
+            )}
+
+            {formVisible && (
+                <>
+                    <div class="card-body" style={{ "background-color": '#E0E0E0' }}>
+                        <h3 class="card-title">New Candidate</h3>
+                        <br />
+                        <Form className="needs-validation" novalidate="" accept-charset="utf-8">
+                            <div class="container" >
+                                <div class="row">
+                                    <div class="mb-6 col">
+                                        <label for="address" className="form-label">Candidate Name</label>
+                                        <FormInput validate={required} type="text" className="form-control" name="title" required="true" />
+                                    </div>
+                                    <div class="mb-6 col">
+                                        <label for="address" class="form-label">ID Number</label>
+                                        <FormInput validate={required} className="form-control" name="description" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col mb-6">
+                                        <label for="address" class="form-label">Adress</label>
+                                        <FormInput validate={required} className="form-control" name="description" />
+                                    </div>
+                                    <div class="col mb-6">
+                                        <div >
+                                            <label for="state" className="form-label" >Date Of Birth</label>
+                                            <FormInput name="expire" type="date" data-date-format="DD-MM-YYYY" className="form-control" required="true" />
+                                            {/* <DatePicker className="form-control"/> */}
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+                            </div>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+                            <button onClick={() => {toggleCompactTableForm(formVisible, setFormVisible)}} className="btn btn-sm btn-outline-primary" style={{margin: 5}}>Hủy</button>
+                        </Form>
+                    </div>
+                    <br />
+                </>
+            )}
+            {formVisible && <h5>All Candidate</h5>}
+            <PaginationTableContext.Provider value={{ ...defaultTableContext, ...allCandidateExtraContextValues }}>
+                <PaginationTable />
+            </PaginationTableContext.Provider>
+        </>
+    )
+}
+
+function toggleCompactTableForm(state, setter) {
+
+    setter(!state);
 }
