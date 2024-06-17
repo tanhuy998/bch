@@ -15,7 +15,7 @@ import (
 
 type (
 	ILaunchNewCampaign interface {
-		Execute(*requestPresenter.LaunchNewCampaignRequest, responsePresenter.ILaunchNewCampaignResponsePresenter) (mvc.Result, error)
+		Execute(*requestPresenter.LaunchNewCampaignRequest, *responsePresenter.LaunchNewCampaignResponse) (mvc.Result, error)
 	}
 
 	LaunchNewCampaignUseCase struct {
@@ -26,7 +26,7 @@ type (
 
 func (this *LaunchNewCampaignUseCase) Execute(
 	input *requestPresenter.LaunchNewCampaignRequest,
-	output responsePresenter.ILaunchNewCampaignResponsePresenter,
+	output *responsePresenter.LaunchNewCampaignResponse, //responsePresenter.ILaunchNewCampaignResponsePresenter,
 ) (mvc.Result, error) {
 
 	input.Data.UUID = nil
@@ -46,8 +46,11 @@ func (this *LaunchNewCampaignUseCase) Execute(
 		return this.ActionResultService.ServeErrorResponse(err)
 	}
 
-	output.SetMessage("success")
-	output.GetData().CreatedUUID = createdUUID
+	// output.SetMessage("success")
+	// output.GetData().CreatedUUID = createdUUID
+
+	output.Message = "success"
+	output.Data.CreatedUUID = createdUUID
 
 	return this.ActionResultService.
 		Prepare().

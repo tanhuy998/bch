@@ -15,7 +15,7 @@ type (
 
 	LaunchNewCampaignResponse struct {
 		Message string `json:"message"`
-		Data    *Data  `json:"data"`
+		Data    Data   `json:"data"`
 	}
 )
 
@@ -26,9 +26,9 @@ func (this *LaunchNewCampaignResponse) SetMessage(msg string) {
 
 func (this *LaunchNewCampaignResponse) SetData(dt *Data) {
 
-	this.Data = dt
+	this.Data = *dt
 }
 func (this *LaunchNewCampaignResponse) GetData() *Data {
 
-	return this.Data
+	return &this.Data
 }
