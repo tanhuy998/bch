@@ -4,21 +4,11 @@ export default class FormDelegator {
 
     /**@type {Function} */
     #navigator;
-    #validationFailedFootprint;
 
-    get validationFailedFootPrint() {
-
-        return this.#validationFailedFootprint;
-    }
 
     get dataModel() {
 
         return undefined;
-    }
-
-    setValidationFailedFootPrint(any) {
-
-        this.#validationFailedFootprint = any;
     }
 
     setNavigator(hook) {

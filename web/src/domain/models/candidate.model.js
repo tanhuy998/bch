@@ -12,14 +12,23 @@ export {
 function candidate_model_t() {
 
     /**
-     * 
+     *  @type {string}
      */
     this.idNumber;
 
     /**
-     * 
+     *  @type {Date}
+     */
+    this.dateOfBirth;
+    
+    /**
+     *  @type {string}
      */
     this.name;
+
+    /**
+     *  @type {string}
+     */
     this.address;
 }
 

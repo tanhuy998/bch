@@ -10,6 +10,7 @@ import BasicTab from "../components/basicTab";
 import Form from "../components/form";
 import FormInput from "../components/formInput";
 import { required } from "../components/lib/validator.";
+import NewCandidateFormDelegator from "../domain/valueObject/newCandidateFormDelegator";
 
 
 
@@ -40,30 +41,34 @@ export default function SingleCampaignPage({ usecase }) {
 
 
 
-    const candidateDisplayTable = (
-        // <PaginationTable idField="uuid" exposedFields={['name', 'idNumber', 'address']} headers={['Tên', 'Số CCDD', 'Địa Chỉ']} endpoint={usecase.campaignCandidateListEndpoint} title="Canidates" />
-        <PaginationTable />
-    )
+    // const candidateDisplayTable = (
+    //     // <PaginationTable idField="uuid" exposedFields={['name', 'idNumber', 'address']} headers={['Tên', 'Số CCDD', 'Địa Chỉ']} endpoint={usecase.campaignCandidateListEndpoint} title="Canidates" />
+    //     <PaginationTable />
+    // )
 
     const candidateTabs = {
-        All: <CompactCampaignCandidateTable usecase={usecase} uuid={uuid} />,
-        Signed: '',
-        Unsigned: ''
+        // All: //<CompactCampaignCandidateTable usecase={usecase} uuid={uuid} />,
+        Signed: <CampaignCandidateProgression uuid={uuid} endpoint={usecase.campaignCandidateListEndpoint} />,
+        Unsigned: <CampaignCandidateProgression uuid={uuid} endpoint={usecase.campaignCandidateListEndpoint} />,
     }
 
     const mainTabs = {
-        'Mô tả': `
-
-Lorem ipsum dolor sit amet. Eos neque dolor id accusantium reprehenderit et impedit ipsam quo illo praesentium. Ut porro amet aut autem ducimus At voluptas repellat. Est accusamus sequi est fuga voluptate ut aliquid minima 33 dolores nisi est maxime aspernatur qui sunt voluptatum. Ad sequi iure nam vero quis et aliquam repellat et eaque soluta et galisum quaerat ut rerum esse.
+        'Mô tả': `Lorem ipsum dolor sit amet. Eos neque dolor id accusantium reprehenderit et impedit ipsam quo illo praesentium. Ut porro amet aut autem ducimus At voluptas repellat. Est accusamus sequi est fuga voluptate ut aliquid minima 33 dolores nisi est maxime aspernatur qui sunt voluptatum. Ad sequi iure nam vero quis et aliquam repellat et eaque soluta et galisum quaerat ut rerum esse.
 
 Qui nesciunt corporis in praesentium nemo ut vitae dolores et accusantium vitae. Ut nihil earum et iste quis id provident molestiae non voluptas veritatis ut ducimus similique et nulla pariatur et sint officia. In eius quibusdam qui facilis neque qui rerum consequatur. Qui reprehenderit possimus quo repellat quasi aut asperiores labore rem neque veritatis ut veniam distinctio est Quis dolor sit velit optio.
 
 A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo eligendi veritatis sit eaque perferendis et atque modi aut cumque odio ex dolorum provident! Ut vero impedit ad voluptatem optio ut Quis velit. Sit suscipit dolor sit voluptatem voluptatum eum inventore tenetur est quas quia qui eligendi minima.`,
-        'Candidates': (
+        Candidates: (
             <div class="card-body">
                 {/* <h3 class="card-title">Candidates Detail</h3> */}
 
-                <PillTab tabs={candidateTabs} />
+                {/* <PillTab tabs={candidateTabs} /> */}
+                <CompactCampaignCandidateTable formDelegator={usecase.newCandidateFormDelegator} endpoint={usecase.campaignCandidateListEndpoint} uuid={uuid} />
+            </div>
+        ),
+        Progression: (
+            <div class="card-body">
+                <PillTab tabs={candidateTabs}/>
             </div>
         )
     };
@@ -113,7 +118,12 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
     )
 }
 
-function CompactCampaignCandidateTable({ uuid, usecase }) {
+function CompactCampaignCandidateTable({ uuid, endpoint, formDelegator }) {
+
+    if (!(formDelegator instanceof NewCandidateFormDelegator)) {
+
+        throw new Error('formDelegator must be instance of NewCandidateFormDelegator');
+    }
 
     const [formVisible, setFormVisible] = useState(false);
 
@@ -125,9 +135,9 @@ function CompactCampaignCandidateTable({ uuid, usecase }) {
         idField: "uuid",
         exposedFields: ['name', 'idNumber', 'address'],
         headers: ['Tên', 'Số CCDD', 'Địa Chỉ'],
-        endpoint: usecase.campaignCandidateListEndpoint,
+        endpoint: endpoint,
         title: "Canidates",
-        rowManipulator: usecase.candidateListTableRowManipulator
+        rowManipulator: endpoint,
     }
 
     return (
@@ -148,7 +158,7 @@ function CompactCampaignCandidateTable({ uuid, usecase }) {
                     <div class="card-body" style={{ "background-color": '#E0E0E0' }}>
                         <h3 class="card-title">New Candidate</h3>
                         <br />
-                        <Form className="needs-validation" novalidate="" accept-charset="utf-8">
+                        <Form delegate={formDelegator} className="needs-validation" novalidate="" accept-charset="utf-8">
                             <div class="container" >
                                 <div class="row">
                                     <div class="mb-6 col">
@@ -160,17 +170,18 @@ function CompactCampaignCandidateTable({ uuid, usecase }) {
                                         <FormInput validate={required} className="form-control" name="description" />
                                     </div>
                                 </div>
+                                <br />
                                 <div class="row">
-                                    <div class="col mb-6">
-                                        <label for="address" class="form-label">Adress</label>
-                                        <FormInput validate={required} className="form-control" name="description" />
-                                    </div>
                                     <div class="col mb-6">
                                         <div >
                                             <label for="state" className="form-label" >Date Of Birth</label>
                                             <FormInput name="expire" type="date" data-date-format="DD-MM-YYYY" className="form-control" required="true" />
                                             {/* <DatePicker className="form-control"/> */}
                                         </div>
+                                    </div>
+                                    <div class="col mb-6">
+                                        <label for="address" class="form-label">Adress</label>
+                                        <FormInput validate={required} className="form-control" name="description" />
                                     </div>
                                 </div>
                                 <br />
@@ -190,7 +201,30 @@ function CompactCampaignCandidateTable({ uuid, usecase }) {
     )
 }
 
+function CampaignCandidateProgression({uuid, endpoint}) {
+
+    const allCandidateExtraContextValues = {
+        EXTRA_FETCH_ARGS: [uuid]
+    }
+
+    const defaultTableContext = {
+        idField: "uuid",
+        exposedFields: ['name', 'idNumber', 'address'],
+        headers: ['Tên', 'Số CCDD', 'Địa Chỉ'],
+        endpoint: endpoint,
+        title: "Canidates",
+        rowManipulator: endpoint,
+    }
+
+    return (
+        <PaginationTableContext.Provider value={{ ...defaultTableContext, ...allCandidateExtraContextValues }}>
+            <PaginationTable />
+        </PaginationTableContext.Provider>
+    )
+}
+
 function toggleCompactTableForm(state, setter) {
 
     setter(!state);
 }
+
