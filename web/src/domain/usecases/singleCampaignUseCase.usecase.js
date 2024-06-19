@@ -7,8 +7,8 @@ import NewCandidateFormDelegator from "../valueObject/newCandidateFormDelegator"
 export default class SingleCampaignUseCase extends SingleCampaignEndPoint {
 
     #CampaignCandidateListEndpoint = new CampaignCandidateListEndpoint();
-    #candidateListTableRowManipulator;
     #newCandidateFormDelegator = new NewCandidateFormDelegator();
+    #candidateListTableRowManipulator = new CandidateListTableRowManipulator(this.#newCandidateFormDelegator.endpoint.url);
 
     get newCandidateFormDelegator() {
 

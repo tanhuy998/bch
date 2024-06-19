@@ -70,7 +70,7 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
                 {/* <h3 class="card-title">Candidates Detail</h3> */}
 
                 {/* <PillTab tabs={candidateTabs} /> */}
-                <CompactCampaignCandidateTable formDelegator={usecase.newCandidateFormDelegator} endpoint={usecase.campaignCandidateListEndpoint} uuid={uuid} />
+                <CompactCampaignCandidateTable pageUsecase={usecase} formDelegator={usecase.newCandidateFormDelegator} endpoint={usecase.campaignCandidateListEndpoint} uuid={uuid} />
             </div>
         ),
         'Tiến Độ': (
@@ -129,7 +129,7 @@ function increaseAddedCandidateCount(state) {
     return state + 1;
 }
 
-function CompactCampaignCandidateTable({ uuid, endpoint, formDelegator }) {
+function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelegator }) {
 
     const [formVisible, setFormVisible] = useState(false);
     const [submissionSuccess, setSubmissionSuccess] = useState(INIT_STATE);
@@ -138,6 +138,11 @@ function CompactCampaignCandidateTable({ uuid, endpoint, formDelegator }) {
     if (!(formDelegator instanceof NewCandidateFormDelegator)) {
 
         throw new Error('formDelegator must be instance of NewCandidateFormDelegator');
+    }
+
+    if (!(pageUsecase instanceof SingleCampaignUseCase)) {
+
+        throw new Error('pageUsecase must be instance of SingleCampaignUseCase');   
     }
 
     const allCandidateExtraContextValues = {
@@ -197,7 +202,7 @@ function CompactCampaignCandidateTable({ uuid, endpoint, formDelegator }) {
             )}
             {formVisible && <h5>All Candidate</h5>}
             <PaginationTableContext.Provider value={{ ...defaultTableContext, ...allCandidateExtraContextValues }}>
-                <PaginationTable candidateAdded={candidateAddedCount} />
+                <PaginationTable rowManipulator={pageUsecase.candidateListTableRowManipulator} candidateAdded={candidateAddedCount} />
             </PaginationTableContext.Provider>
         </>
     )
