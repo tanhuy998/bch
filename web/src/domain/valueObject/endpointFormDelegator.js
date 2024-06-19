@@ -1,3 +1,4 @@
+import CRUDEndpoint from "../../backend/crudEndpoint";
 import ErrorResponse from "../../backend/error/errorResponse";
 import AdvanceValidationFormDelegator from "./advancedValidationFormdelegator";
 
@@ -22,7 +23,7 @@ export class EndpointFormDelegatorAction {
 
 export default class EndpointFormDelegator extends AdvanceValidationFormDelegator {
 
-    /**@type {import("../../backend/httpRequestBuilder").HttpEndpoint} */
+    /**@type {CRUDEndpoint} */
     get endpoint() {
 
 
@@ -44,24 +45,40 @@ export default class EndpointFormDelegator extends AdvanceValidationFormDelegato
 
     async interceptSubmission() {
         console.log('submit', this.dataModel)
+
+        if (!(this.endpoint instanceof CRUDEndpoint)) {
+
+
+        }
+
         try {
 
             const action = this.action;
             const res = await this.endpoint[action](this.dataModel);
 
-            const navigatePath = this.shouldNavigate(res);
-
-            if (!navigatePath || typeof navigatePath !== 'string') {
-
-                return
-            }
-
-            this.navigate(navigatePath);
+            this.navigateAfterInterceptionSuccess(res);
         }
         catch (e) {
             console.log('endpoint throw error')
             this.#handleError(e);
         }
+    }
+
+    navigateAfterInterceptionSuccess(res) {
+
+        const navigatePath = this.shouldNavigate(res);
+
+        if (!navigatePath || typeof navigatePath !== 'string') {
+
+            return
+        }
+
+        this.navigate(navigatePath);
+    }
+
+    _handleError(err) {
+
+        this.#handleError(err);
     }
 
     #handleError(err) {

@@ -26,14 +26,17 @@ export function validatePeopleName(val) {
  * @param {Date} date 
  * @returns {boolean}
  */
-export function aboveSixteenYearsOld(date) {
-
+export function ageAboveSixteenAndYoungerThanTwentySeven(date) {
+    
     if (!(date instanceof Date)) {
 
         return false;
     }
+    
+    const thisYear = (new Date()).getFullYear();
+    const age = thisYear - date.getFullYear();
 
-    return (new Date).getFullYear() - date.getFullYear() > 16;
+    return age >= 17 && age < 27;
 }
 
 /**

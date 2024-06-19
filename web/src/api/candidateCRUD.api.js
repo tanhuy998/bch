@@ -14,12 +14,23 @@ export default class CandidateCRUDEndpoint extends CRUDEndpoint {
     /**
      * 
      * @param {candidate_model_t} model 
+     * @param {string} campaignUUID
      * @returns {NewCampaignResponsePresenter}
      */
-    async create(candidateModel) {
+    async create(candidateModel, campaignUUID) {
 
-        const res = await super.create(candidateModel);
+        const res = await super.fetch(
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    data: candidateModel
+                })
+            },
+            undefined,
+            `/campaign/${campaignUUID}`
+        )
 
+        return res;
         //return new NewCampaignResponsePresenter(res);
     }
 

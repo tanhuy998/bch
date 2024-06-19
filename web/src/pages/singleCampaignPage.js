@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import PaginationTable from "../components/paginationTable";
 import SingleCampaignUseCase from "../domain/usecases/singleCampaignUseCase.usecase";
 import PaginationTableContext from "../contexts/paginationTable.context";
-import { useEffect, useState } from "react";
+import { createContext, memo, useContext, useEffect, useReducer, useState } from "react";
 import { tab } from "@testing-library/user-event/dist/tab";
 import Tab from "../components/Tab";
 import PillTab from "../components/pillTab";
@@ -12,7 +12,14 @@ import FormInput from "../components/formInput";
 import { required } from "../components/lib/validator.";
 import NewCandidateFormDelegator from "../domain/valueObject/newCandidateFormDelegator";
 
+const CandidatesTabContext = createContext({
+    formVisible: false,
+    setFormVisible: null,
+    refreshTab: () => {console.log('default refresh')},
+})
 
+const MemoNewCandidateForm = memo(NewCandidateForm);
+const INIT_STATE = Symbol('_init_state_')
 
 export default function SingleCampaignPage({ usecase }) {
 
@@ -29,6 +36,8 @@ export default function SingleCampaignPage({ usecase }) {
         throw new Error('invalid use case passed to SingleCampaignPage');
     }
 
+    usecase.newCandidateFormDelegator.setCampaignUUID(uuid);
+
     useEffect(() => {
 
         usecase.fetch(uuid)
@@ -39,14 +48,12 @@ export default function SingleCampaignPage({ usecase }) {
 
     }, [])
 
-
-
     // const candidateDisplayTable = (
     //     // <PaginationTable idField="uuid" exposedFields={['name', 'idNumber', 'address']} headers={['Tên', 'Số CCDD', 'Địa Chỉ']} endpoint={usecase.campaignCandidateListEndpoint} title="Canidates" />
     //     <PaginationTable />
     // )
 
-    const candidateTabs = {
+    const progressionTabs = {
         // All: //<CompactCampaignCandidateTable usecase={usecase} uuid={uuid} />,
         Signed: <CampaignCandidateProgression uuid={uuid} endpoint={usecase.campaignCandidateListEndpoint} />,
         Unsigned: <CampaignCandidateProgression uuid={uuid} endpoint={usecase.campaignCandidateListEndpoint} />,
@@ -66,14 +73,13 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
                 <CompactCampaignCandidateTable formDelegator={usecase.newCandidateFormDelegator} endpoint={usecase.campaignCandidateListEndpoint} uuid={uuid} />
             </div>
         ),
-        Progression: (
+        'Tiến Độ': (
             <div class="card-body">
-                <PillTab tabs={candidateTabs}/>
+                <PillTab tabs={progressionTabs} />
             </div>
         )
     };
 
-    console.log('usecase', usecase.campaignCandidateListEndpoint)
     return (
         <>
             <div class="row">
@@ -118,14 +124,21 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
     )
 }
 
+function increaseAddedCandidateCount(state) {
+    console.log('reducer', state)
+    return state + 1;
+}
+
 function CompactCampaignCandidateTable({ uuid, endpoint, formDelegator }) {
+
+    const [formVisible, setFormVisible] = useState(false);
+    const [submissionSuccess, setSubmissionSuccess] = useState(INIT_STATE);
+    const [candidateAddedCount, addOneCandidate] = useReducer(increaseAddedCandidateCount, 0);
 
     if (!(formDelegator instanceof NewCandidateFormDelegator)) {
 
         throw new Error('formDelegator must be instance of NewCandidateFormDelegator');
     }
-
-    const [formVisible, setFormVisible] = useState(false);
 
     const allCandidateExtraContextValues = {
         EXTRA_FETCH_ARGS: [uuid]
@@ -133,12 +146,29 @@ function CompactCampaignCandidateTable({ uuid, endpoint, formDelegator }) {
 
     const defaultTableContext = {
         idField: "uuid",
-        exposedFields: ['name', 'idNumber', 'address'],
-        headers: ['Tên', 'Số CCDD', 'Địa Chỉ'],
+        exposedFields: ['name', 'dateOfBirth', 'idNumber', 'address'],
+        headers: ['Tên', 'Ngày Sinh', 'Số CCDD', 'Địa Chỉ'],
         endpoint: endpoint,
         title: "Canidates",
         rowManipulator: endpoint,
     }
+
+    useEffect(() => {
+
+        if (submissionSuccess === INIT_STATE) {
+
+            return;
+        }
+
+        if (submissionSuccess === false) {
+
+            return;
+        }
+        
+        setSubmissionSuccess(false);
+        addOneCandidate();
+        console.log('new candidate added', candidateAddedCount)
+    }, [submissionSuccess])
 
     return (
         <>
@@ -149,7 +179,7 @@ function CompactCampaignCandidateTable({ uuid, endpoint, formDelegator }) {
                         <button onClick={() => { toggleCompactTableForm(formVisible, setFormVisible) }} class="btn btn-sm btn-outline-primary float-end"><i class="fas fa-plus-circle"></i> Thêm mới</button>
                         {/* <a href="users.html" class="btn btn-sm btn-outline-info float-end me-1"><i class="fas fa-angle-left"></i> <span class="btn-header">Return</span></a> */}
                     </h5>
-                    <br/>
+                    <br />
                 </>
             )}
 
@@ -158,50 +188,67 @@ function CompactCampaignCandidateTable({ uuid, endpoint, formDelegator }) {
                     <div class="card-body" style={{ "background-color": '#E0E0E0' }}>
                         <h3 class="card-title">New Candidate</h3>
                         <br />
-                        <Form delegate={formDelegator} className="needs-validation" novalidate="" accept-charset="utf-8">
-                            <div class="container" >
-                                <div class="row">
-                                    <div class="mb-6 col">
-                                        <label for="address" className="form-label">Candidate Name</label>
-                                        <FormInput validate={required} type="text" className="form-control" name="title" required="true" />
-                                    </div>
-                                    <div class="mb-6 col">
-                                        <label for="address" class="form-label">ID Number</label>
-                                        <FormInput validate={required} className="form-control" name="description" />
-                                    </div>
-                                </div>
-                                <br />
-                                <div class="row">
-                                    <div class="col mb-6">
-                                        <div >
-                                            <label for="state" className="form-label" >Date Of Birth</label>
-                                            <FormInput name="expire" type="date" data-date-format="DD-MM-YYYY" className="form-control" required="true" />
-                                            {/* <DatePicker className="form-control"/> */}
-                                        </div>
-                                    </div>
-                                    <div class="col mb-6">
-                                        <label for="address" class="form-label">Adress</label>
-                                        <FormInput validate={required} className="form-control" name="description" />
-                                    </div>
-                                </div>
-                                <br />
-                            </div>
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
-                            <button onClick={() => {toggleCompactTableForm(formVisible, setFormVisible)}} className="btn btn-sm btn-outline-primary" style={{margin: 5}}>Hủy</button>
-                        </Form>
+                        <CandidatesTabContext.Provider value={{ formVisible, setFormVisible, refreshTab: setSubmissionSuccess}}>
+                            <NewCandidateForm formDelegator={formDelegator} />
+                        </CandidatesTabContext.Provider>
                     </div>
                     <br />
                 </>
             )}
             {formVisible && <h5>All Candidate</h5>}
             <PaginationTableContext.Provider value={{ ...defaultTableContext, ...allCandidateExtraContextValues }}>
-                <PaginationTable />
+                <PaginationTable candidateAdded={candidateAddedCount} />
             </PaginationTableContext.Provider>
         </>
     )
 }
 
-function CampaignCandidateProgression({uuid, endpoint}) {
+function NewCandidateForm({ formDelegator }) {
+
+    const { formVisible, setFormVisible, refreshTab } = useContext(CandidatesTabContext);
+
+    const thisYear = (new Date()).getFullYear();
+    const minDate = `1-1-${thisYear - 17}`;
+    const maxDate = `12-31-${thisYear + 10}`
+
+    formDelegator.setRefreshEmitter(refreshTab);
+
+    return (
+        <Form delegate={formDelegator} className="needs-validation" novalidate="" accept-charset="utf-8">
+            <div class="container" >
+                <div class="row">
+                    <div class="mb-6 col">
+                        <label for="address" className="form-label">Candidate Name</label>
+                        <FormInput validate={(val) => val.length > 5} type="text" className="form-control" name="name" required="true" />
+                    </div>
+                    <div class="mb-6 col">
+                        <label for="address" class="form-label">ID Number</label>
+                        <FormInput validate={required} type="text" className="form-control" name="idNumber" />
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col mb-6">
+                        <div >
+                            <label for="state" className="form-label" >Date Of Birth</label>
+                            <FormInput name="dateOfBirth" type="date" value={minDate} min={minDate} max={maxDate} data-date-format="DD-MM-YYYY" className="form-control" required="true" />
+                            {/* <DatePicker className="form-control"/> */}
+                        </div>
+                    </div>
+                    <div class="col mb-6">
+                        <label for="address" class="form-label">Adress</label>
+                        <FormInput validate={required} type="text" className="form-control" name="address" />
+                    </div>
+                </div>
+                <br />
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+            <button onClick={() => { toggleCompactTableForm(formVisible, setFormVisible) }} className="btn btn-sm btn-outline-primary" style={{ margin: 5 }}>Hủy</button>
+        </Form>
+    )
+}
+
+function CampaignCandidateProgression({ uuid, endpoint }) {
 
     const allCandidateExtraContextValues = {
         EXTRA_FETCH_ARGS: [uuid]

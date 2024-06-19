@@ -1,12 +1,17 @@
 import Schema from "validate";
 import FormDelegator from "../../components/lib/formDelegator"
 import { candidate_model_t } from "../models/candidate.model";
-import { validateIDNumber, validatePeopleName, aboveSixteenYearsOld } from "../../lib/validator";
+import { validateIDNumber, validatePeopleName, ageAboveSixteenAndYoungerThanTwentySeven } from "../../lib/validator";
 import ErrorTraceFormDelegator from "./errorTraceFormDelegator";
 import CandidateCRUDEndpoint from "../../api/candidateCRUD.api";
+import EndpointFormDelegator from "./endpointFormDelegator";
 
-export default class NewCandidateFormDelegator extends ErrorTraceFormDelegator {
+export default class NewCandidateFormDelegator extends EndpointFormDelegator {
+    
+    #refreshEmitter;
 
+    /**@type {string} */
+    #campaignUUID;
     #endpoint  = new CandidateCRUDEndpoint();
     #dataModel = new candidate_model_t();
     #validator = new Schema({
@@ -23,13 +28,21 @@ export default class NewCandidateFormDelegator extends ErrorTraceFormDelegator {
         dateOfBirth: {
             type: Date,
             required: true,
-            use : {aboveSixteenYearsOld}
+            use: { ageAboveSixteenAndYoungerThanTwentySeven },
+            message: {
+                use: 'candidate age must be in range from 17 to 26'
+            }
         },
         address: {
             type: String,
             required: true,
         },
     });
+
+    get validator() {
+
+        return this.#validator;
+    }
 
     get dataModel() {
 
@@ -43,32 +56,59 @@ export default class NewCandidateFormDelegator extends ErrorTraceFormDelegator {
 
     /**
      * 
-     * @param {any} formData
-     * 
-     * @returns {boolean}
+     * @param {function} emitter 
      */
-    interceptSubmission() {
+    setRefreshEmitter(emitter) {
 
-
+        this.#refreshEmitter = emitter;
     }
 
     /**
      * 
-     * @param {any} formData
-     * 
-     * @returns {boolean}
+     * @param {string} uuid 
      */
-    validateModel() {
+    setCampaignUUID(uuid) {
 
-        const errors = !this.#validator.validate(this.#dataModel);
+        if (!uuid || typeof uuid !== 'string') {
 
-        if (errors) {
-
-            this.setValidationFailedFootPrint(errors);
-            return false;
+            throw new Error("campaing uuid must be string");
         }
 
-        return true;
+        this.#campaignUUID = uuid;
+    }
+
+    #refresh() {
+        console.log('refresh')
+        this.#refreshEmitter(true);
+    }
+
+    async interceptSubmission() {
+
+        try {
+
+            const res = await this.#endpoint.create(
+                this.#dataModel, this.#campaignUUID
+            )
+
+            this.#refresh();
+        }
+        catch(e) {
+
+            super._handleError(e);
+        }
+
+    }
+
+    validateModel() {
+
+        const dateOfBirth = this.#dataModel.dateOfBirth;
+
+        if (!(dateOfBirth instanceof Date)) {
+
+            this.#dataModel.dateOfBirth = new Date(dateOfBirth);
+        }
+
+        return super.validateModel();
     }
 
     validateEveryInput() {

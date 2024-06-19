@@ -13,8 +13,8 @@ export default class CRUDEndpoint extends AuthEndpoint {
                 method: 'POST',
                 body: JSON.stringify({
                     data: model
-                })
-            }
+                }),
+            },
         )
     }
 
@@ -52,10 +52,10 @@ export default class CRUDEndpoint extends AuthEndpoint {
         )
     }
 
-    fetch() {
+    // fetch() {
 
-        throw new Error('method fetch() is not allowed on crud endpoints');
-    }
+    //     throw new Error('method fetch() is not allowed on crud endpoints');
+    // }
 
     #assertString(unknown) {
 

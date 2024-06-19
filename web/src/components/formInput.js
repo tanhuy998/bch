@@ -1,6 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { memo, useContext, useEffect, useState } from "react";
 import FormContext from "../contexts/form.context";
 import Validator from "./lib/validator.";
+import "../assets/css/input.css";
 
 const FIRST = 0;
 const INPUT_DEBOUNCE_DELAY = 1500;
@@ -13,7 +14,11 @@ const NEED_DEBOUNCE_DELAY = new Set([
 
 export const IGNORE_VALIDATION = Symbol('input_ignore_validator');
 
-export default function FormInput({validate, onValidInput, onInvalidInput, invalidMessage, onAfterDebounce, name, textArea, type}) {
+const FormInput = memo(_FormInput);
+
+export default FormInput;
+
+function _FormInput({validate, onValidInput, onInvalidInput, invalidMessage, onAfterDebounce, name, textArea, type}) {
 
     const context = useContext(FormContext);
     const contextDelayingDebounces = context.delayingDebounces; 
@@ -62,38 +67,74 @@ export default function FormInput({validate, onValidInput, onInvalidInput, inval
 
             onChangeProp(event);
         }
-    })
+    });
     
-    useEffect(() => {
+    const changValidInputState = (state) => {
+        console.log('change isValidInput')
+        setIsValidInput(INIT_STATE);
+        setIsValidInput(state);
+    }
 
-        if (!hasDataModel) {
+    const emitEventAndValidate = () => {
 
+        console.log('end input', inputCurrentValue);
+
+        if (hasAfterDebounceListener) {
+
+            onAfterDebounce(inputCurrentValue);
+        }
+
+        if (!hasValidation || validate(inputCurrentValue)) {
+            console.log('not has validation or valid')
+            changValidInputState(true)
+            //setIsValidInput(true);
             return;
         }
 
-        dataModel[name] = type === 'date' ? convertToDate(dataModelFieldValue) :  dataModelFieldValue;
+        changValidInputState(false);
+        //setIsValidInput(false);
+    };
+    
+    // useEffect(() => {
 
-    }, [dataModelFieldValue]);
+    //     if (!hasDataModel) {
+
+    //         return;
+    //     }
+
+    //     dataModel[name] = type === 'date' ? convertToDate(dataModelFieldValue) :  dataModelFieldValue;
+
+    // }, [dataModelFieldValue]);
 
     useEffect(() => {
-       
+       console.log('isValidInput state change')
         if (isValidInput === INIT_STATE) {
-
+            console.log('isValidInput init state')
             return;
         }
-        
+        console.log('begin set data model field')
         console.log('is input', [name], 'valid', isValidInput);
         (
-            isValidInput && !setDataModelFieldValue(inputCurrentValue) ? 
+            isValidInput /* && !setDataModelFieldValue(inputCurrentValue) */? 
             hasValidationSuccessListener ?  onValidInput(inputCurrentValue) : undefined
-            : hasValidationFailedListener ? onValidInput(inputCurrentValue) : undefined
+            : hasValidationFailedListener ? onInvalidInput(inputCurrentValue) : undefined
         )
 
     }, [isValidInput]);
 
     useEffect(() => {
 
-        console.log('model field assign', dataModelFieldValue)
+        if (
+            !hasDataModel 
+            || typeof dataModelFieldValue !== 'string'
+        ) {
+
+            return;
+        }
+
+        dataModel[name] = type === 'date' ? convertToDate(dataModelFieldValue) : dataModelFieldValue;
+
+        console.log('model field assign', dataModelFieldValue, dataModel)
     }, [dataModelFieldValue])
 
     useEffect(() => {
@@ -103,6 +144,8 @@ export default function FormInput({validate, onValidInput, onInvalidInput, inval
             return;
         }
         console.log(debounceTimeout)
+        setDataModelFieldValue(inputCurrentValue);
+
         if (
             typeof debounceTimeout === 'number'
         ) {
@@ -111,26 +154,7 @@ export default function FormInput({validate, onValidInput, onInvalidInput, inval
             clearTimeout(debounceTimeout);
         }
 
-        const emitEventAndValidate = () => {
-
-            console.log('end input');
-
-            if (hasAfterDebounceListener) {
-
-                onAfterDebounce(inputCurrentValue);
-            }
-
-            if (!hasValidation || validate(inputCurrentValue)) {
-
-                setIsValidInput(true);
-                return;
-            }
-
-            setIsValidInput(false);
-
-        };
-
-        if (textArea || !NEED_DEBOUNCE_DELAY.has(type)) {
+        if (!textArea && !NEED_DEBOUNCE_DELAY.has(type)) {
 
             emitEventAndValidate();
             return;
@@ -143,16 +167,32 @@ export default function FormInput({validate, onValidInput, onInvalidInput, inval
 
     }, [inputCurrentValue])
 
+    prepareElementClass(htmlElementAttributes, isValidInput);
+
     return (
         textArea === true ?
-        <textarea {...{...htmlElementAttributes, onChange: handleInputChange, name}} >{inputCurrentValue}</textarea> 
-        : <input {...{...htmlElementAttributes, onChange: handleInputChange, name}} value={inputCurrentValue}/>
+        <textarea {...{...htmlElementAttributes, onChange: handleInputChange, name}} >{inputCurrentValue || ''}</textarea> 
+        : <input {...{...htmlElementAttributes, onChange: handleInputChange, name}} value={inputCurrentValue || ''}/>
     )
+}
+
+function prepareElementClass(htmlElementAttributes, isValidInputState) {
+
+    /**@type {string} */
+    let propClass = (htmlElementAttributes.className || '');
+
+    if (!isValidInputState) {
+
+        propClass.replace('invalid', '');
+        propClass += ' invalid';
+    }
+
+    htmlElementAttributes.className = propClass;
 }
 
 /**
  * 
- * @param {*} validate 
+ * @param {*} validate
  * @param {*} context 
  * @returns {function name(params): Boolean {}} 
  */
