@@ -45,7 +45,9 @@ func init() {
 		panic(err)
 	}
 
-	db.GetDB()
+	db := db.GetDB()
+
+	config.InitDomainIndexes(db)
 }
 
 func main() {

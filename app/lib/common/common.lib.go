@@ -68,3 +68,21 @@ func IsInterface[T any]() bool {
 
 	return reflect.TypeOf((*T)(nil)).Kind() == reflect.Interface
 }
+
+func ReverseSlice[T any](list ...T) []T {
+
+	var left int = 0
+	var right int = len(list) - 1
+
+	for left < right {
+
+		temp := list[left]
+		list[left] = list[right]
+		list[right] = temp
+
+		left++
+		right--
+	}
+
+	return list
+}

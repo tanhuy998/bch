@@ -1,6 +1,7 @@
 package repository
 
 import (
+	libCommon "app/lib/common"
 	"context"
 	"errors"
 
@@ -13,25 +14,27 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
-const (
-	SORT_DESC             = -1
-	SORT_ASC              = 1
-	OP_LTE                = "$lte"
-	OP_LT                 = "$lt"
-	OP_GT                 = "$gt"
-	OP_GTE                = "$gte"
-	PAGINATION_FIRST_PAGE = 0
-	PAGINATION_LAST_PAGE  = 1
-)
-
-var (
-	empty_bson = bson.D{{}}
-)
-
 type (
 	Bson_Expression_Type interface {
 		bson.D | bson.M
 	}
+
+	MongoDBCursorSortOrder = int
+)
+
+const (
+	SORT_DESC             MongoDBCursorSortOrder = -1
+	SORT_ASC              MongoDBCursorSortOrder = 1
+	OP_LTE                                       = "$lte"
+	OP_LT                                        = "$lt"
+	OP_GT                                        = "$gt"
+	OP_GTE                                       = "$gte"
+	PAGINATION_FIRST_PAGE                        = 0
+	PAGINATION_LAST_PAGE                         = 1
+)
+
+var (
+	empty_bson = bson.D{{}}
 )
 
 func ParseCursor[T any](cursor *mongo.Cursor, ctx context.Context) ([]*T, error) {
@@ -153,9 +156,16 @@ func getDocumentsPageByID[Model_Type any](
 		func(mongo.SessionContext) (interface{}, error) {
 
 			var paginationQuery bson.D = preparePaginationQuery(_id, isPrevDir, extraFilters)
+			var sortOrder MongoDBCursorSortOrder = SORT_DESC
+
+			if isPrevDir {
+
+				sortOrder = SORT_ASC
+			}
 
 			option := options.Find()
-			option.Sort = bson.D{{"_id", SORT_DESC}}
+			// option.Sort = bson.D{{"_id", SORT_DESC}}
+			option.Sort = bson.D{{"_id", sortOrder}}
 			option.Limit = &pageLimit
 
 			if projection != nil {
@@ -192,6 +202,11 @@ func getDocumentsPageByID[Model_Type any](
 			if err != nil {
 
 				return nil, err
+			}
+
+			if isPrevDir {
+
+				data = libCommon.ReverseSlice(data...)
 			}
 
 			dataPack := PaginationPack[Model_Type]{
@@ -235,7 +250,7 @@ func preparePaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters
 
 	if isPrevDir {
 
-		dir_op = OP_GTE
+		dir_op = OP_GT
 	} else {
 
 		dir_op = OP_LT
