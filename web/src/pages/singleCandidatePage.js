@@ -186,20 +186,20 @@ function _SignedInformations() {
                             <Column>Nơi Làm Việc (Học Tập): {signingInfo.jobPlace}</Column>
                         </Row>
                         <Row>
-                            <Column>Họ Tên Cha: {family.father.name}</Column>
-                            <Column>Tình Trạng (Sống, Chết): {family.father.dead ? 'Chết' : 'Sống'}</Column>
+                            <Column>Họ Tên Cha: {family?.father?.name}</Column>
+                            <Column>Tình Trạng (Sống, Chết): {family?.father?.dead ? 'Chết' : 'Sống'}</Column>
                         </Row>
                         <Row>
-                            <Column>Sinh Ngày: {formatLocalDate(family.father.dateOfBirth)}</Column>
-                            <Column>Nghề Nghiệp: {family.father.job}</Column>
+                            <Column>Sinh Ngày: {formatLocalDate(family?.father?.dateOfBirth)}</Column>
+                            <Column>Nghề Nghiệp: {family?.father?.job}</Column>
                         </Row>
                         <Row>
-                            <Column>Họ Tên Mẹ: {family.mother.name}</Column>
-                            <Column>Tình Trạng (Sống, Chết): {family.mother.dead ? 'Chết' : 'Sống'}</Column>
+                            <Column>Họ Tên Mẹ: {family?.mother?.name}</Column>
+                            <Column>Tình Trạng (Sống, Chết): {family?.mother?.dead ? 'Chết' : 'Sống'}</Column>
                         </Row>
                         <Row>
-                            <Column>Sinh Ngày: {formatLocalDate(family.mother.dateOfBirth)}</Column>
-                            <Column>Nghề Nghiệp: {family.mother.job}</Column>
+                            <Column>Sinh Ngày: {formatLocalDate(family?.mother?.dateOfBirth)}</Column>
+                            <Column>Nghề Nghiệp: {family?.mother?.job}</Column>
                         </Row>
 
                     </div>
@@ -209,11 +209,11 @@ function _SignedInformations() {
                 <div className="card-body">
                     <div className="container">
                         <Title>II. TÌNH HÌNH KINH TẾ CHÍNH TRỊ CỦA GIA ĐÌNH</Title>
-                        <PoliticDetail header="Cha" member={family.father} />
+                        <PoliticDetail header="Cha" member={family?.father} />
                         <br/>
-                        <PoliticDetail header="Mẹ" member={family.mother} />
+                        <PoliticDetail header="Mẹ" member={family?.mother} />
                         {
-                            family.anothers.map(m => {
+                            family?.anothers?.map(m => {
 
                                 <>
                                     <PoliticDetail member={m}/>
@@ -309,7 +309,7 @@ function PoliticDetail({member, header}) {
                 <Column>Sau 1975: {h?.afterReunification}</Column>
             </Row>
             <Row>
-                <Column>Nghề Nghiệp: {m.job}</Column>
+                <Column>Nghề Nghiệp: {m?.job}</Column>
             </Row>
         </>
     )
