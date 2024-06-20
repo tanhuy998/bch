@@ -22,9 +22,9 @@ async function fetchData(setDataFunc, endpoint, query) {
 
 
 
-export default memo(PaginationTable);
+//export default memo(PaginationTable);
 
-function PaginationTable({ columnTransform, rowManipulator, idField, endpoint, exposedFields, headers, title }) {
+export default function PaginationTable({ refresh, columnTransform, rowManipulator, idField, endpoint, exposedFields, headers, title }) {
 
     const context = useContext(PaginationTableContext);
 
@@ -38,6 +38,17 @@ function PaginationTable({ columnTransform, rowManipulator, idField, endpoint, e
     
     const exposedHeaders = (Array.isArray(headers) ? headers : []).map(header => <th>{header}</th>)
     const [endpointData, setEndpointData] = useState(null);
+
+    useEffect(() => {
+
+        if (!refresh) {
+
+            return;
+        }
+
+        setEndpointData(null);
+
+    }, [])
 
     return (
         <>

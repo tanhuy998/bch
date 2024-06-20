@@ -38,7 +38,7 @@ function PaginationNavButton({
     const tagId = `dataTables-example_` + direction;
 
     if (
-        typeof navigationQuery !== 'object' ||
+        typeof navigationQuery !== 'object' || 
         typeof pageCounter !== 'number' ||
         pageCounter === 1 && isPrevious
         || isLastDataPage && !isPrevious
@@ -68,7 +68,7 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
 
     const [query, setQuery] = useState(null)
     const [debounce, setDebounce] = useState(false);
-    const [pageCounter, setPageCounter] = useState(dataTotalCount > 0 ? 1 : null);
+    const [pageCounter, setPageCounter] = useState(1);
 
     const tableContext = useContext(PaginationTableContext);
     const extra_fetch_args = tableContext?.[EXTRA_FETCH_ARGS];
@@ -80,6 +80,10 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
             .then((data) => {
                 setDebounce(false);
                 setEndpointData(data)
+            })
+            .catch(err => {
+
+                alert(err?.message || err);
             });
 
         setDebounce(true);
@@ -90,18 +94,7 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
         fetchData();
 
     }, [query])
-
-    useEffect(() => {
-
-        if (
-            dataTotalCount > 0
-            && pageCounter === null
-        ) {
-
-            setPageCounter(1);
-        }
-    })
-
+    
     const isLastDataPage = calculatePage(dataTotalCount, DEFAULT_PAGINATION_LIMIT) === pageCounter
     const context = {
         isLastDataPage,
@@ -123,7 +116,6 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
                         <ul class="pagination">
                             
                             <PaginationNavButton  pageReducer={() => { setPageCounter(pageCounter - 1) }} navigationQuery={navigator?.previous} isPrevious={true} label="Trước" />
-                           
                             {/* {pageCounterPlaceHolder} */}
                             {pageCounter > 0 &&
                                 <li class="paginate_button page-item active">
@@ -132,8 +124,6 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
                                     </a>
                                 </li>
                             }
-
-                            
                             <PaginationNavButton pageReducer={() => { setPageCounter(pageCounter + 1) }} navigationQuery={navigator?.next} label="sau" />
                             
                         </ul>
@@ -147,7 +137,7 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
 function calculatePage(totalCount, pageLimit) {
 
     const odd = (totalCount % pageLimit) > 0 ? 1 : 0;
-    const even = totalCount % pageLimit;
-
+    const even = Math.floor(totalCount / pageLimit);
+    
     return even + odd;
 }
