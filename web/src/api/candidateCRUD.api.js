@@ -34,9 +34,11 @@ export default class CandidateCRUDEndpoint extends CRUDEndpoint {
         //return new NewCampaignResponsePresenter(res);
     }
 
-    async read() {
+    async read(uuid) {
 
-
+        const res = await super.read(uuid);
+        
+        return res.data;
     }
 
     /**

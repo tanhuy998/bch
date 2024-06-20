@@ -23,11 +23,13 @@ import NewCampaignUseCase from './domain/usecases/newCampaign.usecase';
 import NewCandidatePage from './pages/newCandidatePage';
 import NewCandidateUseCase from './domain/usecases/newCandidate.usecase';
 import SingleCandidatePage from './pages/singleCandidatePage';
+import SingleCandidateUseCase from './domain/usecases/singleCandidate.usecase';
 
 const campaignlistUseCase = new CampaignListUseCase()
 const singleCampaignUseCase = new SingleCampaignUseCase();
 const newCampaignUseCase = new NewCampaignUseCase();
 const newCandidateUseCase = new NewCandidateUseCase();
+const singleCandidateUseCase = new SingleCandidateUseCase();
 
 function App() {
 
@@ -45,7 +47,7 @@ function App() {
           <Route path="campaign/:uuid" element={<SingleCampaignPage usecase={singleCampaignUseCase} />} />
           <Route path="campaign/new" element={<NewCampaignPage usecase={newCampaignUseCase} />} />
           <Route path="campaign/:campaignUUID/new/candidate" element={<NewCandidatePage usecase={newCandidateUseCase} />} />
-          <Route path="candidate/:uuid" element={<SingleCandidatePage />}/>
+          <Route path="candidate/:uuid" element={<SingleCandidatePage usecase={singleCandidateUseCase}/>}/>
         </Route>
       </Routes>
     </BrowserRouter>

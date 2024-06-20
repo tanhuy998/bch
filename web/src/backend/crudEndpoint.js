@@ -18,9 +18,9 @@ export default class CRUDEndpoint extends AuthEndpoint {
         )
     }
 
-    async read() {
+    async read(uuid) {
 
-
+        return super.fetch(undefined, undefined, `/${uuid}`);
     }
 
     async update(uuid, model) {
