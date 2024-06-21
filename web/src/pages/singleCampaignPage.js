@@ -21,6 +21,8 @@ const CandidatesTabContext = createContext({
 const MemoNewCandidateForm = memo(NewCandidateForm);
 const INIT_STATE = Symbol('_init_state_')
 
+const PageLayoutContext = createContext({});
+
 export default function SingleCampaignPage({ usecase }) {
 
     const { uuid } = useParams();
@@ -80,46 +82,56 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
         )
     };
 
+
+
+    const pageLayout = {
+        mainTab: useRef(),
+    }
+
     return (
         <>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <h5 class="card-header">Campaign Management</h5>
-                                <div class="card-body">
-                                    <h1 class="card-title">{campaignData?.title || 'Unknown'}</h1>
-                                    <br />
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="col">
-                                                <h4 class="card-text">Ngày Bắt Đầu: {campaignData?.issueTime || ''}</h4>
-                                            </div>
-                                            <div class="col">
-                                                <h4 class="card-text">Ngày Kết Thúc: {campaignData?.expire || ''}</h4>
+            <PageLayoutContext.Provider value={pageLayout}>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <h5 class="card-header">Campaign Management</h5>
+                                    <div class="card-body">
+                                        <h1 class="card-title">{campaignData?.title || 'Unknown'}</h1>
+                                        <br />
+                                        <div class="container">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <h4 class="card-text">Ngày Bắt Đầu: {campaignData?.issueTime || ''}</h4>
+                                                </div>
+                                                <div class="col">
+                                                    <h4 class="card-text">Ngày Kết Thúc: {campaignData?.expire || ''}</h4>
+                                                </div>
                                             </div>
                                         </div>
+                                        <br />
+
+                                        <Link to="#" class="btn btn-primary">Chỉnh sửa</Link>
+                                        <br />
+                                        <br />
+                                        <div ref={pageLayout.mainTab}>
+                                            <BasicTab tabs={mainTabs} initTabIndex={0} />
+                                        </div>
                                     </div>
-                                    <br />
 
-                                    <Link to="#" class="btn btn-primary">Chỉnh sửa</Link>
-                                    <br />
-                                    <br />
-                                    <BasicTab tabs={mainTabs} initTabIndex={0} />
-                                </div>
-
-                                {/* <div class="card-body">
+                                    {/* <div class="card-body">
                                     <h3 class="card-title">Candidates Detail</h3>
 
                                     <PillTab tabs={candidateTabs} />
                                 </div> */}
 
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </PageLayoutContext.Provider>
         </>
     )
 }
@@ -134,7 +146,8 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
     const [formVisible, setFormVisible] = useState(false);
     const [submissionSuccess, setSubmissionSuccess] = useState(INIT_STATE);
     const [candidateAddedCount, addOneCandidate] = useReducer(increaseAddedCandidateCount, 0);
-    const addCandidateForm = useRef();
+    //const addCandidateForm = useRef();
+    const { mainTab } = useContext(PageLayoutContext);
 
     if (!(formDelegator instanceof NewCandidateFormDelegator)) {
 
@@ -179,18 +192,19 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
     return (
         <>
             <div>
-                <div ref={addCandidateForm} className={"collapse-wrapper" + (formVisible ? ' is-open card-body' : '')} style={{ "background-color": '#E0E0E0', borderRadius: 6, }}>
+                <div className={"collapse-wrapper" + (formVisible ? ' is-open' : '')} style={{ "background-color": '#E0E0E0', borderRadius: 6, }} onTransitionEnd={(e) => { e.propertyName === 'grid-template-rows' && formVisible && mainTab?.current.scrollIntoView({ behavior: "smooth", block: 'start' }); }}>
                     {/* {formVisible && ( */}
                     {(
                         <>
                             {/* {display: !formVisible ? 'none' : undefined } */}
-                            <div className="collapse-content"  onAnimationEnd={() => { addCandidateForm.current.scrollIntoView({ behavior: "smooth", block: 'start' }); }}>
-                                <h3 class="card-title">New Candidate</h3>
-                                <br />
-                                <CandidatesTabContext.Provider value={{ formVisible, setFormVisible, refreshTab: setSubmissionSuccess }}>
-                                    <NewCandidateForm formDelegator={formDelegator} />
-                                </CandidatesTabContext.Provider>
-
+                            <div className="collapse-content ">
+                                <div className="card-body">
+                                    <h3 class="card-title">New Candidate</h3>
+                                    <br />
+                                    <CandidatesTabContext.Provider value={{ formVisible, setFormVisible, refreshTab: setSubmissionSuccess }}>
+                                        <NewCandidateForm formDelegator={formDelegator} />
+                                    </CandidatesTabContext.Provider>
+                                </div>
                             </div>
                         </>
                     )}
