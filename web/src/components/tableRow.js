@@ -59,7 +59,7 @@ function RowManipulator({ endpoint, crud, rowData, idField}) {
             {/* <a href={detailUrl} class="btn btn-outline-info btn-rounded"><i class="fas fa-info-circle"></i></a>
             <a href={modfifyUrl} class="btn btn-outline-info btn-rounded"><i class="fas fa-pen"></i></a>
             <a href={deleteUrl} class="btn btn-outline-danger btn-rounded"><i class="fas fa-trash"></i></a> */}
-            {detailUrl && <NavigateButton navigate={navigate} url={detailUrl} icon="fa-info-circle"/>}
+            {detailUrl && <NavigateButton navigate={navigate} url={detailUrl} icon="fa-file"/>}
             {modfifyUrl &&  <NavigateButton navigate={navigate} url={modfifyUrl} icon="fa-pen"/>}
             {/* {deleteUrl && <Button navigate={navigate} url={deleteUrl} icon="fa-trash"/>} */}
             {deleteUrl && <DeleteButton endpointUrl={deleteUrl} />}

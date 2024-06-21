@@ -25,6 +25,8 @@ import NewCandidateUseCase from './domain/usecases/newCandidate.usecase';
 import SingleCandidatePage from './pages/singleCandidatePage';
 import SingleCandidateUseCase from './domain/usecases/singleCandidate.usecase';
 
+import './assets/css/animation.css';
+
 const campaignlistUseCase = new CampaignListUseCase()
 const singleCampaignUseCase = new SingleCampaignUseCase();
 const newCampaignUseCase = new NewCampaignUseCase();

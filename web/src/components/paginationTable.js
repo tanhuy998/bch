@@ -34,43 +34,52 @@ export default function PaginationTable({ refresh, columnTransform, rowManipulat
     headers = headers || context?.headers;
     title = title || context?.title;
     rowManipulator = rowManipulator || context?.rowManipulator;
-    columnTransform =  columnTransform || context?.columnTransform;
-    
+    columnTransform = columnTransform || context?.columnTransform;
+
     const exposedHeaders = (Array.isArray(headers) ? headers : []).map(header => <th>{header}</th>)
     const [endpointData, setEndpointData] = useState(null);
+    const [lastRefreshSignal, setLastRefreshSignal] = useState(refresh);
 
     useEffect(() => {
 
-        if (!refresh) {
+        if (refresh === lastRefreshSignal) {
 
             return;
         }
 
+        setLastRefreshSignal(refresh);
+
+        // if (!refresh) {
+
+        //     return;
+        // }
+
         setEndpointData(null);
 
-    }, [])
+    }, []);
 
     return (
         <>
-            <table class="table table-hover table-striped" id="dataTables-example" width="100%">
-                <thead>
-                    <tr>
-                        {exposedHeaders}
-                    </tr>
-                </thead>
-                <tbody>
-                    <TableRowContext.Provider value={{rowManipulator, columnTransform}}>
-                    {
-                        (endpointData?.data || []).map(row => {
+            <div style={{ height: "400px", overflow: "auto" }}>
+                <table class="table table-hover table-striped" id="dataTables-example" width="100%">
+                    <thead style={{position: "sticky"}}>
+                        <tr>
+                            {exposedHeaders}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <TableRowContext.Provider value={{ rowManipulator, columnTransform }}>
+                            {
+                                (endpointData?.data || []).map(row => {
 
-                            return <TableRow  idField={idField} endpoint={endpoint} exposedFields={exposedFields} dataObject={row} />
-                        })
-                    }
-                    </TableRowContext.Provider>
-                </tbody>
-                <br />
-               
-            </table>
+                                    return <TableRow idField={idField} endpoint={endpoint} exposedFields={exposedFields} dataObject={row} />
+                                })
+                            }
+                        </TableRowContext.Provider>
+                    </tbody>
+                </table>
+            </div>
+            <br />
             <PaginationController dataTotalCount={endpointData?.dataTotalCount} endpoint={endpoint} navigator={endpointData?.navigation} setEndpointData={setEndpointData} />
         </>
     )

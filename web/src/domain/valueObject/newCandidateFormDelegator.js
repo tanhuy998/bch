@@ -54,6 +54,11 @@ export default class NewCandidateFormDelegator extends EndpointFormDelegator {
         return this.#endpoint;
     }
 
+    shouldNavigate() {
+
+        return 0;
+    }
+
     /**
      * 
      * @param {function} emitter 
@@ -77,9 +82,12 @@ export default class NewCandidateFormDelegator extends EndpointFormDelegator {
         this.#campaignUUID = uuid;
     }
 
-    #refresh() {
-        console.log('refresh')
-        this.#refreshEmitter(true);
+    reset() {
+        console.log('reset')
+
+        this.#dataModel = new candidate_model_t();
+        //this.#refreshEmitter(true);
+        //super.navigate(0)
     }
 
     async interceptSubmission() {
@@ -90,7 +98,7 @@ export default class NewCandidateFormDelegator extends EndpointFormDelegator {
                 this.#dataModel, this.#campaignUUID
             )
 
-            this.#refresh();
+            this.reset();
         }
         catch(e) {
 

@@ -1,8 +1,8 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import PaginationTable from "../components/paginationTable";
 import SingleCampaignUseCase from "../domain/usecases/singleCampaignUseCase.usecase";
 import PaginationTableContext from "../contexts/paginationTable.context";
-import { createContext, memo, useContext, useEffect, useReducer, useState } from "react";
+import { createContext, memo, useContext, useEffect, useReducer, useRef, useState } from "react";
 import { tab } from "@testing-library/user-event/dist/tab";
 import Tab from "../components/Tab";
 import PillTab from "../components/pillTab";
@@ -15,7 +15,7 @@ import NewCandidateFormDelegator from "../domain/valueObject/newCandidateFormDel
 const CandidatesTabContext = createContext({
     formVisible: false,
     setFormVisible: null,
-    refreshTab: () => {console.log('default refresh')},
+    refreshTab: () => { console.log('default refresh') },
 })
 
 const MemoNewCandidateForm = memo(NewCandidateForm);
@@ -134,6 +134,7 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
     const [formVisible, setFormVisible] = useState(false);
     const [submissionSuccess, setSubmissionSuccess] = useState(INIT_STATE);
     const [candidateAddedCount, addOneCandidate] = useReducer(increaseAddedCandidateCount, 0);
+    const addCandidateForm = useRef();
 
     if (!(formDelegator instanceof NewCandidateFormDelegator)) {
 
@@ -142,7 +143,7 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
 
     if (!(pageUsecase instanceof SingleCampaignUseCase)) {
 
-        throw new Error('pageUsecase must be instance of SingleCampaignUseCase');   
+        throw new Error('pageUsecase must be instance of SingleCampaignUseCase');
     }
 
     const allCandidateExtraContextValues = {
@@ -169,7 +170,7 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
 
             return;
         }
-        
+
         setSubmissionSuccess(false);
         addOneCandidate();
         console.log('new candidate added', candidateAddedCount)
@@ -177,32 +178,36 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
 
     return (
         <>
-            {!formVisible && (
+            <div ref={addCandidateForm}>
+                {/* {formVisible && ( */}
+                {(
+                    <>
+                        <div class="card-body" style={{ "background-color": '#E0E0E0', borderRadius: 6, display: !formVisible ? 'none' : undefined }} onAnimationEnd={() => { addCandidateForm.current.scrollIntoView({ behavior: "smooth", block: 'start' }); }}>
+                            <h3 class="card-title">New Candidate</h3>
+                            <br />
+                            <CandidatesTabContext.Provider value={{ formVisible, setFormVisible, refreshTab: setSubmissionSuccess }}>
+                                <NewCandidateForm formDelegator={formDelegator} />
+                            </CandidatesTabContext.Provider>
+                            
+                        </div>
+                    </>
+                )}
+            </div>
+            {/* {!formVisible && (
                 <>
-                    <h5>
-                        All Candidates
-                        <button onClick={() => { toggleCompactTableForm(formVisible, setFormVisible) }} class="btn btn-sm btn-outline-primary float-end"><i class="fas fa-plus-circle"></i> Thêm mới</button>
-                        {/* <a href="users.html" class="btn btn-sm btn-outline-info float-end me-1"><i class="fas fa-angle-left"></i> <span class="btn-header">Return</span></a> */}
-                    </h5>
-                    <br />
+                    
                 </>
-            )}
-
-            {formVisible && (
-                <>
-                    <div class="card-body" style={{ "background-color": '#E0E0E0' }}>
-                        <h3 class="card-title">New Candidate</h3>
-                        <br />
-                        <CandidatesTabContext.Provider value={{ formVisible, setFormVisible, refreshTab: setSubmissionSuccess}}>
-                            <NewCandidateForm formDelegator={formDelegator} />
-                        </CandidatesTabContext.Provider>
-                    </div>
-                    <br />
-                </>
-            )}
-            {formVisible && <h5>All Candidate</h5>}
+            )} */}
+            <h5>
+                {formVisible && <br/>}
+                All Candidates
+                <button style={{ display: formVisible ? 'none' : undefined }} onClick={() => { toggleCompactTableForm(formVisible, setFormVisible); }} class="btn btn-sm btn-outline-primary float-end"><i class="fas fa-plus-circle"></i> Thêm mới</button>
+                {/* <a href="users.html" class="btn btn-sm btn-outline-info float-end me-1"><i class="fas fa-angle-left"></i> <span class="btn-header">Return</span></a> */}
+            </h5>
+            <br />
+            {/* {formVisible && <h5>All Candidate</h5>} */}
             <PaginationTableContext.Provider value={{ ...defaultTableContext, ...allCandidateExtraContextValues }}>
-                <PaginationTable rowManipulator={pageUsecase.candidateListTableRowManipulator} candidateAdded={candidateAddedCount} />
+                <PaginationTable refresh={candidateAddedCount} rowManipulator={pageUsecase.candidateListTableRowManipulator} candidateAdded={candidateAddedCount} />
             </PaginationTableContext.Provider>
         </>
     )
@@ -224,7 +229,7 @@ function NewCandidateForm({ formDelegator }) {
                 <div class="row">
                     <div class="mb-6 col">
                         <label for="address" className="form-label">Candidate Name</label>
-                        <FormInput validate={(val) => val.length > 5} type="text" className="form-control" name="name" required="true" />
+                        <FormInput validate={(val) => val?.length > 5} type="text" className="form-control" name="name" required="true" />
                     </div>
                     <div class="mb-6 col">
                         <label for="address" class="form-label">ID Number</label>
@@ -248,7 +253,7 @@ function NewCandidateForm({ formDelegator }) {
                 <br />
             </div>
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
-            <button onClick={() => { toggleCompactTableForm(formVisible, setFormVisible) }} className="btn btn-sm btn-outline-primary" style={{ margin: 5 }}>Hủy</button>
+            <button type="button" onClick={() => { toggleCompactTableForm(formVisible, setFormVisible) }} className="btn btn-sm btn-outline-primary" style={{ margin: '5px', paddingTop: "7px", paddingBottom: "7px" }}>Đóng</button>
         </Form>
     )
 }

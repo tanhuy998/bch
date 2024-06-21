@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import FormContext, { defaultFormContextValue } from "../contexts/form.context";
 import Validator from "./lib/validator.";
 import FormDelegator from "./lib/formDelegator";
@@ -40,7 +40,18 @@ export default function Form({
 }) {
 
     const hasDelegator = delegate instanceof FormDelegator;
+    /**@type {FormDelegator} */
+    const delegator = hasDelegator ? delegate : null;
     const navigate = useNavigate();
+    const resetFormContext = useReducer(() => {
+
+        if (hasDelegator) {
+
+            delegator.reset();
+        }
+
+        return null;
+    }, null)[1];
 
     if (
         typeof shouldNavigate !== 'string'
@@ -58,9 +69,6 @@ export default function Form({
 
         throw new Error('invalid delegator passed to form whose type is not instance of FormDelegator');
     }
-    
-    /**@type {FormDelegator} */
-    const delegator = hasDelegator ? delegate : null;
 
     dataModel = hasDelegator ? delegator.dataModel : dataModel;
     interceptSubmit = hasDelegator ? delegator.interceptSubmission.bind(delegator) : interceptSubmit;
@@ -120,6 +128,7 @@ export default function Form({
         }
         
         interceptSubmit(targetDataObj);
+        resetFormContext();
     });
     
     return (

@@ -11,6 +11,10 @@ export default class FormDelegator {
         return undefined;
     }
 
+    reset() {
+        
+    }
+
     setNavigator(hook) {
 
         if (typeof hook !== 'function') {

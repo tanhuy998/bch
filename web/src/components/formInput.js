@@ -26,7 +26,7 @@ function _FormInput({validate, onValidInput, onInvalidInput, invalidMessage, onA
     const [dataModel, hasDataModel] = prepareDataModel(context);    
 
     const [debounceTimeout, setDebounceTimeout] = useState(null);
-    const [inputCurrentValue, setInputCurrentValue] = useState(null);
+    const [inputCurrentValue, setInputCurrentValue] = useState(hasDataModel ? dataModel[name] : null);
     const [isValidInput, setIsValidInput] = useState(INIT_STATE);
     const [dataModelFieldValue, setDataModelFieldValue] = useState(dataModel?.[name]);
     

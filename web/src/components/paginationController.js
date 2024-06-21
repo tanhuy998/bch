@@ -17,13 +17,13 @@ function PaginationNavButton({
     navigationQuery,
 }) {
 
-    const { isLastDataPage, pageCounter, debounce, setQuery } = useContext(PaginationControllerContext);
+    const { isLastDataPage, pageCounter, throttle, setQuery } = useContext(PaginationControllerContext);
 
     let exposedButton;
 
     function emitQuery() {
 
-        if (debounce) {
+        if (throttle) {
 
             return;
         }
@@ -31,30 +31,39 @@ function PaginationNavButton({
         pageReducer();
         setQuery(navigationQuery);
     }
-
-    
-    const direction = isPrevious ? "previous" : "next";
-    const tagClass = `paginate_button page-item ` + direction;
-    const tagId = `dataTables-example_` + direction;
-
-    if (
-        typeof navigationQuery !== 'object' || 
+    console.log('throttle', throttle)
+    const isDisabled = (
+        throttle ||
+        typeof navigationQuery !== 'object' ||
         typeof pageCounter !== 'number' ||
         pageCounter === 1 && isPrevious
         || isLastDataPage && !isPrevious
-    ) {
+    );
+    
+    const direction = isPrevious ? "previous" : "next";
+    const tagClass = 'paginate_button page-item ' + direction + (isDisabled ? ' disabled' : '');
+    const tagId = `dataTables-example_` + direction;
+    
+    // if (
+    //     typeof navigationQuery !== 'object' || 
+    //     typeof pageCounter !== 'number' ||
+    //     pageCounter === 1 && isPrevious
+    //     || isLastDataPage && !isPrevious
+    // ) {
 
-        exposedButton = <></>;
-    }
-    else {
+    //     exposedButton = <></>;
+    // }
+    // else {
 
-        exposedButton = <button onClick={() => { debounce === false && emitQuery() }} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</button>;
-    }
+    //     exposedButton = <button  onClick={() => { debounce === false && emitQuery() }} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</button>;
+    // }
 
     return (
-        <li class={tagClass} id={tagId}>
+        <li className={tagClass} id={tagId} style={{visibility: isDisabled ? 'hidden': undefined}}>
             {/* <a href={endpoint} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</a> */}
-            {exposedButton}
+            {/* {exposedButton} */}
+
+            <button onClick={() => { !throttle && emitQuery() }} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class={"page-link"}>{label}</button>
         </li>
     )
 }
@@ -67,7 +76,7 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
     }
 
     const [query, setQuery] = useState(null)
-    const [debounce, setDebounce] = useState(false);
+    const [throttle, setThrottle] = useState(true);
     const [pageCounter, setPageCounter] = useState(1);
 
     const tableContext = useContext(PaginationTableContext);
@@ -78,15 +87,16 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
 
         endpoint.fetch(query || {}, ...(extra_fetch_args || []))
             .then((data) => {
-                setDebounce(false);
-                setEndpointData(data)
+            
+                setEndpointData(data);
+                setThrottle(false);
             })
             .catch(err => {
 
                 alert(err?.message || err);
             });
 
-        setDebounce(true);
+        setThrottle(true);
     }
 
     useEffect(() => {
@@ -99,7 +109,7 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
     const context = {
         isLastDataPage,
         pageCounter,
-        debounce,
+        throttle: throttle,
         setQuery,
     }
 
@@ -115,7 +125,7 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
                     <div class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
                         <ul class="pagination">
                             
-                            <PaginationNavButton  pageReducer={() => { setPageCounter(pageCounter - 1) }} navigationQuery={navigator?.previous} isPrevious={true} label="Trước" />
+                            <PaginationNavButton  pageReducer={() => { setPageCounter(pageCounter - 1) }} navigationQuery={navigator?.previous} isPrevious={true} label="<" />
                             {/* {pageCounterPlaceHolder} */}
                             {pageCounter > 0 &&
                                 <li class="paginate_button page-item active">
@@ -124,7 +134,7 @@ export default function PaginationController({ dataTotalCount, currentPageNumber
                                     </a>
                                 </li>
                             }
-                            <PaginationNavButton pageReducer={() => { setPageCounter(pageCounter + 1) }} navigationQuery={navigator?.next} label="sau" />
+                            <PaginationNavButton pageReducer={() => { setPageCounter(pageCounter + 1) }} navigationQuery={navigator?.next} label=">" />
                             
                         </ul>
                     </div>
