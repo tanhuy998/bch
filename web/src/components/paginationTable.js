@@ -4,6 +4,9 @@ import PaginationController from "./paginationController";
 import HttpEndpoint from "../backend/endpoint";
 import PaginationTableContext from "../contexts/paginationTable.context";
 import TableRowContext from "../contexts/tableRow.context";
+import TableRowManipulator from "./lib/tableRowDataAction";
+
+const DEFAULT_TABLE_BODY_HEIGHT = 400
 
 /**
  * 
@@ -21,10 +24,9 @@ async function fetchData(setDataFunc, endpoint, query) {
 }
 
 
-
 //export default memo(PaginationTable);
 
-export default function PaginationTable({ refresh, columnTransform, rowManipulator, idField, endpoint, exposedFields, headers, title }) {
+export default function PaginationTable({ height, refresh, columnTransform, rowManipulator, idField, endpoint, exposedFields, headers, title }) {
 
     const context = useContext(PaginationTableContext);
 
@@ -39,6 +41,8 @@ export default function PaginationTable({ refresh, columnTransform, rowManipulat
     const exposedHeaders = (Array.isArray(headers) ? headers : []).map(header => <th>{header}</th>)
     const [endpointData, setEndpointData] = useState(null);
     const [lastRefreshSignal, setLastRefreshSignal] = useState(refresh);
+
+    const hasRowManipulator = rowManipulator instanceof TableRowManipulator;
 
     useEffect(() => {
 
@@ -60,14 +64,23 @@ export default function PaginationTable({ refresh, columnTransform, rowManipulat
 
     return (
         <>
-            <div style={{ height: "400px", overflow: "auto" }}>
+            <div>
                 <table class="table table-hover table-striped" id="dataTables-example" width="100%">
-                    <thead style={{position: "sticky"}}>
+                    <thead style={{
+                        display: 'table',
+                        width: '100%',
+                        'table-layout': 'fixed',
+                    }}>
                         <tr>
                             {exposedHeaders}
+                            {hasRowManipulator && <td></td>}
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody style={{
+                        display: 'block',
+                        'max-height': height || DEFAULT_TABLE_BODY_HEIGHT,
+                        'overflow-y': 'scroll'
+                    }}>
                         <TableRowContext.Provider value={{ rowManipulator, columnTransform }}>
                             {
                                 (endpointData?.data || []).map(row => {

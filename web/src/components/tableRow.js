@@ -74,7 +74,11 @@ export default function TableRow({ idField, exposedFields, dataObject, crud , en
 
     return (
         <>
-            <tr>
+            <tr style={{
+                display: 'table',
+                width: '100%',
+                'table-layout': 'fixed',
+            }}>
                 {/* <td>1</td>
                 <td>Dakota Rice</td>
                 <td>$36,738</td>

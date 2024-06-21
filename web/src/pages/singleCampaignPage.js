@@ -178,37 +178,40 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
 
     return (
         <>
-            <div ref={addCandidateForm}>
-                {/* {formVisible && ( */}
-                {(
-                    <>
-                        <div class="card-body" style={{ "background-color": '#E0E0E0', borderRadius: 6, display: !formVisible ? 'none' : undefined }} onAnimationEnd={() => { addCandidateForm.current.scrollIntoView({ behavior: "smooth", block: 'start' }); }}>
-                            <h3 class="card-title">New Candidate</h3>
-                            <br />
-                            <CandidatesTabContext.Provider value={{ formVisible, setFormVisible, refreshTab: setSubmissionSuccess }}>
-                                <NewCandidateForm formDelegator={formDelegator} />
-                            </CandidatesTabContext.Provider>
-                            
-                        </div>
-                    </>
-                )}
-            </div>
-            {/* {!formVisible && (
+            <div>
+                <div ref={addCandidateForm} className={"collapse-wrapper" + (formVisible ? ' is-open card-body' : '')} style={{ "background-color": '#E0E0E0', borderRadius: 6, }}>
+                    {/* {formVisible && ( */}
+                    {(
+                        <>
+                            {/* {display: !formVisible ? 'none' : undefined } */}
+                            <div className="collapse-content"  onAnimationEnd={() => { addCandidateForm.current.scrollIntoView({ behavior: "smooth", block: 'start' }); }}>
+                                <h3 class="card-title">New Candidate</h3>
+                                <br />
+                                <CandidatesTabContext.Provider value={{ formVisible, setFormVisible, refreshTab: setSubmissionSuccess }}>
+                                    <NewCandidateForm formDelegator={formDelegator} />
+                                </CandidatesTabContext.Provider>
+
+                            </div>
+                        </>
+                    )}
+                </div>
+                {/* {!formVisible && (
                 <>
                     
                 </>
             )} */}
-            <h5>
-                {formVisible && <br/>}
-                All Candidates
-                <button style={{ display: formVisible ? 'none' : undefined }} onClick={() => { toggleCompactTableForm(formVisible, setFormVisible); }} class="btn btn-sm btn-outline-primary float-end"><i class="fas fa-plus-circle"></i> Thêm mới</button>
-                {/* <a href="users.html" class="btn btn-sm btn-outline-info float-end me-1"><i class="fas fa-angle-left"></i> <span class="btn-header">Return</span></a> */}
-            </h5>
-            <br />
-            {/* {formVisible && <h5>All Candidate</h5>} */}
-            <PaginationTableContext.Provider value={{ ...defaultTableContext, ...allCandidateExtraContextValues }}>
-                <PaginationTable refresh={candidateAddedCount} rowManipulator={pageUsecase.candidateListTableRowManipulator} candidateAdded={candidateAddedCount} />
-            </PaginationTableContext.Provider>
+                <h5>
+                    {formVisible && <br />}
+                    All Candidates
+                    <button style={{ display: formVisible ? 'none' : undefined }} onClick={() => { toggleCompactTableForm(formVisible, setFormVisible); }} class="btn btn-sm btn-outline-primary float-end"><i class="fas fa-plus-circle"></i> Thêm mới</button>
+                    {/* <a href="users.html" class="btn btn-sm btn-outline-info float-end me-1"><i class="fas fa-angle-left"></i> <span class="btn-header">Return</span></a> */}
+                </h5>
+                <br />
+                {/* {formVisible && <h5>All Candidate</h5>} */}
+                <PaginationTableContext.Provider value={{ ...defaultTableContext, ...allCandidateExtraContextValues }}>
+                    <PaginationTable refresh={candidateAddedCount} rowManipulator={pageUsecase.candidateListTableRowManipulator} candidateAdded={candidateAddedCount} />
+                </PaginationTableContext.Provider>
+            </div>
         </>
     )
 }
