@@ -24,6 +24,7 @@ import NewCandidatePage from './pages/newCandidatePage';
 import NewCandidateUseCase from './domain/usecases/newCandidate.usecase';
 import SingleCandidatePage from './pages/singleCandidatePage';
 import SingleCandidateUseCase from './domain/usecases/singleCandidate.usecase';
+import {motion} from "framer-motion";
 
 import './assets/css/animation.css';
 
@@ -32,6 +33,12 @@ const singleCampaignUseCase = new SingleCampaignUseCase();
 const newCampaignUseCase = new NewCampaignUseCase();
 const newCandidateUseCase = new NewCandidateUseCase();
 const singleCandidateUseCase = new SingleCandidateUseCase();
+
+const pageAnimationVariants = {
+  hidden: { opacity: 0, x: 0, y: 20 },
+  enter: { opacity: 1, x: 0, y: 0 },
+  exit: { opacity: 0},
+};
 
 function App() {
 
@@ -43,17 +50,33 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/admin' element={<AdminTemplate />}>
-          <Route index element={<AdminDashboad />} />
+          <Route index element={<AnimatePage><AdminDashboad /></AnimatePage>} />
           {/* <Route path="campaigns" element={<PaginationTable idField={"uuid"} endpoint={campaignlistUseCase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} /> */}
-          <Route path="campaigns" element={<CampaignListPage usecase={campaignlistUseCase} />} />
-          <Route path="campaign/:uuid" element={<SingleCampaignPage usecase={singleCampaignUseCase} />} />
-          <Route path="campaign/new" element={<NewCampaignPage usecase={newCampaignUseCase} />} />
-          <Route path="campaign/:campaignUUID/new/candidate" element={<NewCandidatePage usecase={newCandidateUseCase} />} />
-          <Route path="candidate/:uuid" element={<SingleCandidatePage usecase={singleCandidateUseCase}/>}/>
+          <Route path="campaigns" element={<AnimatePage><CampaignListPage usecase={campaignlistUseCase} /></AnimatePage>} />
+          <Route path="campaign/:uuid" element={<AnimatePage><SingleCampaignPage usecase={singleCampaignUseCase} /></AnimatePage>} />
+          <Route path="campaign/new" element={<AnimatePage><NewCampaignPage usecase={newCampaignUseCase} /></AnimatePage>} />
+          {/* <Route path="campaign/:campaignUUID/new/candidate" element={<NewCandidatePage usecase={newCandidateUseCase} />} /> */}
+          <Route path="candidate/:uuid" element={<AnimatePage><SingleCandidatePage usecase={singleCandidateUseCase} /></AnimatePage>}/>
         </Route>
       </Routes>
     </BrowserRouter>
   );
+}
+
+function AnimatePage({children}) {
+
+  return (
+    <motion.div 
+      initial="hidden"
+      animate="enter"
+      exit="exit"
+      variants={pageAnimationVariants}
+      transition={{ duration: 0.2, type: "easeInOut" }}
+      className='relative'
+    >
+      {children}
+    </motion.div>
+  )
 }
 
 export default App;

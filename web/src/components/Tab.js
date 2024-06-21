@@ -1,9 +1,16 @@
-import { memo, useContext, useEffect, useState } from "react";
+import { memo, useContext, useEffect, useRef, useState } from "react";
 import TabContext from "../contexts/tab.context";
+import { AnimatePresence } from "framer-motion";
+import {motion} from 'framer-motion';
+import useResizeObserver from "../hooks/resizeObserver.hook";
+
+const tabContainerStyle = {
+    transition: "height 0.5 ease-out"
+}
 
 function TabItem({ setCurrentTab, label, isActive }) {
     const tabContext = useContext(TabContext);
-    const elementClass = `nav-link ${isActive? 'active' : ''}`;
+    const elementClass = `nav-link ${isActive ? 'active' : ''}`;
 
     return (
         <>
@@ -33,7 +40,7 @@ function resovleExactInitTabKey(tabKeys, initIndex, initKey) {
     ) {
 
         return initKey;
-    } 
+    }
 
     if (initKey < tabKeys.length) {
 
@@ -47,6 +54,11 @@ export default memo(Tab)
 
 function Tab({ tabs, initTabKey, initTabIndex }) {
     const tabContext = useContext(TabContext);
+    const tabContainer = useRef();
+    const [tabContainerHeight, setTabContainerHeight] = useState(0);
+    const tabContainerRect = useResizeObserver(tabContainer);
+    const [containerOpacity, setContainerOpacity] = useState(1);
+
     if (typeof tabs !== 'object') {
 
         throw new Error('There are no tab passed to tab list')
@@ -59,6 +71,7 @@ function Tab({ tabs, initTabKey, initTabIndex }) {
 
     useEffect(() => {
 
+        setContainerOpacity(1);
 
     }, [currentTabKey])
 
@@ -72,8 +85,24 @@ function Tab({ tabs, initTabKey, initTabIndex }) {
         setCurrentTabKey(initKey);
     }, [])
 
+    // useEffect(() => {
+
+    //     if (tabContainerHeight === tabContainerRect.height) {
+
+    //         setContainerOpacity(1);
+    //     }
+
+    //     setTabContainerHeight(tabContainerRect.height);
+
+    // }, [tabContainerRect])
+
+    // useEffect(() => {
+    //     console.log('height', (tabContainer.current.getBoundingClientRect().height))
+    //     setTabContainerHeight(tabContainer.current.getBoundingClientRect().height)
+    // })
+
     return (
-        <>
+        <div>
             <ul {...(tabContext?.ul || {})}>
                 {
                     Object.keys(tabs || {}).map((key) => {
@@ -84,11 +113,26 @@ function Tab({ tabs, initTabKey, initTabIndex }) {
                     })
                 }
             </ul>
-            <div {...(tabContext?.content || {})}>
-                {tabs?.[currentTabKey]}
-            </div>
-
-           
-        </>
+            <AnimatePresence>
+                {
+                    (
+                        <div 
+                            
+                            style={{
+                                transition: "all 0.3s",
+                                opacity: containerOpacity,
+                                height: `${tabContainerRect.height}px`,
+                                width: `${tabContainerRect.width}px`,
+                                overflow: "hidden",
+                            }}
+                        >
+                            <div {...(tabContext?.content || {})} ref={tabContainer}>
+                                    {tabs?.[currentTabKey]}
+                                </div>
+                        </div>
+                    )
+                }
+            </AnimatePresence>
+        </div>
     )
 }

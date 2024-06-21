@@ -200,7 +200,7 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
                             <div className="collapse-content ">
                                 <div className="card-body">
                                     <h3 class="card-title">New Candidate</h3>
-                                    <br />
+                                   gti <br />
                                     <CandidatesTabContext.Provider value={{ formVisible, setFormVisible, refreshTab: setSubmissionSuccess }}>
                                         <NewCandidateForm formDelegator={formDelegator} />
                                     </CandidatesTabContext.Provider>
