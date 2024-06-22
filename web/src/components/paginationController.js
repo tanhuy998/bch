@@ -59,7 +59,7 @@ function PaginationNavButton({
     // }
 
     return (
-        <li className={tagClass} id={tagId} style={{visibility: isDisabled ? 'hidden': undefined}}>
+        <li className={tagClass} id={tagId} >
             {/* <a href={endpoint} aria-controls="dataTables-example" data-dt-idx="0" tabindex="0" class="page-link">{label}</a> */}
             {/* {exposedButton} */}
 
