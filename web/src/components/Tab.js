@@ -3,6 +3,7 @@ import TabContext from "../contexts/tab.context";
 import { AnimatePresence } from "framer-motion";
 import {motion} from 'framer-motion';
 import useResizeObserver from "../hooks/resizeObserver.hook";
+import TabEventContext from "../contexts/tabEvent.contex";
 
 const tabContainerStyle = {
     transition: "height 0.5 ease-out"
@@ -10,12 +11,28 @@ const tabContainerStyle = {
 
 function TabItem({ setCurrentTab, label, isActive }) {
     const tabContext = useContext(TabContext);
+    const {onTabSwitch} = useContext(TabEventContext);
     const elementClass = `nav-link ${isActive ? 'active' : ''}`;
+
+    const hasSwitchEventListener = typeof onTabSwitch === 'function';
+    const currentTabKey = tabContext?.currentTabKey;
+
+    function handleClick() { 
+
+        if (isActive) {
+
+            return;
+        }
+
+        setCurrentTab(label); 
+
+        hasSwitchEventListener && currentTabKey !== label && onTabSwitch(currentTabKey, label); 
+    }
 
     return (
         <>
             <li {...(tabContext?.li || {})}>
-                <button onClick={() => { !isActive && setCurrentTab(label) }} class={elementClass} {...tabContext?.liButton || {}}>{label}</button>
+                <button onClick={handleClick} class={elementClass} {...tabContext?.liButton || {}}>{label}</button>
             </li>
         </>
     )
@@ -52,10 +69,9 @@ function resovleExactInitTabKey(tabKeys, initIndex, initKey) {
 
 export default memo(Tab)
 
-function Tab({ tabs, initTabKey, initTabIndex }) {
+export function Tab({ tabs, initTabKey, initTabIndex }) {
     const tabContext = useContext(TabContext);
     const tabContainer = useRef();
-    const [tabContainerHeight, setTabContainerHeight] = useState(0);
     const tabContainerRect = useResizeObserver(tabContainer);
     const [containerOpacity, setContainerOpacity] = useState(1);
 
@@ -65,25 +81,34 @@ function Tab({ tabs, initTabKey, initTabIndex }) {
     }
 
     const tabKeys = Object.keys(tabs);
-    const [currentTabKey, setCurrentTabKey] = useState();
-
     const initKey = resovleExactInitTabKey(tabKeys, initTabIndex, initTabKey);
+    
+    const [currentTabKey, setCurrentTabKey] = useState(initKey);
+    //tabContext.currentTabKey = currentTabKey;
+    console.log('tab key', initKey, currentTabKey)
 
     useEffect(() => {
 
         setContainerOpacity(1);
+        //tabContext.currentTabKey = currentTabKey;
 
     }, [currentTabKey])
 
     useEffect(() => {
 
-        if (!initKey) {
+        setCurrentTabKey(initKey)
 
-            return;
-        }
+    }, [initKey]);
 
-        setCurrentTabKey(initKey);
-    }, [])
+    // useEffect(() => {
+
+    //     if (!initKey) {
+
+    //         return;
+    //     }
+
+    //     setCurrentTabKey(initKey);
+    // }, [])
 
     // useEffect(() => {
 
@@ -122,8 +147,9 @@ function Tab({ tabs, initTabKey, initTabIndex }) {
                                 transition: "all 0.3s",
                                 opacity: containerOpacity,
                                 height: `${tabContainerRect.height}px`,
-                                width: `${tabContainerRect.width}px`,
+                                //width: `${tabContainerRect.width}px`,
                                 overflow: "hidden",
+                                //display: "inline-block",
                             }}
                         >
                             <div {...(tabContext?.content || {})} ref={tabContainer}>

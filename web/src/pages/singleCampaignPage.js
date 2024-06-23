@@ -91,6 +91,7 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
     return (
         <>
             <PageLayoutContext.Provider value={pageLayout}>
+                <div class="container">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="row">
@@ -100,7 +101,7 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
                                     <div class="card-body">
                                         <h1 class="card-title">{campaignData?.title || 'Unknown'}</h1>
                                         <br />
-                                        <div class="container">
+                                        {/* <div class="container"> */}
                                             <div class="row">
                                                 <div class="col">
                                                     <h4 class="card-text">Ngày Bắt Đầu: {campaignData?.issueTime || ''}</h4>
@@ -109,7 +110,7 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
                                                     <h4 class="card-text">Ngày Kết Thúc: {campaignData?.expire || ''}</h4>
                                                 </div>
                                             </div>
-                                        </div>
+                                        {/* </div> */}
                                         <br />
 
                                         <Link to="#" class="btn btn-primary">Chỉnh sửa</Link>
@@ -130,6 +131,7 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
             </PageLayoutContext.Provider>
         </>
@@ -242,33 +244,33 @@ function NewCandidateForm({ formDelegator }) {
 
     return (
         <Form delegate={formDelegator} className="needs-validation" novalidate="" accept-charset="utf-8">
-            <div class="container" >
-                <div class="row">
-                    <div class="mb-6 col">
+            {/* <div class="container" > */}
+                <div class="row g-2">
+                    <div class="col">
                         <label for="address" className="form-label">Candidate Name</label>
                         <FormInput validate={(val) => val?.length > 5} type="text" className="form-control" name="name" required="true" />
                     </div>
-                    <div class="mb-6 col">
+                    <div class="col">
                         <label for="address" class="form-label">ID Number</label>
                         <FormInput validate={required} type="text" className="form-control" name="idNumber" />
                     </div>
                 </div>
                 <br />
-                <div class="row">
-                    <div class="col mb-6">
+                <div class="row g-2">
+                    <div class="col">
                         <div >
                             <label for="state" className="form-label" >Date Of Birth</label>
                             <FormInput name="dateOfBirth" type="date" value={minDate} min={minDate} max={maxDate} data-date-format="DD-MM-YYYY" className="form-control" required="true" />
                             {/* <DatePicker className="form-control"/> */}
                         </div>
                     </div>
-                    <div class="col mb-6">
+                    <div class="col">
                         <label for="address" class="form-label">Adress</label>
                         <FormInput validate={required} type="text" className="form-control" name="address" />
                     </div>
                 </div>
                 <br />
-            </div>
+            {/* </div> */}
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
             <button type="button" onClick={() => { toggleCompactTableForm(formVisible, setFormVisible) }} className="btn btn-sm btn-outline-primary" style={{ margin: '5px', paddingTop: "7px", paddingBottom: "7px" }}>Đóng</button>
         </Form>

@@ -1,6 +1,8 @@
+import { current } from "@reduxjs/toolkit";
 import { createContext } from "react";
 
 export const pillTabStyle = {
+    currentTabKey: null,
     ul: {
         "class": "nav nav-pills mb-3",
         "id": "pills-tab",
@@ -22,6 +24,7 @@ export const pillTabStyle = {
 }
 
 export const basicTabStyle =  {
+    currentTabKey: null,
     ul: {
         "class": "nav nav-tabs",
         "id": "myTab",

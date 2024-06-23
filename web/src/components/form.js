@@ -1,8 +1,9 @@
-import { useReducer, useState } from "react";
+import { useContext, useReducer, useRef, useState } from "react";
 import FormContext, { defaultFormContextValue } from "../contexts/form.context";
 import Validator from "./lib/validator.";
 import FormDelegator from "./lib/formDelegator";
 import {useNavigate} from "react-router-dom";
+import FormCollectorContext from "../contexts/formCollector.context";
 
 /**
  * This component is wrapper for default html <form> element. This component
@@ -43,6 +44,9 @@ export default function Form({
     /**@type {FormDelegator} */
     const delegator = hasDelegator ? delegate : null;
     const navigate = useNavigate();
+
+    const formCollectorRef = useRefForFormCollector(hasDelegator);
+
     const resetFormContext = useReducer(() => {
 
         if (hasDelegator) {
@@ -139,11 +143,30 @@ export default function Form({
             validate: validateField,
             delayingDebounces: delayingDebounceTimeouts
         }}>
-            <form {...allProps} onSubmit={handleSubmit} >
+            <form {...allProps} ref={formCollectorRef} onSubmit={handleSubmit} >
                 {children}
             </form>
         </FormContext.Provider>
     )
+}
+
+function useRefForFormCollector(hasDelegator) {
+
+    const collectorContext = useContext(FormCollectorContext);
+    const [registered, setRegistered] = useState();
+    const formRef = useRef();
+
+    if (
+        //hasDelegator &&
+        typeof collectorContext?.register === 'function'
+        && !registered
+    ) {
+
+        setRegistered(true);
+        collectorContext.register(formRef);
+    }
+
+    return formRef;
 }
 
 /**
