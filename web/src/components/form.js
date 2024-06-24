@@ -1,4 +1,4 @@
-import { useContext, useReducer, useRef, useState } from "react";
+import { useContext, useEffect, useReducer, useRef, useState } from "react";
 import FormContext, { defaultFormContextValue } from "../contexts/form.context";
 import Validator from "./lib/validator.";
 import FormDelegator from "./lib/formDelegator";
@@ -44,7 +44,7 @@ export default function Form({
     /**@type {FormDelegator} */
     const delegator = hasDelegator ? delegate : null;
     const navigate = useNavigate();
-
+    
     const formCollectorRef = useRefForFormCollector(hasDelegator, delegator);
 
     const resetFormContext = useReducer(() => {
@@ -153,17 +153,21 @@ export default function Form({
 function useRefForFormCollector(hasDelegator, delegator) {
 
     const collectorContext = useContext(FormCollectorContext);
-    const [registered, setRegistered] = useState();
+    const [registered, setRegistered] = useState(false);
 
-    if (
-        hasDelegator &&
-        typeof collectorContext?.register === 'function'
-        && !registered
-    ) {
+    useEffect(() => {
 
-        setRegistered(true);
-        collectorContext.register(delegator);
-    }
+        if (
+            hasDelegator &&
+            typeof collectorContext?.register === 'function'
+            && !registered
+        ) {
+
+            setRegistered(true);
+            collectorContext.register(delegator);
+        }
+
+    }, [])
 }
 
 /**

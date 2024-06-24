@@ -1,13 +1,13 @@
 import Schema from "validate";
-import { civil_identity_t } from "../models/candidate.model";
+import { candidate_model_t } from "../models/candidate.model";
 import CollectableFormDelegator from "./collectableFormDelegator";
 
-export default class CanidateIdentityFormDelegator extends CollectableFormDelegator {
+export default class CandidateJobFormDelegator extends CollectableFormDelegator {
 
-    #dataModel = new civil_identity_t();
+    #dataModel = new candidate_model_t();
     #validator = new Schema({
-        
-    });
+
+    })
 
     get validator() {
 
@@ -21,6 +21,6 @@ export default class CanidateIdentityFormDelegator extends CollectableFormDelega
 
     reset() {
 
-        this.#dataModel = new civil_identity_t();
+        this.#dataModel = new candidate_model_t();
     }
 }

@@ -4,6 +4,7 @@ import ErrorTraceFormDelegator from "./errorTraceFormDelegator";
 export default class AdvanceValidationFormDelegator extends ErrorTraceFormDelegator {
 
     #validationFailedFootprint;
+    #validator;
 
     // get validationFailedFootPrint() {
 
@@ -16,6 +17,20 @@ export default class AdvanceValidationFormDelegator extends ErrorTraceFormDelega
     get validator() {
 
 
+    }
+
+    /**
+     * 
+     * @param {Object} rules 
+     */
+    setValidatorRules(rules) {
+
+        if (typeof rules !== 'object') {
+
+            throw new Error('validator rules must be object that represent the package validator\'s rules');
+        }
+
+        this.#validator = new Schema(rules);
     }
 
     validateModel() {

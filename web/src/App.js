@@ -27,13 +27,16 @@ import SingleCandidateUseCase from './domain/usecases/singleCandidate.usecase';
 import { motion } from "framer-motion";
 
 import './assets/css/animation.css';
-import CandidateSigningPage from './pages/candidateSigningPage';
+import CandidateSigningPage from './pages/candidateSinging/candidateSigning.page';
+import CandidateSigningUseCase from './domain/usecases/candidateSigning.usecase';
+// import CandidateSigningPage from './pages/candidateSigning/candidateSinging.page';
 
 const campaignlistUseCase = new CampaignListUseCase()
 const singleCampaignUseCase = new SingleCampaignUseCase();
 const newCampaignUseCase = new NewCampaignUseCase();
 const newCandidateUseCase = new NewCandidateUseCase();
 const singleCandidateUseCase = new SingleCandidateUseCase();
+const candidateSigningUseCase = new CandidateSigningUseCase();
 
 const pageAnimationVariants = {
   hidden: { opacity: 0, x: 0, y: 20 },
@@ -50,7 +53,7 @@ function App() {
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/signing' element={<AnimatePage><SingingPageTemplate /></AnimatePage>}>
-          <Route path='campaign/:campaignUUID/candidate/:candidateUUID' element={<CandidateSigningPage />} />
+          <Route path='campaign/:campaignUUID/candidate/:candidateUUID' element={<CandidateSigningPage usecase={candidateSigningUseCase} />} />
         </Route>
         <Route path='/login' element={<AnimatePage><Login /></AnimatePage>} />
         <Route path='/admin' element={<AdminTemplate />}>
