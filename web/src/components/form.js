@@ -45,7 +45,7 @@ export default function Form({
     const delegator = hasDelegator ? delegate : null;
     const navigate = useNavigate();
 
-    const formCollectorRef = useRefForFormCollector(hasDelegator);
+    const formCollectorRef = useRefForFormCollector(hasDelegator, delegator);
 
     const resetFormContext = useReducer(() => {
 
@@ -150,23 +150,20 @@ export default function Form({
     )
 }
 
-function useRefForFormCollector(hasDelegator) {
+function useRefForFormCollector(hasDelegator, delegator) {
 
     const collectorContext = useContext(FormCollectorContext);
     const [registered, setRegistered] = useState();
-    const formRef = useRef();
 
     if (
-        //hasDelegator &&
+        hasDelegator &&
         typeof collectorContext?.register === 'function'
         && !registered
     ) {
 
         setRegistered(true);
-        collectorContext.register(formRef);
+        collectorContext.register(delegator);
     }
-
-    return formRef;
 }
 
 /**

@@ -11,6 +11,7 @@ import { pillTabStyle } from "../contexts/tab.context"
 import TabEventContext from "../contexts/tabEvent.contex";
 import FormCollector from "../components/formCollector";
 import FormCollectorDispatchContext from "../contexts/formCollectorDispatch.context";
+import PromptFormInput from "../components/promptFormInput";
 
 const SUBMIT_PHASE = Infinity;
 
@@ -48,6 +49,15 @@ const pagePhases = {
                     <h4 className="card-title">Thông Tin Học Vấn</h4>
                     <br />
                     <EducationSectionForm name="2" />
+                    <div className="row">
+                        <div className="col">
+                            
+                        </div>
+                    </div>
+                    <br />
+                    <div className="line"></div>
+                    <br />
+                    <JobSectionFormm />
                     <div className="row">
                         <div className="col">
                             <div className="line"></div>
@@ -95,16 +105,61 @@ export default function CandidateSigningPage({ usecase }) {
     )
 }
 
-function EducationSectionForm() {
-
-
-}
-
-function PoliticSectionForm() {
+function EducationSectionForm({delegator}) {
 
     return (
         <Form>
+            <div className="row">
+                <div className="col-md-6">
+                    <PromptFormInput label="Trình Độ Học Vấn" inputName="highestGrade" type="text"/>
+                </div>
+            </div>
+            <div className="row">
+                <div className="col-md-6">
+                    <PromptFormInput label="Trình Độ Chuyên Môn" inputName="expertise" type="text" />
+                </div>
+                <div className="col-md-6">
+                    <PromptFormInput label="Chuyên Ngành Đào tạo" inputName="" type='text'/>
+                </div>
+            </div>
+        </Form>
+    )
+}
 
+function PoliticSectionForm({delegator}) {
+
+    return (
+        <Form>
+            <div className="row">
+                <div className="col-md-6">
+                    <PromptFormInput label="Ngày Vào Đoàn TNCS Hồ Chí Minh" inputName="unionJoinDate" type="text"/>
+                </div>
+                <div className="col-md-6">
+                    <PromptFormInput label="Ngày Vào Đảng" inputName="partyJoinDate" type="text" />
+                </div>
+            </div>
+            <br/>
+            <div className="row">
+                <h4>Quá trình </h4>
+                <br/>
+                <PromptFormInput label="Chi tiết" inputName="historyDetail" textArea={true} />
+            </div>
+        </Form>
+    )
+}
+
+function JobSectionFormm({delegator}) {
+
+    return (
+        <Form>
+            <div className="row">
+                <div className="col-md-6">
+                    <PromptFormInput label="Nghề nghiệp" inputName="job" textArea={true} />
+                </div>
+                <div className="col-md-6">
+                    <PromptFormInput label="Nơi Làm Việc" inputName="jobPlace" textArea={true} />
+                </div>
+            </div>
         </Form>
     )
 }

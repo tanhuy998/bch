@@ -1,6 +1,7 @@
 import { useContext, useEffect, useReducer, useState } from "react";
 import FormCollectorContext from "../contexts/formCollector.context";
 import FormCollectorDispatchContext from "../contexts/formCollectorDispatch.context";
+import CollectableFormDelegator from "../domain/valueObject/collectableFormDelegator";
 
 function addFormRefReducer(currentFormRefList, newForm) {
 
@@ -16,14 +17,16 @@ function addFormRefReducer(currentFormRefList, newForm) {
  */
 export default function FormCollector({children}) {
 
-    const [formRefList, addFormRef] = useReducer(addFormRefReducer, []);
+    const [formDelegatorList, addFormDelegatorToList] = useReducer(addFormRefReducer, []);
+    const [newCollectedDelegator, setNewCollectedDelegator] = useState(null);
+    const [endCollectSignal, setEndCollectSignal] = useState(false);
     const { signal, setFormCollectorResponse, setFormCollectorHandShake } = useContext(FormCollectorDispatchContext) || {};
 
     
 
     function register(formRef) {
 
-        addFormRef(formRef);
+        addFormDelegatorToList(formRef);
     }
 
     useEffect(() => {
@@ -36,30 +39,57 @@ export default function FormCollector({children}) {
     }, [])
 
     useEffect(() => {
+        
+        if (!(newCollectedDelegator instanceof CollectableFormDelegator)) {
 
-        console.log(formRefList)
+            return;
+        }
+        console.log(formDelegatorList)
+        addFormDelegatorToList(newCollectedDelegator);
 
-    }, [formRefList])
+    }, [newCollectedDelegator])
 
     useEffect(() => {
         console.log('emit collector')
-        if (formRefList.length === 0) {
+
+        if (!endCollectSignal) {
 
             return;
         }
 
-        for (const formRef of formRefList) {
+        if (formDelegatorList.length === 0) {
 
-            formRef?.current?.submit();
+            setFormCollectorResponse(true);
+            return;
         }
 
-        setFormCollectorResponse(true)
+        let res = true;
+
+        for (const delegator of formDelegatorList) {
+
+            if (!delegator.interceptSubmission()) {
+
+                res = false;
+            }
+        }
+
+        setFormCollectorResponse(res);
 
     }, [signal])
 
     return (
         <FormCollectorContext.Provider value={{register}}>
             {children}
+            <EndCollector emit={setEndCollectSignal}/>
         </FormCollectorContext.Provider>
+    )
+}
+
+function EndCollector({emit}) {
+
+    return (
+        <>
+        {emit(true)}
+        </>
     )
 }
