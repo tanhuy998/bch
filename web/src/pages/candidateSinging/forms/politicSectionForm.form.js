@@ -14,11 +14,11 @@ export default function PoliticSectionForm({ delegator }) {
                 </div>
             </div>
             <br />
-            <div className="row">
+            {/* <div className="row">
                 <h4>Quá trình </h4>
                 <br />
                 <PromptFormInput label="Chi tiết" inputName="historyDetail" textArea={true} />
-            </div>
+            </div> */}
         </Form>
     )
 }

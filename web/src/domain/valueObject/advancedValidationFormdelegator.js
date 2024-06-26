@@ -19,6 +19,11 @@ export default class AdvanceValidationFormDelegator extends ErrorTraceFormDelega
 
     }
 
+    get validationFailedFootPrint() {
+
+        return this.#validationFailedFootprint;
+    }
+
     /**
      * 
      * @param {Object} rules 

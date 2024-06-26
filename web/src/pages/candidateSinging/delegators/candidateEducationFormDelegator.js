@@ -1,6 +1,6 @@
 import Schema from "validate";
-import CollectableFormDelegator from "./collectableFormDelegator";
-import { candidate_signing_education_t } from "../models/candidate.model";
+import CollectableFormDelegator from "../../../domain/valueObject/collectableFormDelegator";
+import { candidate_signing_education_t } from "../../../domain/models/candidate.model";
 
 export default class CandidateEducationFormDelegator extends CollectableFormDelegator {
 
@@ -21,6 +21,6 @@ export default class CandidateEducationFormDelegator extends CollectableFormDele
 
     reset() {
 
-        this.#dataModel = new candidate_signing_education_t();
+
     }
 }

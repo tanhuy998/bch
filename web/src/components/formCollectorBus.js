@@ -1,24 +1,31 @@
 import { useState } from "react";
-import FormCollectorDispatchContext from "../contexts/formCollectorDispatch.context";
+import FormCollectorBusContext from "../contexts/formCollectorBus.context";
 
 export default function FormCollectorBus({children}) {
 
-    const [formCollectorHandShake, setFormCollectorHandShake] = useState(false);
-    const [formCollectorResponse, setFormCollectorResponse] = useState();
-    const [emitSignal, setEmitSignal] = useState();
+    // const [formCollectorHandShake, setFormCollectorHandShake] = useState(false);
+    // const [formCollectorResponse, setFormCollectorResponse] = useState();
+    // const [emitSignal, setEmitSignal] = useState();
+
+    const [collectedDelegator, setCollectedDelegator] = useState();
+    const [collectedEndSignal, setCollectedEndSignal] = useState(null);
+    const [busSession, setBusSession] = useState(null);
 
     return (
-        <FormCollectorDispatchContext.Provider
+        <FormCollectorBusContext.Provider
             value={{
-                emitSignal: null,
-                setEmitSignal,
-                formCollectorResponse,
-                setFormCollectorResponse,
-                formCollectorHandShake,
-                setFormCollectorHandShake,
+                // emitSignal: null,
+                // setEmitSignal,
+                // formCollectorResponse,
+                // setFormCollectorResponse,
+                // formCollectorHandShake,
+                // setFormCollectorHandShake,
+                collectedDelegator, setCollectedDelegator,
+                collectedEndSignal, setCollectedEndSignal,
+                busSession, setBusSession,
             }}
         >
             {children}
-        </FormCollectorDispatchContext.Provider>
+        </FormCollectorBusContext.Provider>
     )
 }

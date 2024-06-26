@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import FormCollectorDispatchContext from "../../contexts/formCollectorDispatch.context";
 import TabEventContext from "../../contexts/tabEvent.contex";
 import TabContext from "../../contexts/tab.context";
 import { Tab } from "../../components/Tab";
@@ -8,7 +7,14 @@ import PageControllerContext from "./contexts/pageController.context";
 import customTabContextvalue from "./constant";
 import FormCollector from "../../components/formCollector";
 import FormCollectorBus from "../../components/formCollectorBus";
+import useCollectedForms from "../../hooks/formCollectorBus";
+import debug from 'debug';
+import useFormCollectorBusSession from "../../hooks/formCollectorBusSession";
+import CollectableFormDelegator from "../../domain/valueObject/collectableFormDelegator";
 
+
+const debugButton = debug('page-controller:button');
+const debugPhase = debug('page-controller:phase')
 const SUBMIT_PHASE = Infinity;
 
 // function isFirstPagePhase(tabKey) {
@@ -17,19 +23,27 @@ const SUBMIT_PHASE = Infinity;
 // }
 
 function NextPhaseButton({ resolveNextPhaseKey }) {
-
-    const { currentTabKey, setCurrentTabKey, focusPoint } = useContext(PageControllerContext);
-    const { formCollectorResponse, setEmitSignal, formCollectorHandShake, setFormCollectorHandShake } = useContext(FormCollectorDispatchContext) || {};
-
-    const hasSignalEmit = typeof setEmitSignal === 'function';
-    const hasHandShakeSetter = typeof setFormCollectorHandShake === 'function';
-
-    const isHandShaked = formCollectorHandShake === true;
+    
+    const { currentTabKey, setCurrentTabKey, focusPoint, pageFormDelegators } = useContext(PageControllerContext);
 
     function dispatchNextPhase() {
 
         const nextPhaseKey = resolveNextPhaseKey(currentTabKey);
-        console.log('current phase', currentTabKey, 'next phase', nextPhaseKey)
+        debugButton('current phase', currentTabKey, 'next phase', nextPhaseKey)
+        /**@type {Array<CollectableFormDelegator>} */
+        const delegators = pageFormDelegators?.[currentTabKey];
+
+        const delegatorFailedValidation = (Array.isArray(delegators) ? delegators : [])
+                                .filter(d => d?.notPassValidation())
+                                .map(d => d.validationFailedFootPrint);
+
+        console.log(delegators?.map(d => d.dataModel));
+        
+        if (delegatorFailedValidation.length > 0) {
+            
+            return;
+        } 
+
         if (nextPhaseKey === SUBMIT_PHASE) {
 
             return;
@@ -41,28 +55,9 @@ function NextPhaseButton({ resolveNextPhaseKey }) {
 
     function handleClick() {
 
-        if (
-            hasSignalEmit
-            //&& isHandShaked
-        ) {
-
-            console.log('button emit');
-            setEmitSignal(currentTabKey);
-            return;
-        }
-
         dispatchNextPhase();
     }
 
-    useEffect(() => {
-
-        if (formCollectorResponse === true) {
-
-            dispatchNextPhase();
-            setFormCollectorHandShake(false);
-        }
-
-    }, [formCollectorResponse]);
 
     return (
         <button type="button" onClick={handleClick} class="btn btn-outline-primary mb-2" value={currentTabKey}>Tiếp Theo</button>
@@ -76,7 +71,7 @@ function PreviousPhaseButton() {
     )
 }
 
-export default function PageController({ children, pagePhases }) {
+export default function PageController({ children, pagePhases, pageFormDelegators}) {
 
     const pagePhaseKeys = Object.keys(pagePhases);
     const [currentTabKey, setCurrentTabKey] = useState(pagePhaseKeys[0]);
@@ -107,7 +102,7 @@ export default function PageController({ children, pagePhases }) {
         return pagePhaseKeys[currentPhaseIndex + 1];
     }
 
-    console.log('phase', currentTabKey)
+    debugPhase('phase', currentTabKey)
     return (
         <>
             {/* <FormCollectorDispatchContext.Provider
@@ -120,9 +115,9 @@ export default function PageController({ children, pagePhases }) {
                     setFormCollectorHandShake,
                 }}
             > */}
-            <FormCollectorBus>
-                <FormCollector sessionValue={currentTabKey}>
-                    <PageControllerContext.Provider value={{ currentTabKey, setCurrentTabKey, focusPoint: pageMainTab, }}>
+            {/* <FormCollectorBus> */}
+                {/* <FormCollector sessionValue={currentTabKey}> */}
+                    <PageControllerContext.Provider value={{ currentTabKey, setCurrentTabKey, focusPoint: pageMainTab, pageFormDelegators}}>
 
                         <div ref={pageMainTab}>
                             {/* <CustomTab initTabIndex={currentTab} tabs={tabContents} /> */}
@@ -133,12 +128,12 @@ export default function PageController({ children, pagePhases }) {
 
                                 </TabContext.Provider>
                             </TabEventContext.Provider>
-                            <NextPhaseButton resolveNextPhaseKey={resolveNextPhaseKey} />
+                            <NextPhaseButton resolveNextPhaseKey={resolveNextPhaseKey}/>
                         </div>
 
                     </PageControllerContext.Provider>
-                </FormCollector>
-            </FormCollectorBus>
+                {/* </FormCollector> */}
+            {/* </FormCollectorBus> */}
             {/* </FormCollectorDispatchContext.Provider> */}
         </>
     )

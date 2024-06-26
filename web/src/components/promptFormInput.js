@@ -1,14 +1,27 @@
-import FormInput from "./formInput";
+import { useEffect, useState } from "react";
+import FormInput, {_FormInput} from "./formInput";
 
-export default function PromptFormInput({label, inputName, placeholder, noticeText, invalidMessage, type}) {
+
+export default function PromptFormInput({label, validate, inputName, placeholder, noticeText, invalidMessage, type, textArea}) {
+
+    const [isValidInput, setIsValidInput] = useState();
+    
+    useEffect(() => {
+
+        console.log('prompt', isValidInput, invalidMessage)
+
+    }, [isValidInput])
 
     return (
         <>
             <label for={inputName} class="form-label">{label}</label>
-            <FormInput type={type} className="form-control" name={inputName} placeholder={placeholder} />
+            <FormInput validate={validate} type={type} onValidInput={() => {setIsValidInput(true)}} onInvalidInput={() => {setIsValidInput(false)}} className="form-control" name={inputName} placeholder={placeholder} textArea={textArea}/>
             <small class="form-text text-muted">{noticeText}</small>
+
             {/* <div class="valid-feedback">Looks good!</div> */}
-            <div class="invalid-feedback">{invalidMessage}</div>
+            {
+                !isValidInput && <div class="invalid-feedback is-invalid">{invalidMessage}</div>
+            }
         </>
     )
 }

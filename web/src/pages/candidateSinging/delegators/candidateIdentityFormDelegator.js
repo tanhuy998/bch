@@ -1,0 +1,80 @@
+import Schema from "validate";
+import { civil_identity_t } from "../../../domain/models/candidate.model";
+import CollectableFormDelegator from "../../../domain/valueObject/collectableFormDelegator";
+import {validateIDNumber, validatePeopleName, ageAboveSixteenAndYoungerThanTwentySeven} from "../../../lib/validator";
+
+export default class CanidateIdentityFormDelegator extends CollectableFormDelegator {
+
+    #dataModel = new civil_identity_t();
+    #validator = new Schema({
+        idNumber: {
+            type: String,
+            required: true,
+            use: {validateIDNumber},
+            message: "Số căn cước công dân không hợp lệ",
+        },
+        name: {
+            type: String,
+            required: true,
+            use: {validatePeopleName},
+            message: "Tên không hợp lệ",
+        },
+        dateOfBirth: {
+            type: Date,
+            required: true,
+            use: {ageAboveSixteenAndYoungerThanTwentySeven},
+            message: "Ngày sinh không hợp lệ"
+        },
+        birthPlace: {
+            type: String,
+            required: true,
+            message: "Nơi đăng ký khai sinh không hợp lệ"
+        },
+        ethinicity: {
+            type: String,
+            required: true,
+            message: "Dân tộc không hợp lệ",
+        },
+        religion: {
+            type: String,
+            required: false,
+            message: "Tôn giáo không hợp lệ",
+        },
+        permanentResident: {
+            type: String,
+            required: true,
+            message: "Địa chỉ thường trú là bắt buộc",
+        },
+        male: {
+            type: Boolean,
+            required: true,
+        },
+        placeOfOrigin: {
+            type: String,
+            required: true,
+            message: "Quê quán không hợp lệ",
+        }
+    });
+
+    get validator() {
+
+        return this.#validator;
+    }
+
+    get dataModel() {
+
+        return this.#dataModel;
+    }
+    
+    notPassValidation() {  
+
+        console.log(this.#dataModel);
+
+        return super.notPassValidation();
+    }
+
+    reset() {
+
+    
+    }
+}

@@ -29,6 +29,7 @@ import { motion } from "framer-motion";
 import './assets/css/animation.css';
 import CandidateSigningPage from './pages/candidateSinging/candidateSigning.page';
 import CandidateSigningUseCase from './domain/usecases/candidateSigning.usecase';
+import './config/debug';
 // import CandidateSigningPage from './pages/candidateSigning/candidateSinging.page';
 
 const campaignlistUseCase = new CampaignListUseCase()
