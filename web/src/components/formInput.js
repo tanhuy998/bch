@@ -1,5 +1,5 @@
 import { memo, useContext, useEffect, useState } from "react";
-import FormContext from "../contexts/form.context";
+import FormContext, { child_input_proxy_t } from "../contexts/form.context";
 import Validator from "./lib/validator.";
 import "../assets/css/input.css";
 import debug from "debug";
@@ -32,7 +32,9 @@ export function _FormInput({validate, onValidInput, onInvalidInput, invalidMessa
     const [inputCurrentValue, setInputCurrentValue] = useState(hasDataModel ? dataModel[name] : null);
     const [isValidInput, setIsValidInput] = useState(INIT_STATE);
     const [dataModelFieldValue, setDataModelFieldValue] = useState(dataModel?.[name]);
-    
+
+    const inputProxy = useInputProxy(name, setInputCurrentValue);
+
     const isIgnoreValidation = validate === IGNORE_VALIDATION;
 
     validate = prepareValidateFunction(validate, context);
@@ -52,7 +54,7 @@ export function _FormInput({validate, onValidInput, onInvalidInput, invalidMessa
     const hasAfterDebounceListener = typeof onAfterDebounce === 'function';
     const hasValidationSuccessListener = typeof onValidInput === 'function';
     const hasValidationFailedListener = typeof onInvalidInput === 'function';
-
+    
     if (hasDataModel) {
 
         dataModel[name] = inputCurrentValue;
@@ -137,7 +139,7 @@ export function _FormInput({validate, onValidInput, onInvalidInput, invalidMessa
 
         dataModel[name] = type === 'date' ? convertToDate(dataModelFieldValue) : dataModelFieldValue;
 
-        formInputDebugger('model field assign', dataModelFieldValue, dataModel)
+        console.log('model field assign', dataModelFieldValue, dataModel)
     }, [dataModelFieldValue])
 
     useEffect(() => {
@@ -148,6 +150,7 @@ export function _FormInput({validate, onValidInput, onInvalidInput, invalidMessa
         }
         formInputDebugger(debounceTimeout)
         setDataModelFieldValue(inputCurrentValue);
+
 
         if (
             typeof debounceTimeout === 'number'
@@ -179,6 +182,32 @@ export function _FormInput({validate, onValidInput, onInvalidInput, invalidMessa
         <textarea {...{...htmlElementAttributes, onChange: handleInputChange, name}} >{inputCurrentValue || ''}</textarea> 
         : <input {...{...htmlElementAttributes, onChange: handleInputChange, name}} value={inputCurrentValue || ''}/>
     )
+}
+
+function useInputProxy(name, setInputCurrentValue) {
+
+    const {childrenInputs} = useContext(FormContext) || {};
+    const [inputProxy] = useState(new child_input_proxy_t())
+
+    useEffect(() => {
+
+        if (!(childrenInputs instanceof Map)) {
+
+            return;
+        }
+
+        if (childrenInputs?.has(name)) {
+
+            return;
+        }
+
+        inputProxy.reset = () => {setInputCurrentValue(null)};
+
+        childrenInputs?.set(name, inputProxy);
+
+    }, []);
+
+    return inputProxy;
 }
 
 function prepareElementClass(htmlElementAttributes, isValidInputState) {

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useReducer, useRef, useState } from "react";
-import FormContext, { defaultFormContextValue } from "../contexts/form.context";
+import FormContext, { child_input_proxy_t, defaultFormContextValue } from "../contexts/form.context";
 import Validator from "./lib/validator.";
 import FormDelegator from "./lib/formDelegator";
 import {useNavigate} from "react-router-dom";
@@ -44,6 +44,7 @@ export default function Form({
     /**@type {FormDelegator} */
     const delegator = hasDelegator ? delegate : null;
     const navigate = useNavigate();
+    const [childrenInputs] = useState(new Map());
     
     const formCollectorRef = useRefForFormCollector(hasDelegator, delegator);
 
@@ -53,6 +54,8 @@ export default function Form({
 
             delegator.reset();
         }
+
+        resetInputProxies(childrenInputs);
 
         return null;
     }, null)[1];
@@ -107,7 +110,7 @@ export default function Form({
     const handleSubmit = !hasInterceptor ? hasSubmissionListener ? onSubmit : undefined
     : (function() {
 
-        clearDebounces(delayingDebounceTimeouts);
+        //clearDebounces(delayingDebounceTimeouts);
 
         const event = arguments[0];
 
@@ -141,7 +144,8 @@ export default function Form({
             delegate: undefined,
             dataModel: dataModel, 
             validate: validateField,
-            delayingDebounces: delayingDebounceTimeouts
+            delayingDebounces: delayingDebounceTimeouts,
+            childrenInputs: childrenInputs,
         }}>
             <form {...allProps} ref={formCollectorRef} onSubmit={handleSubmit} >
                 {children}
@@ -179,5 +183,22 @@ function clearDebounces(list) {
     for (const timeout of list.values()) {
 
         clearTimeout(timeout);
+    }
+}
+
+/**
+ * 
+ * @param {Map<string, child_input_proxy_t>} list 
+ */
+function resetInputProxies(list) {
+
+    for (const proxy of list.values()) {
+
+        if (typeof proxy.reset !== 'function') {
+
+            continue;
+        }
+
+        proxy.reset();
     }
 }

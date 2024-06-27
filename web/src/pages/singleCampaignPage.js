@@ -11,6 +11,8 @@ import Form from "../components/form";
 import FormInput from "../components/formInput";
 import { required } from "../components/lib/validator.";
 import NewCandidateFormDelegator from "../domain/valueObject/newCandidateFormDelegator";
+import PromptFormInput from "../components/promptFormInput";
+import { ageAboveSixteenAndYoungerThanTwentySeven, validateIDNumber, validatePeopleName } from "../lib/validator";
 
 const CandidatesTabContext = createContext({
     formVisible: false,
@@ -92,16 +94,16 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
         <>
             <PageLayoutContext.Provider value={pageLayout}>
                 <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="card">
-                                    <h5 class="card-header">Campaign Management</h5>
-                                    <div class="card-body">
-                                        <h1 class="card-title">{campaignData?.title || 'Unknown'}</h1>
-                                        <br />
-                                        {/* <div class="container"> */}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <h5 class="card-header">Campaign Management</h5>
+                                        <div class="card-body">
+                                            <h1 class="card-title">{campaignData?.title || 'Unknown'}</h1>
+                                            <br />
+                                            {/* <div class="container"> */}
                                             <div class="row">
                                                 <div class="col">
                                                     <h4 class="card-text">Ngày Bắt Đầu: {campaignData?.issueTime || ''}</h4>
@@ -110,28 +112,28 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
                                                     <h4 class="card-text">Ngày Kết Thúc: {campaignData?.expire || ''}</h4>
                                                 </div>
                                             </div>
-                                        {/* </div> */}
-                                        <br />
+                                            {/* </div> */}
+                                            <br />
 
-                                        <Link to="#" class="btn btn-primary">Chỉnh sửa</Link>
-                                        <br />
-                                        <br />
-                                        <div ref={pageLayout.mainTab}>
-                                            <BasicTab tabs={mainTabs} initTabIndex={0} />
+                                            <Link to="#" class="btn btn-primary">Chỉnh sửa</Link>
+                                            <br />
+                                            <br />
+                                            <div ref={pageLayout.mainTab}>
+                                                <BasicTab tabs={mainTabs} initTabIndex={0} />
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    {/* <div class="card-body">
+                                        {/* <div class="card-body">
                                     <h3 class="card-title">Candidates Detail</h3>
 
                                     <PillTab tabs={candidateTabs} />
                                 </div> */}
 
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 </div>
             </PageLayoutContext.Provider>
         </>
@@ -174,22 +176,22 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
         rowManipulator: endpoint,
     }
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        if (submissionSuccess === INIT_STATE) {
+    //     if (submissionSuccess === INIT_STATE) {
 
-            return;
-        }
+    //         return;
+    //     }
 
-        if (submissionSuccess === false) {
+    //     if (submissionSuccess === false) {
 
-            return;
-        }
+    //         return;
+    //     }
 
-        setSubmissionSuccess(false);
-        addOneCandidate();
-        console.log('new candidate added', candidateAddedCount)
-    }, [submissionSuccess])
+    //     //setSubmissionSuccess(false);
+    //     addOneCandidate();
+    //     console.log('new candidate added', candidateAddedCount)
+    // }, [submissionSuccess])
 
     return (
         <>
@@ -202,8 +204,8 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
                             <div className="collapse-content ">
                                 <div className="card-body">
                                     <h3 class="card-title">New Candidate</h3>
-                                   gti <br />
-                                    <CandidatesTabContext.Provider value={{ formVisible, setFormVisible, refreshTab: setSubmissionSuccess }}>
+                                    <br />
+                                    <CandidatesTabContext.Provider value={{ formVisible, setFormVisible, refreshTab: addOneCandidate }}>
                                         <NewCandidateForm formDelegator={formDelegator} />
                                     </CandidatesTabContext.Provider>
                                 </div>
@@ -225,14 +227,14 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
                 <br />
                 {/* {formVisible && <h5>All Candidate</h5>} */}
                 <PaginationTableContext.Provider value={{ ...defaultTableContext, ...allCandidateExtraContextValues }}>
-                    <PaginationTable refresh={candidateAddedCount} rowManipulator={pageUsecase.candidateListTableRowManipulator} candidateAdded={candidateAddedCount} />
+                    <PaginationTable key={candidateAddedCount} refresh={candidateAddedCount} rowManipulator={pageUsecase.candidateListTableRowManipulator} candidateAdded={candidateAddedCount} />
                 </PaginationTableContext.Provider>
             </div>
         </>
     )
 }
 
-function NewCandidateForm({ formDelegator }) {
+ function NewCandidateForm({ formDelegator }) {
 
     const { formVisible, setFormVisible, refreshTab } = useContext(CandidatesTabContext);
 
@@ -245,31 +247,62 @@ function NewCandidateForm({ formDelegator }) {
     return (
         <Form delegate={formDelegator} className="needs-validation" novalidate="" accept-charset="utf-8">
             {/* <div class="container" > */}
-                <div class="row g-2">
-                    <div class="col">
-                        <label for="address" className="form-label">Candidate Name</label>
-                        <FormInput validate={(val) => val?.length > 5} type="text" className="form-control" name="name" required="true" />
-                    </div>
-                    <div class="col">
-                        <label for="address" class="form-label">ID Number</label>
-                        <FormInput validate={required} type="text" className="form-control" name="idNumber" />
-                    </div>
+            <div class="row g-2">
+                <div class="mb-3 col-md-6">
+                    {/* <label for="address" className="form-label">Candidate Name</label> */}
+                    <PromptFormInput
+                        validate={validatePeopleName}
+                        label="Candidate Name"
+                        invalidMessage="Tên chỉ chứa ký tự!"
+                        type="text"
+                        className="form-control"
+                        name="name"
+                        required="true"
+                    />
                 </div>
-                <br />
-                <div class="row g-2">
-                    <div class="col">
-                        <div >
-                            <label for="state" className="form-label" >Date Of Birth</label>
-                            <FormInput name="dateOfBirth" type="date" value={minDate} min={minDate} max={maxDate} data-date-format="DD-MM-YYYY" className="form-control" required="true" />
-                            {/* <DatePicker className="form-control"/> */}
-                        </div>
-                    </div>
-                    <div class="col">
-                        <label for="address" class="form-label">Adress</label>
-                        <FormInput validate={required} type="text" className="form-control" name="address" />
-                    </div>
+                <div class="mb-3 col-md-6">
+                    {/* <label for="address" class="form-label">ID Number</label> */}
+                    <PromptFormInput
+                        validate={validateIDNumber}
+                        label="ID Number"
+                        invalidMessage="Số CCCD không hợp lệ!"
+                        type="text"
+                        className="form-control"
+                        name="idNumber"
+                    />
                 </div>
-                <br />
+            </div>
+            <br />
+            <div class="row g-2">
+                <div class="mb-3 col-md-6">
+                    
+                    <PromptFormInput
+                        name="dateOfBirth"
+                        label="Date Of Birth"
+                        validate={ageAboveSixteenAndYoungerThanTwentySeven}
+                        invalidMessage="Ngày sinh không hợp lệ!"
+                        type="date"
+                        value={minDate}
+                        min={minDate}
+                        max={maxDate}
+                        data-date-format="DD-MM-YYYY"
+                        className="form-control"
+                        required="true"
+                    />
+                </div>
+                <div class="mb-3 col-md-6">
+                    {/* <label for="address" class="form-label">Adress</label> */}
+                    <PromptFormInput
+                        validate={required}
+                        label="Address"
+                        invalidMessage="Addrress is required!s"
+                        type="text"
+                        className="form-control"
+                        name="address"
+                    />
+                </div>
+            </div>
+            <br />
             {/* </div> */}
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
             <button type="button" onClick={() => { toggleCompactTableForm(formVisible, setFormVisible) }} className="btn btn-sm btn-outline-primary" style={{ margin: '5px', paddingTop: "7px", paddingBottom: "7px" }}>Đóng</button>

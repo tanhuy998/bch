@@ -86,7 +86,7 @@ export default class NewCandidateFormDelegator extends EndpointFormDelegator {
         console.log('reset')
 
         this.#dataModel = new candidate_model_t();
-        //this.#refreshEmitter(true);
+        this.#refreshEmitter(true);
         //super.navigate(0)
     }
 

@@ -30,6 +30,7 @@ import './assets/css/animation.css';
 import CandidateSigningPage from './pages/candidateSinging/candidateSigning.page';
 import CandidateSigningUseCase from './domain/usecases/candidateSigning.usecase';
 import './config/debug';
+import './assets/css/background.css';
 // import CandidateSigningPage from './pages/candidateSigning/candidateSinging.page';
 
 const campaignlistUseCase = new CampaignListUseCase()
@@ -74,7 +75,18 @@ function App() {
 function SingingPageTemplate() {
 
   return (
-    <div className="content">
+    <div className="content" style={{
+      //backgroundImage: "url(https://vneid.gov.vn/_next/static/media/background-login.98683067.png)",
+      backgroundPosition: "50%",
+      backgroundSize: "cover",
+      paddingTop: "32px",
+      backgroundRepeat: "no-repeat",
+      width: "100vw",
+      height: "100vh",
+      filter: "contrast(400%)",
+      filter: "saturate(100%)",
+      //boxShadow: "0 0 200px rgba(0, 0, 0, 0.5) inset",
+    }}>
       <div className='container'>
         <div className='row'>
           <br />

@@ -7,15 +7,15 @@ export default function EducationSectionForm({ delegator }) {
         <Form delegate={delegator}>
             <div className="row">
                 <div className="col-md-6">
-                    <PromptFormInput label="Trình Độ Học Vấn" inputName="highestGrade" type="text" />
+                    <PromptFormInput label="Trình Độ Học Vấn" name="highestGrade" type="text" />
                 </div>
             </div>
             <div className="row">
                 <div className="col-md-6">
-                    <PromptFormInput label="Trình Độ Chuyên Môn" inputName="expertise" type="text" />
+                    <PromptFormInput label="Trình Độ Chuyên Môn" name="expertise" type="text" />
                 </div>
                 <div className="col-md-6">
-                    <PromptFormInput label="Chuyên Ngành Đào tạo" inputName="" type='text' />
+                    <PromptFormInput label="Chuyên Ngành Đào tạo" name="" type='text' />
                 </div>
             </div>
         </Form>

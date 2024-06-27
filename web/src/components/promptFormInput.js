@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import FormInput, {_FormInput} from "./formInput";
 
 
-export default function PromptFormInput({label, validate, inputName, placeholder, noticeText, invalidMessage, type, textArea}) {
+export default function PromptFormInput({label, validate, name, placeholder, noticeText, invalidMessage, type, textArea}) {
 
     const [isValidInput, setIsValidInput] = useState();
     
@@ -14,8 +14,8 @@ export default function PromptFormInput({label, validate, inputName, placeholder
 
     return (
         <>
-            <label for={inputName} class="form-label">{label}</label>
-            <FormInput validate={validate} type={type} onValidInput={() => {setIsValidInput(true)}} onInvalidInput={() => {setIsValidInput(false)}} className="form-control" name={inputName} placeholder={placeholder} textArea={textArea}/>
+            <label for={name} class="form-label">{label}</label>
+            <FormInput validate={validate} type={type} onValidInput={() => {setIsValidInput(true)}} onInvalidInput={() => {setIsValidInput(false)}} className="form-control" name={name} placeholder={placeholder} textArea={textArea}/>
             <small class="form-text text-muted">{noticeText}</small>
 
             {/* <div class="valid-feedback">Looks good!</div> */}

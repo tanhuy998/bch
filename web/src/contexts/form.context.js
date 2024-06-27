@@ -1,6 +1,17 @@
 import { createContext } from "react";
 
+export function child_input_proxy_t() {
 
+    /**
+     * @type {function}
+     */
+    this.reset = null;
+
+    /**
+     * @type {any}
+     */
+    this.inputCurrentValue = undefined;
+}
 
 export const defaultFormContextValue = {
     validate: null,

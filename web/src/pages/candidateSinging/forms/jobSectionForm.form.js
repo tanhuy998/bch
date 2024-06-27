@@ -7,10 +7,10 @@ export default function JobSectionFormm({ delegator }) {
         <Form delegate={delegator}>
             <div className="row">
                 <div className="col-md-6">
-                    <PromptFormInput label="Nghề nghiệp" inputName="job" textArea={true} />
+                    <PromptFormInput label="Nghề nghiệp" name="job" textArea={true} />
                 </div>
                 <div className="col-md-6">
-                    <PromptFormInput label="Nơi Làm Việc" inputName="jobPlace" textArea={true} />
+                    <PromptFormInput label="Nơi Làm Việc" name="jobPlace" textArea={true} />
                 </div>
             </div>
         </Form>
