@@ -11,6 +11,11 @@ export function child_input_proxy_t() {
      * @type {any}
      */
     this.inputCurrentValue = undefined;
+
+    /**
+     * @type {boolean}
+     */
+    this.isValid;
 }
 
 export const defaultFormContextValue = {
