@@ -10,6 +10,8 @@ type (
 		Bind(ctx iris.Context) error
 	}
 
+	IEmptyResponse any
+
 	IPaginationResult interface {
 		GetNavigation() *PaginationNavigation
 		SetTotalCount(int64)

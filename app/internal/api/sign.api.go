@@ -1,6 +1,7 @@
 package api
 
 import (
+	"app/domain/presenter"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/controller"
@@ -35,6 +36,11 @@ func initCandidateSigningApi(app *iris.Application) *mvc.Application {
 			activator.Handle(
 				"PATCH", "/campaign/{campaignUUID}/candidate/{candidateUUID}", "CommitCandidateSigningInfo",
 				middleware.BindPresenters[requestPresenter.CommitCandidateSigningInfoRequest, responsePresenter.CommitCandidateSigningInfoResponse](container),
+			)
+
+			activator.Handle(
+				"HEAD", "/pending/campaign/{campaignUUID}/candidate/{candidateUUID}", "CheckSigningExistence",
+				middleware.BindPresenters[requestPresenter.CheckSigningExistenceRequest, presenter.IEmptyPresenter](container),
 			)
 		}),
 	)

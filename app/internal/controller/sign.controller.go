@@ -11,6 +11,7 @@ import (
 type SignController struct {
 	CommitCandidateSigningInfoUseCase    usecase.ICommitCandidateSigningInfo
 	GetSingleCandidateSigningInfoUseCase usecase.IGetSingleCandidateSigningInfo
+	CheckSigningExistenceUseCase         usecase.ICheckSigningExistence
 }
 
 func (this *SignController) GetSingleCandidateSigningInfo(
@@ -27,4 +28,11 @@ func (this *SignController) CommitCandidateSigningInfo(
 ) (mvc.Result, error) {
 
 	return this.CommitCandidateSigningInfoUseCase.Execute(input, output)
+}
+
+func (this *SignController) CheckSigningExistence(
+	input *requestPresenter.CheckSigningExistenceRequest,
+) (mvc.Result, error) {
+
+	return this.CheckSigningExistenceUseCase.Execute(input)
 }

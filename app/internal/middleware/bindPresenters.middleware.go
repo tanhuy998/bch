@@ -1,8 +1,10 @@
 package middleware
 
 import (
+	"app/domain/presenter"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
+	libCommon "app/lib/common"
 	libError "app/lib/error"
 	"io"
 
@@ -14,6 +16,7 @@ import (
 
 type (
 	PresenterInitializer[RequestPresenter_T, ResponsePresenter_T any] func(req *RequestPresenter_T, res *ResponsePresenter_T)
+	RequestPresenterInitializer[RequestPresenter_T any]               func(req *RequestPresenter_T)
 )
 
 func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
@@ -26,6 +29,8 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 		panic("BindPresenter middleware need container to function")
 	}
 
+	ensureProperPresenteTypes[RequestPresenter_T, ResponsePresenter_T]()
+
 	return container.Handler(func(ctx iris.Context, validator context.Validator) {
 
 		if validator == nil {
@@ -37,8 +42,8 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 		}
 
 		var (
-			request  *RequestPresenter_T  = new(RequestPresenter_T)
-			response *ResponsePresenter_T = new(ResponsePresenter_T)
+			request  *RequestPresenter_T  = instantiatePresenter[RequestPresenter_T]()  //new(RequestPresenter_T)
+			response *ResponsePresenter_T = instantiatePresenter[ResponsePresenter_T]() //new(ResponsePresenter_T)
 			err      error
 		)
 
@@ -73,11 +78,71 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 			return
 		}
 
-		ctx.RegisterDependency(request)
-		ctx.RegisterDependency(response)
+		if request != nil {
+
+			ctx.RegisterDependency(request)
+		}
+
+		if response != nil {
+
+			ctx.RegisterDependency(response)
+		}
+
 		ctx.Next()
 	})
 }
+
+func ensureProperPresenteTypes[RequestPresenter_T, ResponsePresenter_T any]() {
+
+	if !libCommon.IsInterface[RequestPresenter_T]() ||
+		isEmptyPresenter[RequestPresenter_T]() &&
+			!libCommon.IsInterface[ResponsePresenter_T]() ||
+		isEmptyPresenter[ResponsePresenter_T]() {
+
+		return
+	}
+
+	panic("could not bind types that is not struct type or IEmptyPresenter")
+}
+
+func instantiatePresenter[Presenter_T any]() *Presenter_T {
+
+	if !libCommon.IsInterface[Presenter_T]() {
+
+		return new(Presenter_T)
+	}
+
+	if isEmptyPresenter[Presenter_T]() {
+
+		return nil
+	}
+
+	panic("Could not bind interface type as concrete presenter.")
+}
+
+func isEmptyPresenter[T any]() bool {
+
+	var r any = (*T)(nil)
+
+	switch r.(type) {
+	case *presenter.IEmptyPresenter:
+		return true
+	default:
+		return false
+	}
+}
+
+// func BindRequestPresenter[RequestPresenter_T any](
+// 	container *hero.Container,
+// 	initilaizers ...RequestPresenterInitializer[RequestPresenter_T],
+// ) {
+
+// 	mustHaveContainer(container)
+
+// 	return container.Handler(func(ctx iris.Context, validator context.Validator) {
+
+// 	})
+// }
 
 func runInitializers[RequestPresenter_T, ResponsePresenter_T any](
 	req *RequestPresenter_T,
@@ -112,4 +177,12 @@ func isValidationError(err error) bool {
 	}
 
 	return false
+}
+
+func mustHaveContainer(container *hero.Container) {
+
+	if container == nil {
+
+		panic("BindPresenter middleware need container to function")
+	}
 }
