@@ -13,7 +13,7 @@ import (
 
 func initCandidateSigningApi(app *iris.Application) *mvc.Application {
 
-	router := app.Party("/sign")
+	router := app.Party("/signing")
 
 	container := router.ConfigureContainer().Container
 

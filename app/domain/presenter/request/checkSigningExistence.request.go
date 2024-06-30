@@ -2,7 +2,7 @@ package requestPresenter
 
 type (
 	CheckSigningExistenceRequest struct {
-		CampaignUUID  string `url:"campaignUUID"`
-		CandidateUUID string `url:"canidateUUID"`
+		CampaignUUID  string `param:"campaignUUID" validate:"required,uuid_rfc4122"`
+		CandidateUUID string `param:"candidateUUID" validate:"required,uuid_rfc4122"`
 	}
 )

@@ -3,6 +3,7 @@ package repository
 import (
 	"app/domain/model"
 	libCommon "app/lib/common"
+	mongoUtil "app/repository/util"
 	"context"
 
 	"github.com/google/uuid"
@@ -75,7 +76,9 @@ func (this *CandidateRepository) Find(
 	query bson.D, ctx context.Context,
 ) (*model.Candidate, error) {
 
-	return findOneDocument[model.Candidate](query, this.collection, ctx)
+	return mongoUtil.ReturnResultOrNoDocuments(
+		findOneDocument[model.Candidate](query, this.collection, ctx),
+	)
 }
 
 func (this *CandidateRepository) FindByUUID(uuid uuid.UUID, ctx context.Context) (*model.Candidate, error) {

@@ -2,6 +2,7 @@ package candidateService
 
 import (
 	"app/repository"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -43,23 +44,23 @@ func (this *CheckSigningExistenceService) Serve(str_campaignUUID string, str_can
 	candidateUUID, err := uuid.Parse(str_candidateUUID)
 
 	if err != nil {
-
+		fmt.Println(err.Error(), str_candidateUUID)
 		return false, nil
 	}
 
 	candidate, err := this.CandidateRepository.Find(
 		bson.D{
 			{"uuid", candidateUUID},
-			{"campaignID", campaignUUID},
+			{"campaignUUID", campaignUUID},
 		},
 		nil,
 	)
 
 	if err != nil {
-
+		fmt.Println(err.Error())
 		return false, err
 	}
-
+	fmt.Println(4)
 	if candidate == nil {
 
 		return false, nil

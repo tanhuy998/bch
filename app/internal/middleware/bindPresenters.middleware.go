@@ -55,7 +55,7 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 
 		} else {
 
-			err = bindDefault(request, ctx)
+			err = bindRequestDefault(request, ctx)
 		}
 
 		if !libError.IsAcceptable(err, io.EOF) {
@@ -156,7 +156,7 @@ func runInitializers[RequestPresenter_T, ResponsePresenter_T any](
 	}
 }
 
-func bindDefault[RequestPresenter_T any](presenter *RequestPresenter_T, ctx iris.Context) error {
+func bindRequestDefault[RequestPresenter_T any](presenter *RequestPresenter_T, ctx iris.Context) error {
 
 	ctx.ReadURL(presenter)
 	ctx.ReadJSON(presenter)
