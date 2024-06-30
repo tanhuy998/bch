@@ -27,7 +27,7 @@ export function _FormInput({validate, onValidInput, onInvalidInput, invalidMessa
     const contextDelayingDebounces = context.delayingDebounces; 
     const htmlElementAttributes = prepareRenderAttributes(arguments[FIRST]);
     //const [dataModel, hasDataModel] = useDataModel();    
-    const [inputCurrentValue, setInputCurrentValue] = useDataModelBinding(type, name);// useState(hasDataModel ? dataModel[name] : null);
+    const [inputCurrentValue, setInputCurrentValue] = useDataModelBinding(name, type);// useState(hasDataModel ? dataModel[name] : null);
     
 
     const inputProxy = useInputProxy(name, setInputCurrentValue);
