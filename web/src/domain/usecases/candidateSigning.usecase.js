@@ -39,8 +39,15 @@ export default class CandidateSigningUseCase extends CandidateSigningEndpoint {
         dataModel.education = this.#educationFormDelegator.dataModel;
     }
 
-    submit() {
+    submit(campainUUID, candidateUUID) {
 
+        try {
 
+            super.commit(campainUUID, candidateUUID, this.#dataModel);
+        }
+        catch (e) {
+
+            alert(e?.message || e);
+        }
     }
 }

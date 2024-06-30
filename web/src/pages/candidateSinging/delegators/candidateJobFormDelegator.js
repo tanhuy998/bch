@@ -6,7 +6,7 @@ export default class CandidateJobFormDelegator extends CollectableFormDelegator 
 
     #dataModel = new candidate_signing_info_t();
     #validator = new Schema({
-
+        
     })
 
     get validator() {

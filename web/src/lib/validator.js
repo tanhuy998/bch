@@ -21,6 +21,8 @@ export function validatePeopleName(val) {
     return REGEEX_PEOPLE_NAME.test(val);
 }
 
+export const validateFormalName = validatePeopleName;
+
 /**
  * 
  * @param {Date} date 

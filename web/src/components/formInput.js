@@ -173,7 +173,7 @@ function useDebounce(inputCurrentValueState, cb, delayDuration = INPUT_DEBOUNCE_
     }, [inputCurrentValueState]);
 }
 
-function useDataModelBinding(inputName, inputType) {
+export function useDataModelBinding(inputName, inputType) {
 
     const [dataModel, hasDataModel] = useDataModel();
     const [inputCurrentValue, setInputCurrentValue] = useState(hasDataModel ? dataModel[inputName] : null);

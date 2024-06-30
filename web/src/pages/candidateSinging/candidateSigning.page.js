@@ -108,6 +108,6 @@ export default function CandidateSigningPage({ usecase }) {
     }
 
     return (
-        <PageController pagePhases={pagePhases} pageFormDelegators={pageFormDelegators} />
+        <PageController pagePhases={pagePhases} pageUsecase={usecase} pageFormDelegators={pageFormDelegators} />
     )
 }

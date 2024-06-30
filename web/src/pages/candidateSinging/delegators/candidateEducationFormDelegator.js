@@ -6,7 +6,10 @@ export default class CandidateEducationFormDelegator extends CollectableFormDele
 
     #dataModel = new candidate_signing_education_t();
     #validator = new Schema({
-
+        highestGrade: {
+            type: Number,
+            message: "Trình độ văn hóa không hợp lệ"
+        }
     });
 
     get validator() {

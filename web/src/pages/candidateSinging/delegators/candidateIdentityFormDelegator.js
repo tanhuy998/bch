@@ -1,7 +1,7 @@
 import Schema from "validate";
 import { civil_identity_t } from "../../../domain/models/candidate.model";
 import CollectableFormDelegator from "../../../domain/valueObject/collectableFormDelegator";
-import {validateIDNumber, validatePeopleName, ageAboveSixteenAndYoungerThanTwentySeven} from "../../../lib/validator";
+import {validateIDNumber, validatePeopleName, ageAboveSixteenAndYoungerThanTwentySeven, validateFormalName} from "../../../lib/validator";
 
 export default class CanidateIdentityFormDelegator extends CollectableFormDelegator {
 
@@ -33,11 +33,13 @@ export default class CanidateIdentityFormDelegator extends CollectableFormDelega
         ethinicity: {
             type: String,
             required: true,
+            use: {validateFormalName},
             message: "Dân tộc không hợp lệ",
         },
         religion: {
             type: String,
             required: false,
+            use: {validateFormalName},
             message: "Tôn giáo không hợp lệ",
         },
         permanentResident: {
@@ -52,6 +54,7 @@ export default class CanidateIdentityFormDelegator extends CollectableFormDelega
         placeOfOrigin: {
             type: String,
             required: true,
+            use: {validateFormalName},
             message: "Quê quán không hợp lệ",
         }
     });

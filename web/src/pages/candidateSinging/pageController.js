@@ -11,6 +11,7 @@ import useCollectedForms from "../../hooks/formCollectorBus";
 import debug from 'debug';
 import useFormCollectorBusSession from "../../hooks/formCollectorBusSession";
 import CollectableFormDelegator from "../../domain/valueObject/collectableFormDelegator";
+import { useParams } from "react-router-dom";
 
 
 const debugButton = debug('page-controller:button');
@@ -22,8 +23,8 @@ const SUBMIT_PHASE = Infinity;
 //     return pagePhaseKeys.indexOf(tabKey) === 0;
 // }
 
-function NextPhaseButton({ resolveNextPhaseKey }) {
-    
+function NextPhaseButton({ resolveNextPhaseKey, pageUsecase }) {
+    const { campaignUUID, candidateUUID } = useParams();
     const { currentTabKey, setCurrentTabKey, focusPoint, pageFormDelegators } = useContext(PageControllerContext);
 
     function dispatchNextPhase() {
@@ -46,6 +47,7 @@ function NextPhaseButton({ resolveNextPhaseKey }) {
 
         if (nextPhaseKey === SUBMIT_PHASE) {
 
+            pageUsecase.submit(campaignUUID, candidateUUID)
             return;
         }
 
@@ -71,13 +73,13 @@ function PreviousPhaseButton() {
     )
 }
 
-export default function PageController({ children, pagePhases, pageFormDelegators}) {
+export default function PageController({ children, pagePhases, pageFormDelegators, pageUsecase}) {
 
     const pagePhaseKeys = Object.keys(pagePhases);
     const [currentTabKey, setCurrentTabKey] = useState(pagePhaseKeys[0]);
-    const [formCollectorHandShake, setFormCollectorHandShake] = useState(false);
-    const [formCollectorResponse, setFormCollectorResponse] = useState();
-    const [emitSignal, setEmitSignal] = useState();
+    // const [formCollectorHandShake, setFormCollectorHandShake] = useState(false);
+    // const [formCollectorResponse, setFormCollectorResponse] = useState();
+    // const [emitSignal, setEmitSignal] = useState();
     //const [enumerateTabKey, nextPhase] = useReducer(nextPagePhase, pagePhaseKeys[0]);
 
     const pageMainTab = useRef();
@@ -128,7 +130,7 @@ export default function PageController({ children, pagePhases, pageFormDelegator
 
                                 </TabContext.Provider>
                             </TabEventContext.Provider>
-                            <NextPhaseButton resolveNextPhaseKey={resolveNextPhaseKey}/>
+                            <NextPhaseButton pageUsecase={pageUsecase} resolveNextPhaseKey={resolveNextPhaseKey}/>
                         </div>
 
                     </PageControllerContext.Provider>
