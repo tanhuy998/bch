@@ -21,7 +21,7 @@ const FormInput = memo(_FormInput);
 
 export default FormInput;
 
-export function _FormInput({validate, onValidInput, onInvalidInput, invalidMessage, onAfterDebounce, name, textArea, type}) {
+export function _FormInput({validate, onValidInput, onInvalidInput, invalidMessage, onAfterDebounce, name, textArea, type, dataModelType}) {
 
     const context = useContext(FormContext);
     const contextDelayingDebounces = context.delayingDebounces; 
@@ -173,11 +173,12 @@ function useDebounce(inputCurrentValueState, cb, delayDuration = INPUT_DEBOUNCE_
     }, [inputCurrentValueState]);
 }
 
-export function useDataModelBinding(inputName, inputType) {
+export function useDataModelBinding(inputName, inputType, transformDataFunc, initValue) {
 
     const [dataModel, hasDataModel] = useDataModel();
-    const [inputCurrentValue, setInputCurrentValue] = useState(hasDataModel ? dataModel[inputName] : null);
+    const [inputCurrentValue, setInputCurrentValue] = useState(hasDataModel ? dataModel[inputName] : initValue);
     //const hasDataModel = typeof dataModel === 'object';
+    const hasForceCastType = typeof transformDataFunc === 'function';
 
     useEffect(() => {
 
@@ -186,7 +187,7 @@ export function useDataModelBinding(inputName, inputType) {
             return;
         }
         
-        dataModel[inputName] = convertDataModelInputType(inputType, inputCurrentValue)
+        dataModel[inputName] = hasForceCastType ? transformDataFunc(inputCurrentValue) : convertDataModelInputType(inputType, inputCurrentValue);
         console.log(inputCurrentValue, dataModel)
     }, [inputCurrentValue])
 
@@ -292,6 +293,8 @@ function convertDataModelInputType(ipnutType, dataModelFieldValue,isTextArea) {
 
         case 'date':
             return convertToDate(dataModelFieldValue);
+        case 'number':
+            return Number(ipnutType);
         default:
             return dataModelFieldValue;
     }

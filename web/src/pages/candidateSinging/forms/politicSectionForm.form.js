@@ -6,11 +6,11 @@ export default function PoliticSectionForm({ delegator }) {
     return (
         <Form delegate={delegator}>
             <div className="row">
-                <div className="col-md-6">
-                    <PromptFormInput label="Ngày Vào Đoàn TNCS Hồ Chí Minh" name="unionJoinDate" type="text" />
+                <div className="col-md-4">
+                    <PromptFormInput label="Ngày Vào Đoàn TNCS Hồ Chí Minh" name="unionJoinDate" type="date" />
                 </div>
-                <div className="col-md-6">
-                    <PromptFormInput label="Ngày Vào Đảng" name="partyJoinDate" type="text" />
+                <div className="col-md-4">
+                    <PromptFormInput label="Ngày Vào Đảng" name="partyJoinDate" type="date" />
                 </div>
             </div>
             <br />

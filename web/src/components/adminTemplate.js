@@ -7,7 +7,7 @@ import '../assets/css/master.css';
 import React, { Component, useEffect, useState } from "react";
 import SideBar from "../components/sidebar";
 import NavBar from "../components/navbar";
-import { Outlet, useLocation, useOutlet } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate, useOutlet } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { AnimatePresence } from 'framer-motion';
 
@@ -17,6 +17,7 @@ export default function AdminTemplate(props) {
     const [sideBarActive, setSideBarActive] = useState("");
     const location = useLocation();
     const element = useOutlet();
+    const navigate = useNavigate();
 
     return (
         <div class="wrapper">
@@ -26,6 +27,7 @@ export default function AdminTemplate(props) {
                 <div class="content">
                     <div class="container">
                         <AnimatePresence mode='wait' initial={true}>
+                            <button onClick={() => { navigate(-1) }} style={{marginLeft: 5}} class="btn btn-sm btn-outline-secondary float-end"><i class="fas fa-arrow-left"></i> Quay lại</button>
                             {/* <Outlet key={location.pathname}/> */}
                             {element && React.cloneElement(element, {key: location.pathname})}
                         </AnimatePresence>

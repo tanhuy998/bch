@@ -39,8 +39,12 @@ export default function CandidateSigningPage({ usecase }) {
         "2": [
             usecase.candidateEducationFormDelegator,
             usecase.candidateJobFormDelegator,
+            usecase.candidateFatherPoliticHistoryFormDelegator,
         ],
-        "3": [],
+        "3": [
+            usecase.candidateFatherFormDelegator,
+            usecase.candidateMotherFormDelegator,
+        ],
     }
 
     const pagePhases = {
@@ -71,7 +75,7 @@ export default function CandidateSigningPage({ usecase }) {
                     <br />
                     <div className="line"></div>
                     <br />
-                    <PoliticSectionForm name="2.1" />
+                    <PoliticSectionForm name="2.1" delegator={usecase.candidateFatherPoliticHistoryFormDelegator}/>
                 </div>
             </div>
         ),
@@ -81,7 +85,7 @@ export default function CandidateSigningPage({ usecase }) {
                     <div className="card-body">
                         <h4 className="card-title">Thông Tin Gia Đình</h4>
                         <br />
-                        <FamilyMemberForm who="Cha" />
+                        <FamilyMemberForm who="Cha" delegator={usecase.candidateFatherFormDelegator}/>
                         <br />
                         <div className="row">
                             <div className="col">
@@ -90,7 +94,7 @@ export default function CandidateSigningPage({ usecase }) {
                                 <br />
                             </div>
                         </div>
-                        <FamilyMemberForm who='Mẹ' />
+                        <FamilyMemberForm who='Mẹ' delegator={usecase.candidateMotherFormDelegator}/>
                         <br />
                         <div className="line"></div>
                         <br />

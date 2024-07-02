@@ -87,7 +87,7 @@ function civil_identity_t() {
     /**
      * @type {boolean}
      */
-    this.male;
+    this.male = true;
 
     /**
      *  @type {string}

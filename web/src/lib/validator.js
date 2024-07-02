@@ -1,3 +1,5 @@
+import { required } from "../components/lib/validator.";
+
 const REGEX_ID_NUMBER = /^\d{12}$/;
 const REGEEX_PEOPLE_NAME = /^[\p{Letter}\s]{3,}$/u ///^[a-zA-Z](([a-zA-Z])| ){5,}$/;
 
@@ -18,7 +20,7 @@ export function validateIDNumber(val) {
  */
 export function validatePeopleName(val) {
 
-    return REGEEX_PEOPLE_NAME.test(val);
+    return required(val) && REGEEX_PEOPLE_NAME.test(val);
 }
 
 export const validateFormalName = validatePeopleName;

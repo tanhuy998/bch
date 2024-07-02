@@ -30,7 +30,7 @@ export default class CanidateIdentityFormDelegator extends CollectableFormDelega
             required: true,
             message: "Nơi đăng ký khai sinh không hợp lệ"
         },
-        ethinicity: {
+        ethnicity: {
             type: String,
             required: true,
             use: {validateFormalName},

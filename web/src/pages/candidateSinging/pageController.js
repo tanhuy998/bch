@@ -34,16 +34,10 @@ function NextPhaseButton({ resolveNextPhaseKey, pageUsecase }) {
         /**@type {Array<CollectableFormDelegator>} */
         const delegators = pageFormDelegators?.[currentTabKey];
 
-        const delegatorFailedValidation = (Array.isArray(delegators) ? delegators : [])
-                                .filter(d => d?.notPassValidation())
-                                .map(d => d.validationFailedFootPrint);
+        if (collectDelegatorValidationErrors(delegators).length > 0) {
 
-        console.log(delegators?.map(d => d.dataModel));
-        
-        if (delegatorFailedValidation.length > 0) {
-            
             return;
-        } 
+        }
 
         if (nextPhaseKey === SUBMIT_PHASE) {
 
@@ -62,8 +56,28 @@ function NextPhaseButton({ resolveNextPhaseKey, pageUsecase }) {
 
 
     return (
-        <button type="button" onClick={handleClick} class="btn btn-outline-primary mb-2" value={currentTabKey}>Tiếp Theo</button>
+        <div 
+            style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+            }}
+        >
+            <button type="button" onClick={handleClick} class="btn btn-warning mb-2" value={currentTabKey}>Tiếp Theo</button>
+        </div>
     )
+}
+
+/**
+ * 
+ * @param {Array<CollectableFormDelegator>} delegators 
+ * @returns {Array<any>}
+ */
+function collectDelegatorValidationErrors(delegators) {
+
+    return (Array.isArray(delegators) ? delegators : [])
+        .filter(d => d?.notPassValidation())
+        .map(d => d.validationFailedFootPrint);
 }
 
 function PreviousPhaseButton() {

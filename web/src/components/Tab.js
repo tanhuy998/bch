@@ -16,7 +16,7 @@ function TabItem({ setCurrentTab, label, isActive }) {
 
     const hasSwitchEventListener = typeof onTabSwitch === 'function';
     const currentTabKey = tabContext?.currentTabKey;
-
+    
     function handleClick() { 
 
         if (isActive) {
