@@ -17,7 +17,8 @@ const (
 )
 
 var (
-	regex_match_name *regexp.Regexp = regexp.MustCompile("^[a-zA-Z][a-zA-Z ]+")
+	// match unicode letters and whiteSpace that belong to formal names
+	regex_match_name *regexp.Regexp = regexp.MustCompile(`^[\p{L}\s]{3,}$`)
 )
 
 type CommitCandidateSigningInfoRequest struct {
@@ -97,10 +98,10 @@ func (this *CommitCandidateSigningInfoRequest) validateNames() error {
 		return errorAlert("name")
 	}
 
-	if !isValidName(civilIdentity.BirthPlace) {
+	// if !isValidName(civilIdentity.BirthPlace) {
 
-		return errorAlert("birth place")
-	}
+	// 	return errorAlert("birth place")
+	// }
 
 	if !isValidName(civilIdentity.PlaceOfOrigin) {
 
