@@ -74,12 +74,16 @@ export default function IdentittySectionForm({ name, delegator }) {
                         label="Quê quán" 
                         validate={validateFormalName}
                         invalidMessage="Quê quán không bỏ trống" 
-                        name="birthPlace" 
+                        name="placeOfOrigin" 
                         type="text" 
                     />
                 </div>
                 <div class="mb-3 col-md-4">
-                    <PromptFormInput label="Tôn Giáo" name="placeOfOrigin" type="text" />
+                    <PromptFormInput 
+                        label="Tôn Giáo"
+                        name="religion" 
+                        type="text" 
+                    />
                 </div>
                 <div class="mb-3 col-md-4">
                     <PromptFormInput 

@@ -82,6 +82,11 @@ export default class HttpEndpoint extends MockEndpoint{
             throw new ErrorResponse(res);
         }
 
+        if (res.status === 204) {
+
+            return;
+        }
+
         return res.json();
     }
 

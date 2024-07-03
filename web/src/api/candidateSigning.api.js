@@ -5,7 +5,7 @@ export default class CandidateSigningEndpoint extends HttpEndpoint {
 
     constructor() {
 
-        super({uri: '/signing'});
+        super({uri: '/signing/pending'});
     }
 
     /**
@@ -28,24 +28,19 @@ export default class CandidateSigningEndpoint extends HttpEndpoint {
 
     async handShake(campaignUUID, candidateUUID) {
 
-        try {
+        const res = super.fetch(
+            {
+                method: "HEAD",
+            },
+            undefined,
+            `/campaign/${campaignUUID}/candidate/${candidateUUID}`
+        );
 
-            const res = super.fetch(
-                {
-                    method: "HEAD",
-                }, 
-                undefined, 
-                `/campaign/${campaignUUID}/candidate/${candidateUUID}`
-            );
+        if (res.status !== 204) {
 
-            if (res.status !== 204) {
-
-                throw new Error("");
-            }
-        }
-        catch (e) {
-
-
+            throw new Error("");
         }
     }
 }
+
+export class CandidateSigningInfoNotFoundError extends Error {}

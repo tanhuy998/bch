@@ -59,12 +59,17 @@ export default class CandidateSigningUseCase extends CandidateSigningEndpoint {
 
         super();
 
+
+    }
+
+    #marshall() {
+
         const dataModel = this.#dataModel = this.#jobFormDelegator.dataModel;
 
         dataModel.civilIdentity = this.#civilIdentityFormDelegator.dataModel;
         dataModel.education = this.#educationFormDelegator.dataModel;
         dataModel.politic = this.#fatherPoliticHistoryFormDelegator.dataModel;
-        
+
         this.#initCandidateFamilyDataModel();
     }
 
@@ -86,8 +91,9 @@ export default class CandidateSigningUseCase extends CandidateSigningEndpoint {
     submit(campainUUID, candidateUUID) {
 
         try {
-
+            
             super.commit(campainUUID, candidateUUID, this.#dataModel);
+            console.log(this.#dataModel)
         }
         catch (e) {
 

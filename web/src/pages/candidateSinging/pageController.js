@@ -11,7 +11,9 @@ import useCollectedForms from "../../hooks/formCollectorBus";
 import debug from 'debug';
 import useFormCollectorBusSession from "../../hooks/formCollectorBusSession";
 import CollectableFormDelegator from "../../domain/valueObject/collectableFormDelegator";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import CandidateSigningUseCase from "../../domain/usecases/candidateSigning.usecase";
+import { CandidateSigningInfoNotFoundError } from "../../api/candidateSigning.api";
 
 
 const debugButton = debug('page-controller:button');
@@ -89,6 +91,7 @@ function PreviousPhaseButton() {
 
 export default function PageController({ children, pagePhases, pageFormDelegators, pageUsecase}) {
 
+    useHandShake(pageUsecase);
     const pagePhaseKeys = Object.keys(pagePhases);
     const [currentTabKey, setCurrentTabKey] = useState(pagePhaseKeys[0]);
     // const [formCollectorHandShake, setFormCollectorHandShake] = useState(false);
@@ -153,4 +156,30 @@ export default function PageController({ children, pagePhases, pageFormDelegator
             {/* </FormCollectorDispatchContext.Provider> */}
         </>
     )
+}
+
+/**
+ * 
+ * @param {CandidateSigningUseCase} usecase 
+ */
+function useHandShake(usecase) {
+
+    const { campaignUUID, candidateUUID } = useParams();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+
+        usecase.handShake(campaignUUID, candidateUUID)
+        .catch(e => {
+
+            if (e instanceof CandidateSigningInfoNotFoundError) {
+
+                navigate('/404');   
+                return;
+            }
+
+            navigate('/500');
+        });
+
+    }, []);
 }

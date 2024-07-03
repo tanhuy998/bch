@@ -31,6 +31,8 @@ import CandidateSigningPage from './pages/candidateSinging/candidateSigning.page
 import CandidateSigningUseCase from './domain/usecases/candidateSigning.usecase';
 import './config/debug';
 import './assets/css/background.css';
+import PageNotFound from './pages/404';
+import InternalErrorPage from './pages/500';
 // import CandidateSigningPage from './pages/candidateSigning/candidateSinging.page';
 
 const campaignlistUseCase = new CampaignListUseCase()
@@ -53,6 +55,8 @@ function App() {
 
     <BrowserRouter>
       <Routes>
+        <Route path="/404" element={<PageNotFound/>}/>
+        <Route path='/500' element={<InternalErrorPage/>}/>
         <Route path='/' element={<Home />} />
         <Route path='/signing' element={<AnimatePage><SingingPageTemplate /></AnimatePage>}>
           <Route path='campaign/:campaignUUID/candidate/:candidateUUID' element={<CandidateSigningPage usecase={candidateSigningUseCase} />} />
