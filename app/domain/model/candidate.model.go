@@ -15,7 +15,7 @@ type Candidate struct {
 	Address      *string               `json:"address,omitempty" bson:"address,omitempty" validate:"required"`
 	Phone        *string               `json:"phone,omitempty" bson:"phone,omitempty"`
 	SigningInfo  *CandidateSigningInfo `json:"signingInfo,omitempty" bson:"signingInfo,omitempty"`
-	CampaignUUID *uuid.UUID            `json:"campaignID,omitempty" bson:"campaignUUID,omitempty"`
+	CampaignUUID *uuid.UUID            `json:"campaignUUID,omitempty" bson:"campaignUUID,omitempty"`
 	Version      *time.Time            `json:"version,omitempty" bson:"version,omitempty"`
 }
 

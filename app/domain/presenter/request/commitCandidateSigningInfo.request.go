@@ -66,6 +66,11 @@ func (this *CommitCandidateSigningInfoRequest) validateYears() error {
 
 	data := this.Data
 
+	if data == nil {
+
+		return fmt.Errorf("no data")
+	}
+
 	dateOfBirth := data.CivilIndentity.DateOfBirth
 
 	if currentYear-dateOfBirth.Year() < CANDIDATE_SIGNING_OLD {
