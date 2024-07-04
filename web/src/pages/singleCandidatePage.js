@@ -1,9 +1,16 @@
-import { useParams } from "react-router-dom"
+import { Link, useHref, useLocation, useNavigate, useParams, useResolvedPath } from "react-router-dom"
 import BasicTab from "../components/basicTab";
 import { createContext, memo, useContext, useEffect, useState } from "react";
 import SingleCandidateUseCase from "../domain/usecases/singleCandidate.usecase";
 import { candidate_model_t, candidate_signing_family_member_t } from "../domain/models/candidate.model";
 import formatLocalDate from "../lib/formatLocalDate";
+import QRCode from "react-qr-code";
+import useBrowserLocation from "../hooks/useBrowserLocation";
+import AppContext from "../contexts/app.context";
+import useNotFoundRedirection from "../hooks/useNotFoundRedirection";
+import ErrorResponse from "../backend/error/errorResponse";
+import { useEndpointResponseErrorHandler } from "../hooks/handleEndpointError.lib";
+import { type } from "@testing-library/user-event/dist/type";
 
 /**
  * @typedef {inport("../domain/models/candidate.model.js")} candidate_model_t
@@ -18,8 +25,9 @@ const PageContext = createContext({
 export default function SingleCandidatePage({ usecase }) {
 
     const { uuid } = useParams();
-    const [isFetchingData, setIsFetchingData] = useState(false);
+    const [currentDataFetchingInterval, setCurrentDataFetchingInterval] = useState(0);
     const [ /**@type {candidate_model_t} */ candidateData, setCandidateData] = useState(null);
+    const responseErrorHandleFunc = useEndpointResponseErrorHandler();
 
     if (!(usecase instanceof SingleCandidateUseCase)) {
 
@@ -28,22 +36,28 @@ export default function SingleCandidatePage({ usecase }) {
 
     function fetchData(uuid) {
 
-        setIsFetchingData(true);
+        setCurrentDataFetchingInterval(true);
         console.log('fetch')
-        usecase.read(uuid)
+        return usecase.read(uuid)
             .then(data => {
 
                 setCandidateData(data);
-                setIsFetchingData(false);
+                
 
                 if (typeof data !== 'object') {
 
                     return;
                 }
                 console.log(data)
-                setInterval(fetchData, FETCH_INTERVAL_BEAT, uuid);
             })
             .catch(err => {
+
+                if (
+                    err instanceof ErrorResponse
+                ) {
+
+                    responseErrorHandleFunc(err);
+                }
 
                 alert(err?.messsage);
             });
@@ -51,27 +65,19 @@ export default function SingleCandidatePage({ usecase }) {
 
     useEffect(() => {
 
-        // if (typeof candidateData === 'object') {
+        fetchData(uuid)
+        .then(() => {
 
-        //     return;
-        // }
+            const interval = setInterval(fetchData, FETCH_INTERVAL_BEAT, uuid);
+            setCurrentDataFetchingInterval(interval);
+        })
 
-        fetchData(uuid);
+        return () => {
 
-    }, []);
-
-    useEffect(() => {
-
-        if (
-            typeof candidateData === 'object'
-            || isFetchingData
-        ) {
-
-            return;
+            clearInterval(currentDataFetchingInterval);
         }
 
-        fetchData(uuid);
-    })
+    }, []);
 
     const tabs = {
         'Signed Informations': <_SignedInformations />
@@ -79,12 +85,12 @@ export default function SingleCandidatePage({ usecase }) {
 
     return (
         <>
-            <PageContext.Provider value={{ candidateData }}>
+            <PageContext.Provider value={{ candidateData, usecase: usecase }}>
                 <div className="card">
                     <div className="card-header">
                         Candidate Detail
                     </div>
-                    
+
                     <div className="card-body">
                         <CandidateDetail />
                     </div>
@@ -120,7 +126,7 @@ function _SignedInformations() {
             <div className="card">
                 <div className="card-body">
                     <Title>I. SƠ YẾU LÝ LỊCH</Title>
-                    <br/>
+                    <br />
                     <div className="container">
                         <Row>
                             <Column>
@@ -134,7 +140,7 @@ function _SignedInformations() {
                         <Row>
                             <Column>Số Căn Cước Công Dân: <SigningInfo>{civilIdentity.idNumber}</SigningInfo></Column>
                         </Row>
-                        <br/>
+                        <br />
                         <Row>
                             <Column>Nơi Đăng Ký Khai sinh: <signingInfo>{civilIdentity.birthPlace}</signingInfo></Column>
                         </Row>
@@ -146,7 +152,7 @@ function _SignedInformations() {
                             <Column>Tôn Giáo: <SigningInfo>{typeof civilIdentity.religion === 'string' && civilIdentity.religion != '' ? civilIdentity.religion : 'Không'}</SigningInfo></Column>
                             <Column>Quốc Tịch: <SigningInfo>{civilIdentity.nationality}</SigningInfo> </Column>
                         </Row>
-                        <br/>
+                        <br />
                         <Row>
                             <Column>Nơi Thường Trú: <SigningInfo>{civilIdentity.permanentResident}</SigningInfo></Column>
                         </Row>
@@ -158,7 +164,7 @@ function _SignedInformations() {
                             <Column>Thành Phần Gia Đình: </Column>
                             <Column>Bản Thân: </Column>
                         </Row>
-                        <br/>
+                        <br />
                         <Row>
                             <Column>Trình Độ Văn Hóa: <SigningInfo>{education.highestGrade}/12</SigningInfo></Column>
                             <Column>NĂm Tốt Nghiệp:<SigningInfo> {education.graduateAt}</SigningInfo></Column>
@@ -170,7 +176,7 @@ function _SignedInformations() {
                         <Row>
                             <Column>Ngoại Ngữ: </Column>
                         </Row>
-                        <br/>
+                        <br />
                         <Row>
                             <Column>Ngày Vào Đảng CSVN: <SigningInfo>{formatLocalDate(politic.partyJoinDate)}</SigningInfo></Column>
                             <Column>Chính Thức: </Column>
@@ -202,9 +208,9 @@ function _SignedInformations() {
                             <Column>Nghề Nghiệp: <SigningInfo>{family?.father?.job}</SigningInfo></Column>
                         </Row>
                         <Row>
-                            <Column><br/></Column>
-                            <Column/>
-                            <Column/>
+                            <Column><br /></Column>
+                            <Column />
+                            <Column />
                         </Row>
                         <Row>
                             <Column>Họ Tên Mẹ: <SigningInfo>{family?.mother?.name}</SigningInfo></Column>
@@ -222,7 +228,7 @@ function _SignedInformations() {
                 <div className="card-body">
                     <div className="container">
                         <Title>II. TÌNH HÌNH KINH TẾ CHÍNH TRỊ CỦA GIA ĐÌNH</Title>
-                        <br/>
+                        <br />
                         <PoliticDetail header="Cha" member={family?.father} />
                         <br />
                         <PoliticDetail header="Mẹ" member={family?.mother} />
@@ -244,32 +250,98 @@ function _SignedInformations() {
 
 function CandidateDetail() {
 
+    const { uuid } = useParams();
     /**@type {candidate_model_t} */
     const candidateData = useContext(PageContext)?.candidateData;
 
+    
     return (
         <>
             <h3>Candidate Detail</h3>
             <div className="container">
                 <div className="row">
-                    <div className="col-6 col-md-4">
+                    <div className="mb-3 col-md-4">
                         Name: <SigningInfo>{candidateData?.name}</SigningInfo>
                     </div>
-                    <div className="col-6 col-md-4">
+                    <div className="mb-3 col-md-4">
                         ID Number: <SigningInfo>{candidateData?.idNumber}</SigningInfo>
                     </div>
                 </div>
                 <div className="row">
-                    <div className="col-6 col-md-4">
+                    <div className="mb-3 col-md-4">
                         Date Of Birth: <SigningInfo>{formatLocalDate(candidateData?.dateOfBirth)}</SigningInfo>
                     </div>
-                    <div className="col-6 col-md-4">
+                    <div className="mb-3 col-md-4">
                         address: <SigningInfo>{candidateData?.address}</SigningInfo>
                     </div>
                 </div>
+                <CandidateSigningSuppliment campaignUUID={candidateData?.campaignUUID} candidateUUID={uuid} />
             </div>
         </>
     )
+}
+
+function CandidateSigningSuppliment({campaignUUID, candidateUUID}) {
+    
+    const pageUsecase = useContext(PageContext)?.usecase;
+    const navigate = useNavigate();
+    const [isOpenSigning, setIsOpenSigning] = useState(false);
+    const signingURL = useSigningURLGeneration(campaignUUID, candidateUUID);
+    
+    useEffect(() => {
+
+        if (typeof campaignUUID !== 'string') {
+
+            return;
+        }
+
+        pageUsecase?.isOpenSigning(campaignUUID, candidateUUID)
+                    .then(openState => setIsOpenSigning(openState));
+
+    }, [campaignUUID])
+
+    if (!(pageUsecase instanceof SingleCandidateUseCase)) {
+
+        return <></>
+    }
+
+    return (
+        <>
+        {
+                isOpenSigning &&
+                <>
+                    <br />
+                    <div style={{ height: "auto", margin: "0 auto", maxWidth: 256, width: "100%" }}>
+                        <QRCode
+                            style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                            value={signingURL}
+                            viewBox={`0 0 256 256`}
+                        />
+                    </div>
+                    <br />
+                    <button className="btn btn-sm btn-outline-primary" onClick={() => { navigate(`/signing/campaign/${campaignUUID}/candidate/${candidateUUID}`) }}>
+                        Go To Signing Page <i className="fas fa-arrow-right"></i>
+                    </button>
+                    <div className="row">
+
+                    </div>
+                </>
+        }
+        </>
+    )
+}
+
+function useSigningURLGeneration(campaignUUID, candidateUUID) {
+
+    const {APP_HOST_NAME, APP_HTTP_PROTOCOL, APP_PORT} = useContext(AppContext);
+    
+    const location = window.location;
+    const hostName = APP_HOST_NAME || location.hostname;
+    const protocol = APP_HTTP_PROTOCOL || location.protocol;
+    let port = APP_PORT || location.port
+    port = port ? `:${port}` : "";
+
+    return `${protocol}//${hostName}${port}/signing/campaign/${campaignUUID}/candidate/${candidateUUID}`
 }
 
 function Row({ children }) {
@@ -340,13 +412,13 @@ function LineSeperator() {
     )
 }
 
-function SigningInfo({children}) {
+function SigningInfo({ children }) {
 
     return (
         <strong style={{
-                fontSize: "20",
-                textTransform: "uppercase"
-            }}
+            fontSize: "20",
+            textTransform: "uppercase"
+        }}
         >
             {children}
         </strong>

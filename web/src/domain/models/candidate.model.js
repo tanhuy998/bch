@@ -32,6 +32,11 @@ function candidate_model_t() {
     this.address;
 
     /**
+     *  @type {string}
+     */
+    this.campaignUUID;
+
+    /**
      * @type {candidate_signing_info_t}
      */
     this.signingInfo;
@@ -92,7 +97,7 @@ function civil_identity_t() {
     /**
      *  @type {string}
      */
-    this.nationality;
+    this.nationality = "Việt Nam";
 
     /**
      * @type {string}

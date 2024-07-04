@@ -177,7 +177,7 @@ function useHandShake(usecase) {
                 navigate('/404');   
                 return;
             }
-
+            console.log('page controller', e)
             navigate('/500');
         });
 

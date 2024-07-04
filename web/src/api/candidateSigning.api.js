@@ -1,19 +1,21 @@
 import HttpEndpoint from "../backend/endpoint";
 import { candidate_signing_info_t } from "../domain/models/candidate.model";
 
+export class CandidateSigningInfoNotFoundError extends Error { }
+
 export default class CandidateSigningEndpoint extends HttpEndpoint {
 
     constructor() {
 
-        super({uri: '/signing/pending'});
+        super({uri: '/signing'});
     }
 
     /**
      * 
      * @param {candidate_signing_info_t} signingInfo 
      */
-    async commit(campaignUUID, candidateUUID,signingInfo) {
-
+    async commit(campaignUUID, candidateUUID, signingInfo) {
+        
         return super.fetch(
             {
                 method: "PATCH",
@@ -28,19 +30,18 @@ export default class CandidateSigningEndpoint extends HttpEndpoint {
 
     async handShake(campaignUUID, candidateUUID) {
 
-        const res = super.fetch(
+        const res = await super.fetchRaw(
             {
                 method: "HEAD",
             },
             undefined,
-            `/campaign/${campaignUUID}/candidate/${candidateUUID}`
+            `/pending/campaign/${campaignUUID}/candidate/${candidateUUID}`
         );
-
+        
         if (res.status !== 204) {
 
-            throw new Error("");
+            throw new CandidateSigningInfoNotFoundError();
         }
     }
 }
 
-export class CandidateSigningInfoNotFoundError extends Error {}

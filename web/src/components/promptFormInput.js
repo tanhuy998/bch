@@ -3,7 +3,7 @@ import FormInput, {_FormInput} from "./formInput";
 import SelectInput from "./selectInput";
 
 
-export default function PromptFormInput({label, validate, name, placeholder, noticeText, invalidMessage, type, textArea}) {
+export default function PromptFormInput({label, validate, name, placeholder, noticeText, invalidMessage, type, textArea, defaultValue}) {
 
     const [isValidInput, setIsValidInput] = useState();
     
@@ -16,7 +16,7 @@ export default function PromptFormInput({label, validate, name, placeholder, not
     return (
         <>
             {label && <label for={name} class="form-label">{label}</label>}
-            <FormInput validate={validate} type={type} onValidInput={() => {setIsValidInput(true)}} onInvalidInput={() => {setIsValidInput(false)}} className="form-control" name={name} placeholder={placeholder} textArea={textArea}/>
+            <FormInput defaulValue={defaultValue} validate={validate} type={type} onValidInput={() => {setIsValidInput(true)}} onInvalidInput={() => {setIsValidInput(false)}} className="form-control" name={name} placeholder={placeholder} textArea={textArea}/>
             <small class="form-text text-muted">{noticeText}</small>
 
             {/* <div class="valid-feedback">Looks good!</div> */}
@@ -51,5 +51,23 @@ export function PromptSelectInput({defaultValue, label, name, placeholder, notic
             }
             <br/>
         </>
+    )
+}
+
+export function PrompEthinicitySelectInput({className}) {
+
+    return (
+        <PromptSelectInput
+            label="Dân Tộc"
+            name="ethnicity"
+            invalidMessage="Dân tộc không được bỏ trống"
+            required={true}
+            className={className}
+        >
+            <option value="Kinh">Kinh</option>
+            <option value="Hoa">Hoa</option>
+            <option value="Chăm">Chăm</option>
+            <option value="Khmer">Khmer</option>
+        </PromptSelectInput>
     )
 }

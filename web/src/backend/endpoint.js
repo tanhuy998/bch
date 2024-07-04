@@ -58,6 +58,42 @@ export default class HttpEndpoint extends MockEndpoint{
 
     async fetch(options = {}, query, extraURI) {
 
+        // options.mode = 'cors';
+
+        // extraURI = typeof extraURI === 'string' && extraURI !== '' ? extraURI : '';
+
+        // const queryStr = typeof query === 'object' ? '?' + new URLSearchParams(query) : '';
+
+
+        // const res = await fetch(
+        //     this.#initUrl + extraURI + queryStr,
+        //     {
+        //         ...this.#defaultRequestOptions,
+        //         ...options,
+        //         headers: {
+        //             ...this.#defaultRequestHeaders,
+        //             ...options.headers,
+        //         }
+        //     }
+        // )
+
+        const res = await this.fetchRaw(options, query, extraURI);
+
+        if (!res.ok) {
+
+            throw new ErrorResponse(res);
+        }
+
+        if (res.status === 204) {
+            
+            return;
+        }
+
+        return res.json();
+    }
+
+    async fetchRaw(options = {}, query, extraURI) {
+
         options.mode = 'cors';
 
         extraURI = typeof extraURI === 'string' && extraURI !== '' ? extraURI : '';
@@ -65,7 +101,7 @@ export default class HttpEndpoint extends MockEndpoint{
         const queryStr = typeof query === 'object' ? '?' + new URLSearchParams(query) : '';
 
 
-        const res = await fetch(
+        return fetch(
             this.#initUrl + extraURI + queryStr,
             {
                 ...this.#defaultRequestOptions,
@@ -76,18 +112,6 @@ export default class HttpEndpoint extends MockEndpoint{
                 }
             }
         )
-
-        if (!res.ok) {
-
-            throw new ErrorResponse(res);
-        }
-
-        if (res.status === 204) {
-
-            return;
-        }
-
-        return res.json();
     }
 
     #fetchMock() {

@@ -7,6 +7,7 @@ import HttpEndpoint from "../../backend/endpoint";
 import CandidateSigningEndpoint from "../../api/candidateSigning.api";
 import CandidateParentFormDelegator from "../../pages/candidateSinging/delegators/candidateFamilyFormDelegator";
 import CandidatePoliticFormDelegator from "../../pages/candidateSinging/delegators/candidatePoliticFormDelegator";
+import ErrorResponse from "../../backend/error/errorResponse";
 
 export default class CandidateSigningUseCase extends CandidateSigningEndpoint {
 
@@ -58,8 +59,6 @@ export default class CandidateSigningUseCase extends CandidateSigningEndpoint {
     constructor() {
 
         super();
-
-
     }
 
     #marshall() {
@@ -88,14 +87,23 @@ export default class CandidateSigningUseCase extends CandidateSigningEndpoint {
         family.father.politic.history = this.#fatherPoliticHistoryFormDelegator.dataModel;
     }
 
-    submit(campainUUID, candidateUUID) {
+    async submit(campainUUID, candidateUUID) {
 
         try {
             
-            super.commit(campainUUID, candidateUUID, this.#dataModel);
-            console.log(this.#dataModel)
+            this.#marshall();
+            console.log('BEFORE ENDPOINT', this.#dataModel)
+            await super.commit(campainUUID, candidateUUID, this.#dataModel);
         }
         catch (e) {
+
+            if (e instanceof ErrorResponse) {
+
+                const msg = await e.responseObject.text();
+
+                alert(msg);
+                return;
+            }
 
             alert(e?.message || e);
         }

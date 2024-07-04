@@ -21,13 +21,14 @@ const FormInput = memo(_FormInput);
 
 export default FormInput;
 
-export function _FormInput({validate, onValidInput, onInvalidInput, invalidMessage, onAfterDebounce, name, textArea, type, dataModelType}) {
+export function _FormInput({defaulValue, validate, onValidInput, onInvalidInput, invalidMessage, onAfterDebounce, name, textArea, type, dataModelType}) {
 
+    defaulValue = typeof defaulValue === 'string' || typeof defaulValue === 'number' ? defaulValue : undefined;
     const context = useContext(FormContext);
     const contextDelayingDebounces = context.delayingDebounces; 
     const htmlElementAttributes = prepareRenderAttributes(arguments[FIRST]);
     //const [dataModel, hasDataModel] = useDataModel();    
-    const [inputCurrentValue, setInputCurrentValue] = useDataModelBinding(name, type);// useState(hasDataModel ? dataModel[name] : null);
+    const [inputCurrentValue, setInputCurrentValue] = useDataModelBinding(name, type, undefined, defaulValue);// useState(hasDataModel ? dataModel[name] : null);
     
 
     const inputProxy = useInputProxy(name, setInputCurrentValue);

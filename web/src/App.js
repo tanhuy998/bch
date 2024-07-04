@@ -33,6 +33,7 @@ import './config/debug';
 import './assets/css/background.css';
 import PageNotFound from './pages/404';
 import InternalErrorPage from './pages/500';
+import AppContext from './contexts/app.context';
 // import CandidateSigningPage from './pages/candidateSigning/candidateSinging.page';
 
 const campaignlistUseCase = new CampaignListUseCase()
@@ -52,27 +53,28 @@ function App() {
 
 
   return (
-
-    <BrowserRouter>
-      <Routes>
-        <Route path="/404" element={<PageNotFound/>}/>
-        <Route path='/500' element={<InternalErrorPage/>}/>
-        <Route path='/' element={<Home />} />
-        <Route path='/signing' element={<AnimatePage><SingingPageTemplate /></AnimatePage>}>
-          <Route path='campaign/:campaignUUID/candidate/:candidateUUID' element={<CandidateSigningPage usecase={candidateSigningUseCase} />} />
-        </Route>
-        <Route path='/login' element={<AnimatePage><Login /></AnimatePage>} />
-        <Route path='/admin' element={<AdminTemplate />}>
-          <Route index element={<AnimatePage><AdminDashboad /></AnimatePage>} />
-          {/* <Route path="campaigns" element={<PaginationTable idField={"uuid"} endpoint={campaignlistUseCase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} /> */}
-          <Route path="campaigns" element={<AnimatePage><CampaignListPage usecase={campaignlistUseCase} /></AnimatePage>} />
-          <Route path="campaign/:uuid" element={<AnimatePage><SingleCampaignPage usecase={singleCampaignUseCase} /></AnimatePage>} />
-          <Route path="campaign/new" element={<AnimatePage><NewCampaignPage usecase={newCampaignUseCase} /></AnimatePage>} />
-          {/* <Route path="campaign/:campaignUUID/new/candidate" element={<NewCandidatePage usecase={newCandidateUseCase} />} /> */}
-          <Route path="candidate/:uuid" element={<AnimatePage><SingleCandidatePage usecase={singleCandidateUseCase} /></AnimatePage>} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <AppContext.Provider value={{}}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/404" element={<PageNotFound />} />
+          <Route path='/500' element={<InternalErrorPage />} />
+          <Route path='/' element={<Home />} />
+          <Route path='/signing' element={<AnimatePage><SingingPageTemplate /></AnimatePage>}>
+            <Route path='campaign/:campaignUUID/candidate/:candidateUUID' element={<CandidateSigningPage usecase={candidateSigningUseCase} />} />
+          </Route>
+          <Route path='/login' element={<AnimatePage><Login /></AnimatePage>} />
+          <Route path='/admin' element={<AdminTemplate />}>
+            <Route index element={<AnimatePage><AdminDashboad /></AnimatePage>} />
+            {/* <Route path="campaigns" element={<PaginationTable idField={"uuid"} endpoint={campaignlistUseCase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} /> */}
+            <Route path="campaigns" element={<AnimatePage><CampaignListPage usecase={campaignlistUseCase} /></AnimatePage>} />
+            <Route path="campaign/:uuid" element={<AnimatePage><SingleCampaignPage usecase={singleCampaignUseCase} /></AnimatePage>} />
+            <Route path="campaign/new" element={<AnimatePage><NewCampaignPage usecase={newCampaignUseCase} /></AnimatePage>} />
+            {/* <Route path="campaign/:campaignUUID/new/candidate" element={<NewCandidatePage usecase={newCandidateUseCase} />} /> */}
+            <Route path="candidate/:uuid" element={<AnimatePage><SingleCandidatePage usecase={singleCandidateUseCase} /></AnimatePage>} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AppContext.Provider>
   );
 }
 
