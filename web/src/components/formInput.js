@@ -60,6 +60,8 @@ export function _FormInput({defaulValue, validate, onValidInput, onInvalidInput,
         }
     });
 
+
+
     return (
         textArea === true ?
         <textarea {...{...htmlElementAttributes, onChange: handleInputChange, name}} >{inputCurrentValue || ''}</textarea> 
@@ -80,6 +82,7 @@ function useInputProxyValidationListener(inputProxy, isValidInputState) {
 
     }, [isValidInputState])
 }
+
 
 function useInputFieldValidation(inputCurrentValueState, validateFunc) {
 
@@ -181,6 +184,8 @@ export function useDataModelBinding(inputName, inputType, transformDataFunc, ini
     //const hasDataModel = typeof dataModel === 'object';
     const hasForceCastType = typeof transformDataFunc === 'function';
 
+    useDefaultValue(initValue, setInputCurrentValue);
+
     useEffect(() => {
 
         if (!hasDataModel) {
@@ -189,11 +194,29 @@ export function useDataModelBinding(inputName, inputType, transformDataFunc, ini
         }
         
         dataModel[inputName] = hasForceCastType ? transformDataFunc(inputCurrentValue) : convertDataModelInputType(inputType, inputCurrentValue);
-        console.log(inputCurrentValue, dataModel)
+        console.log(inputName, inputCurrentValue, dataModel)
     }, [inputCurrentValue])
 
     return [inputCurrentValue, setInputCurrentValue];
 }
+
+export function useDefaultValue(defaultValue, setInputCurremtValue) {
+
+    useEffect(() => {
+
+        if (
+            defaultValue === null
+            || defaultValue === undefined
+        ) {
+
+            return;
+        }
+
+        setInputCurremtValue(defaultValue);
+
+    }, []);
+}
+
 
 function useInputProxy(name, setInputCurrentValue) {
 

@@ -21,6 +21,12 @@ export default class CandidateSigningUseCase extends CandidateSigningEndpoint {
     #fatherPoliticHistoryFormDelegator = new CandidatePoliticFormDelegator();
     #motherPoliticHistoryFormDelegator = new CandidatePoliticFormDelegator();
 
+    get dataModel() {
+
+        this.#marshall();
+        return this.#dataModel;
+    }
+
     get candidateFatherPoliticHistoryFormDelegator() {
 
         return this.#fatherPoliticHistoryFormDelegator;
@@ -93,6 +99,7 @@ export default class CandidateSigningUseCase extends CandidateSigningEndpoint {
             
             this.#marshall();
             console.log('BEFORE ENDPOINT', this.#dataModel)
+            console.log(JSON.stringify(this.#dataModel))
             await super.commit(campainUUID, candidateUUID, this.#dataModel);
         }
         catch (e) {

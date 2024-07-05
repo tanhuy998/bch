@@ -58,8 +58,12 @@ export function dayAfterNow(date) {
     const today = new Date;
 
     return (
-        date.getDate() - today.getDate() >= 1
-        || date.getMonth() - today.getMonth() > 0
-        || date.getFullYear() - today.getFullYear() > 0
+        // date.getDate() - today.getDate() >= 1
+        // || date.getMonth() - today.getMonth() > 0
+        // || date.getFullYear() - today.getFullYear() > 0
+
+        date.getFullYear() - today.getFullYear() >= 0
+        && date.getMonth() - today.getMonth() >= 0
+        && date.getDate() - today.getDate() >= 1
     ) 
 }

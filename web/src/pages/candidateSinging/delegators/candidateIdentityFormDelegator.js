@@ -56,7 +56,13 @@ export default class CanidateIdentityFormDelegator extends CollectableFormDelega
             required: true,
             use: {validateFormalName},
             message: "Quê quán không hợp lệ",
-        }
+        },
+        nationality: {
+            type: String,
+            required: true,
+            use: {validateFormalName},
+            message: "Quốc tịch không hợp lệ và không được để trống"
+        },
     });
 
     get validator() {
