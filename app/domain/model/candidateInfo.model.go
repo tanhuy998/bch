@@ -46,11 +46,11 @@ type CitizenIdentity struct {
 	BirthPlace        string    `json:"birthPlace" bson:"birthPlace" validate:"required"`
 	PlaceOfOrigin     string    `json:"placeOfOrigin" bson:"placeOfOrigin" validate:"required"`
 	Ethnicity         string    `json:"ethnicity" bson:"ethnicity" validate:"required"`
-	Religion          string    `json:"religion" bson:"religion" validate:"required"`
+	Religion          string    `json:"religion" bson:"religion"`
 	Nationality       string    `json:"nationality" bson:"nationality" validate:"required"`
 	PermanentResident string    `json:"permanentResident" bson:"permanentResident" validate:"required"`
 	TemporaryResident string    `json:"temporaryResident" bson:"temporaryResident"`
-	CurrentResident   string    `json:"currentResident" bson:"currentResident" validate:"required"`
+	CurrentResident   string    `json:"currentResident" bson:"currentResident"`
 }
 
 type FamilyDetail struct {
@@ -62,11 +62,11 @@ type FamilyDetail struct {
 type FamilyMember struct {
 	Name          string           `json:"name" bson:"name" validate:"required"`
 	DateOfBirth   *time.Time       `json:"dateOfBirth" bson:"dateOfBirth" validate:"required"`
-	Dead          *bool            `json:"dead" bson:"dead"`
+	Dead          bool             `json:"dead" bson:"dead"`
 	Job           string           `json:"job" bson:"job"`
-	Politic       *PoliticDetail   `json:"politic" bson:"politic,omitempty" validate:"required"`
-	Education     *EducationDetail `json:"education" bson:"education,omitempty"`
-	CivilIdentity *CitizenIdentity `json:"civilIdentity" bson:"civilIdentity,omitempty"`
+	Politic       *PoliticDetail   `json:"politic" bson:"politic" validate:"required"`
+	Education     *EducationDetail `json:"education,omitempty" bson:"education,omitempty"`
+	CivilIdentity *CitizenIdentity `json:"civilIdentity,omitempty" bson:"civilIdentity,omitempty"`
 }
 
 type CivilHistory struct {
@@ -81,9 +81,9 @@ type CivilHistory struct {
 // }
 
 type PoliticDetail struct {
-	History       CivilHistory `json:"history" bson:"history"`
-	UnionJoinDate time.Time    `json:"unionJoinDate" bson:"unionJoinDate"`
-	PartyJoinDate time.Time    `json:"partyJoinDate" bson:"partyJoinDate"`
+	History       *CivilHistory `json:"history" bson:"history"`
+	UnionJoinDate *time.Time    `json:"unionJoinDate" bson:"unionJoinDate"`
+	PartyJoinDate *time.Time    `json:"partyJoinDate" bson:"partyJoinDate"`
 }
 
 type BasicType struct {

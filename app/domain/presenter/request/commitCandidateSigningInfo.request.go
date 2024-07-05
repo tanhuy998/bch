@@ -13,7 +13,7 @@ import (
 const (
 	CANDIDATE_SIGNING_OLD = 17
 	PARENT_THRESHOLD      = 18
-	alert_name_msg        = "invalid %s, contains special characters"
+	alert_name_msg        = `invalid %s, contains special characters, received "%s"`
 )
 
 var (
@@ -100,7 +100,7 @@ func (this *CommitCandidateSigningInfoRequest) validateNames() error {
 
 	if !isValidName(civilIdentity.Name) {
 
-		return errorAlert("name")
+		return errorAlert("name", civilIdentity.Name)
 	}
 
 	// if !isValidName(civilIdentity.BirthPlace) {
@@ -110,24 +110,24 @@ func (this *CommitCandidateSigningInfoRequest) validateNames() error {
 
 	if !isValidName(civilIdentity.PlaceOfOrigin) {
 
-		return errorAlert("place of origin")
+		return errorAlert("place of origin", civilIdentity.PlaceOfOrigin)
 	}
 
 	if !isValidName(civilIdentity.Nationality) {
 
-		return errorAlert("nationality")
+		return errorAlert("nationality", civilIdentity.Nationality)
 	}
 
 	family := &(data.Family)
 
 	if !isValidName(family.Mother.Name) {
 
-		return errorAlert("mother name")
+		return errorAlert("mother name", family.Mother.Name)
 	}
 
 	if !isValidName((family.Father.Name)) {
 
-		return errorAlert("father name")
+		return errorAlert("father name", family.Mother.Name)
 	}
 
 	if family.Anothers != nil {
@@ -136,7 +136,7 @@ func (this *CommitCandidateSigningInfoRequest) validateNames() error {
 
 			if !isValidName(m.Name) {
 
-				return errorAlert("sibling name")
+				return errorAlert("sibling name", family.Mother.Name)
 			}
 		}
 	}
@@ -149,7 +149,7 @@ func isValidName(name string) bool {
 	return regex_match_name.MatchString(name)
 }
 
-func errorAlert(key string) error {
+func errorAlert(key string, value string) error {
 
-	return fmt.Errorf(alert_name_msg, key)
+	return fmt.Errorf(alert_name_msg, key, value)
 }
