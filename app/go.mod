@@ -3,6 +3,7 @@ module app
 go 1.22.2
 
 require (
+	github.com/evanphx/json-patch/v5 v5.9.0
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/gofor-little/env v1.0.18
 	github.com/golang-jwt/jwt/v5 v5.2.1
@@ -55,6 +56,7 @@ require (
 	github.com/nats-io/nats.go v1.34.1 // indirect
 	github.com/nats-io/nkeys v0.4.7 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
+	github.com/pkg/errors v0.8.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect

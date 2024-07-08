@@ -8,7 +8,10 @@ import (
 	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 	candidateService "app/service/candidate"
+	"encoding/json"
+	"fmt"
 
+	jsonpatch "github.com/evanphx/json-patch/v5"
 	"github.com/kataras/iris/v12/mvc"
 )
 
@@ -22,6 +25,7 @@ type (
 
 	CommitCandidateSigningInfoUseCase struct {
 		CommitCandidateSigningInfoService candidateService.ICommitCandidateSigningInfo
+		CommitLoggerService               candidateService.ICandidateSigningCommitLogger
 		GetSingleCandidateByUUIDService   adminService.IGetSingleCandidateByUUID
 		GetSingleCandidateService         adminService.IGetSingleCandidateByUUID
 		GetCampaignService                adminService.IGetCampaign
@@ -39,7 +43,14 @@ func (this *CommitCandidateSigningInfoUseCase) Execute(
 		return this.ActionResultService.ServeErrorResponse(common.ERR_INVALID_HTTP_INPUT)
 	}
 
-	_, _, err := this.Retrieve(input.CampaignUUID, input.CandidateUUID)
+	_, candidate, err := this.Retrieve(input.CampaignUUID, input.CandidateUUID)
+
+	if err != nil {
+
+		return this.ActionResultService.ServeErrorResponse(err)
+	}
+
+	err = this.WriteLog(input.Data, candidate)
 
 	if err != nil {
 
@@ -66,7 +77,41 @@ func (this *CommitCandidateSigningInfoUseCase) Execute(
 	return this.ActionResultService.ServeResponse(output)
 }
 
-func (this *CommitCandidateSigningInfoUseCase) Retrieve(campaignUUID_str string, candidateUUID_str string) (*model.Campaign, *model.Candidate, error) {
+func (this *CommitCandidateSigningInfoUseCase) WriteLog(
+	inputCommit *model.CandidateSigningInfo,
+	candidate *model.Candidate,
+) error {
+
+	rawInputCommit, err := json.Marshal(inputCommit)
+
+	if err != nil {
+
+		return err
+	}
+
+	existingSigningInfo, err := json.Marshal(candidate.SigningInfo)
+
+	if err != nil {
+
+		return err
+	}
+
+	jsonPatch, err := jsonpatch.CreateMergePatch(rawInputCommit, existingSigningInfo)
+
+	if err != nil {
+
+		return err
+	}
+
+	fmt.Println(string(jsonPatch))
+
+	return nil
+}
+
+func (this *CommitCandidateSigningInfoUseCase) Retrieve(
+	campaignUUID_str string,
+	candidateUUID_str string,
+) (*model.Campaign, *model.Candidate, error) {
 
 	campaign, err := this.GetCampaignService.Serve(campaignUUID_str)
 
