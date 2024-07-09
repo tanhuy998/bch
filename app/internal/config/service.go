@@ -62,6 +62,9 @@ func InitializeDatabase(app router.Party) {
 	libConfig.BindDependency[repository.ICandidateRepository](
 		container, new(repository.CandidateRepository).Init(db),
 	)
+	libConfig.BindDependency[repository.ICandidateSigningCommit](
+		container, new(repository.CandidateSingingCommitRepository).Init(db),
+	)
 	fmt.Println("Repositories Initialized.")
 }
 
@@ -115,6 +118,8 @@ func RegisterServices(app router.Party) {
 	libConfig.BindDependency[candidateService.ICommitCandidateSigningInfo, candidateService.CommitCandidateSigningInfoService](container, nil)
 	libConfig.BindDependency[candidateService.IGetSingleCandidateSigningInfo, candidateService.GetSingleCandidateSigningInfoService](container, nil)
 	libConfig.BindDependency[candidateService.ICheckSigningExistence, candidateService.CheckSigningExistenceService](container, nil)
+
+	libConfig.BindDependency[candidateService.ICandidateSigningCommitLogger, candidateService.CandidateSigningCommmitLoggerService](container, nil)
 
 	/*
 		Bind Usecase Objects

@@ -3,17 +3,18 @@ package repository
 import (
 	"app/domain/model"
 	"context"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type (
 	ICandidateSigningCommit interface {
-		IMongoDBRepository
 		// FindByCandidateUUID(candidateUUID uuid.UUID, ctx context.Context) ([]*model.JsonPatchRawValueOperation, error)
 		// Find(query bson.D, ctx context.Context, projections ...bson.E) ([]*model.JsonPatchRawValueOperation, error)
-		Create(jsonPatch *model.JsonPatchRawValueOperation, ctx context.Context) error
+		Create(jsonPatch *model.CandidateSigningCommit, ctx context.Context) error
 	}
 
-	CandidateSingingCommit struct {
+	CandidateSingingCommitRepository struct {
 		AbstractMongoRepository
 	}
 )
@@ -26,8 +27,15 @@ type (
 
 // }
 
-func (this *CandidateSingingCommit) Create(
-	jsonPatch *model.JsonPatchRawValueOperation,
+func (this *CandidateSingingCommitRepository) Init(db *mongo.Database) *CandidateSingingCommitRepository {
+
+	this.AbstractMongoRepository.Init(db, "candidateSigningCommits")
+
+	return this
+}
+
+func (this *CandidateSingingCommitRepository) Create(
+	jsonPatch *model.CandidateSigningCommit,
 	ctx context.Context,
 ) error {
 

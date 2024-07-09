@@ -8,10 +8,7 @@ import (
 	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 	candidateService "app/service/candidate"
-	"encoding/json"
-	"fmt"
 
-	jsonpatch "github.com/evanphx/json-patch/v5"
 	"github.com/kataras/iris/v12/mvc"
 )
 
@@ -50,7 +47,7 @@ func (this *CommitCandidateSigningInfoUseCase) Execute(
 		return this.ActionResultService.ServeErrorResponse(err)
 	}
 
-	err = this.WriteLog(input.Data, candidate)
+	err = this.WriteCommitLog(input.Data, candidate)
 
 	if err != nil {
 
@@ -77,35 +74,12 @@ func (this *CommitCandidateSigningInfoUseCase) Execute(
 	return this.ActionResultService.ServeResponse(output)
 }
 
-func (this *CommitCandidateSigningInfoUseCase) WriteLog(
+func (this *CommitCandidateSigningInfoUseCase) WriteCommitLog(
 	inputCommit *model.CandidateSigningInfo,
 	candidate *model.Candidate,
 ) error {
 
-	rawInputCommit, err := json.Marshal(inputCommit)
-
-	if err != nil {
-
-		return err
-	}
-
-	existingSigningInfo, err := json.Marshal(candidate.SigningInfo)
-
-	if err != nil {
-
-		return err
-	}
-
-	jsonPatch, err := jsonpatch.CreateMergePatch(rawInputCommit, existingSigningInfo)
-
-	if err != nil {
-
-		return err
-	}
-
-	fmt.Println(string(jsonPatch))
-
-	return nil
+	return this.CommitLoggerService.CompareAndServe(inputCommit, candidate)
 }
 
 func (this *CommitCandidateSigningInfoUseCase) Retrieve(

@@ -3,6 +3,7 @@ package libCommon
 import (
 	"fmt"
 	"reflect"
+	"time"
 )
 
 func Ternary[T any](criteria bool, valIfTrue T, valIfFalse T) T {
@@ -85,4 +86,13 @@ func ReverseSlice[T any](list ...T) []T {
 	}
 
 	return list
+}
+
+func MeassureTime(content string) func() {
+
+	start := time.Now()
+
+	return func() {
+		fmt.Println(content, time.Since(start))
+	}
 }

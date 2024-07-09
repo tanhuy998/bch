@@ -2,11 +2,18 @@ package candidateService
 
 import (
 	"app/domain/model"
+	libCommon "app/lib/common"
 	"app/repository"
 	"encoding/json"
+	"fmt"
+	"time"
 
-	jsonpatch "github.com/evanphx/json-patch/v5"
 	"github.com/google/uuid"
+	"github.com/wI2L/jsondiff"
+)
+
+var (
+	ERR_JSON_PATCH_NO_DIFF error = fmt.Errorf("no difference between json documents")
 )
 
 type (
@@ -63,6 +70,8 @@ func (this *CandidateSigningCommmitLoggerService) handle(
 		return err
 	}
 
+	defer libCommon.MessureTime("write time")()
+
 	err = this.CandidateSigningCommitRepository.Create(model, nil)
 
 	if err != nil {
@@ -77,7 +86,9 @@ func resolve(
 	candidateUUID uuid.UUID,
 	commitSingingInfo *model.CandidateSigningInfo,
 	existingSigningInfo *model.CandidateSigningInfo,
-) (*model.JsonPatchRawValueOperation, error) {
+) (*model.CandidateSigningCommit, error) {
+
+	defer libCommon.MessureTime("compare time")()
 
 	jsonRawCommit, err := json.Marshal(commitSingingInfo)
 
@@ -93,21 +104,30 @@ func resolve(
 		return nil, err
 	}
 
-	rawJsonPatch, err := jsonpatch.CreateMergePatch(jsonRawOrginal, jsonRawCommit)
+	jsonPatch, err := jsondiff.CompareJSON(jsonRawOrginal, jsonRawCommit)
 
 	if err != nil {
 
 		return nil, err
 	}
 
-	var jsonPatchModel *model.JsonPatchRawValueOperation
+	if len(jsonPatch) == 0 {
 
-	err = json.Unmarshal(rawJsonPatch, &jsonPatchModel)
-
-	if err != nil {
-
-		return nil, err
+		return nil, ERR_JSON_PATCH_NO_DIFF
 	}
 
-	return jsonPatchModel, nil
+	ret := &model.CandidateSigningCommit{
+		CandidateUUID: &candidateUUID,
+		Time:          libCommon.PointerPrimitive(time.Now()),
+		Operations:    jsonPatch.String(),
+	}
+
+	// err = json.Unmarshal(rawJsonPatch, &jsonPatchModel)
+
+	// if err != nil {
+
+	// 	return nil, err
+	// }
+
+	return ret, nil
 }

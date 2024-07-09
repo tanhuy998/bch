@@ -4,13 +4,15 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
-	CandidateSigningCommit[Op_Value_T any] struct {
-		Time          *time.Time                    `bson:"time"`
-		CamdidateUUID *uuid.UUID                    `bson:"candidateUUID"`
-		Operations    []*JsonPatchRawValueOperation `bson:"operations"` //[]*JsonPatchOperation
+	CandidateSigningCommit struct {
+		ID            *primitive.ObjectID `json:"commit" bson:"_id,omitempty"`
+		Time          *time.Time          `bson:"time"`
+		CandidateUUID *uuid.UUID          `bson:"candidateUUID"`
+		Operations    string              `bson:"operations"` //[]*JsonPatchOperation
 	}
 )
 
