@@ -1,6 +1,7 @@
 package candidateService
 
 import (
+	"app/domain/model"
 	"app/repository"
 	"fmt"
 	"time"
@@ -12,6 +13,7 @@ import (
 type (
 	ICheckSigningExistence interface {
 		Serve(campaignUUID string, candidateUUID string) (bool, error)
+		RetrievePendingCandidateSigning(campaignUUID string, candidateUUID string) (*model.Candidate, error)
 	}
 
 	CheckSigningExistenceService struct {
@@ -20,32 +22,55 @@ type (
 	}
 )
 
-func (this *CheckSigningExistenceService) Serve(str_campaignUUID string, str_candidateUUID string) (bool, error) {
+func (this *CheckSigningExistenceService) Serve(
+	str_campaignUUID string,
+	str_candidateUUID string,
+) (bool, error) {
 
-	campaignUUID, err := uuid.Parse(str_campaignUUID)
-
-	if err != nil {
-
-		return false, nil
-	}
-
-	isCampaignPending, err := this.checkIsCampaignPending(campaignUUID)
+	candidate, err := this.RetrievePendingCandidateSigning(str_campaignUUID, str_candidateUUID)
 
 	if err != nil {
 
 		return false, err
 	}
 
-	if !isCampaignPending {
+	if candidate == nil {
 
 		return false, nil
+	}
+
+	return true, nil
+}
+
+func (this *CheckSigningExistenceService) RetrievePendingCandidateSigning(
+	str_campaignUUID string,
+	str_candidateUUID string,
+) (*model.Candidate, error) {
+
+	campaignUUID, err := uuid.Parse(str_campaignUUID)
+
+	if err != nil {
+
+		return nil, nil
+	}
+
+	isCampaignPending, err := this.checkIsCampaignPending(campaignUUID)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	if !isCampaignPending {
+
+		return nil, nil
 	}
 
 	candidateUUID, err := uuid.Parse(str_candidateUUID)
 
 	if err != nil {
 		fmt.Println(err.Error(), str_candidateUUID)
-		return false, nil
+		return nil, nil
 	}
 
 	candidate, err := this.CandidateRepository.Find(
@@ -58,15 +83,15 @@ func (this *CheckSigningExistenceService) Serve(str_campaignUUID string, str_can
 
 	if err != nil {
 		fmt.Println(err.Error())
-		return false, err
+		return nil, err
 	}
 	fmt.Println(4)
 	if candidate == nil {
 
-		return false, nil
+		return nil, nil
 	}
 
-	return true, nil
+	return candidate, nil
 }
 
 func (this *CheckSigningExistenceService) checkIsCampaignPending(campaignUUID uuid.UUID) (bool, error) {

@@ -380,3 +380,20 @@ func count(collection *mongo.Collection, ctx context.Context, filter ...bson.E) 
 
 	return collection.CountDocuments(ctx, filter)
 }
+
+func aggregate[Model_T any](collection *mongo.Collection, pipeline mongo.Pipeline, ctx context.Context, options ...*options.AggregateOptions) ([]*Model_T, error) {
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline, options...)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return ParseCursor[Model_T](cursor, context.TODO())
+}

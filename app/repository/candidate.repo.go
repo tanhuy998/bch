@@ -146,3 +146,18 @@ func (this *CandidateRepository) Delete(uuid uuid.UUID, ctx context.Context) err
 /*
 # END IMPLEMENT ICandidateRepository
 */
+
+func (this *CandidateRepository) Aggregate(
+	pipeline mongo.Pipeline,
+	ctx context.Context,
+) ([]*model.Candidate, error) {
+
+	res, err := aggregate[model.Candidate](this.collection, pipeline, ctx)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return res, nil
+}

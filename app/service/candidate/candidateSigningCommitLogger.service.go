@@ -70,8 +70,6 @@ func (this *CandidateSigningCommmitLoggerService) handle(
 		return err
 	}
 
-	defer libCommon.MessureTime("write time")()
-
 	err = this.CandidateSigningCommitRepository.Create(model, nil)
 
 	if err != nil {
@@ -87,8 +85,6 @@ func resolve(
 	commitSingingInfo *model.CandidateSigningInfo,
 	existingSigningInfo *model.CandidateSigningInfo,
 ) (*model.CandidateSigningCommit, error) {
-
-	defer libCommon.MessureTime("compare time")()
 
 	jsonRawCommit, err := json.Marshal(commitSingingInfo)
 

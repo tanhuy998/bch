@@ -36,6 +36,11 @@ type (
 		GetCollection() *mongo.Collection
 	}
 
+	IMongoDBAggregator[Model_T any] interface {
+		IMongoDBRepository
+		Aggregate(pipeline mongo.Pipeline, ctx context.Context) ([]*Model_T, error)
+	}
+
 	PaginationPack[Model_T any] struct {
 		Data  []*Model_T
 		Count int64

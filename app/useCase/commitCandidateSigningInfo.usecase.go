@@ -23,6 +23,7 @@ type (
 	CommitCandidateSigningInfoUseCase struct {
 		CommitCandidateSigningInfoService candidateService.ICommitCandidateSigningInfo
 		CommitLoggerService               candidateService.ICandidateSigningCommitLogger
+		CheckSigningExistence             candidateService.ICheckSigningExistence
 		GetSingleCandidateByUUIDService   adminService.IGetSingleCandidateByUUID
 		GetSingleCandidateService         adminService.IGetSingleCandidateByUUID
 		GetCampaignService                adminService.IGetCampaign
