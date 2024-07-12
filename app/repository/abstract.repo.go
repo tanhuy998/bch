@@ -37,7 +37,6 @@ type (
 	}
 
 	IMongoDBAggregator[Model_T any] interface {
-		IMongoDBRepository
 		Aggregate(pipeline mongo.Pipeline, ctx context.Context) ([]*Model_T, error)
 	}
 
@@ -79,6 +78,7 @@ type (
 	}
 
 	ICandidateRepository interface {
+		IMongoDBAggregator[model.Candidate]
 		IMongoDBRepository
 		Find(query bson.D, ctx context.Context) (*model.Candidate, error)
 		FindByUUID(uuid.UUID, context.Context) (*model.Candidate, error)

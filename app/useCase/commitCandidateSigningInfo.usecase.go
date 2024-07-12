@@ -41,11 +41,20 @@ func (this *CommitCandidateSigningInfoUseCase) Execute(
 		return this.ActionResultService.ServeErrorResponse(common.ERR_INVALID_HTTP_INPUT)
 	}
 
-	_, candidate, err := this.Retrieve(input.CampaignUUID, input.CandidateUUID)
+	//_, candidate, err := this.Retrieve(input.CampaignUUID, input.CandidateUUID)
+
+	candidate, err := this.CheckSigningExistence.RetrievePendingCandidateSigning(
+		input.CampaignUUID, input.CandidateUUID,
+	)
 
 	if err != nil {
 
 		return this.ActionResultService.ServeErrorResponse(err)
+	}
+
+	if candidate == nil {
+
+		return this.ActionResultService.Prepare().SetCode(404), nil
 	}
 
 	err = this.WriteCommitLog(input.Data, candidate)

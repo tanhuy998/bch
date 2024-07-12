@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type (
@@ -73,10 +74,48 @@ func (this *CheckSigningExistenceService) RetrievePendingCandidateSigning(
 		return nil, nil
 	}
 
-	candidate, err := this.CandidateRepository.Find(
-		bson.D{
-			{"uuid", candidateUUID},
-			{"campaignUUID", campaignUUID},
+	// candidate, err := this.CandidateRepository.Find(
+	// 	bson.D{
+	// 		{"uuid", candidateUUID},
+	// 		{"campaignUUID", campaignUUID},
+	// 	},
+	// 	nil,
+	// )
+
+	res, err := this.CandidateRepository.Aggregate(
+		mongo.Pipeline{
+			bson.D{
+				{
+					"$match", bson.D{
+						{"uuid", candidateUUID},
+						{"campaignUUID", campaignUUID},
+					},
+				},
+			},
+			bson.D{
+				{
+					"$lookup", bson.D{
+						{"from", repository.CAMPAIGN_COLLECTION_NAME},
+						{"localField", "campaignUUID"},
+						{"foreignField", "uuid"},
+						{"as", "campaigns"},
+					},
+				},
+			},
+			bson.D{
+				{
+					"$match", bson.D{
+						{"campaigns.0.expire", bson.D{{"$gt", time.Now()}}},
+					},
+				},
+			},
+			bson.D{
+				{
+					"$project", bson.D{
+						{"campaigns", 0},
+					},
+				},
+			},
 		},
 		nil,
 	)
@@ -85,13 +124,13 @@ func (this *CheckSigningExistenceService) RetrievePendingCandidateSigning(
 		fmt.Println(err.Error())
 		return nil, err
 	}
-	fmt.Println(4)
-	if candidate == nil {
+
+	if res == nil || len(res) == 0 {
 
 		return nil, nil
 	}
 
-	return candidate, nil
+	return res[0], nil
 }
 
 func (this *CheckSigningExistenceService) checkIsCampaignPending(campaignUUID uuid.UUID) (bool, error) {
