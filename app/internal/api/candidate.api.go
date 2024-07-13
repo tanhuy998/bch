@@ -71,6 +71,11 @@ func initCandidateGroupApi(app *iris.Application) *mvc.Application {
 				middleware.BindPresenters[requestPresenter.GetSingleCandidateRequest, responsePresenter.GetSingleCandidateResponse](container),
 			).SetName("GET_SINGLE_CANDIDATE_BY_UUID")
 
+			activator.Handle(
+				"GET", "/signed/campaign/{campaignUUID}", "GetSignedCandidates",
+				middleware.BindPresenters[requestPresenter.GetCampaignSignedCandidatesRequest, responsePresenter.GetCampaignSignedCandidatesResponse](container),
+			).SetName("GET_CAMPAIGN_SIGNED_CANDIDATES")
+
 			/*
 				Post a candidate to a specific campaign
 			*/

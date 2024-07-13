@@ -9,11 +9,12 @@ import (
 )
 
 type CandidateController struct {
-	AddNewCandidateUseCase          usecase.IAddNewCandidate
-	ModifyCandidateUseCase          usecase.IModifyExistingCandidate
-	DeleteCandidateUseCase          usecase.IDeleteCandidate
-	GetCampaignCandidateListUseCase usecase.IGetCampaignCandidateList
-	GetSingleCandidateByUUIDUseCase usecase.IGetSingleCandidateByUUID
+	AddNewCandidateUseCase             usecase.IAddNewCandidate
+	ModifyCandidateUseCase             usecase.IModifyExistingCandidate
+	DeleteCandidateUseCase             usecase.IDeleteCandidate
+	GetCampaignCandidateListUseCase    usecase.IGetCampaignCandidateList
+	GetSingleCandidateByUUIDUseCase    usecase.IGetSingleCandidateByUUID
+	GetCampaignSignedCandidatesUseCase usecase.IGetCampaignSignedCandidates
 }
 
 func (this *CandidateController) GetSingleCandidateByUUID(
@@ -62,4 +63,12 @@ func (this *CandidateController) GetCampaignCandidateList(
 
 func (this *CandidateController) SearchByInformation() {
 
+}
+
+func (this *CandidateController) GetSignedCandidates(
+	input *requestPresenter.GetCampaignSignedCandidatesRequest,
+	output *responsePresenter.GetCampaignSignedCandidatesResponse,
+) (mvc.Result, error) {
+
+	return this.GetCampaignSignedCandidatesUseCase.Execute(input, output)
 }

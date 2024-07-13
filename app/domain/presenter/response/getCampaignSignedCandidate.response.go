@@ -1,0 +1,20 @@
+package responsePresenter
+
+import "app/domain/model"
+
+type GetCampaignSignedCandidatesResponse struct {
+	Message        string               `json:"message"`
+	Data           []*model.Campaign    `json:"data"`
+	DataTotalCount int64                `json:"dataTotalCount"`
+	Navigation     PaginationNavigation `json:"navigation"`
+}
+
+func (this *GetCampaignSignedCandidatesResponse) GetNavigation() *PaginationNavigation {
+
+	return &this.Navigation
+}
+
+func (this *GetCampaignSignedCandidatesResponse) SetTotalCount(count int64) {
+
+	this.DataTotalCount = count
+}

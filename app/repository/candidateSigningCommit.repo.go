@@ -7,6 +7,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+const (
+	CANDIDATE_SIGNING_COMMITS_COLLECTION = "candidateSigningCommits"
+)
+
 type (
 	ICandidateSigningCommit interface {
 		// FindByCandidateUUID(candidateUUID uuid.UUID, ctx context.Context) ([]*model.JsonPatchRawValueOperation, error)
@@ -29,7 +33,7 @@ type (
 
 func (this *CandidateSingingCommitRepository) Init(db *mongo.Database) *CandidateSingingCommitRepository {
 
-	this.AbstractMongoRepository.Init(db, "candidateSigningCommits")
+	this.AbstractMongoRepository.Init(db, CANDIDATE_SIGNING_COMMITS_COLLECTION)
 
 	return this
 }
