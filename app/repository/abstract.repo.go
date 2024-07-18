@@ -40,6 +40,17 @@ type (
 		Aggregate(pipeline mongo.Pipeline, ctx context.Context) ([]*Model_T, error)
 	}
 
+	IMongodDBCustomPagination[Model_T any] interface {
+		RetrieveCustomPagination(
+			pipeline mongo.Pipeline,
+			paginationPivotField string,
+			pivotValue interface{},
+			pageLimit int64,
+			isPrevDir bool,
+			ctx context.Context,
+		) (*PaginationPack[Model_T], error)
+	}
+
 	PaginationPack[Model_T any] struct {
 		Data  []*Model_T
 		Count int64
@@ -80,6 +91,7 @@ type (
 	ICandidateRepository interface {
 		IMongoDBAggregator[model.Candidate]
 		IMongoDBRepository
+		//IMongodDBCustomPagination[model.Candidate]
 		Find(query bson.D, ctx context.Context) (*model.Candidate, error)
 		FindByUUID(uuid.UUID, context.Context) (*model.Candidate, error)
 		Get(page int, ctx context.Context) ([]*model.Candidate, error)

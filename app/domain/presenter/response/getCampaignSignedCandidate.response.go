@@ -4,7 +4,7 @@ import "app/domain/model"
 
 type GetCampaignSignedCandidatesResponse struct {
 	Message        string               `json:"message"`
-	Data           []*model.Campaign    `json:"data"`
+	Data           []*model.Candidate   `json:"data"`
 	DataTotalCount int64                `json:"dataTotalCount"`
 	Navigation     PaginationNavigation `json:"navigation"`
 }

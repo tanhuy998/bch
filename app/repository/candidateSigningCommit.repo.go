@@ -13,6 +13,8 @@ const (
 
 type (
 	ICandidateSigningCommit interface {
+		IMongoDBRepository
+		//IMongodDBCustomPagination[model.CandidateSigningCommit]
 		// FindByCandidateUUID(candidateUUID uuid.UUID, ctx context.Context) ([]*model.JsonPatchRawValueOperation, error)
 		// Find(query bson.D, ctx context.Context, projections ...bson.E) ([]*model.JsonPatchRawValueOperation, error)
 		Create(jsonPatch *model.CandidateSigningCommit, ctx context.Context) error
@@ -63,4 +65,28 @@ func initContext(ctx context.Context) context.Context {
 	}
 
 	return ctx
+}
+
+// func (this *CandidateSingingCommitRepository) RetrieveCustomPagination(
+// 	pipeline mongo.Pipeline,
+// 	paginationPivotField string,
+// 	pivotValue interface{},
+// 	pageLimit int64,
+// 	isPrevDir bool,
+// 	ctx context.Context,
+// ) (*PaginationPack[model.CandidateSigningCommit], error) {
+
+// 	return AggregateByPage[model.CandidateSigningCommit](
+// 		this.collection, pipeline, paginationPivotField, pivotValue, pageLimit, isPrevDir, ctx,
+// 	)
+// }
+
+func (this *CandidateSingingCommitRepository) GetDBClient() *mongo.Client {
+
+	return this.collection.Database().Client()
+}
+
+func (this *CandidateSingingCommitRepository) GetCollection() *mongo.Collection {
+
+	return this.collection
 }

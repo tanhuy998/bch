@@ -152,7 +152,7 @@ func (this *CandidateRepository) Aggregate(
 	ctx context.Context,
 ) ([]*model.Candidate, error) {
 
-	res, err := aggregate[model.Candidate](this.collection, pipeline, ctx)
+	res, err := Aggregate[model.Candidate](this.collection, pipeline, ctx)
 
 	if err != nil {
 
@@ -161,3 +161,17 @@ func (this *CandidateRepository) Aggregate(
 
 	return res, nil
 }
+
+// func (this *CandidateRepository) RetrieveCustomPagination(
+// 	pipeline mongo.Pipeline,
+// 	paginationPivotField string,
+// 	pivotValue interface{},
+// 	pageLimit int64,
+// 	isPrevDir bool,
+// 	ctx context.Context,
+// ) (*PaginationPack[model.Candidate], error) {
+
+// 	return AggregateByPage[model.Candidate](
+// 		this.collection, pipeline, paginationPivotField, pivotValue, pageLimit, isPrevDir, ctx,
+// 	)
+// }

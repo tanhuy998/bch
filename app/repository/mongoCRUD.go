@@ -155,7 +155,7 @@ func getDocumentsPageByID[Model_Type any](
 		ctx,
 		func(mongo.SessionContext) (interface{}, error) {
 
-			var paginationQuery bson.D = preparePaginationQuery(_id, isPrevDir, extraFilters)
+			var paginationQuery bson.D = PrepareObjIDFilterPaginationQuery(_id, isPrevDir, extraFilters)
 			var sortOrder MongoDBCursorSortOrder = SORT_DESC
 
 			if isPrevDir {
@@ -244,7 +244,7 @@ func initDBTransaction(client *mongo.Client) (*mongo.Session, error) {
 	return &session, nil
 }
 
-func preparePaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters []bson.E) bson.D {
+func PrepareObjIDFilterPaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters []bson.E) bson.D {
 
 	var dir_op string
 
@@ -272,6 +272,32 @@ func preparePaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters
 		{
 			"_id", bson.D{
 				{dir_op, _id},
+			},
+		},
+	}, extraFilters...)
+}
+
+func PrepareAggregatePaginationQuery(paginationPivotField string, pivotValue interface{}, isPrevDir bool, extraFilters []bson.E) bson.D {
+
+	var dir_op string
+
+	if isPrevDir {
+
+		dir_op = OP_GT
+	} else {
+
+		dir_op = OP_LT
+	}
+
+	if pivotValue == nil {
+
+		dir_op = OP_GTE
+	}
+
+	return append(bson.D{
+		{
+			paginationPivotField, bson.D{
+				{dir_op, pivotValue},
 			},
 		},
 	}, extraFilters...)
@@ -381,7 +407,7 @@ func count(collection *mongo.Collection, ctx context.Context, filter ...bson.E) 
 	return collection.CountDocuments(ctx, filter)
 }
 
-func aggregate[Model_T any](collection *mongo.Collection, pipeline mongo.Pipeline, ctx context.Context, options ...*options.AggregateOptions) ([]*Model_T, error) {
+func Aggregate[Model_T any](collection *mongo.Collection, pipeline mongo.Pipeline, ctx context.Context, options ...*options.AggregateOptions) ([]*Model_T, error) {
 
 	if ctx == nil {
 
@@ -396,4 +422,84 @@ func aggregate[Model_T any](collection *mongo.Collection, pipeline mongo.Pipelin
 	}
 
 	return ParseCursor[Model_T](cursor, context.TODO())
+}
+
+func AggregateByPage[Model_T any](
+	collection *mongo.Collection,
+	pipeline mongo.Pipeline,
+	paginationPivotField string,
+	pivotValue interface{},
+	pageLimit int64,
+	isPrevDir bool,
+	pipelineAfterPivot mongo.Pipeline,
+	ctx context.Context,
+	option ...*options.AggregateOptions,
+) (*PaginationPack[Model_T], error) {
+
+	if collection == nil {
+
+		panic("no collection provided for aggregation")
+	}
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	paginationStages := prepareAggregationPaginationStages(paginationPivotField, pivotValue, isPrevDir)
+	pipeline = append(pipeline, paginationStages...)
+
+	if pipelineAfterPivot != nil {
+
+		pipeline = append(pipeline, pipelineAfterPivot...)
+	}
+
+	resData, err := Aggregate[Model_T](collection, pipeline, ctx)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	dataPack := &PaginationPack[Model_T]{
+		Data: resData,
+	}
+
+	return dataPack, nil
+}
+
+func prepareAggregationPaginationStages(
+	paginationPivotField string,
+	pivotValue interface{},
+	isPrevDir bool,
+) mongo.Pipeline {
+
+	if paginationPivotField == "" {
+
+		paginationPivotField = "_id"
+	}
+
+	pivotQuery := PrepareAggregatePaginationQuery(paginationPivotField, pivotValue, isPrevDir, nil)
+	pivotStage := bson.D{
+		{"$match", pivotQuery},
+	}
+
+	var sortOrder MongoDBCursorSortOrder = SORT_DESC
+
+	if isPrevDir {
+
+		sortOrder = SORT_ASC
+	}
+
+	sortStage := bson.D{
+		{
+			"$sort", bson.D{
+				{paginationPivotField, sortOrder},
+			},
+		},
+	}
+
+	return mongo.Pipeline{
+		pivotStage, sortStage,
+	}
 }
