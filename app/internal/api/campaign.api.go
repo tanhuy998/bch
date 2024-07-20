@@ -73,6 +73,11 @@ func initCampaignGroupApi(app *iris.Application) *mvc.Application {
 			).SetName("GET_SINGLE_CAMPAIGN")
 
 			activator.Handle(
+				"GET", "/{uuid:uuid}/progress", "GetCampaignProgress",
+				middleware.BindPresenters[requestPresenter.CampaignProgressRequestPresenter, responsePresenter.CampaignProgressResponsePresenter](container),
+			)
+
+			activator.Handle(
 				"GET", "/pending", "GetPendingCampaigns",
 				middleware.Authorize(authService.AuthorizationLicense{
 					Fields: campaignField,

@@ -147,6 +147,8 @@ func RegisterServices(app router.Party) {
 
 	libConfig.BindDependency[usecase.ICheckSigningExistence, usecase.CheckSigningExistenceUseCase](container, nil)
 	libConfig.BindDependency[usecase.IGetCampaignSignedCandidates, usecase.GetCampaignSignedCandidatesUseCase](container, nil)
+
+	libConfig.BindDependency[usecase.ICampaignProgress, usecase.CampaignProgressUseCase](container, nil)
 }
 
 // func GetComponent[AbstractType](ctx iris.Context) {

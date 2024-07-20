@@ -22,6 +22,7 @@ type CampaignController struct {
 	DeleteCampaignUseCase         usecase.DeleteCampaignUseCase
 	LaunNewCampaignUseCase        usecase.ILaunchNewCampaign
 	UpdateExistingCampaignUseCase usecase.IUpdateCampaign
+	CampaignProgresss             usecase.ICampaignProgress
 }
 
 // func (this *CampaignController) HandleHTTPError(err mvc.Err, statusCode mvc.Code) *mvc.Response {
@@ -107,4 +108,12 @@ func (this *CampaignController) DeleteCampaign(
 ) (mvc.Result, error) {
 
 	return this.DeleteCampaignUseCase.Execute(input, output)
+}
+
+func (this *CampaignController) GetCampaignProgress(
+	input *requestPresenter.CampaignProgressRequestPresenter,
+	output *responsePresenter.CampaignProgressResponsePresenter,
+) (mvc.Result, error) {
+
+	return this.CampaignProgresss.Execute(input, output)
 }
