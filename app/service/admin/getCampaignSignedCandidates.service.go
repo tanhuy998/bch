@@ -5,7 +5,6 @@ import (
 	libCommon "app/lib/common"
 	"app/repository"
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -62,7 +61,7 @@ func (this *GetCampaignSignedCandidates) Serve(
 
 		return nil, err
 	}
-	fmt.Println(pivotObjID.String())
+
 	pack, err := this.Query(campaignUUID, pivotObjID, limit, isPrevDir)
 
 	return pack, err
@@ -160,7 +159,9 @@ func (this *GetCampaignSignedCandidates) Query(
 
 		mainPipeLine = append(
 			mainPipeLine,
-			repository.PrepareObjIDFilterPaginationQuery(pivotObjID, isPrevDir, nil),
+			bson.D{
+				{"$match", repository.PrepareObjIDFilterPaginationQuery(pivotObjID, isPrevDir, nil)},
+			},
 		)
 	}
 

@@ -3,10 +3,11 @@ package responsePresenter
 import "app/domain/model"
 
 type GetCampaignSignedCandidatesResponse struct {
-	Message        string               `json:"message"`
-	Data           []*model.Candidate   `json:"data"`
-	DataTotalCount int64                `json:"dataTotalCount"`
-	Navigation     PaginationNavigation `json:"navigation"`
+	Message              string               `json:"message"`
+	Data                 []*model.Candidate   `json:"data"`
+	DataTotalCount       int64                `json:"dataTotalCount"`
+	CandidateSignedCount int64                `json:"candidateSignedCount"`
+	Navigation           PaginationNavigation `json:"navigation"`
 }
 
 func (this *GetCampaignSignedCandidatesResponse) GetNavigation() *PaginationNavigation {
