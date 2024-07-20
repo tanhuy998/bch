@@ -54,6 +54,11 @@ export default class NewCandidateFormDelegator extends EndpointFormDelegator {
         return this.#endpoint;
     }
 
+    get campaignUUID() {
+
+        return this.#campaignUUID;
+    }
+
     shouldNavigate() {
 
         return 0;

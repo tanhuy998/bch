@@ -34,6 +34,8 @@ import './assets/css/background.css';
 import PageNotFound from './pages/404';
 import InternalErrorPage from './pages/500';
 import AppContext from './contexts/app.context';
+import EditSingleCandidatePage from './pages/editSingleCandidatePage';
+import EditSingleCandidateUseCase from './domain/usecases/editSingleCandidate.usecase';
 // import CandidateSigningPage from './pages/candidateSigning/candidateSinging.page';
 
 const campaignlistUseCase = new CampaignListUseCase()
@@ -42,6 +44,7 @@ const newCampaignUseCase = new NewCampaignUseCase();
 const newCandidateUseCase = new NewCandidateUseCase();
 const singleCandidateUseCase = new SingleCandidateUseCase();
 const candidateSigningUseCase = new CandidateSigningUseCase();
+const editSingleCandidateUseCase = new EditSingleCandidateUseCase();
 
 const pageAnimationVariants = {
   hidden: { opacity: 0, x: 0, y: 20 },
@@ -71,6 +74,7 @@ function App() {
             <Route path="campaign/new" element={<AnimatePage><NewCampaignPage usecase={newCampaignUseCase} /></AnimatePage>} />
             {/* <Route path="campaign/:campaignUUID/new/candidate" element={<NewCandidatePage usecase={newCandidateUseCase} />} /> */}
             <Route path="candidate/:uuid" element={<AnimatePage><SingleCandidatePage usecase={singleCandidateUseCase} /></AnimatePage>} />
+            <Route path='candidate/edit/:uuid' element={<AnimatePage><EditSingleCandidatePage usecase={editSingleCandidateUseCase} /></AnimatePage>} />
           </Route>
         </Routes>
       </BrowserRouter>
