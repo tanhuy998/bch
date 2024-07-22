@@ -38,7 +38,7 @@ export default class CandidateCRUDEndpoint extends CRUDEndpoint {
 
         const res = await super.read(uuid);
         
-        return res.data;
+        return Object.assign(new candidate_model_t(), res.data);
     }
 
     /**

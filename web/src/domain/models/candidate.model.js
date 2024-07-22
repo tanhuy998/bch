@@ -12,6 +12,11 @@ export {
 function candidate_model_t() {
 
     /**
+     * @type {string}
+     */
+    this.uuid;
+
+    /**
      *  @type {string}
      */
     this.idNumber;

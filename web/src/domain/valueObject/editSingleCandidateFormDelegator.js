@@ -2,6 +2,15 @@ import NewCandidateFormDelegator from "./newCandidateFormDelegator";
 
 export default class EditSingleCandidateFormDelegator extends NewCandidateFormDelegator {
 
+    /**
+     * 
+     * @param {string} uuid 
+     */
+    setCandidateUUID(uuid) {
+
+        this.dataModel.uuid = uuid;
+    }
+
     async interceptSubmission() {
 
         try {

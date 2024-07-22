@@ -74,7 +74,7 @@ function App() {
             <Route path="campaign/new" element={<AnimatePage><NewCampaignPage usecase={newCampaignUseCase} /></AnimatePage>} />
             {/* <Route path="campaign/:campaignUUID/new/candidate" element={<NewCandidatePage usecase={newCandidateUseCase} />} /> */}
             <Route path="candidate/:uuid" element={<AnimatePage><SingleCandidatePage usecase={singleCandidateUseCase} /></AnimatePage>} />
-            <Route path='candidate/edit/:uuid' element={<AnimatePage><EditSingleCandidatePage usecase={editSingleCandidateUseCase} /></AnimatePage>} />
+            <Route path='candidate/edit/:candidateUUID' element={<AnimatePage><EditSingleCandidatePage usecase={editSingleCandidateUseCase} /></AnimatePage>} />
           </Route>
         </Routes>
       </BrowserRouter>

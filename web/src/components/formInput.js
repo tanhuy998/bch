@@ -17,11 +17,11 @@ const NEED_DEBOUNCE_DELAY = new Set([
 
 export const IGNORE_VALIDATION = Symbol('input_ignore_validator');
 
-const FormInput = memo(_FormInput);
+// const FormInput = memo(_FormInput);
 
-export default FormInput;
+// export default FormInput;
 
-export function _FormInput({defaulValue, validate, onValidInput, onInvalidInput, invalidMessage, onAfterDebounce, name, textArea, type, dataModelType}) {
+export default function FormInput({defaulValue, validate, onValidInput, onInvalidInput, invalidMessage, onAfterDebounce, name, textArea, type, dataModelType}) {
 
     defaulValue = typeof defaulValue === 'string' || typeof defaulValue === 'number' ? defaulValue : undefined;
     const context = useContext(FormContext);
@@ -60,8 +60,6 @@ export function _FormInput({defaulValue, validate, onValidInput, onInvalidInput,
         }
     });
 
-
-
     return (
         textArea === true ?
         <textarea {...{...htmlElementAttributes, onChange: handleInputChange, name}} >{inputCurrentValue || ''}</textarea> 
@@ -82,7 +80,6 @@ function useInputProxyValidationListener(inputProxy, isValidInputState) {
 
     }, [isValidInputState])
 }
-
 
 function useInputFieldValidation(inputCurrentValueState, validateFunc) {
 

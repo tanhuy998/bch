@@ -3,13 +3,58 @@ import { ageAboveSixteenAndYoungerThanTwentySeven, validateIDNumber, validatePeo
 import Form from "../components/form";
 import PromptFormInput from "../components/promptFormInput";
 import EditSingleCandidateUseCase from "../domain/usecases/editSingleCandidate.usecase";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { candidate_model_t } from "../domain/models/candidate.model";
+
+const NOT_FOUND_MODEL = Symbol('NOT_FOUND_MODEL');
 
 export default function EditSingleCandidatePage({usecase}) {
+
+    const { candidateUUID } = useParams();
+    const [isDisabled, setIsDisabled] = useState(true);
 
     if (!(usecase instanceof EditSingleCandidateUseCase)) {
 
         throw new Error("invalid usecase passed to EditSingleCandidatePage that is not instance of EditSingleCandidateUseCase");
     }
+
+    usecase.setCandidateUUID(candidateUUID);
+    const candidateObj = useFetchCandidate(usecase);
+
+    //const isDisabled = (!(candidateObj instanceof candidate_model_t));
+
+    useEffect(() => {
+
+        if (!(candidateObj instanceof candidate_model_t)) {
+
+            return;
+        }
+
+        const dataModel = usecase.formDelegator.dataModel;
+        
+        
+        Object.assign(dataModel, candidateObj)
+        
+        dataModel.uuid = undefined;
+        dataModel.campaignUUID = undefined;
+        dataModel.signingInfo = undefined;
+        dataModel.ObjectID = undefined;
+
+        console.log("model", dataModel)
+        setIsDisabled(false);
+        console.log('update edit page')
+
+    }, [candidateObj])
+
+    useEffect(() => {
+
+        return () => {
+            
+            usecase.formDelegator.reset();
+        }
+
+    }, []);
 
     return (
         <>
@@ -19,7 +64,7 @@ export default function EditSingleCandidatePage({usecase}) {
                 </div>
 
                 <div className="card-body">
-                    <CandidateInfoForm formDelegator={usecase.formDelegator} />
+                    {!isDisabled && <CandidateInfoForm formDelegator={usecase.formDelegator} isDisabled={isDisabled} />}
                 </div>
             </div>
             
@@ -27,7 +72,34 @@ export default function EditSingleCandidatePage({usecase}) {
     )
 }
 
-function CandidateInfoForm({ formDelegator }) {
+/**
+ * 
+ * @param {EditSingleCandidateUseCase} usecase 
+ * @returns {candidate_model_t?}
+ */
+function useFetchCandidate(usecase) {
+
+    const [candidate, setCandidate] = useState();
+
+    useEffect(() => {
+
+        //usecase.read(usecase.candidateUUID)
+        usecase.fetchCandidate()
+        .then((model) => {
+            
+            setCandidate(model)
+        })
+        .catch(() => {
+
+            setCandidate(NOT_FOUND_MODEL)
+        })
+        
+    }, [])
+
+    return candidate;
+}
+
+function CandidateInfoForm({ formDelegator, isDisabled }) {
 
     const thisYear = (new Date()).getFullYear();
     const minDate = `1-1-${thisYear - 17}`;
@@ -47,6 +119,7 @@ function CandidateInfoForm({ formDelegator }) {
                         className="form-control"
                         name="name"
                         required="true"
+                        disable={isDisabled}
                     />
                 </div>
                 <div class="mb-3 col-md-6">
@@ -58,6 +131,7 @@ function CandidateInfoForm({ formDelegator }) {
                         type="text"
                         className="form-control"
                         name="idNumber"
+                        disable={isDisabled}
                     />
                 </div>
             </div>
@@ -77,6 +151,7 @@ function CandidateInfoForm({ formDelegator }) {
                         data-date-format="DD-MM-YYYY"
                         className="form-control"
                         required="true"
+                        disable={isDisabled}
                     />
                 </div>
                 <div class="mb-3 col-md-6">
@@ -88,6 +163,7 @@ function CandidateInfoForm({ formDelegator }) {
                         type="text"
                         className="form-control"
                         name="address"
+                        disable={isDisabled}
                     />
                 </div>
             </div>

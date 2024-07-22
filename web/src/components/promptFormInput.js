@@ -3,7 +3,7 @@ import FormInput, {_FormInput} from "./formInput";
 import SelectInput from "./selectInput";
 
 
-export default function PromptFormInput({label, validate, name, placeholder, noticeText, invalidMessage, type, textArea, defaultValue}) {
+export default function PromptFormInput({label, validate, name, placeholder, noticeText, invalidMessage, type, textArea, defaultValue, ...rest}) {
 
     const [isValidInput, setIsValidInput] = useState();
     
@@ -16,7 +16,7 @@ export default function PromptFormInput({label, validate, name, placeholder, not
     return (
         <>
             {label && <label for={name} class="form-label">{label}</label>}
-            <FormInput defaulValue={defaultValue} validate={validate} type={type} onValidInput={() => {setIsValidInput(true)}} onInvalidInput={() => {setIsValidInput(false)}} className="form-control" name={name} placeholder={placeholder} textArea={textArea}/>
+            <FormInput {...rest} defaulValue={defaultValue} validate={validate} type={type} onValidInput={() => {setIsValidInput(true)}} onInvalidInput={() => {setIsValidInput(false)}} className="form-control" name={name} placeholder={placeholder} textArea={textArea}/>
             <small class="form-text text-muted">{noticeText}</small>
 
             {/* <div class="valid-feedback">Looks good!</div> */}
@@ -27,7 +27,7 @@ export default function PromptFormInput({label, validate, name, placeholder, not
     )
 }
 
-export function PromptSelectInput({defaultValue, label, name, placeholder, noticeText, invalidMessage, children, required, className, castedType , notNull }) {
+export function PromptSelectInput({defaultValue, label, name, placeholder, noticeText, invalidMessage, children, required, className, castedType , notNull, ...rest }) {
 
     const [isSelected, setIsSelected] = useState(false);
 
@@ -35,6 +35,7 @@ export function PromptSelectInput({defaultValue, label, name, placeholder, notic
         <>
             {label && <label for={name} class="form-label">{label}</label>}
             <SelectInput 
+                {...rest}
                 className={className + (required && !isSelected ? 'is-invalid' : '' )} 
                 name={name} 
                 onUnSelected={() => {setIsSelected(false)}} 
@@ -54,10 +55,11 @@ export function PromptSelectInput({defaultValue, label, name, placeholder, notic
     )
 }
 
-export function PrompEthinicitySelectInput({className}) {
+export function PrompEthinicitySelectInput({className, ...rest}) {
 
     return (
         <PromptSelectInput
+            {...rest}
             label="Dân Tộc"
             name="ethnicity"
             invalidMessage="Dân tộc không được bỏ trống"
