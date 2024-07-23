@@ -62,6 +62,8 @@ func InitDomainIndexes(db *mongo.Database) {
 		},
 	)
 
+	initProductionIndexes(db)
+
 	// err = db.CreateView(
 	// 	context.TODO(),
 	// 	"signingDetails",
@@ -123,5 +125,9 @@ func InitDomainIndexes(db *mongo.Database) {
 
 		panic(err)
 	}
+
+}
+
+func initProductionIndexes(db *mongo.Database) {
 
 }

@@ -4,21 +4,9 @@ import (
 	"app/domain/model"
 	"app/internal/common"
 	"fmt"
-	"regexp"
 	"time"
 
 	"github.com/kataras/iris/v12"
-)
-
-const (
-	CANDIDATE_SIGNING_OLD = 17
-	PARENT_THRESHOLD      = 18
-	alert_name_msg        = `invalid %s, contains special characters, received "%s"`
-)
-
-var (
-	// match unicode letters and whiteSpace that belong to formal names
-	regex_match_name *regexp.Regexp = regexp.MustCompile(`^[\p{L}\s]{3,}$`)
 )
 
 type CommitCandidateSigningInfoRequest struct {
@@ -142,14 +130,4 @@ func (this *CommitCandidateSigningInfoRequest) validateNames() error {
 	}
 
 	return nil
-}
-
-func isValidName(name string) bool {
-
-	return regex_match_name.MatchString(name)
-}
-
-func errorAlert(key string, value string) error {
-
-	return fmt.Errorf(alert_name_msg, key, value)
 }
