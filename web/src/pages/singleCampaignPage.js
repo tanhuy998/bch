@@ -13,6 +13,7 @@ import { required } from "../components/lib/validator.";
 import NewCandidateFormDelegator from "../domain/valueObject/newCandidateFormDelegator";
 import PromptFormInput from "../components/promptFormInput";
 import { ageAboveSixteenAndYoungerThanTwentySeven, validateIDNumber, validatePeopleName } from "../lib/validator";
+import { strToLocalDate } from "../lib/formatLocalDate";
 
 const CandidatesTabContext = createContext({
     formVisible: false,
@@ -22,6 +23,9 @@ const CandidatesTabContext = createContext({
 
 const MemoNewCandidateForm = memo(NewCandidateForm);
 const INIT_STATE = Symbol('_init_state_')
+const COLUMN_TRANSFORM = {
+    "dateOfBirth": strToLocalDate,
+};
 
 const PageLayoutContext = createContext({});
 
@@ -168,6 +172,7 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
     }
 
     const defaultTableContext = {
+        columnTransform: COLUMN_TRANSFORM,
         idField: "uuid",
         exposedFields: ['name', 'dateOfBirth', 'idNumber', 'address'],
         headers: ['Tên', 'Ngày Sinh', 'Số CCDD', 'Địa Chỉ'],

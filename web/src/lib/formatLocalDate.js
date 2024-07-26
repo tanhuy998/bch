@@ -12,3 +12,13 @@ export default function formatLocalDate(date) {
 
     return `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`
 }
+
+/**
+ * 
+ * @param {string} str 
+ * @returns {string}
+ */
+export function strToLocalDate(str) {
+
+    return formatLocalDate(new Date(str));
+}
