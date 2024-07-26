@@ -39,5 +39,6 @@ export default class EditSingleCandidateUseCase extends CandidateCRUDEndpoint {
         //this.formDelegator.setCandidateUUID(candidateUUID);
 
         this.#editedCandidateUUID = candidateUUID;
+        this.formDelegator.setCandidateUUID(candidateUUID);
     }
 }

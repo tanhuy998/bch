@@ -27,18 +27,19 @@ export const validateFormalName = validatePeopleName;
 
 /**
  * 
- * @param {Date} date 
+ * @param {Date} inputDate 
  * @returns {boolean}
  */
-export function ageAboveSixteenAndYoungerThanTwentySeven(date) {
+export function ageAboveSixteenAndYoungerThanTwentySeven(inputDate) {
     
-    if (!(date instanceof Date)) {
-
-        return false;
+    if (!(inputDate instanceof Date)) {
+        
+        //return false;
+        inputDate = new Date(inputDate);
     }
     
     const thisYear = (new Date()).getFullYear();
-    const age = thisYear - date.getFullYear();
+    const age = thisYear - inputDate.getFullYear();
 
     return age >= 17 && age < 27;
 }

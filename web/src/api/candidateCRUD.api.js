@@ -38,16 +38,21 @@ export default class CandidateCRUDEndpoint extends CRUDEndpoint {
 
         const res = await super.read(uuid);
         
-        return Object.assign(new candidate_model_t(), res.data);
+        /**@type {candidate_model_t} */
+        const ret = Object.assign(new candidate_model_t(), res.data);
+
+        ret.dateOfBirth = new Date(res.data.dateOfBirth);
+
+        return ret;
     }
 
     /**
      * 
      * @param {candidate_model_t} candidateModel 
      */
-    async update(candidateModel) {
+    async update(candidateUUID, candidateModel) {
 
-        super.update(candidateModel)
+        return super.update(candidateUUID, candidateModel)
     }
 
     /**
@@ -56,6 +61,6 @@ export default class CandidateCRUDEndpoint extends CRUDEndpoint {
      */
     async delete(uuid) {
 
-        super.delete(uuid);
+        return super.delete(uuid);
     }
 }

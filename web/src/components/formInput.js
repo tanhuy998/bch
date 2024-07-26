@@ -28,8 +28,7 @@ export default function FormInput({defaulValue, validate, onValidInput, onInvali
     const contextDelayingDebounces = context.delayingDebounces; 
     const htmlElementAttributes = prepareRenderAttributes(arguments[FIRST]);
     //const [dataModel, hasDataModel] = useDataModel();    
-    const [inputCurrentValue, setInputCurrentValue] = useDataModelBinding(name, type, undefined, defaulValue);// useState(hasDataModel ? dataModel[name] : null);
-    
+    const [inputCurrentValue, setInputCurrentValue] = useDataModelBinding(name, type, undefined, defaulValue);// useState(hasDataModel ? dataModel[name] : null);    
 
     const inputProxy = useInputProxy(name, setInputCurrentValue);
 
@@ -177,15 +176,24 @@ function useDebounce(inputCurrentValueState, cb, delayDuration = INPUT_DEBOUNCE_
 export function useDataModelBinding(inputName, inputType, transformDataFunc, initValue) {
 
     const [dataModel, hasDataModel] = useDataModel();
-    const [inputCurrentValue, setInputCurrentValue] = useState(hasDataModel ? dataModel[inputName] : initValue);
+    const [inputCurrentValue, setInputCurrentValue] = useState(INIT_STATE)// useState(hasDataModel ? dataModel[inputName] : initValue);
     //const hasDataModel = typeof dataModel === 'object';
     const hasForceCastType = typeof transformDataFunc === 'function';
 
-    useDefaultValue(initValue, setInputCurrentValue);
+    useDefaultValue(initValue, dataModel?.[inputName], inputType, setInputCurrentValue);
+
+    // useEffect(() => {
+
+
+
+    // }, []);
 
     useEffect(() => {
 
-        if (!hasDataModel) {
+        if (
+            !hasDataModel
+            || inputCurrentValue === INIT_STATE
+        ) {
 
             return;
         }
@@ -197,23 +205,49 @@ export function useDataModelBinding(inputName, inputType, transformDataFunc, ini
     return [inputCurrentValue, setInputCurrentValue];
 }
 
-export function useDefaultValue(defaultValue, setInputCurremtValue) {
+export function useDefaultValue(defaultValue, dataModelInputValue, inputType, setInputCurrentValue) {
+
+    let init_val = defaultValue || dataModelInputValue;
 
     useEffect(() => {
 
         if (
-            defaultValue === null
-            || defaultValue === undefined
+            // defaultValue === null
+            // || defaultValue === undefined
+            init_val === null
+            || init_val === undefined
         ) {
 
+            setInputCurrentValue('');
             return;
         }
 
-        setInputCurremtValue(defaultValue);
+        //setInputCurrentValue(defaultValue);
+        const val = mapInputValue(init_val, inputType)
+        
+        setInputCurrentValue(val);
 
     }, []);
 }
 
+function mapInputValue(value, inputType) {
+
+    if (
+        inputType === 'date'
+        && value instanceof Date
+    ) {
+
+        let month = value.getMonth() + 1;
+        let date = value.getDate();
+
+        month = month < 10 ? `0${month}` : month;
+        date = date < 10 ? `0${date}` : date;
+
+        return `${value.getFullYear()}-${month}-${date}`
+    }
+
+    return value;
+}
 
 function useInputProxy(name, setInputCurrentValue) {
 

@@ -48,7 +48,7 @@ export default class EndpointFormDelegator extends AdvanceValidationFormDelegato
 
         if (!(this.endpoint instanceof CRUDEndpoint)) {
 
-
+            throw new Error('invalid endpoint to sumit a form which is not an instance of CRUDEndpoint')
         }
 
         try {

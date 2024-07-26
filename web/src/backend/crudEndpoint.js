@@ -61,7 +61,7 @@ export default class CRUDEndpoint extends AuthEndpoint {
 
         if (typeof unknown !== 'string' || unknown === '') {
 
-            throw new Error('uuid argument of CRUDEndpoint.delete() must be at least typeof string');
+            throw new Error('uuid provided to CRUD endpoint must be at least type of string');
         }
     }
 }

@@ -13,12 +13,14 @@ export default function EditSingleCandidatePage({usecase}) {
 
     const { candidateUUID } = useParams();
     const [isDisabled, setIsDisabled] = useState(true);
+    const navigator = useNavigate();
 
     if (!(usecase instanceof EditSingleCandidateUseCase)) {
 
         throw new Error("invalid usecase passed to EditSingleCandidatePage that is not instance of EditSingleCandidateUseCase");
     }
 
+    usecase.formDelegator.setNavigator(navigator);
     usecase.setCandidateUUID(candidateUUID);
     const candidateObj = useFetchCandidate(usecase);
 
@@ -33,7 +35,6 @@ export default function EditSingleCandidatePage({usecase}) {
 
         const dataModel = usecase.formDelegator.dataModel;
         
-        
         Object.assign(dataModel, candidateObj)
         
         dataModel.uuid = undefined;
@@ -41,9 +42,7 @@ export default function EditSingleCandidatePage({usecase}) {
         dataModel.signingInfo = undefined;
         dataModel.ObjectID = undefined;
 
-        console.log("model", dataModel)
         setIsDisabled(false);
-        console.log('update edit page')
 
     }, [candidateObj])
 
