@@ -36,6 +36,8 @@ import InternalErrorPage from './pages/500';
 import AppContext from './contexts/app.context';
 import EditSingleCandidatePage from './pages/editSingleCandidatePage';
 import EditSingleCandidateUseCase from './domain/usecases/editSingleCandidate.usecase';
+import EditSingleCampaignPage from './pages/editSingleCampaignPage';
+import EditSingleCampaignUseCase from './domain/usecases/editSingleCampaign.usecase';
 // import CandidateSigningPage from './pages/candidateSigning/candidateSinging.page';
 
 const campaignlistUseCase = new CampaignListUseCase()
@@ -45,6 +47,7 @@ const newCandidateUseCase = new NewCandidateUseCase();
 const singleCandidateUseCase = new SingleCandidateUseCase();
 const candidateSigningUseCase = new CandidateSigningUseCase();
 const editSingleCandidateUseCase = new EditSingleCandidateUseCase();
+const editSingleCampaignUsecase = new EditSingleCampaignUseCase();
 
 const pageAnimationVariants = {
   hidden: { opacity: 0, x: 0, y: 20 },
@@ -71,8 +74,10 @@ function App() {
             {/* <Route path="campaigns" element={<PaginationTable idField={"uuid"} endpoint={campaignlistUseCase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} /> */}
             <Route path="campaigns" element={<AnimatePage><CampaignListPage usecase={campaignlistUseCase} /></AnimatePage>} />
             <Route path="campaign/:uuid" element={<AnimatePage><SingleCampaignPage usecase={singleCampaignUseCase} /></AnimatePage>} />
+            <Route path="campaign/edit/:campaignUUID" element={<AnimatePage><EditSingleCampaignPage usecase={editSingleCampaignUsecase}/></AnimatePage>} />
             <Route path="campaign/new" element={<AnimatePage><NewCampaignPage usecase={newCampaignUseCase} /></AnimatePage>} />
             {/* <Route path="campaign/:campaignUUID/new/candidate" element={<NewCandidatePage usecase={newCandidateUseCase} />} /> */}
+
             <Route path="candidate/:uuid" element={<AnimatePage><SingleCandidatePage usecase={singleCandidateUseCase} /></AnimatePage>} />
             <Route path='candidate/edit/:candidateUUID' element={<AnimatePage><EditSingleCandidatePage usecase={editSingleCandidateUseCase} /></AnimatePage>} />
           </Route>

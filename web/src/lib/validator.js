@@ -46,14 +46,15 @@ export function ageAboveSixteenAndYoungerThanTwentySeven(inputDate) {
 
 /**
  * 
- * @param {Date} date
+ * @param {Date|string} inputVal
  * @returns {boolean} 
  */
-export function dayAfterNow(date) {
+export function dayAfterNow(inputVal) {
 
-    if (!(date instanceof Date)) {
+    if (!(inputVal instanceof Date)) {
 
-        return false;
+        //return false;
+        inputVal = new Date(inputVal);
     }
 
     const today = new Date;
@@ -63,8 +64,8 @@ export function dayAfterNow(date) {
         // || date.getMonth() - today.getMonth() > 0
         // || date.getFullYear() - today.getFullYear() > 0
 
-        date.getFullYear() - today.getFullYear() >= 0
-        && date.getMonth() - today.getMonth() >= 0
-        && date.getDate() - today.getDate() >= 1
+        inputVal.getFullYear() - today.getFullYear() > 0
+        || inputVal.getMonth() - today.getMonth() > 0
+        || inputVal.getDate() - today.getDate() > 0
     ) 
 }

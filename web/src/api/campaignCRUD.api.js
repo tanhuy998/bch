@@ -26,18 +26,25 @@ export default class CampaignCRUDEndpoint extends CRUDEndpoint {
         return new NewCampaignResponsePresenter(res);
     }
 
-    async read() {
+    async read(campaignUUID) {
 
+        const res = await super.read(campaignUUID);
+        /**@type {campaign_model_t} */
+        const ret = Object.assign(new campaign_model_t(), res.data);
 
-    }
+        ret.expire = new Date(res.data.expire);
+        ret.issueTime = new Date(res.data.issueTime);
+
+        return ret;
+    }   
 
     /**
      * 
      * @param {campaign_model_t} campaignModel 
      */
-    async update(campaignModel) {
+    async update(campaignUUID, campaignModel) {
 
-        super.update(campaignModel)
+        return super.update(campaignUUID, campaignModel)
     }
 
     /**
@@ -46,6 +53,6 @@ export default class CampaignCRUDEndpoint extends CRUDEndpoint {
      */
     async delete(uuid) {
 
-        super.delete(uuid);
+        return super.delete(uuid);
     }
 }

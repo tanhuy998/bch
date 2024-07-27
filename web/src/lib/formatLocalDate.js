@@ -10,7 +10,7 @@ export default function formatLocalDate(date) {
         return '';
     }
 
-    return `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`
+    return `${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`
 }
 
 /**
