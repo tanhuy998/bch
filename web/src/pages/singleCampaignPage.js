@@ -13,7 +13,8 @@ import { required } from "../components/lib/validator.";
 import NewCandidateFormDelegator from "../domain/valueObject/newCandidateFormDelegator";
 import PromptFormInput from "../components/promptFormInput";
 import { ageAboveSixteenAndYoungerThanTwentySeven, validateIDNumber, validatePeopleName } from "../lib/validator";
-import { strToLocalDate } from "../lib/formatLocalDate";
+import formatLocalDate, { strToLocalDate } from "../lib/formatLocalDate";
+import CampaignProgressEndpoint from "../api/campaignProgress.api";
 
 const CandidatesTabContext = createContext({
     formVisible: false,
@@ -33,7 +34,7 @@ export default function SingleCampaignPage({ usecase }) {
 
     const { uuid } = useParams();
     const [/**@type {SingleCampaignRespnsePresenter?} */ campaignData, setCampaignData] = useState(null);
-
+    
     if (!uuid) {
 
         throw new Error('invalid uuid')
@@ -50,7 +51,7 @@ export default function SingleCampaignPage({ usecase }) {
 
         usecase.fetch(uuid)
             .then((data) => {
-
+                console.log(data)
                 setCampaignData(data)
             })
 
@@ -61,11 +62,11 @@ export default function SingleCampaignPage({ usecase }) {
     //     <PaginationTable />
     // )
 
-    const progressionTabs = {
-        // All: //<CompactCampaignCandidateTable usecase={usecase} uuid={uuid} />,
-        Signed: <CampaignCandidateProgression uuid={uuid} endpoint={usecase.campaignCandidateListEndpoint} />,
-        Unsigned: <CampaignCandidateProgression uuid={uuid} endpoint={usecase.campaignCandidateListEndpoint} />,
-    }
+    // const progressionTabs = {
+    //     // All: //<CompactCampaignCandidateTable usecase={usecase} uuid={uuid} />,
+    //     Signed: <CampaignCandidateProgression uuid={uuid} endpoint={usecase.campaignProgressEndpoint.candidate} />,
+    //     Unsigned: <CampaignCandidateProgression uuid={uuid} endpoint={usecase.campaignCandidateListEndpoint} />,
+    // }
 
     const mainTabs = {
         'Mô tả': `Lorem ipsum dolor sit amet. Eos neque dolor id accusantium reprehenderit et impedit ipsam quo illo praesentium. Ut porro amet aut autem ducimus At voluptas repellat. Est accusamus sequi est fuga voluptate ut aliquid minima 33 dolores nisi est maxime aspernatur qui sunt voluptatum. Ad sequi iure nam vero quis et aliquam repellat et eaque soluta et galisum quaerat ut rerum esse.
@@ -82,9 +83,13 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
             </div>
         ),
         'Tiến Độ': (
-            <div class="card-body">
-                <PillTab tabs={progressionTabs} />
-            </div>
+            // <div class="card-body">
+            //     <dib>
+            //         Total candidate count:
+            //     </dib>
+            //     <PillTab tabs={progressionTabs} />
+            // </div>
+            <CampaignProgressionTab uuid={uuid} endpoint={usecase.campaignProgressEndpoint}/>
         )
     };
 
@@ -113,13 +118,13 @@ A nisi aspernatur non natus aliquam aut mollitia rerum. Non magnam aperiam quo e
                                                     <h4 class="card-text">Ngày Bắt Đầu: {campaignData?.issueTime || ''}</h4>
                                                 </div>
                                                 <div class="col">
-                                                    <h4 class="card-text">Ngày Kết Thúc: {campaignData?.expire || ''}</h4>
+                                                    <h4 class="card-text">Ngày Kết Thúc: {campaignData?.expiredTime || ''}</h4>
                                                 </div>
                                             </div>
                                             {/* </div> */}
                                             <br />
 
-                                            <Link to="#" class="btn btn-primary">Chỉnh sửa</Link>
+                                            <Link to={`/admin/campaign/edit/${uuid}`} class="btn btn-primary">Chỉnh sửa</Link>
                                             <br />
                                             <br />
                                             <div ref={pageLayout.mainTab}>
@@ -316,18 +321,19 @@ function CompactCampaignCandidateTable({ uuid, endpoint, pageUsecase, formDelega
 }
 
 function CampaignCandidateProgression({ uuid, endpoint }) {
-
+    
     const allCandidateExtraContextValues = {
-        EXTRA_FETCH_ARGS: [uuid]
+        EXTRA_FETCH_ARGS: [`/${uuid}`]
     }
 
     const defaultTableContext = {
+        columnTransform: COLUMN_TRANSFORM,
         idField: "uuid",
-        exposedFields: ['name', 'idNumber', 'address'],
-        headers: ['Tên', 'Số CCDD', 'Địa Chỉ'],
+        exposedFields: ['name', 'dateOfBirth', 'idNumber', 'address'],
+        headers: ['Tên', 'Ngay Sinh', 'Số CCDD', 'Địa Chỉ'],
         endpoint: endpoint,
         title: "Canidates",
-        rowManipulator: endpoint,
+        //rowManipulator: endpoint,
     }
 
     return (
@@ -335,6 +341,42 @@ function CampaignCandidateProgression({ uuid, endpoint }) {
             <PaginationTable />
         </PaginationTableContext.Provider>
     )
+}
+
+function CampaignProgressionTab({uuid, endpoint}) {
+
+    const [progressionData, setProgressionData] = useState();
+
+    useEffect(() => {
+
+        endpoint.fetch()
+        .then((res) => {
+            
+            setProgressionData(res.data);
+
+        })
+        .catch((e) => {})
+
+    }, []); 
+
+    const progressionTabs = {
+        // All: //<CompactCampaignCandidateTable usecase={usecase} uuid={uuid} />,
+        Signed: <CampaignCandidateProgression uuid={uuid} endpoint={endpoint.candidate} />,
+        //Unsigned: <CampaignCandidateProgression uuid={uuid} endpoint={usecase.campaignCandidateListEndpoint} />,
+    }
+
+    return (
+        <div class="card-body">
+            <dib>
+                Total candidate count: {progressionData?.totalCount || 'N/A'}
+            </dib>
+            <div>
+                Signed candidate count: {progressionData?.signedCount || 'N/A'}
+            </div>
+            <br/>
+            <PillTab tabs={progressionTabs} />
+        </div>
+    )    
 }
 
 function toggleCompactTableForm(state, setter) {

@@ -1,4 +1,5 @@
 import CampaignCandidateListEndpoint from "../../api/campaignCandidateList.api";
+import CampaignProgressEndpoint from "../../api/campaignProgress.api";
 import SingleCampaignRespnsePresenter from "../../api/presenter/response/singleCampaignResponse.presenter";
 import SingleCampaignEndPoint from "../../api/singleCampaign.api";
 import CandidateListTableRowManipulator from "../valueObject/candidateLisitTableRowManipulation";
@@ -9,6 +10,12 @@ export default class SingleCampaignUseCase extends SingleCampaignEndPoint {
     #CampaignCandidateListEndpoint = new CampaignCandidateListEndpoint();
     #newCandidateFormDelegator = new NewCandidateFormDelegator();
     #candidateListTableRowManipulator = new CandidateListTableRowManipulator(this.#newCandidateFormDelegator.endpoint.url);
+    #campaignProgressEndpoint = new CampaignProgressEndpoint();
+
+    get campaignProgressEndpoint() {
+
+        return this.#campaignProgressEndpoint;
+    }
 
     get newCandidateFormDelegator() {
 
