@@ -4,6 +4,6 @@ import "app/domain/valueObject"
 
 type (
 	CampaignProgressResponsePresenter struct {
-		Data valueObject.CandidateSigningReport
+		Data valueObject.CandidateSigningReport `json:"data"`
 	}
 )

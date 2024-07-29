@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"app/domain/model"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
@@ -37,14 +36,17 @@ func (this *ModifyExistingCandidateUseCase) Execute(
 
 	inputData := input.Data
 
-	var updatedCandidate *model.Candidate = &model.Candidate{
-		Name:     inputData.Name,
-		IDNumber: inputData.IDNumber,
-		Phone:    inputData.Phone,
-		Address:  inputData.Address,
-	}
+	// var updatedCandidate *model.Candidate = &model.Candidate{
+	// 	Name:        inputData.Name,
+	// 	IDNumber:    inputData.IDNumber,
+	// 	Phone:       inputData.Phone,
+	// 	Address:     inputData.Address,
+	// 	DateOfBirth: inputData.DateOfBirth,
+	// }
 
-	err := this.ModifyCandidateService.Serve(input.UUID, updatedCandidate)
+	// err := this.ModifyCandidateService.Serve(input.UUID, updatedCandidate)
+
+	err := this.ModifyCandidateService.Serve(input.UUID, inputData)
 
 	if err != nil {
 
