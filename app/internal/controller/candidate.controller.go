@@ -9,12 +9,13 @@ import (
 )
 
 type CandidateController struct {
-	AddNewCandidateUseCase             usecase.IAddNewCandidate
-	ModifyCandidateUseCase             usecase.IModifyExistingCandidate
-	DeleteCandidateUseCase             usecase.IDeleteCandidate
-	GetCampaignCandidateListUseCase    usecase.IGetCampaignCandidateList
-	GetSingleCandidateByUUIDUseCase    usecase.IGetSingleCandidateByUUID
-	GetCampaignSignedCandidatesUseCase usecase.IGetCampaignSignedCandidates
+	AddNewCandidateUseCase               usecase.IAddNewCandidate
+	ModifyCandidateUseCase               usecase.IModifyExistingCandidate
+	DeleteCandidateUseCase               usecase.IDeleteCandidate
+	GetCampaignCandidateListUseCase      usecase.IGetCampaignCandidateList
+	GetSingleCandidateByUUIDUseCase      usecase.IGetSingleCandidateByUUID
+	GetCampaignSignedCandidatesUseCase   usecase.IGetCampaignSignedCandidates
+	GetCampaignUnSignedCandidatesUseCase usecase.IGetCampaignUnSignedCandidates
 }
 
 func (this *CandidateController) GetSingleCandidateByUUID(
@@ -71,4 +72,12 @@ func (this *CandidateController) GetSignedCandidates(
 ) (mvc.Result, error) {
 
 	return this.GetCampaignSignedCandidatesUseCase.Execute(input, output)
+}
+
+func (this *CandidateController) GetUnSignedCandidates(
+	input *requestPresenter.GetCampaignUnSignedCandidates,
+	output *responsePresenter.GetCampaignUnSignedCandidates,
+) (mvc.Result, error) {
+
+	return this.GetCampaignUnSignedCandidatesUseCase.Execute(input, output)
 }
