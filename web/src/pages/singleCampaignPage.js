@@ -349,7 +349,7 @@ function CampaignProgressionTab({uuid, endpoint}) {
 
     useEffect(() => {
 
-        endpoint.fetch()
+        endpoint.fetchReport(uuid)
         .then((res) => {
             
             setProgressionData(res.data);
@@ -362,7 +362,7 @@ function CampaignProgressionTab({uuid, endpoint}) {
     const progressionTabs = {
         // All: //<CompactCampaignCandidateTable usecase={usecase} uuid={uuid} />,
         Signed: <CampaignCandidateProgression uuid={uuid} endpoint={endpoint.candidate} />,
-        //Unsigned: <CampaignCandidateProgression uuid={uuid} endpoint={usecase.campaignCandidateListEndpoint} />,
+        Unsigned: <></>//<CampaignCandidateProgression uuid={uuid} endpoint={usecase.campaignCandidateListEndpoint} />,
     }
 
     return (

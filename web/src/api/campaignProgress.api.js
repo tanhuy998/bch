@@ -32,4 +32,11 @@ export default class CampaignProgressEndpoint extends AuthEndpoint {
     //         undefined, query, extraURI
     //     );
     // }
+
+    async fetchReport(campaignUUID) {
+
+        return super.fetch(
+            undefined, undefined, `/${campaignUUID}/progress`
+        );
+    }
 }
