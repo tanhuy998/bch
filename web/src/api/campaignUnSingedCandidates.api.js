@@ -1,11 +1,11 @@
 import AuthEndpoint from "../backend/autEndpoint";
 import preprocessPaginationQuery from "./lib/preprocessPaginationQuery.lib";
 
-export default class CampaignCandidatesProgressEndpoint extends AuthEndpoint {
+export default class CampaignUnsignedCandidatesEndpoint extends AuthEndpoint {
 
     constructor() {
 
-        super({uri: '/candidates/signed/campaign'});
+        super({ uri: '/candidates/unsigned/campaign' });
     }
 
     async getSigned(campaignUUID, query = {}) {

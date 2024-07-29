@@ -361,9 +361,11 @@ function CampaignProgressionTab({uuid, endpoint}) {
 
     const progressionTabs = {
         // All: //<CompactCampaignCandidateTable usecase={usecase} uuid={uuid} />,
-        Signed: <CampaignCandidateProgression uuid={uuid} endpoint={endpoint.candidate} />,
-        Unsigned: <></>//<CampaignCandidateProgression uuid={uuid} endpoint={usecase.campaignCandidateListEndpoint} />,
+        Signed: <CampaignCandidateProgression key="signed" uuid={uuid} endpoint={endpoint.signedCandidates} />,
+        Unsigned: <CampaignCandidateProgression key="unsigned" uuid={uuid} endpoint={endpoint.unSignedCandidates} />,
     }
+
+    const percentage = ((progressionData?.signedCount || 0) / (progressionData?.totalCount || 1)) * 100
 
     return (
         <div class="card-body">
@@ -372,6 +374,9 @@ function CampaignProgressionTab({uuid, endpoint}) {
             </dib>
             <div>
                 Signed candidate count: {progressionData?.signedCount || 'N/A'}
+            </div>
+            <div>
+                Percentage: {percentage?.toFixed(2) || 'N/A'}%
             </div>
             <br/>
             <PillTab tabs={progressionTabs} />

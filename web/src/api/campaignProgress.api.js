@@ -1,13 +1,21 @@
 import AuthEndpoint from "../backend/autEndpoint";
-import CampaignCandidatesProgressEndpoint from "./campaignCandidateProgress.api";
+import CampaignSignedCandidatesEndpoint from "./campaignSignedCandidates.api";
+import CampaignCandidatesProgressEndpoint from "./campaignSignedCandidates.api";
+import CampaignUnsignedCandidatesEndpoint from "./campaignUnSingedCandidates.api";
 
 export default class CampaignProgressEndpoint extends AuthEndpoint {
 
-    #campaignCandidatesProgressEndpoint = new CampaignCandidatesProgressEndpoint();
+    #campaignSignedCandidateEndpoint = new CampaignSignedCandidatesEndpoint();
+    #campaignUnSignedCandidatesEndpoint = new CampaignUnsignedCandidatesEndpoint();
 
-    get candidate() {
+    get signedCandidates() {
 
-        return this.#campaignCandidatesProgressEndpoint;
+        return this.#campaignSignedCandidateEndpoint;
+    }
+
+    get unSignedCandidates() {
+
+        return this.#campaignUnSignedCandidatesEndpoint;
     }
 
     constructor() {
