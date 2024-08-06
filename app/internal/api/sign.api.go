@@ -42,6 +42,12 @@ func initCandidateSigningApi(app *iris.Application) *mvc.Application {
 				"HEAD", "/pending/campaign/{campaignUUID}/candidate/{candidateUUID}", "CheckSigningExistence",
 				middleware.BindPresenters[requestPresenter.CheckSigningExistenceRequest, presenter.IEmptyPresenter](container),
 			)
+
+			activator.Handle(
+				"PUT", "/candidate/{candidateUUID}", "CommitSpecificSigningInfo",
+				middleware.BindPresenters[requestPresenter.CommitSpecificSigningInfo, responsePresenter.CommitSpecificSigningInfoResponse](container),
+			)
+
 		}),
 	)
 }

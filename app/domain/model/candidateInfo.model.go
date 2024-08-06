@@ -7,14 +7,16 @@ import (
 )
 
 type CandidateSigningInfo struct {
-	//UUID       uuid.UUID       `json:"uuid" bson:"uuid" validate:"required"`
+	UUID           uuid.UUID       `json:"-" bson:"uuid"`
+	CandidateUUID  uuid.UUID       `json:"-" bson:"candidateUUID"`
 	CivilIndentity CitizenIdentity `json:"civilIdentity" bson:"civilIdentity" validate:"required"`
 	Politic        PoliticDetail   `json:"politic" bson:"politic"`
 	Education      EducationDetail `json:"education" bson:"education"`
 	Job            string          `json:"job" bson:"job"`
 	JobPlace       string          `json:"jobPlace" bson:"jobPlace"`
 	Family         FamilyDetail    `json:"family" bson:"family"`
-	Version        time.Time       `json:"version" bson:"version"`
+	Version        time.Time       `json:"-" bson:"version"`
+	//CommitHead     *uuid.UUID      `bson:"commitHead"`
 }
 
 type Citizen struct {

@@ -83,7 +83,19 @@ func (this *CandidateRepository) Find(
 
 func (this *CandidateRepository) FindByUUID(uuid uuid.UUID, ctx context.Context) (*model.Candidate, error) {
 
-	return findDocumentByUUID[model.Candidate](uuid, this.collection, ctx, bson.E{CANDIDATE_SIGNING_INFO_KEY, 0})
+	res, err := findDocumentByUUID[model.Candidate](uuid, this.collection, ctx, bson.E{CANDIDATE_SIGNING_INFO_KEY, 0})
+
+	if err == mongo.ErrNoDocuments {
+
+		return nil, nil
+	}
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return res, err
 }
 
 func (this *CandidateRepository) Get(page int, ctx context.Context) ([]*model.Candidate, error) {

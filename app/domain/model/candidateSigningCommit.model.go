@@ -9,10 +9,11 @@ import (
 
 type (
 	CandidateSigningCommit struct {
-		ID            *primitive.ObjectID `json:"commit" bson:"_id,omitempty"`
-		Time          *time.Time          `bson:"time"`
-		CandidateUUID *uuid.UUID          `bson:"candidateUUID"`
-		Operations    string              `bson:"operations"` //[]*JsonPatchOperation
+		ID              *primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+		Time            *time.Time          `bson:"time"`
+		SigningInfoUUID *uuid.UUID          `json:"signingInfoUUID" bson:"signingInfoUUID"`
+		Operations      string              `bson:"operations"` //[]*JsonPatchOperation
+		CandidateUUID   *uuid.UUID          `bson:"candidateUUID"`
 	}
 )
 

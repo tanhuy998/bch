@@ -8,6 +8,7 @@ import (
 	adminService "app/service/admin"
 	authService "app/service/auth"
 	candidateService "app/service/candidate"
+	"app/service/signingService"
 	usecase "app/useCase"
 	"fmt"
 
@@ -64,6 +65,9 @@ func InitializeDatabase(app router.Party) {
 	)
 	libConfig.BindDependency[repository.ICandidateSigningCommit](
 		container, new(repository.CandidateSingingCommitRepository).Init(db),
+	)
+	libConfig.BindDependency[repository.ICandidateSigningInfo](
+		container, new(repository.CandidateSigningInfoRepository).Init(db),
 	)
 	fmt.Println("Repositories Initialized.")
 }
@@ -126,6 +130,10 @@ func RegisterServices(app router.Party) {
 
 	libConfig.BindDependency[candidateService.ICandidateSigningCommitLogger, candidateService.CandidateSigningCommmitLoggerService](container, nil)
 
+	libConfig.BindDependency[signingService.ICheckCandidateExistence, signingService.CheckCandidateExistenceService](container, nil)
+	libConfig.BindDependency[signingService.ISigningCommitLogger, signingService.SigningCommmitLoggerService](container, nil)
+	libConfig.BindDependency[signingService.ICommitSpecificSigningInfo, signingService.CommitSpecificSigningInfoService](container, nil)
+
 	/*
 		Bind Usecase Objects
 	*/
@@ -152,6 +160,8 @@ func RegisterServices(app router.Party) {
 	libConfig.BindDependency[usecase.IGetCampaignUnSignedCandidates, usecase.GetCampaignUnSignedCandidatesUseCase](container, nil)
 
 	libConfig.BindDependency[usecase.ICampaignProgress, usecase.CampaignProgressUseCase](container, nil)
+
+	libConfig.BindDependency[usecase.ICommitSpecificSigningInfo, usecase.CommitSpecificSigningInfoUseCase](container, nil)
 }
 
 // func GetComponent[AbstractType](ctx iris.Context) {
