@@ -9,6 +9,10 @@ import (
 	"github.com/kataras/iris/v12/hero"
 )
 
+var (
+	concrete_pool map[reflect.Type]interface{} = map[reflect.Type]interface{}{}
+)
+
 func BindDependency[AbstractType any, ConcreteType any](
 	container *hero.Container, concreteVal *ConcreteType,
 ) *hero.Dependency {
@@ -22,7 +26,8 @@ func BindDependency[AbstractType any, ConcreteType any](
 	if concreteVal == nil {
 
 		autowireField = true
-		concreteVal = new(ConcreteType)
+		//concreteVal = new(ConcreteType)
+		concreteVal = resolve_concrete_instance[ConcreteType](container)
 	}
 
 	_checkImplementationOrPanic(abstractType, reflect.TypeOf(concreteVal))
@@ -33,6 +38,33 @@ func BindDependency[AbstractType any, ConcreteType any](
 	dep.Explicitly()
 
 	return dep
+}
+
+func resolve_concrete_instance[Concrete_T any](container *hero.Container) *Concrete_T {
+
+	wrapType := libCommon.Wrap[Concrete_T]()
+
+	v, ok := concrete_pool[wrapType]
+
+	if !ok {
+
+		ret := new(Concrete_T)
+
+		concrete_pool[wrapType] = ret
+
+		dep := container.Register(ret)
+		dep.StructDependents = true
+		dep.Explicitly()
+
+		return ret
+	}
+
+	if ret, ok := v.(*Concrete_T); ok {
+
+		return ret
+	}
+
+	panic("there are issue when resolving concrete instance in service container concrete bool")
 }
 
 func BindAndMapDependencyToContext[AbstractType any, ConcreteType any](
