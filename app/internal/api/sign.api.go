@@ -26,7 +26,7 @@ func initCandidateSigningApi(app *iris.Application) *mvc.Application {
 				Get Signing info of a candidate
 			*/
 			activator.Handle(
-				"GET", "/campaign/{campaignUUID}/candidate/{candidateUUID}", "GetSingleCandidateSigningInfo",
+				"GET", "/candidate/{candidateUUID}", "GetSingleCandidateSigningInfo",
 				middleware.BindPresenters[requestPresenter.GetSingleCandidateSigningInfoRequest, responsePresenter.GetSingleCandidateSigningInfoResponse](container),
 			)
 

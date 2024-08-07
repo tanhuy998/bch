@@ -6,7 +6,7 @@ import (
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/common"
 	actionResultService "app/service/actionResult"
-	candidateService "app/service/candidate"
+	"app/service/signingService"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -20,8 +20,9 @@ type (
 	}
 
 	GetSingleCandidateSigningInfoUseCase struct {
-		GetSingleCanidateSigingInfoServoce candidateService.IGetSingleCandidateSigningInfo
-		ActionResultService                actionResultService.IActionResult
+		//GetSingleCanidateSigingInfoServoce candidateService.IGetSingleCandidateSigningInfo
+		ActionResultService           actionResultService.IActionResult
+		GetSingleCandidateSigningInfo signingService.IGetSingleCandidateSigningInfo
 	}
 )
 
@@ -30,19 +31,23 @@ func (this *GetSingleCandidateSigningInfoUseCase) Execute(
 	output *responsePresenter.GetSingleCandidateSigningInfoResponse,
 ) (mvc.Result, error) {
 
-	if input.CampaignUUID == "" || input.CandidateUUID == "" {
+	if input.CandidateUUID == "" {
 
 		return this.ActionResultService.ServeErrorResponse(common.ERR_INVALID_HTTP_INPUT)
 	}
 
-	singingInfo, err := this.GetSingleCanidateSigingInfoServoce.Serve(input.CampaignUUID, input.CandidateUUID)
+	// singingInfo, err := this.GetSingleCanidateSigingInfoServoce.Serve(input.CampaignUUID, input.CandidateUUID)
+	singingInfo, err := this.GetSingleCandidateSigningInfo.Serve(input.CandidateUUID)
 
 	if err != nil {
 
 		return this.ActionResultService.ServeErrorResponse(err)
 	}
 
-	HideSensitiveInfo(singingInfo)
+	if singingInfo == nil {
+
+		return this.ActionResultService.ServeErrorResponse(common.ERR_HTTP_NOT_FOUND)
+	}
 
 	output.Message = "success"
 	output.Data = singingInfo
