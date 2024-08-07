@@ -11,6 +11,7 @@ import (
 type (
 	CommitSpecificSigningInfo struct {
 		//SigningInfoUUID string                      `param:"signingInfoUUID" validate:"required"`
+		CampaignUUID  string                      `param:"campaignUUID" validate:"required"`
 		CandidateUUID string                      `param:"candidateUUID" validate:"required"`
 		Data          *model.CandidateSigningInfo `json:"data,omitempty" validate:"required"`
 	}

@@ -1,6 +1,8 @@
 package config
 
 import (
+	adminServiceAdapter "app/adapter/adminService"
+	signingServiceAdapter "app/adapter/signingService"
 	"app/infrastructure/db"
 	libConfig "app/lib/config"
 	"app/repository"
@@ -72,9 +74,23 @@ func InitializeDatabase(app router.Party) {
 	fmt.Println("Repositories Initialized.")
 }
 
+func RegisterAdapters(container *hero.Container) {
+
+	fmt.Println("Wiring dependencies adapters...")
+
+	libConfig.BindDependency[adminServiceAdapter.IGetSingleCandidate, adminService.AdminGetSingleCandidateByUUIDService](container, nil)
+	libConfig.BindDependency[signingServiceAdapter.ICountSignedCandidates, signingService.CountSignedCandidateService](container, nil)
+	libConfig.BindDependency[signingServiceAdapter.IGetCampaignSignedCandidates, signingService.GetCampaignSignedCandidates](container, nil)
+	libConfig.BindDependency[signingServiceAdapter.IGetCampaignUnSignedCandidates, signingService.GetCampaignUnSignedCandidatesService](container, nil)
+
+	fmt.Println("Wiring dependencies adapters successfully.")
+}
+
 func RegisterServices(app router.Party) {
 
 	var container *hero.Container = app.ConfigureContainer().EnableStructDependents().Container
+
+	RegisterAdapters(container)
 
 	// auth := new(authService.AuthenticateService)
 	// Dep := container.Register(auth)
@@ -94,6 +110,10 @@ func RegisterServices(app router.Party) {
 	fmt.Println("Auth service initialized.")
 
 	//libConfig.BindDependency[port.IActionResult, usecase.ActionResultUseCase](container, nil)
+
+	fmt.Println("Wiring dependencies...")
+
+	libConfig.BindDependency[signingService.ICountSignedCandidate, signingService.CountSignedCandidateService](container, nil)
 
 	/*
 		init app validator
@@ -130,9 +150,13 @@ func RegisterServices(app router.Party) {
 
 	libConfig.BindDependency[candidateService.ICandidateSigningCommitLogger, candidateService.CandidateSigningCommmitLoggerService](container, nil)
 
+	/*
+		Bind Signing Module Services
+	*/
 	libConfig.BindDependency[signingService.ICheckCandidateExistence, signingService.CheckCandidateExistenceService](container, nil)
 	libConfig.BindDependency[signingService.ISigningCommitLogger, signingService.SigningCommmitLoggerService](container, nil)
 	libConfig.BindDependency[signingService.ICommitSpecificSigningInfo, signingService.CommitSpecificSigningInfoService](container, nil)
+	//libConfig.BindDependency[signingService.IGetCampaignSignedCandidates, signingService.IGetCampaignSignedCandidates](container, nil)
 
 	/*
 		Bind Usecase Objects
@@ -162,6 +186,8 @@ func RegisterServices(app router.Party) {
 	libConfig.BindDependency[usecase.ICampaignProgress, usecase.CampaignProgressUseCase](container, nil)
 
 	libConfig.BindDependency[usecase.ICommitSpecificSigningInfo, usecase.CommitSpecificSigningInfoUseCase](container, nil)
+
+	fmt.Println("Wiring dependencies successully.")
 }
 
 // func GetComponent[AbstractType](ctx iris.Context) {

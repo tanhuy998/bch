@@ -1,7 +1,6 @@
-package adminService
+package signingService
 
 import (
-	signingServiceAdapter "app/adapter/signingService"
 	"app/domain/model"
 	libCommon "app/lib/common"
 	"app/repository"
@@ -26,7 +25,7 @@ type (
 	GetCampaignSignedCandidates struct {
 		CandidateSigningCommitRepository repository.ICandidateSigningCommit
 		CandidateRepository              repository.ICandidateRepository
-		GetSignedCandidateAdapter        signingServiceAdapter.IGetCampaignSignedCandidates
+		SigningInfoRepo                  repository.ICandidateSigningInfo
 	}
 )
 
@@ -37,47 +36,37 @@ func (this *GetCampaignSignedCandidates) Serve(
 	isPrevDir bool,
 ) (*repository.PaginationPack[model.Candidate], error) {
 
-	return this.GetSignedCandidateAdapter.Serve(campaignUUID_str, pivotObjID_str, limit, isPrevDir)
+	var (
+		pivotObjID primitive.ObjectID
+		err        error
+	)
+
+	campaignUUID, err := uuid.Parse(campaignUUID_str)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	if pivotObjID_str == "" {
+
+		pivotObjID = primitive.NilObjectID
+		err = nil
+
+	} else {
+
+		pivotObjID, err = primitive.ObjectIDFromHex(pivotObjID_str)
+	}
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	pack, err := this.Query(campaignUUID, pivotObjID, limit, isPrevDir)
+
+	return pack, err
 }
-
-// func (this *GetCampaignSignedCandidates) Serve(
-// 	campaignUUID_str string,
-// 	pivotObjID_str string,
-// 	limit int,
-// 	isPrevDir bool,
-// ) (*repository.PaginationPack[model.Candidate], error) {
-
-// 	var (
-// 		pivotObjID primitive.ObjectID
-// 		err        error
-// 	)
-
-// 	campaignUUID, err := uuid.Parse(campaignUUID_str)
-
-// 	if err != nil {
-
-// 		return nil, err
-// 	}
-
-// 	if pivotObjID_str == "" {
-
-// 		pivotObjID = primitive.NilObjectID
-// 		err = nil
-
-// 	} else {
-
-// 		pivotObjID, err = primitive.ObjectIDFromHex(pivotObjID_str)
-// 	}
-
-// 	if err != nil {
-
-// 		return nil, err
-// 	}
-
-// 	pack, err := this.Query(campaignUUID, pivotObjID, limit, isPrevDir)
-
-// 	return pack, err
-// }
 
 func (this *GetCampaignSignedCandidates) Query(
 	campaignUUID uuid.UUID,
@@ -105,54 +94,33 @@ func (this *GetCampaignSignedCandidates) Query(
 
 	pipelineAfterPivot := mongo.Pipeline{
 		bson.D{
-			{"$group",
-				bson.D{
-					{"_id", "$candidateUUID"},
-					{"lastCommit", bson.D{{"$last", "$$ROOT"}}},
+			{
+				"$match", bson.D{
+					{"campaignUUID", campaignUUID},
 				},
 			},
 		},
 		bson.D{
-			{"$lookup",
-				bson.D{
-					{"from", "candidates"},
-					{"localField", "_id"},
-					{"foreignField", "uuid"},
-					{"as", "candidates"},
+			{
+				"$lookup", bson.D{
+					{"from", "candidateSigningInfos"},
+					{"localField", "uuid"},
+					{"foreignField", "candidateUUID"},
+					{"as", "signingInfos"},
 				},
 			},
 		},
-		bson.D{
-			{"$unwind", "$candidates"},
-		},
-		bson.D{
-			{"$project",
-				bson.D{
-					{"lastCommit", 1},
-					{"candidate", "$candidates"},
-				},
-			},
-		},
+		// bson.D{
+		// 	{
+		// 		"$unwind", "$signingInfos",
+		// 	},
+		// },
 		bson.D{
 			{
 				"$match", bson.D{
-					{"candidate.campaignUUID", campaignUUID},
-				},
-			},
-		},
-		bson.D{
-			{"$limit", limit},
-		},
-		bson.D{
-			{
-				"$replaceRoot", bson.D{
 					{
-						"newRoot", bson.D{
-							{
-								"$mergeObjects", bson.A{
-									"$$ROOT.candidate",
-								},
-							},
+						"signingInfos", bson.D{
+							{"$ne", bson.A{}},
 						},
 					},
 				},
@@ -161,7 +129,7 @@ func (this *GetCampaignSignedCandidates) Query(
 		bson.D{
 			{
 				"$project", bson.D{
-					{"signingInfo", 0},
+					{"signingInfos", 0},
 				},
 			},
 		},
@@ -180,7 +148,8 @@ func (this *GetCampaignSignedCandidates) Query(
 	mainPipeLine = append(mainPipeLine, pipelineAfterPivot...)
 
 	data, err := repository.Aggregate[model.Candidate](
-		this.CandidateSigningCommitRepository.GetCollection(),
+		//this.CandidateSigningCommitRepository.GetCollection(),
+		this.CandidateRepository.GetCollection(),
 		mainPipeLine,
 		context.TODO(),
 	)

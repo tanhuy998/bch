@@ -44,7 +44,7 @@ func initCandidateSigningApi(app *iris.Application) *mvc.Application {
 			)
 
 			activator.Handle(
-				"PUT", "/candidate/{candidateUUID}", "CommitSpecificSigningInfo",
+				"PUT", "/campaign/{campaignUUID}/candidate/{candidateUUID}", "CommitSpecificSigningInfo",
 				middleware.BindPresenters[requestPresenter.CommitSpecificSigningInfo, responsePresenter.CommitSpecificSigningInfoResponse](container),
 			)
 

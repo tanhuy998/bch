@@ -1,6 +1,7 @@
 package adminService
 
 import (
+	signingServiceAdapter "app/adapter/signingService"
 	"app/domain/model"
 	libCommon "app/lib/common"
 	"app/repository"
@@ -25,47 +26,58 @@ type (
 	GetCampaignUnSignedCandidatesService struct {
 		CandidateSigningCommitRepository repository.ICandidateSigningCommit
 		CandidateRepository              repository.ICandidateRepository
+		GetUnSignedCandidateAdapter      signingServiceAdapter.IGetCampaignUnSignedCandidates
 	}
 )
 
 func (this *GetCampaignUnSignedCandidatesService) Serve(
-	campaignUUID_str string,
+	campaignUUID string,
 	pivotObjID_str string,
 	limit int,
 	isPrevDir bool,
 ) (*repository.PaginationPack[model.Candidate], error) {
 
-	var (
-		pivotObjID primitive.ObjectID
-		err        error
-	)
-
-	campaignUUID, err := uuid.Parse(campaignUUID_str)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	if pivotObjID_str == "" {
-
-		pivotObjID = primitive.NilObjectID
-		err = nil
-
-	} else {
-
-		pivotObjID, err = primitive.ObjectIDFromHex(pivotObjID_str)
-	}
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	pack, err := this.Query(campaignUUID, pivotObjID, limit, isPrevDir)
-
-	return pack, err
+	return this.GetUnSignedCandidateAdapter.Serve(campaignUUID, pivotObjID_str, limit, isPrevDir)
 }
+
+// func (this *GetCampaignUnSignedCandidatesService) Serve(
+// 	campaignUUID_str string,
+// 	pivotObjID_str string,
+// 	limit int,
+// 	isPrevDir bool,
+// ) (*repository.PaginationPack[model.Candidate], error) {
+
+// 	var (
+// 		pivotObjID primitive.ObjectID
+// 		err        error
+// 	)
+
+// 	campaignUUID, err := uuid.Parse(campaignUUID_str)
+
+// 	if err != nil {
+
+// 		return nil, err
+// 	}
+
+// 	if pivotObjID_str == "" {
+
+// 		pivotObjID = primitive.NilObjectID
+// 		err = nil
+
+// 	} else {
+
+// 		pivotObjID, err = primitive.ObjectIDFromHex(pivotObjID_str)
+// 	}
+
+// 	if err != nil {
+
+// 		return nil, err
+// 	}
+
+// 	pack, err := this.Query(campaignUUID, pivotObjID, limit, isPrevDir)
+
+// 	return pack, err
+// }
 
 func (this *GetCampaignUnSignedCandidatesService) Query(
 	campaignUUID uuid.UUID,

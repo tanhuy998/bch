@@ -28,7 +28,7 @@ func (this *CommitSpecificSigningInfoUseCase) Execute(
 	output *responsePresenter.CommitSpecificSigningInfoResponse,
 ) (mvc.Result, error) {
 
-	err := this.CommitSpecificSigningInfoService.Serve(input.CandidateUUID, input.Data)
+	err := this.CommitSpecificSigningInfoService.Serve(input.CampaignUUID, input.CandidateUUID, input.Data)
 
 	if err != nil {
 

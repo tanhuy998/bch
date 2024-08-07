@@ -1,7 +1,9 @@
 package signingService
 
 import (
+	adminServiceAdapter "app/adapter/adminService"
 	"app/domain/model"
+	"app/internal/common"
 	libCommon "app/lib/common"
 	"app/repository"
 	"context"
@@ -12,18 +14,47 @@ import (
 
 type (
 	ICommitSpecificSigningInfo interface {
-		Serve(candidateUUID string, data *model.CandidateSigningInfo) error
+		Serve(campaignUUID string, candidateUUID string, data *model.CandidateSigningInfo) error
 	}
 
 	CommitSpecificSigningInfoService struct {
-		CandidateSigningInfoRepo    repository.ICandidateSigningInfo
-		CheckCandidateExistService  ICheckCandidateExistence
-		SigningCommmitLoggerService ISigningCommitLogger
-		CandidateRepo               repository.ICandidateRepository
+		CandidateSigningInfoRepo       repository.ICandidateSigningInfo
+		CheckCandidateExistService     ICheckCandidateExistence
+		SigningCommmitLoggerService    ISigningCommitLogger
+		CandidateRepo                  repository.ICandidateRepository
+		AdminGetSingleCandidateAdapter adminServiceAdapter.IGetSingleCandidate
 	}
 )
 
-func (this *CommitSpecificSigningInfoService) Serve(candidateUUID_str string, data *model.CandidateSigningInfo) error {
+var (
+	ERR_CANDIDATE_NOT_FOUND = errors.New("CommitSpecificSigningInfo: candidate not found")
+)
+
+func (this *CommitSpecificSigningInfoService) Serve(campaignUUID_str string, candidateUUID_str string, data *model.CandidateSigningInfo) error {
+
+	candidate, err := this.AdminGetSingleCandidateAdapter.Serve(candidateUUID_str)
+
+	if err != nil {
+
+		return err
+	}
+
+	if candidate == nil {
+
+		return ERR_CANDIDATE_NOT_FOUND
+	}
+
+	campaignUUID, err := uuid.Parse(campaignUUID_str)
+
+	if err != nil {
+
+		return common.ERR_HTTP_NOT_FOUND
+	}
+
+	if *candidate.CampaignUUID != campaignUUID {
+
+		return common.ERR_BAD_REQUEST
+	}
 
 	candidateUUID, err := uuid.Parse(candidateUUID_str)
 
@@ -79,6 +110,7 @@ func (this *CommitSpecificSigningInfoService) Serve(candidateUUID_str string, da
 		*/
 		data.UUID = *signingInfoUUID
 		data.CandidateUUID = candidateUUID
+		data.CampaignUUID = campaignUUID
 
 		err = this.CandidateSigningInfoRepo.Create(data, context.TODO())
 	}

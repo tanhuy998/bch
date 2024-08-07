@@ -1,6 +1,7 @@
 package adminService
 
 import (
+	signingServiceAdapter "app/adapter/signingService"
 	"app/domain/valueObject"
 	"app/internal/common"
 	"app/repository"
@@ -23,6 +24,8 @@ type (
 		CandidateSigningCommitRepository repository.ICandidateSigningCommit
 		CandidateRepository              repository.ICandidateRepository
 		CampaignRepository               repository.ICampaignRepository
+		//CountSignedCandidateServie       signingService.ICountSignedCandidate
+		CountSignedCandidateAdapter signingServiceAdapter.ICountSignedCandidates
 	}
 )
 
@@ -114,7 +117,7 @@ func (this *CandidateSigningReportService) countCampaignCandidates(
 	}
 
 	if len(data) == 0 {
-
+		fmt.Println(12)
 		return 0, common.ERR_HTTP_NOT_FOUND
 	}
 
@@ -139,61 +142,67 @@ func (this *CandidateSigningReportService) countSignedCandidates(
 	campaignUUID uuid.UUID,
 ) (int64, error) {
 
-	data, err := repository.Aggregate[valueObject.CampaignSignedCandidateCount](
-		this.CandidateRepository.GetCollection(),
-		mongo.Pipeline{
-			bson.D{
-				{"$lookup",
-					bson.D{
-						{"from", "candidateSigningCommits"},
-						{"localField", "uuid"},
-						{"foreignField", "candidateUUID"},
-						{"as", "commits"},
-					},
-				},
-			},
-			bson.D{
-				{"$unwind",
-					bson.D{
-						{"path", "$commits"},
-						{"includeArrayIndex", "index"},
-					},
-				},
-			},
-			bson.D{
-				{"$group",
-					bson.D{
-						{"_id",
-							bson.D{
-								{"campaignUUID", "$campaignUUID"},
-								{"index", "$index"},
-							},
-						},
-						{"signedCount", bson.D{{"$count", bson.D{}}}},
-					},
-				},
-			},
-			bson.D{
-				{
-					"$match", bson.D{
-						{"_id.campaignUUID", campaignUUID},
-						{"_id.index", 0},
-					},
-				},
-			},
-		},
-		context.TODO(),
-	)
+	// data, err := repository.Aggregate[valueObject.CampaignSignedCandidateCount](
+	// 	this.CandidateRepository.GetCollection(),
+	// 	mongo.Pipeline{
+	// 		bson.D{
+	// 			{"$lookup",
+	// 				bson.D{
+	// 					{"from", "candidateSigningCommits"},
+	// 					{"localField", "uuid"},
+	// 					{"foreignField", "candidateUUID"},
+	// 					{"as", "commits"},
+	// 				},
+	// 			},
+	// 		},
+	// 		bson.D{
+	// 			{"$unwind",
+	// 				bson.D{
+	// 					{"path", "$commits"},
+	// 					{"includeArrayIndex", "index"},
+	// 				},
+	// 			},
+	// 		},
+	// 		bson.D{
+	// 			{"$group",
+	// 				bson.D{
+	// 					{"_id",
+	// 						bson.D{
+	// 							{"campaignUUID", "$campaignUUID"},
+	// 							{"index", "$index"},
+	// 						},
+	// 					},
+	// 					{"signedCount", bson.D{{"$count", bson.D{}}}},
+	// 				},
+	// 			},
+	// 		},
+	// 		bson.D{
+	// 			{
+	// 				"$match", bson.D{
+	// 					{"_id.campaignUUID", campaignUUID},
+	// 					{"_id.index", 0},
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// 	context.TODO(),
+	// )
+
+	// count, err := this.CountSignedCandidateServie.Serve(campaignUUID)
+
+	count, err := this.CountSignedCandidateAdapter.Serve(campaignUUID)
 
 	if err != nil {
 
 		return 0, err
 	}
 
-	if len(data) == 0 {
+	// if len(data) == 0 {
 
-		return 0, nil
-	}
+	// 	return 0, nil
+	// }
 
-	return data[0].SignedCount, nil
+	// return data[0].SignedCount, nil
+
+	return count, nil
 }

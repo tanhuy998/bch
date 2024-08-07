@@ -8,7 +8,8 @@ import (
 
 type CandidateSigningInfo struct {
 	UUID           uuid.UUID       `json:"-" bson:"uuid"`
-	CandidateUUID  uuid.UUID       `json:"-" bson:"candidateUUID"`
+	CandidateUUID  uuid.UUID       `json:"-" bson:"candidateUUID"` // foreign key
+	CampaignUUID   uuid.UUID       `json:"-" bson:"campaignUUID"`  // foreign key
 	CivilIndentity CitizenIdentity `json:"civilIdentity" bson:"civilIdentity" validate:"required"`
 	Politic        PoliticDetail   `json:"politic" bson:"politic"`
 	Education      EducationDetail `json:"education" bson:"education"`
