@@ -18,7 +18,7 @@ export default class CandidateSigningEndpoint extends HttpEndpoint {
         
         return super.fetch(
             {
-                method: "PATCH",
+                method: "PUT",
                 body: JSON.stringify({
                     data: signingInfo,
                 })
@@ -26,6 +26,32 @@ export default class CandidateSigningEndpoint extends HttpEndpoint {
             undefined,
             `/campaign/${campaignUUID}/candidate/${candidateUUID}`,
         )
+    }
+
+    /**
+     * 
+     * @param {string} uuid 
+     * @returns {candidate_signing_info_t}
+     */
+    async getByCandidateUUID(uuid) {
+
+        try {
+
+            const res = await super.fetch(
+                {
+                    method: "GET"
+                },
+                undefined,
+                `/candidate/${uuid}`
+            )
+            
+            return Object.assign(new candidate_signing_info_t(), res?.data)
+        }
+        catch (e) {
+
+            throw e;
+        }
+        
     }
 
     async handShake(campaignUUID, candidateUUID) {

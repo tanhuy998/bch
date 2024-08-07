@@ -80,7 +80,7 @@ export default function SingleCandidatePage({ usecase }) {
     }, []);
 
     const tabs = {
-        'Signed Informations': <_SignedInformations />
+        'Signed Informations': <_SignedInformations usecase={usecase} candidateUUID={uuid}/>
     }
 
     return (
@@ -103,24 +103,43 @@ export default function SingleCandidatePage({ usecase }) {
     )
 }
 
-function _SignedInformations() {
+function _SignedInformations({usecase, candidateUUID}) {
 
-    /**@type {candidate_model_t} */
-    const candidateData = useContext(PageContext)?.candidateData;
-    const signingInfo = candidateData?.signingInfo;
+    // /**@type {candidate_model_t} */
+    // const candidateData = useContext(PageContext)?.candidateData;
+    // const signingInfo = candidateData?.signingInfo;
+
+    const [signingInfo, setSigningInfo] = useState(undefined);
     const hasData = typeof signingInfo === 'object';
+
+    useEffect(() => {
+
+        usecase.getCandidateSigingInfo(candidateUUID)
+                .then(data => {
+                    setSigningInfo(data)
+                })
+                .catch(e => {
+
+
+                })
+
+    }, [])
 
     if (!hasData) {
 
-        return <></>;
+        return (
+            <>
+                <h5>Candidate hasn't signed yet</h5>
+            </>
+        );
     }
 
-    const civilIdentity = signingInfo.civilIdentity;
-    const education = signingInfo.education;
-    const politic = signingInfo.politic;
-    const family = signingInfo.family;
+    const civilIdentity = signingInfo?.civilIdentity;
+    const education = signingInfo?.education;
+    const politic = signingInfo?.politic;
+    const family = signingInfo?.family;
 
-    console.log('signing info', hasData, signingInfo)
+    //console.log('signing info', hasData, signingInfo)
     return (
         <>
             <div className="card">
