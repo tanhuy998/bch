@@ -2,6 +2,7 @@ package config
 
 import (
 	adminServiceAdapter "app/adapter/adminService"
+	passwordServiceAdapter "app/adapter/passwordService"
 	signingServiceAdapter "app/adapter/signingService"
 	"app/infrastructure/db"
 	libConfig "app/lib/config"
@@ -10,6 +11,7 @@ import (
 	adminService "app/service/admin"
 	authService "app/service/auth"
 	candidateService "app/service/candidate"
+	passwordService "app/service/password"
 	"app/service/signingService"
 	usecase "app/useCase"
 	"fmt"
@@ -59,6 +61,21 @@ func InitializeDatabase(app router.Party) {
 	fmt.Println("DBMS client initialized.")
 
 	fmt.Println("Initialize Repositories...")
+	libConfig.BindDependency[repository.IUser](
+		container, new(repository.UserRepository).Init(db),
+	)
+	libConfig.BindDependency[repository.ICommandGroup](
+		container, new(repository.CommandGroupRepository).Init(db),
+	)
+	libConfig.BindDependency[repository.ICommandGroupUser](
+		container, new(repository.CommandGroupUserRepository).Init(db),
+	)
+	libConfig.BindDependency[repository.ICommandGroupUserRole](
+		container, new(repository.CommandGroupUserRoleRepository).Init(db),
+	)
+	libConfig.BindDependency[repository.IRole](
+		container, new(repository.RoleRepository).Init(db),
+	)
 	libConfig.BindDependency[repository.ICampaignRepository](
 		container, new(repository.CampaignRepository).Init(db),
 	)
@@ -83,15 +100,37 @@ func RegisterAdapters(container *hero.Container) {
 	libConfig.BindDependency[signingServiceAdapter.ICountSignedCandidates, signingService.CountSignedCandidateService](container, nil)
 	libConfig.BindDependency[signingServiceAdapter.IGetCampaignSignedCandidates, signingService.GetCampaignSignedCandidates](container, nil)
 	libConfig.BindDependency[signingServiceAdapter.IGetCampaignUnSignedCandidates, signingService.GetCampaignUnSignedCandidatesService](container, nil)
+	libConfig.BindDependency[passwordServiceAdapter.IPassword, passwordService.PasswordService](container, nil)
 
 	fmt.Println("Wiring dependencies adapters successfully.")
+}
+
+func RegisterAuthServices(container *hero.Container) {
+
+	db := db.GetDB()
+
+	authService.Initialize(db)
+
+	libConfig.BindDependency[authService.IAuthService, authService.AuthenticationService](container, nil)
+
+	libConfig.BindDependency[authService.IGetSingleUser, authService.GetSingleUser](container, nil)
+	libConfig.BindDependency[authService.ICreateUser, authService.CreateUserService](container, nil)
+
+	libConfig.BindDependency[usecase.ICreateUser, usecase.CreateUserUsecase](container, nil)
+}
+
+func RegisterUtilServices(container *hero.Container) {
+	libConfig.BindDependency[context.Validator, validator.Validate](container, validator.New())
+	libConfig.BindDependency[actionResultService.IActionResult, actionResultService.ResponseResultService](container, nil)
 }
 
 func RegisterServices(app router.Party) {
 
 	var container *hero.Container = app.ConfigureContainer().EnableStructDependents().Container
 
+	RegisterUtilServices(container)
 	RegisterAdapters(container)
+	RegisterAuthServices(container)
 
 	// auth := new(authService.AuthenticateService)
 	// Dep := container.Register(auth)
@@ -106,7 +145,7 @@ func RegisterServices(app router.Party) {
 	// 	return auth
 	// })
 
-	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticateService](container, nil, AUTH)
+	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticationService](container, nil, AUTH)
 
 	fmt.Println("Auth service initialized.")
 
@@ -119,8 +158,7 @@ func RegisterServices(app router.Party) {
 	/*
 		init app validator
 	*/
-	libConfig.BindDependency[context.Validator, validator.Validate](container, validator.New())
-	libConfig.BindDependency[actionResultService.IActionResult, actionResultService.ResponseResultService](container, nil)
+
 	/*
 		Bind Admin Campaign controller dependent services
 	*/

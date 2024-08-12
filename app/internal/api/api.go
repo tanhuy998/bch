@@ -26,4 +26,5 @@ func Init(app *iris.Application) {
 	initCandidateSigningApi(app).EnableStructDependents()
 	initCampaignGroupApi(app).EnableStructDependents()
 	initCandidateGroupApi(app).EnableStructDependents()
+	initAuthApi(app).EnableStructDependents()
 }

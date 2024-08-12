@@ -1,9 +1,8 @@
 package authService
 
 import (
+	"app/repository"
 	"context"
-	"fmt"
-	"os"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -49,54 +48,64 @@ type AuthorizationLicense struct {
 	Claims []AuthorizationClaim
 }
 
-type AuthenticateService struct {
-	vault *auth_vault
-}
+// type AuthenticateService struct {
+// 	vault *auth_vault
+// }
 
-func New(connString string) *AuthenticateService {
+type (
+	// IIdentityManipulator interface {
+	// 	CreateUser(username string, password string) error
+	// 	AssignUserToCommandGroup(userUUID uuid.UUID, commandGroupUUID uuid.UUID) (*model.CommandGroupUser, error)
+	// 	GrantCommandGroupUserRole(commandGroupUserUUID uuid.UUID, RoleUUID uuid.UUID) error
+	// 	GetGroupMembers(GroupUUID uuid.UUID, pivot primitive.ObjectID, limit int, isPrev bool) (*repository.PaginationPack[authValueObject.CommandGroupUserEntity], error)
+	// }
 
-	ret := new(AuthenticateService)
-	ret.vault = &auth_vault{}
-
-	ret.SetConnString(connString)
-	privateKey, err := retrievePrivateKey()
-
-	if err != nil {
-
-		ret.vault.pending_error = err
+	IAuthorize interface {
+		AuthorizeClaims(token string, field AuthorizationField, claims []AuthorizationGroup) (*context.Context, error)
+		AuthorizeGroup(token string, field AuthorizationField, groups []AuthorizationGroup) (*context.Context, error)
 	}
 
-	ret.vault.private_key = privateKey
+	IAuthenticate interface {
+		ValidateCredential(uname string, pass string) (string, error)
+		SignUp(uname string, pass string) error
+		ChangePassword(uname string) error
+	}
 
-	return ret
-}
+	IAuthService interface {
+		IAuthenticate
+		IAuthorize
+	}
 
-func (this *AuthenticateService) SetConnString(connString string) {
+	AuthenticationService struct {
+		UserRepo                 repository.IUser
+		CommandGroupRepo         repository.ICommandGroup
+		CommandGroupUserRepo     repository.ICommandGroupUser
+		CommandGroupUserRoleRepo repository.ICommandGroupUserRole
+		RoleRepo                 repository.IRole
+	}
+)
 
-	this.vault.conn_string = connString
-}
-
-func (this *AuthenticateService) AuthorizeClaims(token string, field AuthorizationField, claims []AuthorizationGroup) (*context.Context, error) {
+func (this *AuthenticationService) AuthorizeClaims(token string, field AuthorizationField, claims []AuthorizationGroup) (*context.Context, error) {
 
 	return nil, nil
 }
 
-func (this *AuthenticateService) AuthorizeGroup(token string, field AuthorizationField, groups []AuthorizationGroup) (*context.Context, error) {
+func (this *AuthenticationService) AuthorizeGroup(token string, field AuthorizationField, groups []AuthorizationGroup) (*context.Context, error) {
 
 	return nil, nil
 }
 
-func (this *AuthenticateService) ValidateCredential(uname string, pass string) (string, error) {
+func (this *AuthenticationService) ValidateCredential(uname string, pass string) (string, error) {
 
 	return "", nil
 }
 
-func (this *AuthenticateService) SignUp(uname string, pass string) error {
+func (this *AuthenticationService) SignUp(uname string, pass string) error {
 
 	return nil
 }
 
-func (this *AuthenticateService) ChangePassword(uname string) error {
+func (this *AuthenticationService) ChangePassword(uname string) error {
 
 	return nil
 }
@@ -115,22 +124,3 @@ func (this *AuthenticateService) ChangePassword(uname string) error {
 
 // 	//return this.core.AuthorizeGroup(token, field, groups)
 // }
-
-func retrievePrivateKey() ([]byte, error) {
-
-	if len(private_key) > 0 {
-
-		return private_key, nil
-	}
-
-	env := os.Getenv(ENV_JWT_PRIVATE_KEY)
-
-	if env == "" {
-
-		return nil, fmt.Errorf("No Private key for authentication")
-	}
-
-	private_key = []byte(env)
-
-	return private_key, nil
-}
