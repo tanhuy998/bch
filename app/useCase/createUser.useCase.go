@@ -5,6 +5,7 @@ import (
 	responsePresenter "app/domain/presenter/response"
 	actionResultService "app/service/actionResult"
 	authService "app/service/auth"
+	"encoding/json"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -38,13 +39,20 @@ func (this *CreateUserUsecase) Execute(
 
 	ret, err := this.GetSingleUserService.SearchByUsername(input.Data.Username)
 
-	// if err != nil {
+	if err != nil {
 
-	// 	return nil, err
-	// }
+		return nil, err
+	}
 
 	output.Message = "success"
 	output.Data = ret
 
-	return this.ActionResult.ServeResponse(output)
+	resContent, err := json.Marshal(output)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return this.ActionResult.Prepare().SetCode(201).SetContent(resContent), nil
 }
