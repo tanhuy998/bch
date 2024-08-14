@@ -35,12 +35,36 @@ func (this *crud_mongo_repository[Model_T]) Create(model *Model_T, ctx context.C
 
 func (this *crud_mongo_repository[Model_T]) Find(query bson.D, ctx context.Context) (*Model_T, error) {
 
-	return findOneDocument[Model_T](query, this.collection, ctx)
+	ret, err := findOneDocument[Model_T](query, this.collection, ctx)
+
+	if err == mongo.ErrNoDocuments {
+
+		return nil, nil
+	}
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return ret, nil
 }
 
 func (this *crud_mongo_repository[Model_T]) FindOneByUUID(uuid uuid.UUID, ctx context.Context) (*Model_T, error) {
 
-	return findDocumentByUUID[Model_T](uuid, this.collection, ctx)
+	ret, err := findDocumentByUUID[Model_T](uuid, this.collection, ctx)
+
+	if err == mongo.ErrNoDocuments {
+
+		return nil, nil
+	}
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return ret, nil
 }
 
 // func (this *crud_mongo_repository[Model_T]) FindByUUID(uuid uuid.UUID, ctx context.Context) ([]*Model_T, error) {

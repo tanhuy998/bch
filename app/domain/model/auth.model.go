@@ -7,7 +7,8 @@ type (
 		UUID          uuid.UUID `json:"uuid" bson:"uuid"`
 		Name          string    `json:"name" bson:"name"`
 		Username      string    `json:"-" bson:"usename" validate:"required"`
-		PassWord      []byte    `json:"-" bson:"password" validate:"required"`
+		PassWord      string    `json:"-" bson:"password" validate:"required"`
+		Secret        []byte    `json:"-" bson:"secrect"`
 		IsDeactivated bool      `json:"deactivated" bson:"deactivated"`
 		//Info          UserInfo  `json:"userInfo" bson:"userInfo"`
 	}

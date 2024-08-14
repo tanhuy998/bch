@@ -45,17 +45,17 @@ func (this *CreateUserService) Serve(
 		return nil, ERR_USER_NAME_EXISTS
 	}
 
-	pw, err := this.PasswordAdapter.Generate(password)
+	model := &model.User{
+		UUID:     uuid.New(),
+		Username: username,
+		PassWord: password,
+	}
+
+	err = this.PasswordAdapter.Resolve(model)
 
 	if err != nil {
 
 		return nil, err
-	}
-
-	model := &model.User{
-		UUID:     uuid.New(),
-		Username: username,
-		PassWord: pw,
 	}
 
 	fmt.Println(this.UserRepo.GetCollection().Name())
