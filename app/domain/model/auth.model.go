@@ -18,7 +18,7 @@ type (
 	// }
 
 	CommandGroup struct {
-		UUID uuid.UUID `json:"uuid" bson:"uuid" validate:"required"`
+		UUID uuid.UUID `json:"uuid,omitempty" bson:"uuid"`
 		Name string    `json:"name" bson:"name" validate:"required"`
 	}
 

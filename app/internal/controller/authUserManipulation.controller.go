@@ -9,12 +9,12 @@ import (
 )
 
 type (
-	AuthManipulationController struct {
+	AuthUserManipulationController struct {
 		CreateUserUsecase usecase.ICreateUser
 	}
 )
 
-func (this *AuthManipulationController) CreateUser(
+func (this *AuthUserManipulationController) CreateUser(
 	input *requestPresenter.CreateUserRequestPresenter,
 	output *responsePresenter.CreateUserPresenter,
 ) (mvc.Result, error) {

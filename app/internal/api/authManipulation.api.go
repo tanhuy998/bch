@@ -1,38 +1,65 @@
 package api
 
 import (
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	"app/internal/controller"
-	"app/internal/middleware"
+	authManipulationApi "app/internal/api/auth/manipulation"
 
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/mvc"
 )
 
-func initAuthApi(app *iris.Application) *mvc.Application {
+func initAuthApi(app *iris.Application) {
 
-	router := app.Party("/auth/man")
+	genericRouter := app.Party("/auth")
 
-	container := router.ConfigureContainer(func(api *iris.APIContainer) {
+	// add authorization for this router
+	manipulationRouter := genericRouter.Party("/man")
 
-		api.Use(middleware.Authentication())
-	}).Container
+	//userManipulationRouter := manipulationRouter.Party("/users")
+	authManipulationApi.RegisterUserApi(manipulationRouter)
+	//registerUserApi(userManipulationRouter).EnableStructDependents()
 
-	controller := new(controller.AuthManipulationController)
-
-	wrapper := mvc.New(router)
-
-	wrapper.Handle(
-		controller,
-		applyRoutes(func(activator *mvc.ControllerActivator) {
-
-			activator.Handle(
-				"POST", "/user", "CreateUser",
-				middleware.BindPresenters[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter](container),
-			)
-		}),
-	)
-
-	return wrapper
+	commandRouter := manipulationRouter.Party("/command")
+	authManipulationApi.RegisterCommandGroupApi(commandRouter)
+	// commandGroupRouter := commandRouter.Party("/groups")
+	// registerCommandGroupApi(commandGroupRouter)
 }
+
+// func initAuthApi(parentRouter router.Party) *mvc.Application {
+
+// 	router := parentRouter.Party("/man")
+
+// 	router.ConfigureContainer(func(api *iris.APIContainer) {
+
+// 		api.Use(middleware.Authentication())
+// 	})
+
+// 	registerUserApi(router)
+
+// }
+
+// func registerUserApi(parentRoute router.Party) *mvc.Application {
+
+// 	router := parentRoute.Party("/users")
+
+// 	container := router.ConfigureContainer().Container
+// 	controller := new(controller.AuthManipulationController)
+
+// 	wrapper := mvc.New(router)
+
+// 	wrapper.Handle(
+// 		controller,
+// 		applyRoutes(func(activator *mvc.ControllerActivator) {
+
+// 			activator.Handle(
+// 				"POST", "/", "CreateUser",
+// 				middleware.BindPresenters[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter](container),
+// 			)
+
+// 		}),
+// 	)
+
+// 	return wrapper
+// }
+
+// func registerCommandGroupApi(parentRoute router.Party) *mvc.Application {
+
+// }
