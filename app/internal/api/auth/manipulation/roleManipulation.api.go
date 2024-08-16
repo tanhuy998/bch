@@ -10,9 +10,9 @@ import (
 	"github.com/kataras/iris/v12/mvc"
 )
 
-func RegisterCommandGroupApi(parentRoute router.Party) *mvc.Application {
+func RegisterRoleApi(parentRoute router.Party) *mvc.Application {
 
-	router := parentRoute.Party("/groups")
+	router := parentRoute.Party("/roles")
 
 	container := router.ConfigureContainer().Container
 	controller := new(controller.AuthCommandGroupManipulationController)
@@ -22,18 +22,10 @@ func RegisterCommandGroupApi(parentRoute router.Party) *mvc.Application {
 	var hanldFunc mvc.OptionFunc = func(activator *mvc.ControllerActivator) {
 
 		activator.Handle(
-			"GET", "/{userUUID:uuid}", "GetParticipatedGroups",
-		)
-
-		activator.Handle(
-			"POST", "/", "CreateGroup",
+			"POST", "/", "CreateRole",
 			middleware.BindPresenters[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse](container),
 		)
 
-		activator.Handle(
-			"POST", "/{groupUUID:uuid}/user/{userUUID:uuid}", "AddUserToGroup",
-			middleware.BindPresenters[requestPresenter.AddUserToCommandGroupRequest, responsePresenter.AddUserToCommandGroupResponse](container),
-		)
 	}
 
 	wrapper.Handle(

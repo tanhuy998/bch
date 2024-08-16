@@ -5,6 +5,7 @@ import (
 	"app/repository"
 	"context"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -20,9 +21,16 @@ type (
 	}
 )
 
-func (this *GetSingleUser) Serve(uuid string) (*model.User, error) {
+func (this *GetSingleUser) Serve(uuid_str string) (*model.User, error) {
 
-	return nil, nil
+	userUUID, err := uuid.Parse(uuid_str)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return this.UserRepo.FindOneByUUID(userUUID, context.TODO())
 }
 
 func (this *GetSingleUser) SearchByUsername(username string) (*model.User, error) {

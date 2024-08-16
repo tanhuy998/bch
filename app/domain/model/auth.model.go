@@ -25,8 +25,8 @@ type (
 	CommandGroupUser struct {
 		UUID             uuid.UUID `json:"uuid" bson:"uuid" validate:"required"`
 		UserUUID         uuid.UUID `json:"userUUID" bson:"userUUID"`
-		CommandGroupUUID uuid.UUID `json:"authGroupUUID" bson:"authGroupUUID"`
-		RoleUUID         uuid.UUID `json:"roleUUID" bson:"roleUUID"`
+		CommandGroupUUID uuid.UUID `json:"commandGroupUUID" bson:"commandGroupUUID"`
+		//RoleUUID         uuid.UUID `json:"roleUUID" bson:"roleUUID"`
 	}
 
 	CommandGroupUserRole struct {

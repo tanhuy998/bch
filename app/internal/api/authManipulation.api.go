@@ -14,11 +14,11 @@ func initAuthApi(app *iris.Application) {
 	manipulationRouter := genericRouter.Party("/man")
 
 	//userManipulationRouter := manipulationRouter.Party("/users")
-	authManipulationApi.RegisterUserApi(manipulationRouter)
+	authManipulationApi.RegisterUserApi(manipulationRouter).EnableStructDependents()
 	//registerUserApi(userManipulationRouter).EnableStructDependents()
 
 	commandRouter := manipulationRouter.Party("/command")
-	authManipulationApi.RegisterCommandGroupApi(commandRouter)
+	authManipulationApi.RegisterCommandGroupApi(commandRouter).EnableStructDependents()
 	// commandGroupRouter := commandRouter.Party("/groups")
 	// registerCommandGroupApi(commandGroupRouter)
 }
