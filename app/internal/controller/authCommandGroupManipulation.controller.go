@@ -10,8 +10,9 @@ import (
 
 type (
 	AuthCommandGroupManipulationController struct {
-		CreateCommandGroupUseCase    usecase.ICreateCommandGroup
-		AddUserToCommandGroupUseCase usecase.IAddUserToCommandGroup
+		CreateCommandGroupUseCase          usecase.ICreateCommandGroup
+		AddUserToCommandGroupUseCase       usecase.IAddUserToCommandGroup
+		GetParitcipatedCommandGroupUseCase usecase.IGetParticipatedCommandGroups
 	}
 )
 
@@ -31,6 +32,14 @@ func (this *AuthCommandGroupManipulationController) AddUserToGroup(
 	return this.AddUserToCommandGroupUseCase.Execute(input, output)
 }
 
-func (this *AuthCommandGroupManipulationController) GetParticipatedGroups() {
+func (this *AuthCommandGroupManipulationController) GetAllGroups() {
 
+}
+
+func (this *AuthCommandGroupManipulationController) GetParticipatedGroups(
+	input *requestPresenter.GetParticipatedGroups,
+	output *responsePresenter.GetParticipatedGroups,
+) (mvc.Result, error) {
+
+	return this.GetParitcipatedCommandGroupUseCase.Execute(input, output)
 }

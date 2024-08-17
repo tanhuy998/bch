@@ -22,8 +22,13 @@ func RegisterCommandGroupApi(parentRoute router.Party) *mvc.Application {
 	var hanldFunc mvc.OptionFunc = func(activator *mvc.ControllerActivator) {
 
 		activator.Handle(
-			"GET", "/{userUUID:uuid}", "GetParticipatedGroups",
+			"GET", "/participated/user/{userUUID:uuid}", "GetParticipatedGroups",
+			middleware.BindPresenters[requestPresenter.GetParticipatedGroups, responsePresenter.GetParticipatedGroups](container),
 		)
+
+		// activator.Handle(
+		// 	"GET", "/", "GetAllGroups",
+		// )
 
 		activator.Handle(
 			"POST", "/", "CreateGroup",
