@@ -17,6 +17,9 @@ type (
 	IRole interface {
 		IMongoDBRepository
 		ICRUDMongoRepository[model.Role]
+		//FindMany(query bson.D, ctx context.Context) ([]*model.Role, error)
+		IFindMany[model.Role]
+		ICreateMany[model.Role]
 	}
 
 	RoleRepository struct {
@@ -66,4 +69,14 @@ func (this *RoleRepository) UpdateOneByUUID(uuid uuid.UUID, model *model.Role, c
 func (this *RoleRepository) Delete(query bson.D, ctx context.Context) error {
 
 	return this.crud.Delete(query, ctx)
+}
+
+func (this *RoleRepository) FindMany(query bson.D, ctx context.Context, projection ...bson.E) ([]*model.Role, error) {
+
+	return this.crud.FindMany(query, ctx, projection...)
+}
+
+func (this *RoleRepository) CreateMany(models []*model.Role, ctx context.Context) error {
+
+	return this.crud.CreateMany(models, ctx)
 }

@@ -17,6 +17,8 @@ type (
 	ICommandGroupUserRole interface {
 		IMongoDBRepository
 		ICRUDMongoRepository[model.CommandGroupUserRole]
+		//CreateMany(models []*model.CommandGroupUserRole, ctx context.Context) error
+		ICreateMany[model.CommandGroupUserRole]
 	}
 
 	CommandGroupUserRoleRepository struct {
@@ -66,4 +68,19 @@ func (this *CommandGroupUserRoleRepository) UpdateOneByUUID(uuid uuid.UUID, mode
 func (this *CommandGroupUserRoleRepository) Delete(query bson.D, ctx context.Context) error {
 
 	return this.crud.Delete(query, ctx)
+}
+
+func (this *CommandGroupUserRoleRepository) CreateMany(
+	models []*model.CommandGroupUserRole,
+	ctx context.Context,
+) error {
+
+	_, err := insertMany(models, this.collection, context.TODO())
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
 }

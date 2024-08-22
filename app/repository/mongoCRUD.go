@@ -37,6 +37,65 @@ var (
 	empty_bson = bson.D{{}}
 )
 
+func insertMany[T any](
+	models []*T,
+	collection *mongo.Collection,
+	ctx context.Context,
+) (*mongo.InsertManyResult, error) {
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	var documents []interface{} = make([]interface{}, len(models))
+
+	for i, model := range models {
+
+		documents[i] = model
+	}
+
+	return collection.InsertMany(
+		ctx, documents,
+	)
+}
+
+func findManyDocuments[T any](
+	query bson.D,
+	collection *mongo.Collection,
+	ctx context.Context,
+	projections ...bson.E,
+) ([]*T, error) {
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	var opts *options.FindOptions
+
+	if len(projections) > 0 {
+
+		opts = options.Find().SetProjection(projections)
+	}
+
+	cur, err := collection.Find(ctx, query, opts)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	res, err := ParseCursor[T](cur, ctx)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return res, nil
+}
+
 func ParseCursor[T any](cursor *mongo.Cursor, ctx context.Context) ([]*T, error) {
 
 	defer cursor.Close(context.TODO())

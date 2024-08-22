@@ -17,6 +17,8 @@ func initAuthApi(app *iris.Application) {
 	authManipulationApi.RegisterUserApi(manipulationRouter).EnableStructDependents()
 	//registerUserApi(userManipulationRouter).EnableStructDependents()
 
+	authManipulationApi.RegisterRoleApi(manipulationRouter).EnableStructDependents()
+
 	commandRouter := manipulationRouter.Party("/command")
 	authManipulationApi.RegisterCommandGroupApi(commandRouter).EnableStructDependents()
 	// commandGroupRouter := commandRouter.Party("/groups")

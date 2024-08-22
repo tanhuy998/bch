@@ -113,20 +113,27 @@ func RegisterAuthServices(container *hero.Container) {
 
 	libConfig.BindDependency[authService.IAuthService, authService.AuthenticationService](container, nil)
 
+	libConfig.BindDependency[authService.IGetAllRoles, authService.GetAllRolesService](container, nil)
+
 	libConfig.BindDependency[authService.IGetSingleUser, authService.GetSingleUser](container, nil)
 	libConfig.BindDependency[authService.IGetSingleCommandGroup, authService.GetSingleCommandGroupService](container, nil)
 	libConfig.BindDependency[authService.ICheckUserInCommandGroup, authService.CheckUserInCommandGroupService](container, nil)
+	libConfig.BindDependency[authService.ICheckCommandGroupUserRole, authService.CheckCommandGroupUserRoleService](container, nil)
 
 	libConfig.BindDependency[authService.ICreateUser, authService.CreateUserService](container, nil)
 	libConfig.BindDependency[authService.ICreateCommandGroup, authService.CreateCommandGroupService](container, nil)
 	libConfig.BindDependency[authService.IAddUserToCommandGroup, authService.AddUserToCommandGroupService](container, nil)
 	libConfig.BindDependency[authService.IGetParticipatedCommandGroups, authService.GetParticipatedCommandGroupsService](container, nil)
+	libConfig.BindDependency[authService.IGrantCommandGroupRolesToUser, authService.GrantCommandGroupRolesToUserService](container, nil)
+	libConfig.BindDependency[authService.ICheckCommandGroupUserRole, authService.CheckCommandGroupUserRoleService](container, nil)
 
 	libConfig.BindDependency[usecase.ICreateUser, usecase.CreateUserUsecase](container, nil)
 
 	libConfig.BindDependency[usecase.ICreateCommandGroup, usecase.CreateCommandGroupUseCase](container, nil)
 	libConfig.BindDependency[usecase.IAddUserToCommandGroup, usecase.AddUserToCommandGroupUseCase](container, nil)
 	libConfig.BindDependency[usecase.IGetParticipatedCommandGroups, usecase.GetParticipatedCommandGroupsUseCase](container, nil)
+	libConfig.BindDependency[usecase.IGrantCommandGroupRolesToUser, usecase.GrantCommandGroupRolesToUserUseCase](container, nil)
+	libConfig.BindDependency[usecase.IGetAllRoles, usecase.GetAllRolesUseCase](container, nil)
 }
 
 func RegisterUtilServices(container *hero.Container) {

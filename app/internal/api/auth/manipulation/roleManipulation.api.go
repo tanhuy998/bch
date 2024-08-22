@@ -15,11 +15,16 @@ func RegisterRoleApi(parentRoute router.Party) *mvc.Application {
 	router := parentRoute.Party("/roles")
 
 	container := router.ConfigureContainer().Container
-	controller := new(controller.AuthCommandGroupManipulationController)
+	controller := new(controller.AuthRoleManipulationController)
 
 	wrapper := mvc.New(router)
 
 	var hanldFunc mvc.OptionFunc = func(activator *mvc.ControllerActivator) {
+
+		activator.Handle(
+			"GET", "/", "GetAllRoles",
+			middleware.BindPresenters[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse](container),
+		)
 
 		activator.Handle(
 			"POST", "/", "CreateRole",
