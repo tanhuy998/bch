@@ -30,6 +30,11 @@ func RegisterUserApi(parentRoute router.Party) *mvc.Application {
 			"GET", "/group/{groupUUID:uuid}", "GetGroupUsers",
 			middleware.BindPresenters[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse](container),
 		)
+
+		activator.Handle(
+			"PATCH", "/{userUUID:uuid}", "ModifyUser",
+			middleware.BindPresenters[requestPresenter.ModifyUserRequest, responsePresenter.ModifyUserResponse](container),
+		)
 	}
 
 	wrapper.Handle(

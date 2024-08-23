@@ -3,7 +3,7 @@ package requestPresenter
 type (
 	InputUser struct {
 		//UUID          uuid.UUID `json:"uuid" bson:"uuid"`
-		Name     string `json:"name" bson:"name"`
+		Name     string `json:"name" bson:"name" validate:"required"`
 		Username string `json:"username" validate:"required"`
 		Password string `json:"password" validate:"required"`
 		//IsDeactivated bool   `json:"deactivated" bson:"deactivated"`

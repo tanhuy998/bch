@@ -12,6 +12,7 @@ type (
 	AuthUserManipulationController struct {
 		CreateUserUsecase   usecase.ICreateUser
 		GetGroupUserUsecase usecase.IGetGroupUsers
+		ModifyUserUsecase   usecase.IModifyUser
 	}
 )
 
@@ -29,4 +30,12 @@ func (this *AuthUserManipulationController) GetGroupUsers(
 ) (mvc.Result, error) {
 
 	return this.GetGroupUserUsecase.Execute(input, output)
+}
+
+func (this *AuthUserManipulationController) ModifyUser(
+	input *requestPresenter.ModifyUserRequest,
+	output *responsePresenter.ModifyUserResponse,
+) (mvc.Result, error) {
+
+	return this.ModifyUserUsecase.Execute(input, output)
 }

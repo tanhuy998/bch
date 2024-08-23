@@ -4,11 +4,11 @@ import "github.com/google/uuid"
 
 type (
 	User struct {
-		UUID          uuid.UUID `json:"uuid" bson:"uuid"`
+		UUID          uuid.UUID `json:"uuid" bson:"uuid,omitempty"`
 		Name          string    `json:"name,omitempty" bson:"name"`
 		Username      string    `json:"-" bson:"username" validate:"required"`
 		PassWord      string    `json:"-" bson:"password" validate:"required"`
-		Secret        []byte    `json:"-" bson:"secrect"`
+		Secret        []byte    `json:"-" bson:"secret"`
 		IsDeactivated bool      `json:"deactivated" bson:"deactivated"`
 		//Info          UserInfo  `json:"userInfo" bson:"userInfo"`
 	}
@@ -26,7 +26,6 @@ type (
 		UUID             uuid.UUID `json:"uuid" bson:"uuid" validate:"required"`
 		UserUUID         uuid.UUID `json:"userUUID" bson:"userUUID"`
 		CommandGroupUUID uuid.UUID `json:"commandGroupUUID" bson:"commandGroupUUID"`
-		Name             string    `json:"name" bson:"name" validate:"required"`
 		//RoleUUID         uuid.UUID `json:"roleUUID" bson:"roleUUID"`
 	}
 
