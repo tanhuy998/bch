@@ -6,7 +6,6 @@ import (
 	"app/repository"
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -49,6 +48,7 @@ func (this *CreateUserService) Serve(
 		UUID:     uuid.New(),
 		Username: username,
 		PassWord: password,
+		Name:     name,
 	}
 
 	err = this.PasswordAdapter.Resolve(model)
@@ -58,7 +58,6 @@ func (this *CreateUserService) Serve(
 		return nil, err
 	}
 
-	fmt.Println(this.UserRepo.GetCollection().Name())
 	err = this.UserRepo.Create(model, context.TODO())
 
 	if err != nil {
