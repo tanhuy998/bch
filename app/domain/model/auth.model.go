@@ -26,6 +26,7 @@ type (
 		UUID             uuid.UUID `json:"uuid" bson:"uuid" validate:"required"`
 		UserUUID         uuid.UUID `json:"userUUID" bson:"userUUID"`
 		CommandGroupUUID uuid.UUID `json:"commandGroupUUID" bson:"commandGroupUUID"`
+		Name             string    `json:"name" bson:"name" validate:"required"`
 		//RoleUUID         uuid.UUID `json:"roleUUID" bson:"roleUUID"`
 	}
 

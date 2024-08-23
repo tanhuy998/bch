@@ -10,7 +10,8 @@ import (
 
 type (
 	AuthUserManipulationController struct {
-		CreateUserUsecase usecase.ICreateUser
+		CreateUserUsecase   usecase.ICreateUser
+		GetGroupUserUsecase usecase.IGetGroupUsers
 	}
 )
 
@@ -20,4 +21,12 @@ func (this *AuthUserManipulationController) CreateUser(
 ) (mvc.Result, error) {
 
 	return this.CreateUserUsecase.Execute(input, output)
+}
+
+func (this *AuthUserManipulationController) GetGroupUsers(
+	input *requestPresenter.GetGroupUsersRequest,
+	output *responsePresenter.GetGroupUsersResponse,
+) (mvc.Result, error) {
+
+	return this.GetGroupUserUsecase.Execute(input, output)
 }

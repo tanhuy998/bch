@@ -119,6 +119,7 @@ func RegisterAuthServices(container *hero.Container) {
 	libConfig.BindDependency[authService.IGetSingleCommandGroup, authService.GetSingleCommandGroupService](container, nil)
 	libConfig.BindDependency[authService.ICheckUserInCommandGroup, authService.CheckUserInCommandGroupService](container, nil)
 	libConfig.BindDependency[authService.ICheckCommandGroupUserRole, authService.CheckCommandGroupUserRoleService](container, nil)
+	libConfig.BindDependency[authService.IGetCommandGroupUsers, authService.GetCommandGroupUsersService](container, nil)
 
 	libConfig.BindDependency[authService.ICreateUser, authService.CreateUserService](container, nil)
 	libConfig.BindDependency[authService.ICreateCommandGroup, authService.CreateCommandGroupService](container, nil)
@@ -134,6 +135,7 @@ func RegisterAuthServices(container *hero.Container) {
 	libConfig.BindDependency[usecase.IGetParticipatedCommandGroups, usecase.GetParticipatedCommandGroupsUseCase](container, nil)
 	libConfig.BindDependency[usecase.IGrantCommandGroupRolesToUser, usecase.GrantCommandGroupRolesToUserUseCase](container, nil)
 	libConfig.BindDependency[usecase.IGetAllRoles, usecase.GetAllRolesUseCase](container, nil)
+	libConfig.BindDependency[usecase.IGetGroupUsers, usecase.GetGroupUsersUseCase](container, nil)
 }
 
 func RegisterUtilServices(container *hero.Container) {

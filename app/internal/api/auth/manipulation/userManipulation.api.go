@@ -26,6 +26,10 @@ func RegisterUserApi(parentRoute router.Party) *mvc.Application {
 			middleware.BindPresenters[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter](container),
 		)
 
+		activator.Handle(
+			"GET", "/group/{groupUUID:uuid}", "GetGroupUsers",
+			middleware.BindPresenters[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse](container),
+		)
 	}
 
 	wrapper.Handle(
