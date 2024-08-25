@@ -31,11 +31,6 @@ func RegisterCommandGroupApi(parentRoute router.Party) *mvc.Application {
 		// )
 
 		activator.Handle(
-			"POST", "/{groupUUID}/grant/user/{userUUID}", "GrantCommandGroupRolesToUser",
-			middleware.BindPresenters[requestPresenter.GrantCommandGroupRolesToUserRequest, responsePresenter.GrantCommandGroupRolesToUserResponse](container),
-		)
-
-		activator.Handle(
 			"POST", "/", "CreateGroup",
 			middleware.BindPresenters[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse](container),
 		)

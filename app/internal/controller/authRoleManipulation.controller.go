@@ -10,12 +10,17 @@ import (
 
 type (
 	AuthRoleManipulationController struct {
-		GetAllRolesUseCase usecase.IGetAllRoles
+		GetAllRolesUseCase                  usecase.IGetAllRoles
+		GrantCommandGroupRolesToUserUseCase usecase.IGrantCommandGroupRolesToUser
 	}
 )
 
-func (this *AuthRoleManipulationController) CreateRole() {
+func (this *AuthRoleManipulationController) GrantCommandGroupRolesToUser(
+	input *requestPresenter.GrantCommandGroupRolesToUserRequest,
+	output *responsePresenter.GrantCommandGroupRolesToUserResponse,
+) (mvc.Result, error) {
 
+	return this.GrantCommandGroupRolesToUserUseCase.Execute(input, output)
 }
 
 func (this *AuthRoleManipulationController) GetAllRoles(

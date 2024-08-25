@@ -26,11 +26,15 @@ func RegisterRoleApi(parentRoute router.Party) *mvc.Application {
 			middleware.BindPresenters[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse](container),
 		)
 
-		activator.Handle(
-			"POST", "/", "CreateRole",
-			middleware.BindPresenters[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse](container),
-		)
+		// activator.Handle(
+		// 	"POST", "/", "CreateRole",
+		// 	middleware.BindPresenters[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse](container),
+		// )
 
+		activator.Handle(
+			"POST", "/group/{groupUUID}/user/{userUUID}", "GrantCommandGroupRolesToUser",
+			middleware.BindPresenters[requestPresenter.GrantCommandGroupRolesToUserRequest, responsePresenter.GrantCommandGroupRolesToUserResponse](container),
+		)
 	}
 
 	wrapper.Handle(
