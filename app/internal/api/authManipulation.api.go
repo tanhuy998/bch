@@ -3,10 +3,10 @@ package api
 import (
 	authManipulationApi "app/internal/api/auth/manipulation"
 
-	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/core/router"
 )
 
-func initAuthApi(app *iris.Application) {
+func initAuthApi(app router.Party) {
 
 	genericRouter := app.Party("/auth")
 

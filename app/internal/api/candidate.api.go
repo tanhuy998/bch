@@ -8,10 +8,11 @@ import (
 	authService "app/service/auth"
 
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/mvc"
 )
 
-func initCandidateGroupApi(app *iris.Application) *mvc.Application {
+func initCandidateGroupApi(app router.Party) *mvc.Application {
 
 	router := app.Party("/candidates")
 

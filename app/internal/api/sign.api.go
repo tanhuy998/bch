@@ -7,11 +7,11 @@ import (
 	"app/internal/controller"
 	"app/internal/middleware"
 
-	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/mvc"
 )
 
-func initCandidateSigningApi(app *iris.Application) *mvc.Application {
+func initCandidateSigningApi(app router.Party) *mvc.Application {
 
 	router := app.Party("/signing")
 

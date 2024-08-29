@@ -23,8 +23,10 @@ func applyRoutes(f func(*mvc.ControllerActivator)) mvc.OptionFunc {
 
 func Init(app *iris.Application) {
 
+	tenantIsolationRouter := app.Party("/tenants/{tenantUUID:uuid}")
+
 	initCandidateSigningApi(app).EnableStructDependents()
 	initCampaignGroupApi(app).EnableStructDependents()
 	initCandidateGroupApi(app).EnableStructDependents()
-	initAuthApi(app)
+	initAuthApi(tenantIsolationRouter)
 }
