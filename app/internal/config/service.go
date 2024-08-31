@@ -13,6 +13,7 @@ import (
 	candidateService "app/service/candidate"
 	passwordService "app/service/password"
 	"app/service/signingService"
+	tenantAgentService "app/service/tenantAgent"
 	usecase "app/useCase"
 	"fmt"
 
@@ -61,6 +62,12 @@ func InitializeDatabase(app router.Party) {
 	fmt.Println("DBMS client initialized.")
 
 	fmt.Println("Initialize Repositories...")
+	libConfig.BindDependency[repository.ITenant](
+		container, new(repository.TenantRepository).Init(db),
+	)
+	libConfig.BindDependency[repository.ITenantAgent](
+		container, new(repository.TenantAgentRepository).Init(db),
+	)
 	libConfig.BindDependency[repository.IUser](
 		container, new(repository.UserRepository).Init(db),
 	)
@@ -105,7 +112,15 @@ func RegisterAdapters(container *hero.Container) {
 	fmt.Println("Wiring dependencies adapters successfully.")
 }
 
-func RegisterAuthServices(container *hero.Container) {
+func RegisterTenantDependencies(container *hero.Container) {
+
+	libConfig.BindDependency[tenantAgentService.IGetSingleTenantAgent, tenantAgentService.GetSingleTenantAgentService](container, nil)
+	libConfig.BindDependency[tenantAgentService.ICreaateTenantAgent, tenantAgentService.CreateTenantAgentService](container, nil)
+
+	libConfig.BindDependency[usecase.ICreateTenantAgent, usecase.CreateTenantAgentUseCase](container, nil)
+}
+
+func RegisterAuthDependencies(container *hero.Container) {
 
 	db := db.GetDB()
 
@@ -151,7 +166,8 @@ func RegisterServices(app router.Party) {
 
 	RegisterUtilServices(container)
 	RegisterAdapters(container)
-	RegisterAuthServices(container)
+	RegisterTenantDependencies(container)
+	RegisterAuthDependencies(container)
 
 	// auth := new(authService.AuthenticateService)
 	// Dep := container.Register(auth)

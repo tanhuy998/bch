@@ -1,0 +1,35 @@
+package api
+
+import (
+	requestPresenter "app/domain/presenter/request"
+	responsePresenter "app/domain/presenter/response"
+	"app/internal/controller"
+	"app/internal/middleware"
+
+	"github.com/kataras/iris/v12/core/router"
+	"github.com/kataras/iris/v12/mvc"
+)
+
+func initTenantApi(app router.Party) {
+
+	router := app.Party("tenants")
+
+	container := router.ConfigureContainer().Container
+
+	wrapper := mvc.New(router)
+
+	wrapper.Handle(
+		new(controller.TenantController),
+		applyRoutes(func(activator *mvc.ControllerActivator) {
+
+			activator.Handle(
+				"POST", "/agent", "CreateTenantAgent",
+				middleware.BindPresenters[requestPresenter.CreateTenantAgentRequest, responsePresenter.CreateTenantAgentResponse](container),
+			)
+
+			activator.Handle(
+				"POST", "/", "CreateTenant",
+			)
+		}),
+	)
+}

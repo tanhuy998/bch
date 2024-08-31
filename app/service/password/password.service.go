@@ -1,7 +1,7 @@
 package passwordService
 
 import (
-	"app/domain/model"
+	passwordServiceAdapter "app/adapter/passwordService"
 	"errors"
 
 	"golang.org/x/crypto/bcrypt"
@@ -18,8 +18,8 @@ var (
 type (
 	IPassword interface {
 		Generate(plain string) ([]byte, error)
-		Resolve(model *model.User) error
-		Compare(model *model.User, secret []byte) error
+		Resolve(model passwordServiceAdapter.IPasswordDispatcher) error
+		Compare(model passwordServiceAdapter.IPasswordDispatcher, secret []byte) error
 	}
 
 	PasswordService struct {
@@ -38,28 +38,35 @@ func (this *PasswordService) Generate(plain string) ([]byte, error) {
 	return hashed, nil
 }
 
-func (this *PasswordService) Compare(model *model.User, secret []byte) error {
+func (this *PasswordService) Compare(model passwordServiceAdapter.IPasswordDispatcher, secret []byte) error {
 
-	gen_secret, err := merge([]byte(model.Username), []byte(model.PassWord))
+	pw_token, err := merge(model.GetRawUsername(), model.GetRawPasword())
 
 	if err != nil {
 
 		return err
 	}
 
-	return bcrypt.CompareHashAndPassword(gen_secret, secret)
+	return bcrypt.CompareHashAndPassword(pw_token, secret)
 }
 
-func (this *PasswordService) Resolve(model *model.User) error {
+func (this *PasswordService) Resolve(model passwordServiceAdapter.IPasswordDispatcher) error {
 
-	secret, err := merge([]byte(model.Username), []byte(model.PassWord))
+	pw_token, err := merge(model.GetRawUsername(), model.GetRawPasword())
 
 	if err != nil {
 
 		return err
 	}
 
-	model.Secret = secret
+	secret, err := bcrypt.GenerateFromPassword(pw_token, COST)
+
+	if err != nil {
+
+		return err
+	}
+
+	model.SetSecret(secret)
 	return nil
 }
 
@@ -80,12 +87,11 @@ func merge(uname []byte, pw []byte) ([]byte, error) {
 	minSlice = uname
 	maxSlice = pw
 
-	if len(uname) < len(pw) {
+	if len(minSlice) > len(maxSlice) {
 
-		maxSlice, minSlice = swap(minSlice, maxSlice)
+		maxSlice, minSlice = minSlice, maxSlice
 	}
 
-	oddPart = maxSlice[len(minSlice)-1:]
 	ret = make([]byte, 0)
 
 	for i, val := range minSlice {
@@ -93,12 +99,11 @@ func merge(uname []byte, pw []byte) ([]byte, error) {
 		ret = append(ret, val, maxSlice[i])
 	}
 
-	ret = append(ret, oddPart...)
+	if len(minSlice) != len(maxSlice) {
+
+		oddPart = maxSlice[len(minSlice)-1:]
+		ret = append(ret, oddPart...)
+	}
 
 	return ret, nil
-}
-
-func swap[T any](a T, b T) (T, T) {
-
-	return b, a
 }
