@@ -2,6 +2,7 @@ package config
 
 import (
 	adminServiceAdapter "app/adapter/adminService"
+	authServiceAdapter "app/adapter/auth"
 	passwordServiceAdapter "app/adapter/passwordService"
 	signingServiceAdapter "app/adapter/signingService"
 	"app/infrastructure/db"
@@ -108,6 +109,8 @@ func RegisterAdapters(container *hero.Container) {
 	libConfig.BindDependency[signingServiceAdapter.IGetCampaignSignedCandidates, signingService.GetCampaignSignedCandidates](container, nil)
 	libConfig.BindDependency[signingServiceAdapter.IGetCampaignUnSignedCandidates, signingService.GetCampaignUnSignedCandidatesService](container, nil)
 	libConfig.BindDependency[passwordServiceAdapter.IPassword, passwordService.PasswordService](container, nil)
+	libConfig.BindDependency[authServiceAdapter.IGetSingleUserService, authService.GetSingleUser](container, nil)
+	libConfig.BindDependency[authServiceAdapter.ICreateUserService, authService.CreateUserService](container, nil)
 
 	fmt.Println("Wiring dependencies adapters successfully.")
 }

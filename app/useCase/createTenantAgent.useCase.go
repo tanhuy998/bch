@@ -29,7 +29,7 @@ func (this *CreateTenantAgentUseCase) Execute(
 	output *responsePresenter.CreateTenantAgentResponse,
 ) (mvc.Result, error) {
 
-	err := this.CreateTenantAgentService.Serve(input.Data)
+	newAgent, err := this.CreateTenantAgentService.Serve(input.Data.Username, input.Data.Password, input.Data.Name)
 
 	if err != nil {
 
@@ -37,6 +37,7 @@ func (this *CreateTenantAgentUseCase) Execute(
 	}
 
 	output.Message = "success"
+	output.Data = newAgent
 	rawContent, err := json.Marshal(output)
 
 	if err != nil {
