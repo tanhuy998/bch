@@ -10,7 +10,6 @@ import (
 
 	"github.com/gofor-little/env"
 	"github.com/iris-contrib/middleware/cors"
-	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
 )
 
@@ -32,9 +31,10 @@ var (
 
 func init() {
 
-	readSSlCert()
+	//godotenv.Load()
 
-	godotenv.Load()
+	db.Init()
+	readSSlCert()
 
 	host_names = bootstrap.RetrieveCORSHosts()
 
@@ -129,6 +129,7 @@ func main() {
 }
 
 func readSSlCert() {
+
 	__dir, err := os.Getwd()
 
 	if err != nil {

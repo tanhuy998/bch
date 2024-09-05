@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"regexp"
 	"time"
@@ -24,7 +25,7 @@ const (
 var (
 	dbClient                  *mongo.Client
 	db                        *mongo.Database
-	MONGOD_CONN_STR_REGEX, _  = regexp.Compile(`^mongodb(\+srv)?:\/\/\[username:password\]@.*`)
+	MONGOD_CONN_STR_REGEX     = regexp.MustCompile(`^mongodb(\+srv)?:\/\/\[username:password\]@.*`)
 	ERR_DB_CONNECTION_TIMEOUT = errors.New("database connection timeout")
 )
 
@@ -37,47 +38,52 @@ type (
 	MongoCandidateCollection = mongo.Collection
 )
 
-// func init() {
+func Init() {
 
-// 	var err error
+	var err error
 
-// 	dbClient, err = newClient()
+	dbClient, err = newClient()
 
-// 	if err != nil {
+	if err != nil {
 
-// 		panic(err)
-// 	}
-
-// 	GetDB()
-
-// 	fmt.Println("Initialize database connection")
-// }
-
-func GetClient() (*mongo.Client, error) {
-
-	if dbClient != nil {
-
-		return dbClient, nil
+		panic(err)
 	}
 
-	return newClient()
+	err = CheckDBConnection()
+
+	if err != nil {
+
+		panic(err)
+	}
+
+	dbName := os.Getenv(ENV_MONGOD_DB_NAME)
+	db = dbClient.Database(dbName)
+
+	fmt.Println("Initialize database connection")
+}
+
+func GetClient() *mongo.Client {
+
+	// if dbClient != nil {
+
+	// 	return dbClient, nil
+	// }
+
+	// return newClient()
+
+	return dbClient
 }
 
 func CheckDBConnection() error {
 
-	client, err := GetClient()
-
-	if err != nil {
-
-		return err
-	}
+	client := GetClient()
 
 	for attempt := 3; attempt > 0; attempt-- {
 
 		ctx, cancel := context.WithTimeout(context.Background(), PING_TIMEOUT+time.Second)
 		defer cancel()
 
-		err = client.Ping(ctx, nil)
+		err := client.Ping(ctx, nil)
 
 		if err == nil {
 
@@ -88,22 +94,27 @@ func CheckDBConnection() error {
 	return ERR_DB_CONNECTION_TIMEOUT
 }
 
+// func initDB() *mongo.Database {
+
+// 	if db != nil {
+
+// 		return db
+// 	}
+
+// 	client, err := GetClient()
+
+// 	if err != nil {
+
+// 		panic(err)
+// 	}
+
+// 	dbName := os.Getenv(ENV_MONGOD_DB_NAME)
+// 	return client.Database(dbName)
+// }
+
 func GetDB() *mongo.Database {
 
-	if db != nil {
-
-		return db
-	}
-
-	client, err := GetClient()
-
-	if err != nil {
-
-		panic(err)
-	}
-
-	dbName := os.Getenv(ENV_MONGOD_DB_NAME)
-	return client.Database(dbName)
+	return db
 }
 
 func newClient() (*mongo.Client, error) {
