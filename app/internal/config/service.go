@@ -5,6 +5,7 @@ import (
 	authServiceAdapter "app/adapter/auth"
 	passwordServiceAdapter "app/adapter/passwordService"
 	signingServiceAdapter "app/adapter/signingService"
+	tenantAgentServiceAdapter "app/adapter/tenantAgentService"
 	"app/infrastructure/db"
 	libConfig "app/lib/config"
 	"app/repository"
@@ -14,6 +15,7 @@ import (
 	candidateService "app/service/candidate"
 	passwordService "app/service/password"
 	"app/service/signingService"
+	tenantService "app/service/tenant"
 	tenantAgentService "app/service/tenantAgent"
 	usecase "app/useCase"
 	"fmt"
@@ -39,12 +41,7 @@ func InitializeDatabase(app router.Party) {
 	var container *hero.Container = app.ConfigureContainer().Container
 
 	fmt.Println("Initialize DBMS client...")
-	client, err := db.GetClient()
-
-	if err != nil {
-
-		panic(err)
-	}
+	client := db.GetClient()
 
 	db := db.GetDB()
 
@@ -111,6 +108,7 @@ func RegisterAdapters(container *hero.Container) {
 	libConfig.BindDependency[passwordServiceAdapter.IPassword, passwordService.PasswordService](container, nil)
 	libConfig.BindDependency[authServiceAdapter.IGetSingleUserService, authService.GetSingleUser](container, nil)
 	libConfig.BindDependency[authServiceAdapter.ICreateUserService, authService.CreateUserService](container, nil)
+	libConfig.BindDependency[tenantAgentServiceAdapter.IGetSingleTenantAgentServiceAdapter, tenantAgentService.GetSingleTenantAgentService](container, nil)
 
 	fmt.Println("Wiring dependencies adapters successfully.")
 }
@@ -120,7 +118,11 @@ func RegisterTenantDependencies(container *hero.Container) {
 	libConfig.BindDependency[tenantAgentService.IGetSingleTenantAgent, tenantAgentService.GetSingleTenantAgentService](container, nil)
 	libConfig.BindDependency[tenantAgentService.ICreaateTenantAgent, tenantAgentService.CreateTenantAgentService](container, nil)
 
+	libConfig.BindDependency[tenantService.IGetSingleTenant, tenantService.GetSingleTenantService](container, nil)
+	libConfig.BindDependency[tenantService.ICreateTenant, tenantService.CreateTenantService](container, nil)
+
 	libConfig.BindDependency[usecase.ICreateTenantAgent, usecase.CreateTenantAgentUseCase](container, nil)
+	libConfig.BindDependency[usecase.ICreateTenant, usecase.CreateTenantUseCase](container, nil)
 }
 
 func RegisterAuthDependencies(container *hero.Container) {

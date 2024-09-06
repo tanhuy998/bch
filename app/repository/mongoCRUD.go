@@ -439,6 +439,11 @@ func updateDocument[T any](uuid *uuid.UUID, model *T, collection *mongo.Collecti
 	return result, nil
 }
 
+func UpdateOneByUUID[T any](uuid *uuid.UUID, model *T, collection *mongo.Collection, ctx context.Context, extraFilters ...bson.E) (*mongo.UpdateResult, error) {
+
+	return updateDocument(uuid, model, collection, ctx, extraFilters...)
+}
+
 func deleteDocument(uuid uuid.UUID, collection *mongo.Collection, ctx context.Context) error {
 
 	if ctx == nil {

@@ -29,6 +29,7 @@ func initTenantApi(app router.Party) {
 
 			activator.Handle(
 				"POST", "/", "CreateTenant",
+				middleware.BindPresenters[requestPresenter.CreateTenantRequest, responsePresenter.CreateTenantResponse](container),
 			)
 		}),
 	)

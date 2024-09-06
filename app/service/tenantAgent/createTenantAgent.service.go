@@ -4,6 +4,7 @@ import (
 	authServiceAdapter "app/adapter/auth"
 	passwordServiceAdapter "app/adapter/passwordService"
 	"app/domain/model"
+	libCommon "app/lib/common"
 	"app/repository"
 	"context"
 	"errors"
@@ -40,8 +41,8 @@ func (this CreateTenantAgentService) Serve(username string, password string, nam
 	}
 
 	newAgentModel := &model.TenantAgent{
-		UUID:        uuid.New(),
-		UserUUID:    newUser.UUID,
+		UUID:        libCommon.PointerPrimitive(uuid.New()),
+		UserUUID:    &newUser.UUID,
 		Deactivated: true,
 	}
 
