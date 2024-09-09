@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	host_names           []string
+	//host_names           []string
 	cors_allowed_methods []string = []string{
 		"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH",
 	}
@@ -36,7 +36,8 @@ func init() {
 	db.Init()
 	readSSlCert()
 
-	host_names = bootstrap.RetrieveCORSHosts()
+	//host_names = bootstrap.RetrieveCORSHosts()
+	//config.InitializeAuthEncryptionData()
 
 	err := db.CheckDBConnection()
 
@@ -70,7 +71,7 @@ func main() {
 	//app.UseGlobal(middleware.RedirectInternalError())
 	app.UseRouter(
 		cors.New(cors.Options{
-			AllowedOrigins:   host_names,
+			AllowedOrigins:   bootstrap.GetHostNames(),
 			AllowedMethods:   cors_allowed_methods,
 			AllowedHeaders:   cors_allowed_headers,
 			AllowCredentials: true,

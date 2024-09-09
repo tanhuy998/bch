@@ -7,12 +7,14 @@ import (
 	signingServiceAdapter "app/adapter/signingService"
 	tenantAgentServiceAdapter "app/adapter/tenantAgentService"
 	"app/infrastructure/db"
+	"app/internal/bootstrap"
 	libConfig "app/lib/config"
 	"app/repository"
 	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 	authService "app/service/auth"
 	candidateService "app/service/candidate"
+	jwtTokenService "app/service/jwtToken"
 	passwordService "app/service/password"
 	"app/service/signingService"
 	tenantService "app/service/tenant"
@@ -165,18 +167,8 @@ func RegisterUtilServices(container *hero.Container) {
 	libConfig.BindDependency[actionResultService.IActionResult, actionResultService.ResponseResultService](container, nil)
 }
 
-func RegisterServices(app router.Party) {
+func RegisterAuthServices(container *hero.Container) {
 
-	var container *hero.Container = app.ConfigureContainer().EnableStructDependents().Container
-
-	RegisterUtilServices(container)
-	RegisterAdapters(container)
-	RegisterTenantDependencies(container)
-	RegisterAuthDependencies(container)
-
-	// auth := new(authService.AuthenticateService)
-	// Dep := container.Register(auth)
-	// Dep.DestType = libCommon.InterfaceOf((*authService.IAuthService)(nil))
 	fmt.Println("Initialize Auth service...")
 	//BindDependency[authService.IAuthService, authService.AuthenticateService](container, nil)
 	// auth := new(authService.AuthenticateService)
@@ -189,9 +181,32 @@ func RegisterServices(app router.Party) {
 
 	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticationService](container, nil, AUTH)
 
+	jwtService := jwtTokenService.NewECDSAService(*bootstrap.GetJWTEncryptionPrivateKey(), *bootstrap.GetJWTEncryptionPublicKey())
+
+	libConfig.BindDependency[jwtTokenService.IJWTTokenGenerator](container, jwtService)
+	libConfig.BindDependency[jwtTokenService.IJWTTokenSigning](container, jwtService)
+	libConfig.BindDependency[jwtTokenService.IJWTTokenVerification](container, jwtService)
+	libConfig.BindDependency[jwtTokenService.IJWTTokenAuthenticator](container, jwtService)
+
 	fmt.Println("Auth service initialized.")
+}
+
+func RegisterServices(app router.Party) {
+
+	var container *hero.Container = app.ConfigureContainer().EnableStructDependents().Container
+
+	RegisterUtilServices(container)
+	RegisterAdapters(container)
+	RegisterTenantDependencies(container)
+	RegisterAuthDependencies(container)
+
+	// auth := new(authService.AuthenticateService)
+	// Dep := container.Register(auth)
+	// Dep.DestType = libCommon.InterfaceOf((*authService.IAuthService)(nil))
 
 	//libConfig.BindDependency[port.IActionResult, usecase.ActionResultUseCase](container, nil)
+
+	RegisterAuthServices(container)
 
 	fmt.Println("Wiring dependencies...")
 

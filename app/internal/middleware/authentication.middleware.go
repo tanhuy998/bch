@@ -1,20 +1,44 @@
 package middleware
 
 import (
+	accessTokenServicePort "app/adapter/accessToken"
+	authServiceAdapter "app/adapter/auth"
+	"app/internal"
+	"app/internal/common"
 	authService "app/service/auth"
+	jwtTokenService "app/service/jwtToken"
+	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 
 	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/hero"
 )
 
 const (
-	AUTH_USER      = "auth_user"
-	AUTH_HEADER    = "AUTH_HEADER"
-	JWT_PUBLIC_KEY = "JWT_PUBLIC_KEY"
+	AUTH_USER                = "auth_user"
+	AUTH_HEADER              = "AUTH_HEADER"
+	JWT_PUBLIC_KEY           = "JWT_PUBLIC_KEY"
+	AUTH_REQ_HEADER          = "Authorization"
+	AUTH_REQ_HEADER_SCHEME   = "bearer "
+	AUTH_COOKIE_ACCESS_TOKEN = "access-token"
 )
 
-type SigningMethod jwt.SigningMethodECDSA
+var (
+	ERR_INVALID_ACCESS_TOKEN = errors.New("invalid access token")
+	ERR_MISSING_AUTH_HEADER  = errors.New("missing authorization header")
+	ERR_ACCESS_TOKEN_EXPIRED = errors.New("access token expired")
+)
+
+type (
+	SigningMethod jwt.SigningMethodECDSA
+
+	// auth_err_body_reponse struct {
+	// 	Message string `json:"message"`
+	// }
+)
 
 func Authentication() func(iris.Context, authService.IAuthenticate) {
 
@@ -43,35 +67,99 @@ func Authentication() func(iris.Context, authService.IAuthenticate) {
 	}
 }
 
-func handleInvalidInput(ctx iris.Context, err error) {
+func AuthenticationBearer(container *hero.Container) iris.Handler {
+
+	return container.Handler(
+		fetch_and_store_user_data,
+	)
+}
+
+func Auth(container *hero.Container) iris.Handler {
+
+	return container.Handler(
+		authentication_func,
+	)
+}
+
+func authentication_func(ctx iris.Context, accessTokenHandler accessTokenServicePort.IAccessTokenHandler) {
+
+	tokenString, err := retrieveTokenString(ctx)
+
+	if err != nil {
+
+		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	accessToken, err := accessTokenHandler.Read(tokenString)
+
+	switch err {
+	case nil:
+	case jwtTokenService.ERR_SIGNING_METHOD_MISMATCH:
+		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, err.Error())
+	default:
+		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusUnauthorized, err.Error())
+	}
+
+	if err != nil {
+
+		return
+	}
+
+	errCode, err := validateAccessToken(accessToken)
+
+	if err != nil {
+
+		common.SendDefaulJsonBodyAndEndRequest(ctx, errCode, err.Error())
+		return
+	}
+
+	//ctx.RegisterDependency(accessToken)
+	ctx.Values().Set(internal.CTX_ACCESS_TOKEN_KEY, accessToken)
+	ctx.Next()
+}
+
+func validateAccessToken(accessToken accessTokenServicePort.IAccessToken) (errorCode int, err error) {
+
+	switch {
+	case accessToken.Expired():
+		return http.StatusForbidden, ERR_ACCESS_TOKEN_EXPIRED
+	default:
+		return 0, nil
+	}
+}
+
+func fetch_and_store_user_data(ctx iris.Context, accessToken *jwt.Token, fetchAuthDataService authServiceAdapter.IFetchAuthData) {
+
+	aud, err := accessToken.Claims.GetAudience()
+
+	if err != nil {
+
+		return
+	}
+
+	if len(aud) == 0 || len(aud) > 1 {
+
+		return
+	}
 
 }
 
-func unAuthenticated(ctx iris.Context) {
+func retrieveTokenString(ctx iris.Context) (string, error) {
 
-	ctx.StatusCode(401)
+	str := ctx.Request().Header.Get(AUTH_REQ_HEADER)
 
-	ctx.JSON(struct {
-		Message string `json:"message"`
-	}{
-		Message: "unauthenticated",
-	})
+	if str == "" {
 
-	ctx.EndRequest()
-}
+		return "", ERR_MISSING_AUTH_HEADER
+	}
 
-func verifyToken(strToken string) (*jwt.Token, error) {
+	token_str := strings.TrimPrefix(str, AUTH_REQ_HEADER_SCHEME)
 
-	// token := jwt.New(jwt.SigningMethodES256)
-	// token.Raw = strToken
+	if token_str == "" || len(token_str) < 100 {
 
-	return jwt.Parse(strToken, func(token *jwt.Token) (interface{}, error) {
+		return "", ERR_INVALID_ACCESS_TOKEN
+	}
 
-		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
-
-			return nil, fmt.Errorf("")
-		}
-
-		return JWT_PUBLIC_KEY, nil
-	})
+	return token_str, nil
 }

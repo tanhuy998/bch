@@ -8,7 +8,13 @@ import (
 )
 
 const (
-	ENV_HOSTS = "HOSTS"
+	ENV_HOSTS         = "HOSTS"
+	ENV_PROJECT_STAGE = "PROJECT_STAGE"
+)
+
+var (
+	host_names            []string
+	host_names_dictionary map[string]bool = make(map[string]bool)
 )
 
 // var (
@@ -16,9 +22,34 @@ const (
 // 	isLoaded bool = false
 // )
 
+func GetHostNames() []string {
+
+	return host_names
+}
+
+func HasHostName(name string) bool {
+
+	if _, ok := host_names_dictionary[name]; !ok {
+
+		return false
+	}
+
+	return true
+}
+
 func init() {
 
+	defer ignorePanicWhenUnitTesting()
+
 	godotenv.Load()
+	host_names = RetrieveCORSHosts()
+
+	for _, val := range host_names {
+
+		host_names_dictionary[val] = true
+	}
+
+	InitializeAuthEncryptionData()
 }
 
 // func InitEnv() error {
@@ -48,4 +79,16 @@ func RetrieveCORSHosts() []string {
 	hostString := os.Getenv(ENV_HOSTS) // env.Get(ENV_HOSTS, "*")
 
 	return strings.Split(hostString, ",")
+}
+
+func ignorePanicWhenUnitTesting() {
+
+	r := recover()
+
+	switch {
+	case r == nil:
+	case os.Getenv(ENV_PROJECT_STAGE) == "unit-testing":
+	default:
+		panic(r)
+	}
 }
