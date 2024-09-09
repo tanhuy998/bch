@@ -3,25 +3,25 @@ package middleware
 import (
 	"app/domain/presenter"
 	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
+	"app/internal/common"
+	middlewareHelper "app/internal/middlewareHelper"
 	libCommon "app/lib/common"
-	libError "app/lib/error"
 	"io"
+	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/hero"
 )
 
-type (
-	PresenterInitializer[RequestPresenter_T, ResponsePresenter_T any] func(req *RequestPresenter_T, res *ResponsePresenter_T)
-	RequestPresenterInitializer[RequestPresenter_T any]               func(req *RequestPresenter_T)
-)
+// type (
+// 	PresenterInitializer[RequestPresenter_T, ResponsePresenter_T any] func(req *RequestPresenter_T, res *ResponsePresenter_T)
+// 	RequestPresenterInitializer[RequestPresenter_T any]               func(req *RequestPresenter_T)
+// )
 
 func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 	container *hero.Container,
-	initializers ...PresenterInitializer[RequestPresenter_T, ResponsePresenter_T],
+	initializers ...middlewareHelper.PresenterInitializer[RequestPresenter_T, ResponsePresenter_T],
 ) iris.Handler {
 
 	if container == nil {
@@ -35,9 +35,10 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 
 		if validator == nil {
 
-			ctx.StopWithJSON(500, &responsePresenter.ErrorResponse{
-				Message: "no validator",
-			})
+			// ctx.StopWithJSON(500, &responsePresenter.ErrorResponse{
+			// 	Message: "no validator",
+			// })
+			common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, "no validator")
 			return
 		}
 
@@ -47,7 +48,18 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 			err      error
 		)
 
-		runInitializers(request, response, initializers)
+		if val, ok := any(request).(middlewareHelper.IContextBringAlong); ok {
+
+			val.ReceiveContext(ctx)
+		}
+
+		err = runInitializers(request, response, initializers)
+
+		if err != nil {
+
+			common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, err.Error())
+			return
+		}
 
 		if p, ok := any(request).(requestPresenter.IRequestBinder); ok {
 
@@ -58,23 +70,38 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 			err = bindRequestDefault(request, ctx)
 		}
 
-		if !libError.IsAcceptable(err, io.EOF) {
-			/*
-				io.EOF returned when request body is empty
-			*/
-			ctx.StopWithJSON(400, &responsePresenter.ErrorResponse{
-				Message: err.Error(),
-			})
+		// if !libError.IsAcceptable(err, io.EOF) {
+		// 	/*
+		// 		io.EOF returned when request body is empty
+		// 	*/
+		// 	// ctx.StopWithJSON(400, &responsePresenter.ErrorResponse{
+		// 	// 	Message: err.Error(),
+		// 	// })
+		// 	sendBodyAndEndRequest(ctx, http.StatusBadRequest, )
+		// 	return
+		// }
+
+		switch err {
+		case nil:
+		case io.EOF:
+		default:
+			common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		err = validator.Struct(request)
+		// err = validator.Struct(request)
 
-		if err != nil {
+		// if err != nil {
 
-			ctx.StopWithJSON(400, &responsePresenter.ErrorResponse{
-				Message: err.Error(),
-			})
+		// 	ctx.StopWithJSON(400, &responsePresenter.ErrorResponse{
+		// 		Message: err.Error(),
+		// 	})
+		// 	return
+		// }
+
+		if err := validator.Struct(request); err != nil {
+
+			common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -147,13 +174,20 @@ func isEmptyPresenter[T any]() bool {
 func runInitializers[RequestPresenter_T, ResponsePresenter_T any](
 	req *RequestPresenter_T,
 	res *ResponsePresenter_T,
-	initializers []PresenterInitializer[RequestPresenter_T, ResponsePresenter_T],
-) {
+	initializers []middlewareHelper.PresenterInitializer[RequestPresenter_T, ResponsePresenter_T],
+) error {
 
 	for _, f := range initializers {
 
-		f(req, res)
+		err := f(req, res)
+
+		if err != nil {
+
+			return err
+		}
 	}
+
+	return nil
 }
 
 func bindRequestDefault[RequestPresenter_T any](presenter *RequestPresenter_T, ctx iris.Context) error {
@@ -164,25 +198,25 @@ func bindRequestDefault[RequestPresenter_T any](presenter *RequestPresenter_T, c
 	return nil
 }
 
-func isValidationError(err error) bool {
+// func isValidationError(err error) bool {
 
-	if _, ok := err.(*validator.InvalidValidationError); ok {
+// 	if _, ok := err.(*validator.InvalidValidationError); ok {
 
-		return true
-	}
+// 		return true
+// 	}
 
-	if _, ok := err.(validator.ValidationErrors); ok {
+// 	if _, ok := err.(validator.ValidationErrors); ok {
 
-		return true
-	}
+// 		return true
+// 	}
 
-	return false
-}
+// 	return false
+// }
 
-func mustHaveContainer(container *hero.Container) {
+// func mustHaveContainer(container *hero.Container) {
 
-	if container == nil {
+// 	if container == nil {
 
-		panic("BindPresenter middleware need container to function")
-	}
-}
+// 		panic("BindPresenter middleware need container to function")
+// 	}
+// }
