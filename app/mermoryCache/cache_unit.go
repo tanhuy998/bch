@@ -118,11 +118,11 @@ func (this *cache_unit[Key_T, Value_T]) Delete(key Key_T) (deleted bool) {
 Update a cached value, when the update method invoked, its locks until
 the commitFunc commits the value to the cache room
 */
-func (this *cache_unit[Key_T, Value_T]) Update(key Key_T) (value Value_T, commitFunc CommitFunction[Value_T]) {
+func (this *cache_unit[Key_T, Value_T]) Update(key Key_T) (value Value_T, keyExists bool, commitFunc CommitFunction[Value_T]) {
 
-	cache, exists := this.getCache(key)
+	cache, keyExists := this.getCache(key)
 
-	if !exists {
+	if !keyExists {
 
 		return
 	}
@@ -135,5 +135,5 @@ func (this *cache_unit[Key_T, Value_T]) Update(key Key_T) (value Value_T, commit
 		cache.Unlock()
 	}
 
-	return cache.value, commitFunc
+	return cache.value, true, commitFunc
 }
