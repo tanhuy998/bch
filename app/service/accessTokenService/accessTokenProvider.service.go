@@ -2,7 +2,10 @@ package accessTokenService
 
 import (
 	accessTokenServicePort "app/adapter/accessToken"
+	authServiceAdapter "app/adapter/auth"
 	jwtTokenServicePort "app/adapter/jwtTokenService"
+	"app/repository"
+	"context"
 	"errors"
 	"time"
 
@@ -22,18 +25,18 @@ var (
 )
 
 type (
-	IAccessTokenHandler interface {
-		accessTokenServicePort.IAccessTokenHandler
-	}
+	IAccessTokenHandler = accessTokenServicePort.IAccessTokenManipulator
 
-	JWTAccessTokenHandlerService struct {
+	JWTAccessTokenManipulatorService struct {
 		//JWtTokenSigningServive      jwtTokenServicePort.IJWTTokenSigning
 		AudienceList               accessTokenServicePort.AccessTokenAudienceList
-		JWTTokenManipulatorService jwtTokenServicePort.IJWTTokenManipulator
+		FetchAuthDataService       authServiceAdapter.IFetchAuthData
+		JWTTokenManipulatorService jwtTokenServicePort.IAsymmetricJWTTokenManipulator
+		UserRepo                   repository.IUser
 	}
 )
 
-func (this *JWTAccessTokenHandlerService) Read(token_str string) (IAccessToken, error) {
+func (this *JWTAccessTokenManipulatorService) Read(token_str string) (IAccessToken, error) {
 
 	token, err := this.JWTTokenManipulatorService.VerifyTokenString(token_str)
 
@@ -42,22 +45,46 @@ func (this *JWTAccessTokenHandlerService) Read(token_str string) (IAccessToken, 
 		return nil, err
 	}
 
-	return NewFromToken(token)
+	return newFromToken(token)
 }
 
-func (this *JWTAccessTokenHandlerService) Generate(subject uuid.UUID) (accessTokenServicePort.IAccessToken, error) {
+func (this *JWTAccessTokenManipulatorService) Generate(userUUID uuid.UUID, ctx context.Context) (accessTokenServicePort.IAccessToken, error) {
+
+	authData, err := this.FetchAuthDataService.Serve(userUUID, ctx)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	accessToken, err := this.makeFor(userUUID)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	accessToken.claims.AuthData = authData
+
+	return accessToken, nil
+}
+
+func (this *JWTAccessTokenManipulatorService) makeFor(userUUID uuid.UUID) (*jwt_access_token, error) {
 
 	token := this.JWTTokenManipulatorService.GenerateToken()
 
 	token.Claims = jwt_access_token_custom_claims{
 		jwt.RegisteredClaims{
-			Subject:   subject.String(),
+			Subject:   userUUID.String(),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(exp_duration)),
 			Audience:  jwt.ClaimStrings(this.AudienceList),
+			//Issuer: ,
 		},
+		nil,
 	}
 
-	accesstoken, err := NewFromToken(token)
+	accesstoken, err := newFromToken(token)
 
 	if err != nil {
 
@@ -67,11 +94,11 @@ func (this *JWTAccessTokenHandlerService) Generate(subject uuid.UUID) (accessTok
 	return accesstoken, nil
 }
 
-func (this *JWTAccessTokenHandlerService) SignedString(accessToken IAccessToken) (string, error) {
+func (this *JWTAccessTokenManipulatorService) SignString(accessToken IAccessToken) (string, error) {
 
 	if val, ok := accessToken.(*jwt_access_token); ok {
 
-		return this.JWTTokenManipulatorService.SignedString(val.jwt_token)
+		return this.JWTTokenManipulatorService.SignString(val.jwt_token)
 	}
 
 	return "", ERR_INVALID_ACCESS_TOKEN_TYPE

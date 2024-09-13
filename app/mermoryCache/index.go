@@ -3,6 +3,7 @@ package memoryCache
 import (
 	"errors"
 	"sync"
+	"time"
 )
 
 /*
@@ -16,23 +17,69 @@ type (
 )
 
 var (
-	topics *cache_vault = new(cache_vault)
+	cache_topics  *cache_vault
+	cleanupTicker *time.Ticker
+	endSignal     chan bool
 )
 
 var (
 	ERR_TOPIC_EXIST = errors.New("topic exists")
 )
 
-func GetTopic[Key_T, Value_T any](topic string) (*cache_unit[Key_T, *cache_value[Value_T]], bool) {
+func init() {
 
-	unknown, ok := topics.Load(topic)
+	cache_topics = new(cache_vault)
+	cleanupTicker = time.NewTicker(time.Minute * 2)
+
+	//go poll()
+}
+
+func poll() {
+
+	for {
+		select {
+		case <-cleanupTicker.C:
+			cleanup()
+		case <-endSignal:
+			clearAll()
+		}
+	}
+}
+
+func cleanup() {
+
+	cache_topics.Range(func(key interface{}, val interface{}) bool {
+
+		if c, ok := val.(ISelfCleanupCacheUnit); ok {
+
+			go c.cleanup()
+			return true
+		}
+
+		return true
+	})
+}
+
+func clearAll() {
+
+	cache_topics = nil
+}
+
+func Terminate() {
+
+	endSignal <- true
+}
+
+func GetTopic[Key_T, Value_T any](topic string) (*cache_unit[Key_T, Value_T], bool) {
+
+	unknown, ok := cache_topics.Load(topic)
 
 	if !ok {
 
 		return nil, false
 	}
 
-	if val, ok := unknown.(*cache_unit[Key_T, *cache_value[Value_T]]); ok {
+	if val, ok := unknown.(*cache_unit[Key_T, Value_T]); ok {
 
 		return val, true
 	}
@@ -42,19 +89,19 @@ func GetTopic[Key_T, Value_T any](topic string) (*cache_unit[Key_T, *cache_value
 
 func NewTopic[Key_T, Value_T any](topic string) error {
 
-	if _, exists := topics.Load(topic); exists {
+	if _, exists := cache_topics.Load(topic); exists {
 
 		return ERR_TOPIC_EXIST
 	}
 
-	newCacheUnit := new(cache_unit[Key_T, cache_value[Value_T]])
+	newCacheUnit := newCacheUnit[Key_T, Value_T]() // new(cache_unit[Key_T, cache_value[Value_T]])
 
-	topics.Store(topic, newCacheUnit)
+	cache_topics.Store(topic, newCacheUnit)
 
 	return nil
 }
 
-func DeleteTopic(topic string) {
+func DropTopic(topic string) {
 
-	topics.LoadAndDelete(topic)
+	cache_topics.LoadAndDelete(topic)
 }

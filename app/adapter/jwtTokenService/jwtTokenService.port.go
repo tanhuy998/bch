@@ -9,7 +9,7 @@ type (
 
 	IJWTTokenSigning interface {
 		//IJWTTokenGenerator
-		SignedString(token *jwt.Token) (string, error)
+		SignString(token *jwt.Token) (string, error)
 	}
 
 	IJWTTokenVerification interface {
@@ -25,5 +25,17 @@ type (
 		IJWTTokenGenerator
 		IJWTTokenSigning
 		IJWTTokenVerification
+		GetSigningMethod() interface{}
+	}
+
+	ISymmetricJWTTokenManipulator interface {
+		IJWTTokenManipulator
+		GetSecret() interface{}
+	}
+
+	IAsymmetricJWTTokenManipulator interface {
+		IJWTTokenManipulator
+		GetPrivateKey() interface{}
+		GetPublicKey() interface{}
 	}
 )

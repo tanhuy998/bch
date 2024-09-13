@@ -56,11 +56,11 @@ func TestSigningTokenString(t *testing.T) {
 		return
 	}
 
-	s := jwtTokenService.NewECDSAService(*private_key, *public_key)
+	s := jwtTokenService.NewECDSAService(jwt.SigningMethodES256, *private_key, *public_key)
 
 	token := s.GenerateToken()
 
-	str, err := s.SignedString(token)
+	str, err := s.SignString(token)
 
 	if err != nil {
 
@@ -81,7 +81,7 @@ func TestParseTokenFromString(t *testing.T) {
 		return
 	}
 
-	s := jwtTokenService.NewECDSAService(*private_key, *public_key)
+	s := jwtTokenService.NewECDSAService(jwt.SigningMethodES256, *private_key, *public_key)
 
 	_, err = s.VerifyTokenString(example_token)
 

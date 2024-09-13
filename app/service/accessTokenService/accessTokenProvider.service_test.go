@@ -1,7 +1,6 @@
-package accessTokenService_test
+package accessTokenService
 
 import (
-	"app/service/accessTokenService"
 	jwtTokenService "app/service/jwtToken"
 	"crypto/ecdsa"
 	"testing"
@@ -54,8 +53,8 @@ func TestGenerateAccessToken(t *testing.T) {
 		return
 	}
 
-	s := &accessTokenService.JWTAccessTokenHandlerService{
-		JWTTokenManipulatorService: jwtTokenService.NewECDSAService(*private_key, *public_key),
+	s := &JWTAccessTokenManipulatorService{
+		JWTTokenManipulatorService: jwtTokenService.NewECDSAService(jwt.SigningMethodES256, *private_key, *public_key),
 	}
 
 	userUUID, err := uuid.Parse(userUUID_str)
@@ -66,7 +65,7 @@ func TestGenerateAccessToken(t *testing.T) {
 		return
 	}
 
-	at, err := s.Generate(userUUID)
+	at, err := s.makeFor(userUUID)
 
 	if err != nil {
 
@@ -91,8 +90,8 @@ func TestVerifyAccessTokenFromString(t *testing.T) {
 		return
 	}
 
-	s := &accessTokenService.JWTAccessTokenHandlerService{
-		JWTTokenManipulatorService: jwtTokenService.NewECDSAService(*private_key, *public_key),
+	s := &JWTAccessTokenManipulatorService{
+		JWTTokenManipulatorService: jwtTokenService.NewECDSAService(jwt.SigningMethodES256, *private_key, *public_key),
 	}
 
 	userUUID, err := uuid.Parse(userUUID_str)
@@ -103,7 +102,7 @@ func TestVerifyAccessTokenFromString(t *testing.T) {
 		return
 	}
 
-	a, err := s.Generate(userUUID)
+	a, err := s.makeFor(userUUID)
 
 	if err != nil {
 
@@ -111,7 +110,7 @@ func TestVerifyAccessTokenFromString(t *testing.T) {
 		return
 	}
 
-	at_str, err := s.SignedString(a)
+	at_str, err := s.SignString(a)
 
 	if err != nil {
 

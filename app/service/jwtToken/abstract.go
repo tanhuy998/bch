@@ -1,26 +1,19 @@
 package jwtTokenService
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	jwtTokenServicePort "app/adapter/jwtTokenService"
+)
 
 type (
-	IJWTTokenGenerator interface {
-		GenerateToken() *jwt.Token
-	}
+	IJWTTokenGenerator = jwtTokenServicePort.IJWTTokenGenerator
 
-	IJWTTokenSigning interface {
-		SignedString(token *jwt.Token) (string, error)
-	}
+	IJWTTokenSigning = jwtTokenServicePort.IJWTTokenSigning
 
-	IJWTTokenVerification interface {
-		VerifyTokenString(string) (*jwt.Token, error)
-	}
+	IJWTTokenVerification = jwtTokenServicePort.IJWTTokenVerification
 
-	IJWTTokenValidator interface {
-		Validate(token *jwt.Token) error
-	}
+	IJWTTokenValidator = jwtTokenServicePort.IJWTTokenValidator
 
-	IJWTTokenAuthenticator interface {
-		IJWTTokenValidator
-		IJWTTokenVerification
-	}
+	IJWTTokenManipulator = jwtTokenServicePort.IJWTTokenManipulator
+
+	IAsymmetricJWTTokenManipulator = jwtTokenServicePort.IAsymmetricJWTTokenManipulator
 )

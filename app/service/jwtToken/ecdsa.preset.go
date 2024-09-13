@@ -31,3 +31,10 @@ func ValidateToken(token *jwt.Token) error {
 
 	return nil
 }
+
+func IsECSigningMethod(method interface{}) bool {
+
+	_, ok := method.(*jwt.SigningMethodECDSA)
+
+	return ok
+}

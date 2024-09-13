@@ -1,6 +1,9 @@
 package accessTokenServicePort
 
 import (
+	"app/domain/model"
+	"context"
+
 	"github.com/google/uuid"
 )
 
@@ -9,11 +12,11 @@ type (
 	}
 
 	IAccessTokenProvider interface {
-		Generate(audience *AccessTokenAudience) (IAccessToken, error)
+		Generate(userUUID uuid.UUID, ctx context.Context) (IAccessToken, error)
 	}
 
 	IAccessTokenSigning interface {
-		SignedString(IAccessToken) (string, error)
+		SignString(IAccessToken) (string, error)
 	}
 
 	IAccessTokenReader interface {
@@ -26,10 +29,22 @@ type (
 	// 	Refresh(string) (IAccessToken, error)
 	// }
 
-	IAccessTokenHandler interface {
+	IAccessTokenManipulator interface {
 		IAccessTokenProvider
 		IAccessTokenReader
 		IAccessTokenSigning
+	}
+
+	IParticipatedCommandGroup interface {
+		GetCommandGroupUUID() *uuid.UUID
+		GetCommandGroupRoleName() string
+	}
+
+	IAccessTokenAuthData interface {
+		GetTenantUUID() *uuid.UUID
+		GetTenantAgentData() *model.TenantAgent
+		GetParticipatedGroups() []IParticipatedCommandGroup
+		IsTenantAgent() bool
 	}
 
 	IAccessToken interface {
@@ -42,6 +57,7 @@ type (
 
 		GetUserUUID() *uuid.UUID
 		GetAudiences() []string
+		GetAuthData() IAccessTokenAuthData
 		Expired() bool
 	}
 

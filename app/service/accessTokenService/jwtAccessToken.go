@@ -2,6 +2,7 @@ package accessTokenService
 
 import (
 	accessTokenServicePort "app/adapter/accessToken"
+	"app/domain/valueObject"
 	libCommon "app/lib/common"
 	"errors"
 	"time"
@@ -15,27 +16,32 @@ var (
 )
 
 type (
-	IAccessToken interface {
-		accessTokenServicePort.IAccessToken
-	}
+	IAccessToken         = accessTokenServicePort.IAccessToken
+	IAccessTokenAuthData = accessTokenServicePort.IAccessTokenAuthData
+
+	// IAccessTokenAuthData interface {
+	// 	accessTokenServicePort.IAccessTokenAuthData
+	// }
 
 	jwt_access_token_custom_claims struct {
 		// Sub *uuid.UUID `json:"sub"`
 		// Aud []string   `json:"aud,omitempty"`
 		// Exp time.Time  `json:"exp"`
 		jwt.RegisteredClaims
+		AuthData *valueObject.AuthData `json:"aut"`
 	}
 
 	jwt_access_token struct {
 		jwt_token *jwt.Token
 		claims    *jwt_access_token_custom_claims
 		userUUID  *uuid.UUID
-		expired   bool
+		//authData  *AccessTokenAuthData
+		expired bool
 		// audience  *accessTokenServicePort.AccessTokenAudience
 	}
 )
 
-func NewFromToken(token *jwt.Token) (*jwt_access_token, error) {
+func newFromToken(token *jwt.Token) (*jwt_access_token, error) {
 
 	var ret *jwt_access_token
 
@@ -74,7 +80,7 @@ func NewFromToken(token *jwt.Token) (*jwt_access_token, error) {
 		return nil, err
 	}
 
-	ret.expired = exp.After(time.Now())
+	ret.expired = time.Now().After(exp.Time)
 
 	return ret, nil
 }
@@ -92,6 +98,11 @@ func (this *jwt_access_token) GetAudiences() []string {
 func (this *jwt_access_token) Expired() bool {
 
 	return this.expired
+}
+
+func (this *jwt_access_token) GetAuthData() IAccessTokenAuthData {
+
+	return this.claims.AuthData
 }
 
 // func (this *jwt_access_token) GetParsedAudience() *accessTokenServicePort.AccessTokenAudience {

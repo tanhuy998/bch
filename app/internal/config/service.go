@@ -23,6 +23,7 @@ import (
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
@@ -181,12 +182,11 @@ func RegisterAuthServices(container *hero.Container) {
 
 	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticationService](container, nil, AUTH)
 
-	jwtService := jwtTokenService.NewECDSAService(*bootstrap.GetJWTEncryptionPrivateKey(), *bootstrap.GetJWTEncryptionPublicKey())
+	jwtService := jwtTokenService.NewECDSAService(jwt.SigningMethodES256, *bootstrap.GetJWTEncryptionPrivateKey(), *bootstrap.GetJWTEncryptionPublicKey())
 
 	libConfig.BindDependency[jwtTokenService.IJWTTokenGenerator](container, jwtService)
 	libConfig.BindDependency[jwtTokenService.IJWTTokenSigning](container, jwtService)
 	libConfig.BindDependency[jwtTokenService.IJWTTokenVerification](container, jwtService)
-	libConfig.BindDependency[jwtTokenService.IJWTTokenAuthenticator](container, jwtService)
 
 	fmt.Println("Auth service initialized.")
 }
