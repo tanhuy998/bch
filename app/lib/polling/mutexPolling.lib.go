@@ -1,7 +1,6 @@
 package libPolling
 
 import (
-	libCommon "app/lib/common"
 	"context"
 	"fmt"
 )
@@ -42,7 +41,7 @@ type (
 
 	mutex_polling_signal_bus struct {
 		contextPollingChannel chan MutexPollingSignal
-		contextDone           *bool
+		contextDone           bool
 		stopPolling           bool
 	}
 )
@@ -70,14 +69,13 @@ func pollContext(ctx context.Context, bus *mutex_polling_signal_bus) {
 
 	defer fmt.Println("stop polling context")
 
-	for !bus.stopPolling {
+	for !bus.stopPolling || !bus.contextDone {
 
 		select {
 		case <-ctx.Done():
-			//channel <- ContextDoneSignal
-			*bus.contextDone = true
+
+			bus.contextDone = true
 			bus.stopPolling = true
-			//return
 		case signal := <-bus.contextPollingChannel:
 			/*
 				listen for stop signal when context have not already Done().
@@ -99,9 +97,10 @@ func pollRWMutexUnlock[MutexMode_T any](
 
 	defer fmt.Println("stop polling mutex")
 
-	for !bus.stopPolling {
+	for !bus.stopPolling || !bus.contextDone {
+
 		switch {
-		case *bus.contextDone:
+		case bus.contextDone:
 			return
 		case tryLockFunc(mutex):
 			bus.contextPollingChannel <- MutexLockAcquiredSignal
@@ -133,7 +132,7 @@ func pollRWMutex[MutexMode_T any](
 	//contextDone := libCommon.PointerPrimitive(false)
 	signalBus := &mutex_polling_signal_bus{
 		contextPollingChannel: pollingChannel, // make(chan MutexPollingChannel),
-		contextDone:           libCommon.PointerPrimitive(false),
+		contextDone:           false,
 		stopPolling:           false,
 	}
 	/*
@@ -160,7 +159,7 @@ func wrap(
 
 	contextDone = func() bool {
 
-		return *bus.contextDone
+		return bus.contextDone
 	}
 
 	stopPolling = func() {
