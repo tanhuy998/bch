@@ -70,7 +70,7 @@ func Terminate() {
 	endSignal <- true
 }
 
-func GetTopic[Key_T, Value_T any](topic string) (*cache_unit[Key_T, Value_T], bool) {
+func GetTopic[Key_T, Value_T comparable](topic string) (*cache_unit[Key_T, Value_T], bool) {
 
 	unknown, ok := cache_topics.Load(topic)
 
@@ -87,7 +87,7 @@ func GetTopic[Key_T, Value_T any](topic string) (*cache_unit[Key_T, Value_T], bo
 	return nil, false
 }
 
-func NewTopic[Key_T, Value_T any](topic string) error {
+func NewTopic[Key_T, Value_T comparable](topic string) error {
 
 	if _, exists := cache_topics.Load(topic); exists {
 

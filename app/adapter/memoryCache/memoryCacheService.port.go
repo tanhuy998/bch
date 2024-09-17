@@ -6,7 +6,7 @@ import (
 )
 
 type (
-	IMemoryCacheClient[Key_T, Value_T any] interface {
+	IMemoryCacheClient[Key_T, Value_T comparable] interface {
 		ReadInstanctly(ctx context.Context, key Key_T) (value Value_T, exists bool, err error)
 		ReadAndHold(ctx context.Context, key Key_T) (value Value_T, exists bool, releaseLock memoryCache.ReadUnlockFunction, err error)
 		Set(ctx context.Context, key Key_T, value Value_T) error
