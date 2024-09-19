@@ -73,7 +73,7 @@ func TestGenerateAccessToken(t *testing.T) {
 		return
 	}
 
-	if *at.GetUserUUID() != userUUID {
+	if at.GetUserUUID() != userUUID {
 
 		t.Error("fail")
 		return

@@ -32,7 +32,7 @@ func (this *CreateUserService) Serve(
 	name string,
 ) (*model.User, error) {
 
-	usernameExist, err := this.GetSingleUser.CheckUsernameExistence(username)
+	usernameExist, err := this.GetSingleUser.CheckUsernameExistence(username, context.TODO())
 
 	if err != nil {
 

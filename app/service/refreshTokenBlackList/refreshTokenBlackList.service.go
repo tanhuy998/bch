@@ -13,7 +13,7 @@ var (
 )
 
 type (
-	IRefreshTokenBlackListManipulator = refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator[string, IRefreshTokenBlackListPayload]
+	IRefreshTokenBlackListManipulator = refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator
 	IRefreshTokenBlackListPayload     = refreshTokenBlackListServicePort.IRefreshTokenBlackListPayload
 
 	// ReadFunction[Payload_T any]   func(payload Payload_T) error
@@ -26,7 +26,7 @@ type (
 
 func (this *RefreshTokenBlackListManipulatorService) Has(tokenId string, ctx context.Context) (bool, error) {
 
-	_, exists, err := this.CacheClient.ReadInstanctly(ctx, tokenId)
+	_, exists, err := this.CacheClient.Read(ctx, tokenId)
 
 	if err != nil {
 
@@ -38,82 +38,36 @@ func (this *RefreshTokenBlackListManipulatorService) Has(tokenId string, ctx con
 
 func (this *RefreshTokenBlackListManipulatorService) Get(tokenID string, ctx context.Context) (IRefreshTokenBlackListPayload, bool, error) {
 
-	return this.CacheClient.ReadInstanctly(ctx, tokenID)
+	return this.CacheClient.Read(ctx, tokenID)
 }
 
 func (this *RefreshTokenBlackListManipulatorService) Read(
 	tokenID string,
-	readFunc refreshTokenBlackListServicePort.ReadFunction[IRefreshTokenBlackListPayload],
+	readFunc refreshTokenBlackListServicePort.ReadFunction,
 	ctx context.Context,
 ) error {
 
-	payload, exists, releaseLock, err := this.CacheClient.ReadAndHold(ctx, tokenID)
-
-	if releaseLock != nil {
-
-		defer releaseLock()
-	}
-
-	if err != nil {
-
-		return err
-	}
-
-	if !exists {
-
-		return ERR_REFRESH_TOKEN_ID_NOT_EXISTS
-	}
-
-	return readFunc(payload)
+	return this.CacheClient.Hold(ctx, tokenID, readFunc)
 }
 
 func (this *RefreshTokenBlackListManipulatorService) Update(
 	tokenId string,
-	updatefunc refreshTokenBlackListServicePort.UpdateFunction[IRefreshTokenBlackListPayload],
+	updatefunc refreshTokenBlackListServicePort.UpdateFunction,
+	ctx context.Context,
 ) error {
 
-	payload, exists, command, err := this.CacheClient.Update(context.TODO(), tokenId)
+	this.CacheClient.Update(ctx, tokenId, updatefunc)
 
-	if err != nil {
-
-		return err
-	}
-
-	if !exists {
-
-		return ERR_REFRESH_TOKEN_ID_NOT_EXISTS
-	}
-
-	if updatefunc == nil {
-
-		return nil
-	}
-
-	commit, revoke := command()
-
-	newValue, approve, err := updatefunc(payload)
-
-	if err != nil {
-
-		return err
-	}
-
-	if !approve {
-
-		revoke()
-		return ERR_UPDATE_NOT_APPROVED
-	}
-
-	commit(newValue)
 	return nil
 }
 
 func (this *RefreshTokenBlackListManipulatorService) Set(
 	tokenId string,
 	payload IRefreshTokenBlackListPayload,
+	ctx context.Context,
 ) (bool, error) {
 
-	err := this.CacheClient.Set(context.TODO(), tokenId, payload)
+	err := this.CacheClient.Set(ctx, tokenId, payload)
 
 	if err != nil {
 

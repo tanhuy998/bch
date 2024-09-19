@@ -3,6 +3,7 @@ package accessTokenServicePort
 import (
 	"app/domain/model"
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -12,7 +13,9 @@ type (
 	}
 
 	IAccessTokenProvider interface {
-		Generate(userUUID uuid.UUID, ctx context.Context) (IAccessToken, error)
+		GenerateByCredentials(model *model.User, ctx context.Context) (IAccessToken, error)
+		GenerateByUserUUID(userUUID uuid.UUID, ctx context.Context) (IAccessToken, error)
+		DefaultExpireDuration() time.Duration
 	}
 
 	IAccessTokenSigning interface {
@@ -55,7 +58,7 @@ type (
 		// GetSubject() *uuid.UUID
 		// GetAudience() *AccessTokenAudience
 
-		GetUserUUID() *uuid.UUID
+		GetUserUUID() uuid.UUID
 		GetAudiences() []string
 		GetAuthData() IAccessTokenAuthData
 		Expired() bool

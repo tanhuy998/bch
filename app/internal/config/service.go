@@ -1,24 +1,36 @@
 package config
 
 import (
+	accessTokenServicePort "app/adapter/accessToken"
 	adminServiceAdapter "app/adapter/adminService"
 	authServiceAdapter "app/adapter/auth"
+	jwtTokenServicePort "app/adapter/jwtTokenService"
 	passwordServiceAdapter "app/adapter/passwordService"
+	refreshTokenServicePort "app/adapter/refreshToken"
+	refreshTokenBlackListServicePort "app/adapter/refreshTokenBlackList"
+	refreshTokenIdServicePort "app/adapter/refreshTokenidServicePort"
 	signingServiceAdapter "app/adapter/signingService"
 	tenantAgentServiceAdapter "app/adapter/tenantAgentService"
+	uniqueIDServicePort "app/adapter/uniqueID"
 	"app/infrastructure/db"
 	"app/internal/bootstrap"
 	libConfig "app/lib/config"
+	memoryCache "app/mermoryCache"
 	"app/repository"
+	"app/service/accessTokenService"
 	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 	authService "app/service/auth"
 	candidateService "app/service/candidate"
 	jwtTokenService "app/service/jwtToken"
 	passwordService "app/service/password"
+	refreshTokenService "app/service/refreshToken"
+	refreshTokenBlackListService "app/service/refreshTokenBlackList"
+	refreshTokenIDService "app/service/refreshTokenID"
 	"app/service/signingService"
 	tenantService "app/service/tenant"
 	tenantAgentService "app/service/tenantAgent"
+	uniqueIDService "app/service/uniqueID"
 	usecase "app/useCase"
 	"fmt"
 
@@ -128,7 +140,7 @@ func RegisterTenantDependencies(container *hero.Container) {
 	libConfig.BindDependency[usecase.ICreateTenant, usecase.CreateTenantUseCase](container, nil)
 }
 
-func RegisterAuthDependencies(container *hero.Container) {
+func RegisterAuthEndpointServiceDependencies(container *hero.Container) {
 
 	db := db.GetDB()
 
@@ -151,6 +163,7 @@ func RegisterAuthDependencies(container *hero.Container) {
 	libConfig.BindDependency[authService.IGrantCommandGroupRolesToUser, authService.GrantCommandGroupRolesToUserService](container, nil)
 	libConfig.BindDependency[authService.ICheckCommandGroupUserRole, authService.CheckCommandGroupUserRoleService](container, nil)
 	libConfig.BindDependency[authService.IModifyUser, authService.ModifyUserService](container, nil)
+	libConfig.BindDependency[authServiceAdapter.ILogIn, authService.LogInService](container, nil)
 
 	libConfig.BindDependency[usecase.ICreateUser, usecase.CreateUserUsecase](container, nil)
 
@@ -161,6 +174,7 @@ func RegisterAuthDependencies(container *hero.Container) {
 	libConfig.BindDependency[usecase.IGetAllRoles, usecase.GetAllRolesUseCase](container, nil)
 	libConfig.BindDependency[usecase.IGetGroupUsers, usecase.GetGroupUsersUseCase](container, nil)
 	libConfig.BindDependency[usecase.IModifyUser, usecase.ModifyUserUseCase](container, nil)
+	libConfig.BindDependency[usecase.ILogIn, usecase.LogInUseCase](container, nil)
 }
 
 func RegisterUtilServices(container *hero.Container) {
@@ -168,7 +182,7 @@ func RegisterUtilServices(container *hero.Container) {
 	libConfig.BindDependency[actionResultService.IActionResult, actionResultService.ResponseResultService](container, nil)
 }
 
-func RegisterAuthServices(container *hero.Container) {
+func RegisterAuthDependencies(container *hero.Container) {
 
 	fmt.Println("Initialize Auth service...")
 	//BindDependency[authService.IAuthService, authService.AuthenticateService](container, nil)
@@ -182,11 +196,37 @@ func RegisterAuthServices(container *hero.Container) {
 
 	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticationService](container, nil, AUTH)
 
-	jwtService := jwtTokenService.NewECDSAService(jwt.SigningMethodES256, *bootstrap.GetJWTEncryptionPrivateKey(), *bootstrap.GetJWTEncryptionPublicKey())
+	asymmetricJWTService := jwtTokenService.NewECDSAService(jwt.SigningMethodES256, *bootstrap.GetJWTEncryptionPrivateKey(), *bootstrap.GetJWTEncryptionPublicKey())
+	libConfig.BindDependency[jwtTokenServicePort.IAsymmetricJWTTokenManipulator](container, asymmetricJWTService)
 
-	libConfig.BindDependency[jwtTokenService.IJWTTokenGenerator](container, jwtService)
-	libConfig.BindDependency[jwtTokenService.IJWTTokenSigning](container, jwtService)
-	libConfig.BindDependency[jwtTokenService.IJWTTokenVerification](container, jwtService)
+	symmetricJWTService := jwtTokenService.NewHMACService(jwt.SigningMethodHS256, []byte("asdassdad"))
+	libConfig.BindDependency[jwtTokenServicePort.ISymmetricJWTTokenManipulator](container, symmetricJWTService)
+
+	uniqueID, err := uniqueIDService.New(15)
+
+	if err != nil {
+
+		panic("error while initializing uniqueID service: " + err.Error())
+	}
+
+	libConfig.BindDependency[uniqueIDServicePort.IUniqueIDGenerator](container, uniqueID)
+	libConfig.BindDependency[refreshTokenIdServicePort.IRefreshTokenIDProvider, refreshTokenIDService.RefreshTokenIDProviderService](container, nil)
+
+	accessTokenSevice := new(accessTokenService.JWTAccessTokenManipulatorService)
+	libConfig.BindDependency[accessTokenServicePort.IAccessTokenManipulator](container, accessTokenSevice)
+
+	cacheClient, err := memoryCache.NewClient[string, refreshTokenBlackListServicePort.IRefreshTokenBlackListPayload]("REFRESH_TOKEN_BLACK_LIST")
+
+	if err != nil {
+
+		panic("error while initializing refresh token blacklist cache client: " + err.Error())
+	}
+
+	libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenCacheClient](container, cacheClient)
+	libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator, refreshTokenBlackListService.RefreshTokenBlackListManipulatorService](container, nil)
+
+	refreshTokenService := new(refreshTokenService.RefreshTokenManipulatorService)
+	libConfig.BindDependency[refreshTokenServicePort.IRefreshTokenManipulator](container, refreshTokenService)
 
 	fmt.Println("Auth service initialized.")
 }
@@ -197,16 +237,15 @@ func RegisterServices(app router.Party) {
 
 	RegisterUtilServices(container)
 	RegisterAdapters(container)
-	RegisterTenantDependencies(container)
 	RegisterAuthDependencies(container)
+	RegisterTenantDependencies(container)
+	RegisterAuthEndpointServiceDependencies(container)
 
 	// auth := new(authService.AuthenticateService)
 	// Dep := container.Register(auth)
 	// Dep.DestType = libCommon.InterfaceOf((*authService.IAuthService)(nil))
 
 	//libConfig.BindDependency[port.IActionResult, usecase.ActionResultUseCase](container, nil)
-
-	RegisterAuthServices(container)
 
 	fmt.Println("Wiring dependencies...")
 

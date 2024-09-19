@@ -5,6 +5,7 @@ import (
 	responsePresenter "app/domain/presenter/response"
 	actionResultService "app/service/actionResult"
 	authService "app/service/auth"
+	"context"
 	"encoding/json"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -37,7 +38,7 @@ func (this *CreateUserUsecase) Execute(
 		return this.ActionResult.ServeErrorResponse(err)
 	}
 
-	ret, err := this.GetSingleUserService.SearchByUsername(input.Data.Username)
+	ret, err := this.GetSingleUserService.SearchByUsername(input.Data.Username, context.TODO())
 
 	if err != nil {
 

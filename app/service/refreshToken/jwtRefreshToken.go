@@ -50,6 +50,11 @@ func newFromToken(token *jwt.Token) (*jwt_refresh_token, error) {
 		return nil, err
 	}
 
+	if exp == nil {
+
+		return nil, ERR_INVALID_TOKEN
+	}
+
 	ret.expired = time.Now().After(exp.Time)
 
 	subject, err := token.Claims.GetSubject()
@@ -67,8 +72,6 @@ func newFromToken(token *jwt.Token) (*jwt_refresh_token, error) {
 	}
 
 	ret.userUUID = libCommon.PointerPrimitive(userUUID)
-
-	uuid.New().ID()
 
 	return ret, nil
 }

@@ -3,15 +3,20 @@ package refreshTokenService
 import (
 	accessTokenServicePort "app/adapter/accessToken"
 	jwtTokenServicePort "app/adapter/jwtTokenService"
-	refreshtokenServicePort "app/adapter/refreshToken"
+	refreshTokenServicePort "app/adapter/refreshToken"
 	refreshTokenBlackListServicePort "app/adapter/refreshTokenBlackList"
 	"app/domain/valueObject"
 	refreshTokenIDService "app/service/refreshTokenID"
 	"context"
 	"errors"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+)
+
+var (
+	exp_duration = time.Hour * 2
 )
 
 var (
@@ -19,15 +24,14 @@ var (
 )
 
 type (
-	IRefreshTokenHandler = refreshtokenServicePort.IRefreshTokenHadler
-	IRefreshToken        = refreshtokenServicePort.IRefreshToken
-	RefreshTokenID       = refreshtokenServicePort.RefreshTokenID
+	IRefreshTokenManipulator = refreshTokenServicePort.IRefreshTokenManipulator
+	IRefreshToken            = refreshTokenServicePort.IRefreshToken
 
 	RefreshTokenManipulatorService struct {
 		AudienceList           accessTokenServicePort.AccessTokenAudienceList
 		RefreshTokenIDProvider refreshTokenIDService.IRefreshTokenIDProvider
 		JWTTokenService        jwtTokenServicePort.ISymmetricJWTTokenManipulator
-		RefreshTokenBlackList  refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator[string, refreshTokenBlackListServicePort.IRefreshTokenBlackListPayload]
+		RefreshTokenBlackList  refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator
 	}
 )
 
@@ -42,18 +46,21 @@ func (this *RefreshTokenManipulatorService) Generate(userUUID uuid.UUID, ctx con
 		return nil, err
 	}
 
-	token.Claims = jwt_refresh_token_custom_claims{
-		jwt.RegisteredClaims{},
+	token.Claims = &jwt_refresh_token_custom_claims{
+		jwt.RegisteredClaims{
+			Subject:   userUUID.String(),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(exp_duration)),
+		},
 		refreshTokenID,
 	}
 
 	return newFromToken(token)
 }
-func (this *RefreshTokenManipulatorService) Revoke(RefreshTokenID string) error {
+func (this *RefreshTokenManipulatorService) Revoke(RefreshTokenID string, ctx context.Context) error {
 
 	payload := &valueObject.RefreshTokenBlackListPayload{}
 
-	success, err := this.RefreshTokenBlackList.Set(RefreshTokenID, payload)
+	success, err := this.RefreshTokenBlackList.Set(RefreshTokenID, payload, ctx)
 
 	if err != nil {
 
@@ -88,4 +95,9 @@ func (this *RefreshTokenManipulatorService) Read(str string) (IRefreshToken, err
 	}
 
 	return newFromToken(token)
+}
+
+func (this *RefreshTokenManipulatorService) DefaultExpireDuration() time.Duration {
+
+	return exp_duration
 }

@@ -48,7 +48,7 @@ func (this *AddUserToCommandGroupService) Serve(groupUUID_str string, userUUID_s
 		return ERR_INVALID_GROUP
 	}
 
-	user, err := this.GetSingleUserService.Serve(userUUID_str)
+	user, err := this.GetSingleUserService.Serve(userUUID_str, context.TODO())
 
 	if err != nil {
 

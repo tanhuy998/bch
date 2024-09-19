@@ -81,7 +81,10 @@ func Auth(container *hero.Container) iris.Handler {
 	)
 }
 
-func authentication_func(ctx iris.Context, accessTokenHandler accessTokenServicePort.IAccessTokenManipulator) {
+func authentication_func(
+	ctx iris.Context,
+	accessTokenHandler accessTokenServicePort.IAccessTokenManipulator,
+) {
 
 	tokenString, err := retrieveTokenString(ctx)
 

@@ -25,10 +25,10 @@ func Init(app *iris.Application) {
 
 	initTenantApi(app)
 
-	tenantIsolationRouter := app.Party("/tenant/{tenantUUID:uuid}")
+	//tenantIsolationRouter := app.Party("/tenant/{tenantUUID:uuid}")
 
 	initCandidateSigningApi(app).EnableStructDependents()
 	initCampaignGroupApi(app).EnableStructDependents()
 	initCandidateGroupApi(app).EnableStructDependents()
-	initAuthApi(tenantIsolationRouter)
+	initAuthApi(app)
 }

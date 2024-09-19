@@ -47,7 +47,7 @@ func (this *PasswordService) Compare(model passwordServiceAdapter.IPasswordDispa
 		return err
 	}
 
-	return bcrypt.CompareHashAndPassword(pw_token, secret)
+	return bcrypt.CompareHashAndPassword(secret, pw_token)
 }
 
 func (this *PasswordService) Resolve(model passwordServiceAdapter.IPasswordDispatcher) error {
@@ -80,8 +80,8 @@ func merge(uname []byte, pw []byte) ([]byte, error) {
 	var (
 		minSlice []byte
 		maxSlice []byte
-		oddPart  []byte
-		ret      []byte
+		//oddPart  []byte
+		ret []byte
 	)
 
 	minSlice = uname
@@ -101,8 +101,9 @@ func merge(uname []byte, pw []byte) ([]byte, error) {
 
 	if len(minSlice) != len(maxSlice) {
 
-		oddPart = maxSlice[len(minSlice)-1:]
-		ret = append(ret, oddPart...)
+		//oddPart = maxSlice[len(minSlice)-1:]
+		//ret = append(ret, oddPart...)
+		ret = append(ret, maxSlice[len(minSlice)-1:]...)
 	}
 
 	return ret, nil

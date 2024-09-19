@@ -1,7 +1,7 @@
 package refreshTokenIDService
 
 import (
-	refreshtokenidServicePort "app/adapter/refreshTokenID"
+	refreshtokenidServicePort "app/adapter/refreshTokenidServicePort"
 	uniqueIDServicePort "app/adapter/uniqueID"
 	"crypto/rand"
 

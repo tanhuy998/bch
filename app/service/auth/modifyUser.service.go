@@ -35,7 +35,7 @@ func (this *ModifyUserService) Serve(userUUID_str string, dataModel *model.User)
 		return err
 	}
 
-	user, err := this.GetSingleUser.Serve(userUUID_str)
+	user, err := this.GetSingleUser.Serve(userUUID_str, context.TODO())
 
 	if err != nil {
 

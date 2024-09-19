@@ -2,6 +2,7 @@ package api
 
 import (
 	authManipulationApi "app/internal/api/auth/manipulation"
+	"app/internal/api/auth/userLogging"
 
 	"github.com/kataras/iris/v12/core/router"
 )
@@ -9,6 +10,8 @@ import (
 func initAuthApi(app router.Party) {
 
 	genericRouter := app.Party("/auth")
+
+	userLogging.RegisterUserLoggingApi(genericRouter).EnableStructDependents()
 
 	// add authorization for this router
 	manipulationRouter := genericRouter.Party("/man")

@@ -2,8 +2,9 @@ package accessTokenService
 
 import (
 	accessTokenServicePort "app/adapter/accessToken"
-	authServiceAdapter "app/adapter/auth"
 	jwtTokenServicePort "app/adapter/jwtTokenService"
+	"app/domain/model"
+	"app/domain/valueObject"
 	"app/repository"
 	"context"
 	"errors"
@@ -11,6 +12,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
@@ -22,6 +25,7 @@ const (
 
 var (
 	ERR_INVALID_ACCESS_TOKEN_TYPE = errors.New("invalid access token format")
+	ERR_INVALID_USER_CREDENTIALS  = errors.New("accessToken error: invalid username or password")
 )
 
 type (
@@ -29,8 +33,8 @@ type (
 
 	JWTAccessTokenManipulatorService struct {
 		//JWtTokenSigningServive      jwtTokenServicePort.IJWTTokenSigning
-		AudienceList               accessTokenServicePort.AccessTokenAudienceList
-		FetchAuthDataService       authServiceAdapter.IFetchAuthData
+		AudienceList accessTokenServicePort.AccessTokenAudienceList
+		//FetchAuthDataService       authServiceAdapter.IFetchAuthData
 		JWTTokenManipulatorService jwtTokenServicePort.IAsymmetricJWTTokenManipulator
 		UserRepo                   repository.IUser
 	}
@@ -48,23 +52,99 @@ func (this *JWTAccessTokenManipulatorService) Read(token_str string) (IAccessTok
 	return newFromToken(token)
 }
 
-func (this *JWTAccessTokenManipulatorService) Generate(userUUID uuid.UUID, ctx context.Context) (accessTokenServicePort.IAccessToken, error) {
+func (this *JWTAccessTokenManipulatorService) GenerateByUserUUID(
+	userUUID uuid.UUID, ctx context.Context,
+) (IAccessToken, error) {
 
-	authData, err := this.FetchAuthDataService.Serve(userUUID, ctx)
+	return this.queryAndGenerate(
+		bson.D{
+			{"uuid", userUUID},
+		},
+		ctx,
+	)
+}
+
+func (this *JWTAccessTokenManipulatorService) GenerateByCredentials(
+	model *model.User, ctx context.Context,
+) (accessTokenServicePort.IAccessToken, error) {
+
+	return this.queryAndGenerate(
+		bson.D{
+			{"username", model.Username},
+			//{"secret", model.Secret},
+		},
+		ctx,
+	)
+}
+
+func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
+	condition bson.D, ctx context.Context,
+) (accessTokenServicePort.IAccessToken, error) {
+
+	data, err := repository.Aggregate[valueObject.AuthData](
+		this.UserRepo.GetCollection(),
+		mongo.Pipeline{
+			bson.D{
+				{
+					"$match", condition,
+				},
+			},
+			bson.D{
+				{"$lookup",
+					bson.D{
+						{"from", "commandGroupUsers"},
+						{"localField", "uuid"},
+						{"foreignField", "userUUID"},
+						{"as", "participatedCommandGroups"},
+					},
+				},
+			},
+			bson.D{
+				{"$lookup",
+					bson.D{
+						{"from", "tenantAgents"},
+						{"localField", "uuid"},
+						{"foreignField", "userUUID"},
+						{"as", "tenantAgentData"},
+					},
+				},
+			},
+			bson.D{
+				{"$project",
+					bson.D{
+						{"uuid", 1},
+						{"name", 1},
+						{"username", 1},
+						{"secret", 1},
+						{"participatedCommandGroups", 1},
+						{"tenantAgentData", 1},
+					},
+				},
+			},
+		},
+		ctx,
+	)
 
 	if err != nil {
 
 		return nil, err
 	}
 
-	accessToken, err := this.makeFor(userUUID)
+	if len(data) == 0 {
+
+		return nil, ERR_INVALID_USER_CREDENTIALS
+	}
+
+	authData := data[0]
+
+	accessToken, err := this.makeFor(*authData.UserUUID)
 
 	if err != nil {
 
 		return nil, err
 	}
 
-	accessToken.claims.AuthData = authData
+	accessToken.customClaims.AuthData = authData
 
 	return accessToken, nil
 }
@@ -73,7 +153,7 @@ func (this *JWTAccessTokenManipulatorService) makeFor(userUUID uuid.UUID) (*jwt_
 
 	token := this.JWTTokenManipulatorService.GenerateToken()
 
-	token.Claims = jwt_access_token_custom_claims{
+	token.Claims = &jwt_access_token_custom_claims{
 		jwt.RegisteredClaims{
 			Subject:   userUUID.String(),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -102,4 +182,9 @@ func (this *JWTAccessTokenManipulatorService) SignString(accessToken IAccessToke
 	}
 
 	return "", ERR_INVALID_ACCESS_TOKEN_TYPE
+}
+
+func (this *JWTAccessTokenManipulatorService) DefaultExpireDuration() time.Duration {
+
+	return exp_duration
 }

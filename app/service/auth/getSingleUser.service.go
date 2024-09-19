@@ -11,9 +11,9 @@ import (
 
 type (
 	IGetSingleUser interface {
-		Serve(uuid string) (*model.User, error)
-		SearchByUsername(username string) (*model.User, error)
-		CheckUsernameExistence(username string) (bool, error)
+		Serve(uuid string, ctx context.Context) (*model.User, error)
+		SearchByUsername(username string, ctx context.Context) (*model.User, error)
+		CheckUsernameExistence(username string, ctx context.Context) (bool, error)
 	}
 
 	GetSingleUser struct {
@@ -21,7 +21,7 @@ type (
 	}
 )
 
-func (this *GetSingleUser) Serve(uuid_str string) (*model.User, error) {
+func (this *GetSingleUser) Serve(uuid_str string, ctx context.Context) (*model.User, error) {
 
 	userUUID, err := uuid.Parse(uuid_str)
 
@@ -30,16 +30,16 @@ func (this *GetSingleUser) Serve(uuid_str string) (*model.User, error) {
 		return nil, err
 	}
 
-	return this.UserRepo.FindOneByUUID(userUUID, context.TODO())
+	return this.UserRepo.FindOneByUUID(userUUID, ctx)
 }
 
-func (this *GetSingleUser) SearchByUsername(username string) (*model.User, error) {
+func (this *GetSingleUser) SearchByUsername(username string, ctx context.Context) (*model.User, error) {
 
 	ret, err := this.UserRepo.Find(
 		bson.D{
 			{"username", username},
 		},
-		context.TODO(),
+		ctx,
 	)
 
 	if err != nil {
@@ -50,13 +50,13 @@ func (this *GetSingleUser) SearchByUsername(username string) (*model.User, error
 	return ret, nil
 }
 
-func (this *GetSingleUser) CheckUsernameExistence(username string) (bool, error) {
+func (this *GetSingleUser) CheckUsernameExistence(username string, ctx context.Context) (bool, error) {
 
 	ret, err := this.UserRepo.Find(
 		bson.D{
 			{"username", username},
 		},
-		context.TODO(),
+		ctx,
 	)
 
 	if err != nil {

@@ -39,7 +39,7 @@ type (
 		UUID                 uuid.UUID `json:"uuid" bson:"uuid" validate:"required"`
 		TenantUUID           uuid.UUID `json:"tenantUUID" bson:"tenantUUID" validate:"required"`
 		CommandGroupUserUUID uuid.UUID `json:"commandGroupUserUUID" bson:"commandGroupUserUUID" validate:"required"`
-		RoleUUID             uuid.UUID `json:"roleUUID" bson:"roleUUID" validate="required"`
+		RoleUUID             uuid.UUID `json:"roleUUID" bson:"roleUUID" validate:"required"`
 	}
 
 	Role struct {

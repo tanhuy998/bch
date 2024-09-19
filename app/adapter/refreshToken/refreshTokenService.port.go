@@ -1,14 +1,13 @@
-package refreshtokenServicePort
+package refreshTokenServicePort
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
 
 type (
-	RefreshTokenID = []byte
-
 	IRefreshToken interface {
 		GetUserUUID() uuid.UUID
 		GetTokenID() string
@@ -16,7 +15,8 @@ type (
 
 	IRefreshTokenProvider interface {
 		Generate(userUUID uuid.UUID, ctx context.Context) (IRefreshToken, error)
-		Revoke(RefreshTokenID) error
+		Revoke(tokenID string, ctx context.Context) error
+		DefaultExpireDuration() time.Duration
 	}
 
 	IRefreshTokenSigning interface {
@@ -27,7 +27,7 @@ type (
 		Read(string) (IRefreshToken, error)
 	}
 
-	IRefreshTokenHadler interface {
+	IRefreshTokenManipulator interface {
 		IRefreshTokenProvider
 		IRefreshTokenReader
 		IRefreshTokenSigning
