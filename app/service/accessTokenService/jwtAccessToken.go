@@ -13,6 +13,7 @@ import (
 
 var (
 	ERR_INVALID_TOKEN = errors.New("invalid jwt token")
+	ERR_NIL_TOKEN     = errors.New("nil token")
 )
 
 type (
@@ -28,6 +29,7 @@ type (
 		// Aud []string   `json:"aud,omitempty"`
 		// Exp time.Time  `json:"exp"`
 		jwt.RegisteredClaims
+		TokenID  string                `json:"jti"`
 		AuthData *valueObject.AuthData `json:"aut"`
 	}
 
@@ -36,12 +38,17 @@ type (
 		customClaims *jwt_access_token_custom_claims
 		userUUID     *uuid.UUID
 		//authData  *AccessTokenAuthData
-		expired bool
+		//expired bool
 		// audience  *accessTokenServicePort.AccessTokenAudience
 	}
 )
 
 func newFromToken(token *jwt.Token) (*jwt_access_token, error) {
+
+	if token == nil {
+
+		return nil, ERR_NIL_TOKEN
+	}
 
 	var ret *jwt_access_token
 
@@ -85,8 +92,6 @@ func newFromToken(token *jwt.Token) (*jwt_access_token, error) {
 		return nil, ERR_INVALID_TOKEN
 	}
 
-	ret.expired = time.Now().After(exp.Time)
-
 	return ret, nil
 }
 
@@ -102,12 +107,34 @@ func (this *jwt_access_token) GetAudiences() []string {
 
 func (this *jwt_access_token) Expired() bool {
 
-	return this.expired
+	exp, err := this.GetExpire()
+
+	if err != nil {
+
+		return false
+	}
+
+	return exp.Before(time.Now())
 }
 
 func (this *jwt_access_token) GetAuthData() IAccessTokenAuthData {
 
 	return this.customClaims.AuthData
+}
+
+func (this *jwt_access_token) GetExpire() (*jwt.NumericDate, error) {
+
+	return this.jwt_token.Claims.GetExpirationTime()
+}
+
+func (this *jwt_access_token) GetTokenID() string {
+
+	return this.customClaims.TokenID
+}
+
+func (this *jwt_access_token) SetTokenID(id string) {
+
+	this.customClaims.TokenID = id
 }
 
 // func (this *jwt_access_token) GetParsedAudience() *accessTokenServicePort.AccessTokenAudience {

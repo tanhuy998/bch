@@ -20,6 +20,7 @@ type (
 		Redirect(link string) IResponse
 		ContentType(string) IResponse
 		SetContent([]byte) IResponse
+		Done() (IResponse, error)
 		ServeResponse(content interface{}) (IResponse, error)
 		ServeErrorResponse(error) (IResponse, error)
 	}
@@ -140,4 +141,9 @@ func (this *ResponseEntity) ServeResponse(content interface{}) (IResponse, error
 func (this *ResponseEntity) ServeErrorResponse(err error) (IResponse, error) {
 
 	return _ServeErrorResponse(this, err)
+}
+
+func (this *ResponseEntity) Done() (IResponse, error) {
+
+	return this, nil
 }

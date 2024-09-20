@@ -10,7 +10,8 @@ import (
 
 type (
 	UserLoggingController struct {
-		LoginUseCase usecase.ILogIn
+		LoginUseCase        usecase.ILogIn
+		RefreshLoginUseCase usecase.IRefreshLogin
 	}
 )
 
@@ -20,4 +21,16 @@ func (this *UserLoggingController) LogIn(
 ) (mvc.Result, error) {
 
 	return this.LoginUseCase.Execute(input, output)
+}
+
+func (this *UserLoggingController) Refresh(
+	input *requestPresenter.RefreshLoginRequest,
+	output *responsePresenter.RefreshLoginResponse,
+) (mvc.Result, error) {
+
+	return this.RefreshLoginUseCase.Execute(input, output)
+}
+
+func (this *UserLoggingController) Temp() {
+
 }

@@ -4,10 +4,12 @@ import (
 	accessTokenServicePort "app/adapter/accessToken"
 	adminServiceAdapter "app/adapter/adminService"
 	authServiceAdapter "app/adapter/auth"
+	authSignatureTokenPort "app/adapter/authSignatureToken"
 	jwtTokenServicePort "app/adapter/jwtTokenService"
 	passwordServiceAdapter "app/adapter/passwordService"
 	refreshTokenServicePort "app/adapter/refreshToken"
 	refreshTokenBlackListServicePort "app/adapter/refreshTokenBlackList"
+	refreshTokenClientPort "app/adapter/refreshTokenClient"
 	refreshTokenIdServicePort "app/adapter/refreshTokenidServicePort"
 	signingServiceAdapter "app/adapter/signingService"
 	tenantAgentServiceAdapter "app/adapter/tenantAgentService"
@@ -21,11 +23,13 @@ import (
 	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
 	authService "app/service/auth"
+	"app/service/authSignatureToken"
 	candidateService "app/service/candidate"
 	jwtTokenService "app/service/jwtToken"
 	passwordService "app/service/password"
 	refreshTokenService "app/service/refreshToken"
 	refreshTokenBlackListService "app/service/refreshTokenBlackList"
+	refreshTokenClientService "app/service/refreshTokenClient"
 	refreshTokenIDService "app/service/refreshTokenID"
 	"app/service/signingService"
 	tenantService "app/service/tenant"
@@ -164,6 +168,7 @@ func RegisterAuthEndpointServiceDependencies(container *hero.Container) {
 	libConfig.BindDependency[authService.ICheckCommandGroupUserRole, authService.CheckCommandGroupUserRoleService](container, nil)
 	libConfig.BindDependency[authService.IModifyUser, authService.ModifyUserService](container, nil)
 	libConfig.BindDependency[authServiceAdapter.ILogIn, authService.LogInService](container, nil)
+	libConfig.BindDependency[authServiceAdapter.IRefreshLogin, authService.RefreshLoginService](container, nil)
 
 	libConfig.BindDependency[usecase.ICreateUser, usecase.CreateUserUsecase](container, nil)
 
@@ -175,6 +180,7 @@ func RegisterAuthEndpointServiceDependencies(container *hero.Container) {
 	libConfig.BindDependency[usecase.IGetGroupUsers, usecase.GetGroupUsersUseCase](container, nil)
 	libConfig.BindDependency[usecase.IModifyUser, usecase.ModifyUserUseCase](container, nil)
 	libConfig.BindDependency[usecase.ILogIn, usecase.LogInUseCase](container, nil)
+	libConfig.BindDependency[usecase.IRefreshLogin, usecase.RefreshLoginUseCase](container, nil)
 }
 
 func RegisterUtilServices(container *hero.Container) {
@@ -215,7 +221,9 @@ func RegisterAuthDependencies(container *hero.Container) {
 	accessTokenSevice := new(accessTokenService.JWTAccessTokenManipulatorService)
 	libConfig.BindDependency[accessTokenServicePort.IAccessTokenManipulator](container, accessTokenSevice)
 
-	cacheClient, err := memoryCache.NewClient[string, refreshTokenBlackListServicePort.IRefreshTokenBlackListPayload]("REFRESH_TOKEN_BLACK_LIST")
+	cacheClient, err := memoryCache.NewClient[string, refreshTokenBlackListServicePort.IRefreshTokenBlackListPayload](
+		refreshTokenBlackListServicePort.REFRESH_TOKE_BLACK_LIST_TOPIC,
+	)
 
 	if err != nil {
 
@@ -227,6 +235,9 @@ func RegisterAuthDependencies(container *hero.Container) {
 
 	refreshTokenService := new(refreshTokenService.RefreshTokenManipulatorService)
 	libConfig.BindDependency[refreshTokenServicePort.IRefreshTokenManipulator](container, refreshTokenService)
+
+	libConfig.BindDependency[refreshTokenClientPort.IRefreshTokenClient, refreshTokenClientService.RefreshTokenClientService](container, nil)
+	libConfig.BindDependency[authSignatureTokenPort.IAuthSignatureProvider, authSignatureToken.AuthSignatureTokenService](container, nil)
 
 	fmt.Println("Auth service initialized.")
 }

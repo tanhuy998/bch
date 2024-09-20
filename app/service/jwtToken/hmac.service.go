@@ -43,17 +43,36 @@ func (this *jwt_HMACTokenService) SignString(token *jwt.Token) (string, error) {
 	return token.SignedString(this.secret)
 }
 
+func (this *jwt_HMACTokenService) VerifyTokenStringCustomClaim(token_str string, customClaim jwt.Claims) (*jwt.Token, error) {
+
+	return jwt.ParseWithClaims(
+		token_str,
+		customClaim,
+		func(token *jwt.Token) (interface{}, error) {
+
+			if !IsHMACSigningMethod(token.Method) {
+
+				return nil, ERR_SIGNING_METHOD_MISMATCH
+			}
+
+			return this.secret, nil
+		},
+		claim_validations...,
+	)
+}
+
 func (this *jwt_HMACTokenService) VerifyTokenString(token_str string) (*jwt.Token, error) {
 
-	return jwt.Parse(token_str, func(token *jwt.Token) (interface{}, error) {
+	return jwt.NewParser(claim_validations...).
+		Parse(token_str, func(token *jwt.Token) (interface{}, error) {
 
-		if !IsHMACSigningMethod(token.Method) {
+			if !IsHMACSigningMethod(token.Method) {
 
-			return nil, ERR_SIGNING_METHOD_MISMATCH
-		}
+				return nil, ERR_SIGNING_METHOD_MISMATCH
+			}
 
-		return this.secret, nil
-	})
+			return this.secret, nil
+		})
 }
 
 func (this *jwt_HMACTokenService) Validate(token *jwt.Token) error {

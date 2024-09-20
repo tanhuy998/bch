@@ -23,6 +23,11 @@ func RegisterUserLoggingApi(parentRoute iris.Party) *mvc.Application {
 			"POST", "/login", "LogIn",
 			middleware.BindPresenters[requestPresenter.LoginRequest, responsePresenter.LoginResponse](container),
 		)
+
+		activator.Handle(
+			"POST", "/refresh", "Refresh",
+			middleware.BindPresenters[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse](container),
+		)
 	}
 
 	wrapper.Handle(

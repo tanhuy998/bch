@@ -5,6 +5,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -13,8 +14,8 @@ type (
 	}
 
 	IAccessTokenProvider interface {
-		GenerateByCredentials(model *model.User, ctx context.Context) (IAccessToken, error)
-		GenerateByUserUUID(userUUID uuid.UUID, ctx context.Context) (IAccessToken, error)
+		GenerateByCredentials(model *model.User, tokenID string, ctx context.Context) (IAccessToken, error)
+		GenerateByUserUUID(userUUID uuid.UUID, tokenID string, ctx context.Context) (IAccessToken, error)
 		DefaultExpireDuration() time.Duration
 	}
 
@@ -62,6 +63,9 @@ type (
 		GetAudiences() []string
 		GetAuthData() IAccessTokenAuthData
 		Expired() bool
+		GetExpire() (*jwt.NumericDate, error)
+		GetTokenID() string
+		SetTokenID(string)
 	}
 
 	IAccessTokenBuilder interface {

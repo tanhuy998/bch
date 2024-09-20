@@ -10,6 +10,7 @@ import (
 const (
 	ENV_HOSTS         = "HOSTS"
 	ENV_PROJECT_STAGE = "PROJECT_STAGE"
+	ENV_APP_NAME      = "APP_NAME"
 )
 
 var (
@@ -25,6 +26,18 @@ var (
 func GetHostNames() []string {
 
 	return host_names
+}
+
+func GetAppName() string {
+
+	s := os.Getenv(ENV_APP_NAME)
+
+	if s == "" {
+
+		return "bch"
+	}
+
+	return s
 }
 
 func HasHostName(name string) bool {

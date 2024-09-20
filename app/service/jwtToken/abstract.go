@@ -2,6 +2,14 @@ package jwtTokenService
 
 import (
 	jwtTokenServicePort "app/adapter/jwtTokenService"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+var (
+	claim_validations []jwt.ParserOption = []jwt.ParserOption{
+		jwt.WithoutClaimsValidation(),
+	}
 )
 
 type (

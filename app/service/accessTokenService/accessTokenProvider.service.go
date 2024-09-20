@@ -5,6 +5,7 @@ import (
 	jwtTokenServicePort "app/adapter/jwtTokenService"
 	"app/domain/model"
 	"app/domain/valueObject"
+	"app/internal/bootstrap"
 	"app/repository"
 	"context"
 	"errors"
@@ -42,7 +43,7 @@ type (
 
 func (this *JWTAccessTokenManipulatorService) Read(token_str string) (IAccessToken, error) {
 
-	token, err := this.JWTTokenManipulatorService.VerifyTokenString(token_str)
+	token, err := this.JWTTokenManipulatorService.VerifyTokenStringCustomClaim(token_str, &jwt_access_token_custom_claims{})
 
 	if err != nil {
 
@@ -53,28 +54,44 @@ func (this *JWTAccessTokenManipulatorService) Read(token_str string) (IAccessTok
 }
 
 func (this *JWTAccessTokenManipulatorService) GenerateByUserUUID(
-	userUUID uuid.UUID, ctx context.Context,
-) (IAccessToken, error) {
+	userUUID uuid.UUID, tokenID string, ctx context.Context,
+) (at accessTokenServicePort.IAccessToken, err error) {
 
-	return this.queryAndGenerate(
+	at, err = this.queryAndGenerate(
 		bson.D{
 			{"uuid", userUUID},
 		},
 		ctx,
 	)
+
+	if err != nil || at == nil {
+
+		return
+	}
+
+	at.SetTokenID(tokenID)
+	return
 }
 
 func (this *JWTAccessTokenManipulatorService) GenerateByCredentials(
-	model *model.User, ctx context.Context,
-) (accessTokenServicePort.IAccessToken, error) {
+	model *model.User, tokenID string, ctx context.Context,
+) (at accessTokenServicePort.IAccessToken, err error) {
 
-	return this.queryAndGenerate(
+	at, err = this.queryAndGenerate(
 		bson.D{
 			{"username", model.Username},
 			//{"secret", model.Secret},
 		},
 		ctx,
 	)
+
+	if err != nil || at == nil {
+
+		return
+	}
+
+	at.SetTokenID(tokenID)
+	return
 }
 
 func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
@@ -156,11 +173,13 @@ func (this *JWTAccessTokenManipulatorService) makeFor(userUUID uuid.UUID) (*jwt_
 	token.Claims = &jwt_access_token_custom_claims{
 		jwt.RegisteredClaims{
 			Subject:   userUUID.String(),
+			Issuer:    bootstrap.GetAppName(),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(exp_duration)),
-			Audience:  jwt.ClaimStrings(this.AudienceList),
+			//Audience:  jwt.ClaimStrings(bootstrap.GetHostNames()),
 			//Issuer: ,
 		},
+		"",
 		nil,
 	}
 

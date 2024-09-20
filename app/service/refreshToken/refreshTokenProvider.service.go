@@ -6,6 +6,8 @@ import (
 	refreshTokenServicePort "app/adapter/refreshToken"
 	refreshTokenBlackListServicePort "app/adapter/refreshTokenBlackList"
 	"app/domain/valueObject"
+	"app/internal/bootstrap"
+	libCommon "app/lib/common"
 	refreshTokenIDService "app/service/refreshTokenID"
 	"context"
 	"errors"
@@ -27,6 +29,8 @@ type (
 	IRefreshTokenManipulator = refreshTokenServicePort.IRefreshTokenManipulator
 	IRefreshToken            = refreshTokenServicePort.IRefreshToken
 
+	ClaimsOption = func(claims *jwt.RegisteredClaims)
+
 	RefreshTokenManipulatorService struct {
 		AudienceList           accessTokenServicePort.AccessTokenAudienceList
 		RefreshTokenIDProvider refreshTokenIDService.IRefreshTokenIDProvider
@@ -35,7 +39,12 @@ type (
 	}
 )
 
-func (this *RefreshTokenManipulatorService) Generate(userUUID uuid.UUID, ctx context.Context) (IRefreshToken, error) {
+func (this *RefreshTokenManipulatorService) Generate(userUUID uuid.UUID, ctx context.Context) (refreshTokenServicePort.IRefreshToken, error) {
+
+	return this.makeFor(userUUID)
+}
+
+func (this *RefreshTokenManipulatorService) makeFor(userUUID uuid.UUID, claimOption ...ClaimsOption) (refreshTokenServicePort.IRefreshToken, error) {
 
 	token := this.JWTTokenService.GenerateToken()
 
@@ -46,30 +55,47 @@ func (this *RefreshTokenManipulatorService) Generate(userUUID uuid.UUID, ctx con
 		return nil, err
 	}
 
-	token.Claims = &jwt_refresh_token_custom_claims{
+	customClaims := &jwt_refresh_token_custom_claims{
 		jwt.RegisteredClaims{
-			Subject:   userUUID.String(),
+			Subject: userUUID.String(),
+			Issuer:  bootstrap.GetAppName(),
+			//Audience:  jwt.ClaimStrings(bootstrap.GetHostNames()),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(exp_duration)),
 		},
 		refreshTokenID,
 	}
 
+	token.Claims = customClaims
+
+	for _, optionFunc := range claimOption {
+
+		optionFunc(&customClaims.RegisteredClaims)
+	}
+
 	return newFromToken(token)
 }
-func (this *RefreshTokenManipulatorService) Revoke(RefreshTokenID string, ctx context.Context) error {
 
-	payload := &valueObject.RefreshTokenBlackListPayload{}
+func (this *RefreshTokenManipulatorService) Revoke(refreshToken refreshTokenServicePort.IRefreshToken, ctx context.Context) error {
 
-	success, err := this.RefreshTokenBlackList.Set(RefreshTokenID, payload, ctx)
+	refreshTokenID := refreshToken.GetTokenID()
+
+	payload := &valueObject.RefreshTokenBlackListPayload{
+		UserUUID: libCommon.PointerPrimitive(refreshToken.GetUserUUID()),
+	}
+
+	exp, err := refreshToken.GetExpireTime()
 
 	if err != nil {
 
 		return err
 	}
 
-	if !success {
+	err = this.RefreshTokenBlackList.SetWithExpire(refreshTokenID, payload, *exp, ctx)
 
-		return ERR_CANNOT_REVOKE_REFRESH_TOKEN
+	if err != nil {
+
+		return err
 	}
 
 	return nil
@@ -87,7 +113,7 @@ func (this *RefreshTokenManipulatorService) SignString(refreshToken IRefreshToke
 
 func (this *RefreshTokenManipulatorService) Read(str string) (IRefreshToken, error) {
 
-	token, err := this.JWTTokenService.VerifyTokenString(str)
+	token, err := this.JWTTokenService.VerifyTokenStringCustomClaim(str, &jwt_refresh_token_custom_claims{})
 
 	if err != nil {
 
@@ -100,4 +126,44 @@ func (this *RefreshTokenManipulatorService) Read(str string) (IRefreshToken, err
 func (this *RefreshTokenManipulatorService) DefaultExpireDuration() time.Duration {
 
 	return exp_duration
+}
+
+func (this *RefreshTokenManipulatorService) Rotate(refreshToken IRefreshToken, ctx context.Context) (IRefreshToken, error) {
+
+	switch {
+	case refreshToken == nil:
+		return nil, errors.New("nil passed to RefreshTokenManipulatorService.Rotate")
+	case refreshToken.Expired():
+		return nil, refreshTokenServicePort.ERR_TOKEN_EXPIRE
+	}
+
+	refreshTokenInBlackList, err := this.RefreshTokenBlackList.Has(refreshToken.GetTokenID(), ctx)
+
+	switch {
+	case err != nil:
+		return nil, err
+	case refreshTokenInBlackList:
+		return nil, refreshTokenServicePort.ERR_REFRESH_TOKEN_BLACK_LIST
+	}
+
+	exp, err := refreshToken.GetExpireTime()
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	if exp == nil {
+
+		return this.makeFor(refreshToken.GetUserUUID())
+	}
+
+	err = this.Revoke(refreshToken, ctx)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return this.makeFor(refreshToken.GetUserUUID(), SetExpire(*exp))
 }

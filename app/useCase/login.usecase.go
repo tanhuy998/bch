@@ -2,16 +2,12 @@ package usecase
 
 import (
 	authServiceAdapter "app/adapter/auth"
-	refreshTokenServicePort "app/adapter/refreshToken"
-	refreshTokenIdServicePort "app/adapter/refreshTokenidServicePort"
+	refreshTokenClientPort "app/adapter/refreshTokenClient"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
-	"app/internal/bootstrap"
 	actionResultService "app/service/actionResult"
 	"errors"
-	"net/http"
 
-	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/mvc"
 )
 
@@ -25,9 +21,9 @@ type (
 	}
 
 	LogInUseCase struct {
-		LogInService            authServiceAdapter.ILogIn
-		ActionResult            actionResultService.IActionResult
-		RefreshTokenManipulator refreshTokenServicePort.IRefreshTokenManipulator
+		LogInService       authServiceAdapter.ILogIn
+		ActionResult       actionResultService.IActionResult
+		RefreshTokenClient refreshTokenClientPort.IRefreshTokenClient
 	}
 )
 
@@ -50,26 +46,17 @@ func (this *LogInUseCase) Execute(
 		return this.ActionResult.ServeErrorResponse(err)
 	}
 
+	err = this.RefreshTokenClient.Write(reqContext, refreshToken)
+
+	if err != nil {
+
+		return this.ActionResult.ServeErrorResponse(err)
+	}
+
 	output.Data.AccessToken = accessToken
 	output.Message = "success"
 
-	for _, hostname := range bootstrap.GetHostNames() {
-
-		if hostname == "*" {
-
-			continue
-		}
-
-		reqContext.SetCookieKV(
-			refreshTokenIdServicePort.REFRESH_TOKEN_COOKIE,
-			refreshToken,
-			context.CookieExpires(this.RefreshTokenManipulator.DefaultExpireDuration()),
-			context.CookieDomain(hostname),
-			context.CookiePath("/refresh"),
-			context.CookieHTTPOnly(true),
-			context.CookieSameSite(http.SameSiteStrictMode),
-		)
-	}
+	this.RefreshTokenClient.Write(reqContext, refreshToken)
 
 	return this.ActionResult.ServeResponse(output)
 }

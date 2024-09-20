@@ -13,6 +13,7 @@ type (
 	}
 
 	IJWTTokenVerification interface {
+		VerifyTokenStringCustomClaim(token_str string, customClaim jwt.Claims) (*jwt.Token, error)
 		VerifyTokenString(string) (*jwt.Token, error)
 	}
 

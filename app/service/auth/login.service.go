@@ -3,13 +3,13 @@ package authService
 import (
 	accessTokenServicePort "app/adapter/accessToken"
 	authServiceAdapter "app/adapter/auth"
+	authSignatureTokenPort "app/adapter/authSignatureToken"
 	passwordServiceAdapter "app/adapter/passwordService"
 	refreshTokenServicePort "app/adapter/refreshToken"
 	"app/domain/model"
 	"app/repository"
 	"context"
 	"errors"
-	"fmt"
 )
 
 var (
@@ -25,6 +25,8 @@ type (
 		AccessTokenManipulator  accessTokenServicePort.IAccessTokenManipulator
 		GetSingleUser           authServiceAdapter.IGetSingleUserService
 		RefreshTokenManipulator refreshTokenServicePort.IRefreshTokenManipulator
+
+		AuthSignatureTokenProvider authSignatureTokenPort.IAuthSignatureProvider
 	}
 )
 
@@ -34,13 +36,10 @@ func (this *LogInService) Serve(
 
 	existingUser, err := this.GetSingleUser.SearchByUsername(username, ctx)
 
-	if err != nil {
-
+	switch {
+	case err != nil:
 		return
-	}
-
-	if existingUser == nil {
-
+	case existingUser == nil:
 		err = ERR_LOGIN_USER_NOT_FOUND
 		return
 	}
@@ -52,55 +51,13 @@ func (this *LogInService) Serve(
 
 	err = this.PasswordService.Resolve(inputModel)
 
-	if err != nil {
-
+	switch {
+	case err != nil:
 		return
-	}
-
-	if this.PasswordService.Compare(inputModel, existingUser.GetSecret()) != nil {
-
+	case this.PasswordService.Compare(inputModel, existingUser.GetSecret()) != nil:
 		err = ERR_LOGIN_USER_NOT_FOUND
 		return
 	}
 
-	accessToken, err := this.AccessTokenManipulator.GenerateByUserUUID(existingUser.UUID, ctx)
-
-	if err != nil {
-
-		return
-	}
-
-	fmt.Println(3, accessToken.GetUserUUID())
-	refreshToken, err := this.RefreshTokenManipulator.Generate(accessToken.GetUserUUID(), ctx)
-
-	if err != nil {
-
-		return
-	}
-
-	fmt.Println(4)
-	at, err = this.AccessTokenManipulator.SignString(accessToken)
-
-	if err != nil {
-
-		return
-	}
-
-	rt, err = this.RefreshTokenManipulator.SignString(refreshToken)
-	fmt.Println(5)
-	if err != nil {
-
-		return
-	}
-
-	return
+	return this.AuthSignatureTokenProvider.GenerateStrings(existingUser.UUID, ctx)
 }
-
-// func (this *LogInService) generateAccessToken(authData *valueObject.AuthData, ctx context.Context) (string, error) {
-
-// 	this.AccessTokenManipulator.Generate(*authData.UserUUID, ctx)
-// }
-
-// func (this *LogInService) generateRefreshToken(authData *valueObject.AuthData) string {
-
-// }

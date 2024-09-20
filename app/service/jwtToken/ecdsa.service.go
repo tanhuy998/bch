@@ -49,22 +49,36 @@ func (this *jwt_ECTokenService) SignString(token *jwt.Token) (string, error) {
 	return token.SignedString(this.private_key)
 }
 
+func (this *jwt_ECTokenService) VerifyTokenStringCustomClaim(token_str string, customClaim jwt.Claims) (*jwt.Token, error) {
+
+	return jwt.ParseWithClaims(
+		token_str,
+		customClaim,
+		func(token *jwt.Token) (interface{}, error) {
+
+			if !IsECSigningMethod(token.Method) {
+
+				return nil, ERR_SIGNING_METHOD_MISMATCH
+			}
+
+			return this.public_key, nil
+		},
+		claim_validations...,
+	)
+}
+
 func (this *jwt_ECTokenService) VerifyTokenString(token_str string) (*jwt.Token, error) {
 
-	return jwt.Parse(token_str, func(token *jwt.Token) (interface{}, error) {
+	return jwt.NewParser(claim_validations...).
+		Parse(token_str, func(token *jwt.Token) (interface{}, error) {
 
-		// if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
+			if !IsHMACSigningMethod(token.Method) {
 
-		// 	return nil, ERR_SIGNING_METHOD_MISMATCH
-		// }
+				return nil, ERR_SIGNING_METHOD_MISMATCH
+			}
 
-		if !IsECSigningMethod(token.Method) {
-
-			return nil, ERR_SIGNING_METHOD_MISMATCH
-		}
-
-		return this.public_key, nil
-	})
+			return this.public_key, nil
+		})
 }
 
 func (this *jwt_ECTokenService) Validate(token *jwt.Token) error {

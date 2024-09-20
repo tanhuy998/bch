@@ -23,7 +23,6 @@ type (
 		jwt_token *jwt.Token
 		claims    *jwt_refresh_token_custom_claims
 		userUUID  *uuid.UUID
-		expired   bool
 	}
 )
 
@@ -55,8 +54,6 @@ func newFromToken(token *jwt.Token) (*jwt_refresh_token, error) {
 		return nil, ERR_INVALID_TOKEN
 	}
 
-	ret.expired = time.Now().After(exp.Time)
-
 	subject, err := token.Claims.GetSubject()
 
 	if err != nil {
@@ -83,4 +80,33 @@ func (this *jwt_refresh_token) GetUserUUID() uuid.UUID {
 func (this *jwt_refresh_token) GetTokenID() string {
 
 	return this.claims.RefreshTokenID
+}
+
+func (this *jwt_refresh_token) Expired() bool {
+
+	exp, err := this.jwt_token.Claims.GetExpirationTime()
+
+	if err != nil {
+
+		return false
+	}
+
+	return exp.Before(time.Now())
+}
+
+func (this *jwt_refresh_token) GetExpireTime() (*time.Time, error) {
+
+	exp, err := this.jwt_token.Claims.GetExpirationTime()
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	if exp == nil {
+
+		return nil, nil
+	}
+
+	return &exp.Time, err
 }

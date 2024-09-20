@@ -1,10 +1,10 @@
 package refreshTokenBlackListService
 
 import (
-	memoryCacheServicePort "app/adapter/memoryCache"
 	refreshTokenBlackListServicePort "app/adapter/refreshTokenBlackList"
 	"context"
 	"errors"
+	"time"
 )
 
 var (
@@ -20,7 +20,7 @@ type (
 	// UpdateFunction[Payload_T any] func(payload Payload_T) (newVal Payload_T, approve bool, err error)
 
 	RefreshTokenBlackListManipulatorService struct {
-		CacheClient memoryCacheServicePort.IMemoryCacheClient[string, IRefreshTokenBlackListPayload]
+		CacheClient refreshTokenBlackListServicePort.IRefreshTokenCacheClient // memoryCacheServicePort.IMemoryCacheClient[string, IRefreshTokenBlackListPayload]
 	}
 )
 
@@ -75,4 +75,11 @@ func (this *RefreshTokenBlackListManipulatorService) Set(
 	}
 
 	return true, nil
+}
+
+func (this *RefreshTokenBlackListManipulatorService) SetWithExpire(
+	tokenID string, payload IRefreshTokenBlackListPayload, expire time.Time, ctx context.Context,
+) error {
+
+	return this.CacheClient.SetWithExpire(ctx, tokenID, payload, expire)
 }

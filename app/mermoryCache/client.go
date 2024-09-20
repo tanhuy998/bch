@@ -3,6 +3,7 @@ package memoryCache
 import (
 	"context"
 	"errors"
+	"time"
 )
 
 var (
@@ -184,6 +185,20 @@ func (this *CacheClient[Key_T, Value_T]) Update(
 
 	commit(updateValue)
 	return
+}
+
+func (this *CacheClient[Key_T, Value_T]) SetWithExpire(
+	ctx context.Context, key Key_T, value Value_T, moment time.Time,
+) error {
+
+	cacheUnit, exists := GetTopic[Key_T, Value_T](this.topic)
+
+	if !exists {
+
+		return ERR_CACHE_TOPIC_NOT_EXISTS
+	}
+
+	return cacheUnit.SetWithExpire(ctx, key, value, moment)
 }
 
 // func (this *CacheClient[Key_T, Value_T]) Modify(
