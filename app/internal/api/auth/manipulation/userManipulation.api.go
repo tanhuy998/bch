@@ -5,6 +5,7 @@ import (
 	responsePresenter "app/domain/presenter/response"
 	"app/internal/controller"
 	"app/internal/middleware"
+	"app/internal/middlewareHelper"
 
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/mvc"
@@ -18,6 +19,13 @@ func RegisterUserApi(parentRoute router.Party) *mvc.Application {
 	controller := new(controller.AuthUserManipulationController)
 
 	wrapper := mvc.New(router)
+
+	wrapper.Router.Use(
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequireTenantAgent,
+		),
+	)
 
 	var hanldFunc mvc.OptionFunc = func(activator *mvc.ControllerActivator) {
 
