@@ -53,7 +53,7 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 			val.ReceiveContext(ctx)
 		}
 
-		err = runInitializers(request, response, initializers)
+		err = runInitializers(ctx, request, response, initializers)
 
 		if err != nil {
 
@@ -172,6 +172,7 @@ func isEmptyPresenter[T any]() bool {
 // }
 
 func runInitializers[RequestPresenter_T, ResponsePresenter_T any](
+	ctx iris.Context,
 	req *RequestPresenter_T,
 	res *ResponsePresenter_T,
 	initializers []middlewareHelper.PresenterInitializer[RequestPresenter_T, ResponsePresenter_T],
@@ -179,7 +180,7 @@ func runInitializers[RequestPresenter_T, ResponsePresenter_T any](
 
 	for _, f := range initializers {
 
-		err := f(req, res)
+		err := f(ctx, req, res)
 
 		if err != nil {
 

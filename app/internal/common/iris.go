@@ -1,18 +1,35 @@
 package common
 
 import (
-	"fmt"
+	accessTokenServicePort "app/adapter/accessToken"
+	"app/internal"
 
 	"github.com/kataras/iris/v12"
 )
 
+type (
+	reponse_body struct {
+		Message string `json:"message"`
+	}
+)
+
 func SendDefaulJsonBodyAndEndRequest(ctx iris.Context, statusCode int, message string) {
 
-	// body := auth_err_body_reponse{
-	// 	Message: message,
-	// }
-
 	ctx.StatusCode(statusCode)
-	ctx.JSON(fmt.Sprintf(`{message:%s}`, message))
+	ctx.JSON(reponse_body{
+		Message: message,
+	})
 	ctx.EndRequest()
+}
+
+func GetAccessToken(ctx iris.Context) accessTokenServicePort.IAccessToken {
+
+	unknown := ctx.Values().Get(internal.CTX_ACCESS_TOKEN_KEY)
+
+	if accessToken, ok := unknown.(accessTokenServicePort.IAccessToken); ok {
+
+		return accessToken
+	}
+
+	return nil
 }

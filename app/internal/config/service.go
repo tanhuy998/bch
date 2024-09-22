@@ -2,6 +2,7 @@ package config
 
 import (
 	accessTokenServicePort "app/adapter/accessToken"
+	accessTokenClientPort "app/adapter/accessTokenClient"
 	adminServiceAdapter "app/adapter/adminService"
 	authServiceAdapter "app/adapter/auth"
 	authSignatureTokenPort "app/adapter/authSignatureToken"
@@ -19,6 +20,7 @@ import (
 	libConfig "app/lib/config"
 	memoryCache "app/mermoryCache"
 	"app/repository"
+	accessTokenClientService "app/service/accessTokenClient"
 	"app/service/accessTokenService"
 	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
@@ -201,6 +203,8 @@ func RegisterAuthDependencies(container *hero.Container) {
 	// })
 
 	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticationService](container, nil, AUTH)
+
+	libConfig.BindDependency[accessTokenClientPort.IAccessTokenClient, accessTokenClientService.BearerAccessTokenClientService](container, nil)
 
 	asymmetricJWTService := jwtTokenService.NewECDSAService(jwt.SigningMethodES256, *bootstrap.GetJWTEncryptionPrivateKey(), *bootstrap.GetJWTEncryptionPublicKey())
 	libConfig.BindDependency[jwtTokenServicePort.IAsymmetricJWTTokenManipulator](container, asymmetricJWTService)

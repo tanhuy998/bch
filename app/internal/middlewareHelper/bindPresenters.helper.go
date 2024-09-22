@@ -2,7 +2,7 @@ package middlewareHelper
 
 import (
 	accessTokenServicePort "app/adapter/accessToken"
-	"app/internal"
+	"app/internal/common"
 	"errors"
 
 	"github.com/kataras/iris/v12"
@@ -13,11 +13,11 @@ var (
 )
 
 type (
-	PresenterInitializer[RequestPresenter_T, ResponsePresenter_T any] func(req *RequestPresenter_T, res *ResponsePresenter_T) error
+	PresenterInitializer[RequestPresenter_T, ResponsePresenter_T any] func(ctx iris.Context, req *RequestPresenter_T, res *ResponsePresenter_T) error
 	RequestPresenterInitializer[RequestPresenter_T any]               func(req *RequestPresenter_T) error
 
 	IAccessTokenBringAlong interface {
-		IContextBringAlong
+		//IContextBringAlong
 		ReceiveAccessToken(at accessTokenServicePort.IAccessToken)
 		GetAccessToken() accessTokenServicePort.IAccessToken
 	}
@@ -26,23 +26,34 @@ type (
 		ReceiveContext(ctx iris.Context)
 		GetContext() iris.Context
 	}
+
+	IAuthorityBringAlong interface {
+		GetAuthority() accessTokenServicePort.IAccessTokenAuthData
+		SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData)
+	}
 )
 
-func BringAlongAccessToken[Req_T IAccessTokenBringAlong, Res_T any](req Req_T, res Res_T) error {
-
-	ctx := req.GetContext()
+func UseAccessToken[Req_T IAccessTokenBringAlong, Res_T any](ctx iris.Context, req Req_T, res Res_T) error {
 
 	if ctx == nil {
 
 		return ERR_NO_CONTEXT
 	}
 
-	unknown := ctx.Values().Get(internal.CTX_ACCESS_TOKEN_KEY)
+	req.ReceiveAccessToken(common.GetAccessToken(ctx))
 
-	if accessToken, ok := unknown.(accessTokenServicePort.IAccessToken); ok {
+	return nil
+}
 
-		req.ReceiveAccessToken(accessToken)
+func UseAuthority[Req_T IAuthorityBringAlong, Res_T any](ctx iris.Context, req Req_T, res Res_T) error {
+
+	accessToken := common.GetAccessToken(ctx)
+
+	if accessToken == nil {
+
+		return nil
 	}
 
+	req.SetAuthority(accessToken.GetAuthData())
 	return nil
 }

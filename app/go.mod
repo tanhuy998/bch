@@ -10,6 +10,7 @@ require (
 	github.com/iris-contrib/middleware/cors v0.0.0-20240502084239-34f27409ce72
 	github.com/joho/godotenv v1.5.1
 	github.com/kataras/iris/v12 v12.2.11
+	github.com/sqids/sqids-go v0.4.1
 	github.com/wI2L/jsondiff v0.6.0
 	go.mongodb.org/mongo-driver v1.15.0
 	golang.org/x/crypto v0.22.0
@@ -61,7 +62,6 @@ require (
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
-	github.com/sqids/sqids-go v0.4.1 // indirect
 	github.com/tdewolff/minify/v2 v2.20.19 // indirect
 	github.com/tdewolff/parse/v2 v2.7.12 // indirect
 	github.com/tidwall/gjson v1.17.1 // indirect
