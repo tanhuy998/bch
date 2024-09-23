@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="KRsN7USzfbhSE3XmUP83" name="Page-1">
-        <mxGraphModel dx="1965" dy="1923" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1962" dy="1923" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -162,7 +162,7 @@
                     <mxGeometry y="60" width="140" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="84" value="CommandGroupUserRole" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-180" y="-60" width="200" height="150" as="geometry"/>
+                    <mxGeometry x="-180" y="-130" width="200" height="150" as="geometry"/>
                 </mxCell>
                 <mxCell id="85" value="uuid" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="84" vertex="1">
                     <mxGeometry y="30" width="200" height="30" as="geometry"/>
@@ -257,7 +257,7 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="103" value="AssignmentTask" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="165" y="440" width="180" height="150" as="geometry"/>
+                    <mxGeometry x="160" y="420" width="180" height="150" as="geometry"/>
                 </mxCell>
                 <mxCell id="165" value="uuid" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="103" vertex="1">
                     <mxGeometry y="30" width="180" height="30" as="geometry"/>

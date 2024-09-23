@@ -4,6 +4,7 @@ import (
 	accessTokenServicePort "app/adapter/accessToken"
 	accessTokenClientPort "app/adapter/accessTokenClient"
 	adminServiceAdapter "app/adapter/adminService"
+	assignmentServicePort "app/adapter/assignment"
 	authServiceAdapter "app/adapter/auth"
 	authSignatureTokenPort "app/adapter/authSignatureToken"
 	jwtTokenServicePort "app/adapter/jwtTokenService"
@@ -24,6 +25,7 @@ import (
 	"app/service/accessTokenService"
 	actionResultService "app/service/actionResult"
 	adminService "app/service/admin"
+	assignmentService "app/service/assignment"
 	authService "app/service/auth"
 	"app/service/authSignatureToken"
 	candidateService "app/service/candidate"
@@ -114,6 +116,9 @@ func InitializeDatabase(app router.Party) {
 	libConfig.BindDependency[repository.ICandidateSigningInfo](
 		container, new(repository.CandidateSigningInfoRepository).Init(db),
 	)
+	libConfig.BindDependency[repository.IAssignment](
+		container, new(repository.AssignmentRepository).Init(db),
+	)
 	fmt.Println("Repositories Initialized.")
 }
 
@@ -183,6 +188,14 @@ func RegisterAuthEndpointServiceDependencies(container *hero.Container) {
 	libConfig.BindDependency[usecase.IModifyUser, usecase.ModifyUserUseCase](container, nil)
 	libConfig.BindDependency[usecase.ILogIn, usecase.LogInUseCase](container, nil)
 	libConfig.BindDependency[usecase.IRefreshLogin, usecase.RefreshLoginUseCase](container, nil)
+}
+
+func RegisterAssignmentEndpointServiceDependencies(container *hero.Container) {
+
+	libConfig.BindDependency[assignmentServicePort.IGetSingleAssignnment, assignmentService.GetSingleAssignmentService](container, nil)
+	libConfig.BindDependency[assignmentServicePort.ICreateAssignment, assignmentService.CreateAssignmentService](container, nil)
+
+	libConfig.BindDependency[usecase.ICreateAssignment, usecase.CreateAssignmentUseCase](container, nil)
 }
 
 func RegisterUtilServices(container *hero.Container) {
@@ -255,6 +268,7 @@ func RegisterServices(app router.Party) {
 	RegisterAuthDependencies(container)
 	RegisterTenantDependencies(container)
 	RegisterAuthEndpointServiceDependencies(container)
+	RegisterAssignmentEndpointServiceDependencies(container)
 
 	// auth := new(authService.AuthenticateService)
 	// Dep := container.Register(auth)
