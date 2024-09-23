@@ -16,6 +16,7 @@ type (
 	IAccessTokenProvider interface {
 		GenerateByCredentials(model *model.User, tokenID string, ctx context.Context) (IAccessToken, error)
 		GenerateByUserUUID(userUUID uuid.UUID, tokenID string, ctx context.Context) (IAccessToken, error)
+		GenerateBased(IAccessToken IAccessToken, ctx context.Context) (IAccessToken, error)
 		DefaultExpireDuration() time.Duration
 	}
 

@@ -94,6 +94,29 @@ func (this *JWTAccessTokenManipulatorService) GenerateByCredentials(
 	return
 }
 
+func (this *JWTAccessTokenManipulatorService) GenerateBased(
+	accessToken IAccessToken, ctx context.Context,
+) (IAccessToken, error) {
+
+	newAt, err := this.makeFor(accessToken.GetUserUUID())
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	if v, ok := (accessToken.GetAuthData()).(*valueObject.AuthData); ok {
+
+		newAt.customClaims.AuthData = v
+
+	} else {
+
+		return nil, ERR_INVALID_TOKEN
+	}
+
+	return newAt, nil
+}
+
 func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
 	condition bson.D, ctx context.Context,
 ) (accessTokenServicePort.IAccessToken, error) {
