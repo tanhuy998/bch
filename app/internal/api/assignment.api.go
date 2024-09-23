@@ -31,6 +31,14 @@ func initAssignmentApi(app router.Party) *mvc.Application {
 		applyRoutes(func(activator *mvc.ControllerActivator) {
 
 			activator.Handle(
+				"GET", "/{uuid:uuid}", "GetSingleAssignment",
+				middleware.BindPresenters[requestPresenter.GetSingleAssignmentRequest, responsePresenter.GetSingleAssignmentResponse](
+					container,
+					middlewareHelper.UseAuthority,
+				),
+			)
+
+			activator.Handle(
 				"POST", "/", "CreateAssignment",
 				middleware.BindPresenters[requestPresenter.CreateAssigmentRequest, responsePresenter.CreateAssignmentResponse](
 					container,

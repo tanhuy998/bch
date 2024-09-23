@@ -33,7 +33,7 @@ func (this *CreateAssignmentUseCase) Execute(
 
 	model := &model.Assignment{
 		Title:      inputData.Title,
-		TenantUUID: inputData.TenantUUID,
+		TenantUUID: input.GetAuthority().GetTenantUUID(),
 	}
 
 	data, err := this.CreateAssignmentService.Serve(model, input.GetContext())

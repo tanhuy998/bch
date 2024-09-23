@@ -13,6 +13,7 @@ import (
 	refreshTokenBlackListServicePort "app/adapter/refreshTokenBlackList"
 	refreshTokenClientPort "app/adapter/refreshTokenClient"
 	refreshTokenIdServicePort "app/adapter/refreshTokenidServicePort"
+	"app/adapter/responsePresetPort"
 	signingServiceAdapter "app/adapter/signingService"
 	tenantAgentServiceAdapter "app/adapter/tenantAgentService"
 	uniqueIDServicePort "app/adapter/uniqueID"
@@ -35,6 +36,7 @@ import (
 	refreshTokenBlackListService "app/service/refreshTokenBlackList"
 	refreshTokenClientService "app/service/refreshTokenClient"
 	refreshTokenIDService "app/service/refreshTokenID"
+	"app/service/responsePresetService"
 	"app/service/signingService"
 	tenantService "app/service/tenant"
 	tenantAgentService "app/service/tenantAgent"
@@ -196,11 +198,14 @@ func RegisterAssignmentEndpointServiceDependencies(container *hero.Container) {
 	libConfig.BindDependency[assignmentServicePort.ICreateAssignment, assignmentService.CreateAssignmentService](container, nil)
 
 	libConfig.BindDependency[usecase.ICreateAssignment, usecase.CreateAssignmentUseCase](container, nil)
+	libConfig.BindDependency[usecase.IGetSingleAssignment, usecase.GetSingleAssignmentUseCase](container, nil)
 }
 
 func RegisterUtilServices(container *hero.Container) {
+
 	libConfig.BindDependency[context.Validator, validator.Validate](container, validator.New())
 	libConfig.BindDependency[actionResultService.IActionResult, actionResultService.ResponseResultService](container, nil)
+	libConfig.BindDependency[responsePresetPort.IResponsePreset, responsePresetService.ResponsePresetService](container, nil)
 }
 
 func RegisterAuthDependencies(container *hero.Container) {

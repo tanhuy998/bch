@@ -10,9 +10,18 @@ import (
 
 type (
 	AssignmentController struct {
-		CreateAssignmentUseCase usecase.ICreateAssignment
+		CreateAssignmentUseCase    usecase.ICreateAssignment
+		GetSingleAssignmentUseCase usecase.IGetSingleAssignment
 	}
 )
+
+func (this *AssignmentController) GetSingleAssignment(
+	input *requestPresenter.GetSingleAssignmentRequest,
+	output *responsePresenter.GetSingleAssignmentResponse,
+) (mvc.Result, error) {
+
+	return this.GetSingleAssignmentUseCase.Execute(input, output)
+}
 
 func (this *AssignmentController) CreateAssignment(
 	input *requestPresenter.CreateAssigmentRequest,
