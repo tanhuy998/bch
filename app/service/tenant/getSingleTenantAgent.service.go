@@ -1,4 +1,4 @@
-package tenantAgentService
+package tenantService
 
 import (
 	"app/domain/model"

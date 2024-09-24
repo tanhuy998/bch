@@ -11,18 +11,18 @@ import (
 
 type (
 	TenantController struct {
-		CreateTenantAgentUsecase usecase.ICreateTenantAgent
-		CreateTenantUseCase      usecase.ICreateTenant
+		// CreateTenantAgentUsecase usecase.ICreateTenantAgent
+		CreateTenantUseCase usecase.ICreateTenant
 	}
 )
 
-func (this *TenantController) CreateTenantAgent(
-	input *requestPresenter.CreateTenantAgentRequest,
-	output *responsePresenter.CreateTenantAgentResponse,
-) (mvc.Result, error) {
+// func (this *TenantController) CreateTenantAgent(
+// 	input *requestPresenter.CreateTenantAgentRequest,
+// 	output *responsePresenter.CreateTenantAgentResponse,
+// ) (mvc.Result, error) {
 
-	return this.CreateTenantAgentUsecase.Execute(input, output)
-}
+// 	return this.CreateTenantAgentUsecase.Execute(input, output)
+// }
 
 func (this *TenantController) CreateTenant(
 	input *requestPresenter.CreateTenantRequest,

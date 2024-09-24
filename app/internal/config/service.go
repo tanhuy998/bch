@@ -15,7 +15,7 @@ import (
 	refreshTokenIdServicePort "app/adapter/refreshTokenidServicePort"
 	"app/adapter/responsePresetPort"
 	signingServiceAdapter "app/adapter/signingService"
-	tenantAgentServiceAdapter "app/adapter/tenantAgentService"
+	tenantServicePort "app/adapter/tenant"
 	uniqueIDServicePort "app/adapter/uniqueID"
 	"app/infrastructure/db"
 	"app/internal/bootstrap"
@@ -39,7 +39,6 @@ import (
 	"app/service/responsePresetService"
 	"app/service/signingService"
 	tenantService "app/service/tenant"
-	tenantAgentService "app/service/tenantAgent"
 	uniqueIDService "app/service/uniqueID"
 	usecase "app/useCase"
 	"fmt"
@@ -136,20 +135,16 @@ func RegisterAdapters(container *hero.Container) {
 	libConfig.BindDependency[passwordServiceAdapter.IPassword, passwordService.PasswordService](container, nil)
 	libConfig.BindDependency[authServiceAdapter.IGetSingleUserService, authService.GetSingleUser](container, nil)
 	libConfig.BindDependency[authServiceAdapter.ICreateUserService, authService.CreateUserService](container, nil)
-	libConfig.BindDependency[tenantAgentServiceAdapter.IGetSingleTenantAgentServiceAdapter, tenantAgentService.GetSingleTenantAgentService](container, nil)
+	//libConfig.BindDependency[tenantAgentServiceAdapter.IGetSingleTenantAgentServiceAdapter, tenantService.GetSingleTenantAgentService](container, nil)
 
 	fmt.Println("Wiring dependencies adapters successfully.")
 }
 
 func RegisterTenantDependencies(container *hero.Container) {
 
-	libConfig.BindDependency[tenantAgentService.IGetSingleTenantAgent, tenantAgentService.GetSingleTenantAgentService](container, nil)
-	libConfig.BindDependency[tenantAgentService.ICreaateTenantAgent, tenantAgentService.CreateTenantAgentService](container, nil)
+	libConfig.BindDependency[tenantServicePort.ICreateTenantAgent, tenantService.CreateTenantAgentService](container, nil)
+	libConfig.BindDependency[tenantServicePort.ICreateTenant, tenantService.CreateTenantService](container, nil)
 
-	libConfig.BindDependency[tenantService.IGetSingleTenant, tenantService.GetSingleTenantService](container, nil)
-	libConfig.BindDependency[tenantService.ICreateTenant, tenantService.CreateTenantService](container, nil)
-
-	libConfig.BindDependency[usecase.ICreateTenantAgent, usecase.CreateTenantAgentUseCase](container, nil)
 	libConfig.BindDependency[usecase.ICreateTenant, usecase.CreateTenantUseCase](container, nil)
 }
 

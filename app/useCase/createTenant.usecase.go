@@ -1,10 +1,11 @@
 package usecase
 
 import (
+	tenantServicePort "app/adapter/tenant"
+	"app/domain/model"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	actionResultService "app/service/actionResult"
-	tenantService "app/service/tenant"
 	"encoding/json"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -19,7 +20,7 @@ type (
 	}
 
 	CreateTenantUseCase struct {
-		CreateTenantService tenantService.ICreateTenant
+		CreateTenantService tenantServicePort.ICreateTenant
 		ActionResult        actionResultService.IActionResult
 	}
 )
@@ -29,7 +30,18 @@ func (this *CreateTenantUseCase) Execute(
 	output *responsePresenter.CreateTenantResponse,
 ) (mvc.Result, error) {
 
-	newTenant, err := this.CreateTenantService.Serve(input.Data.Name, input.Data.Description, input.Data.TenantAgentUUID)
+	newTenant := &model.Tenant{
+		Name:        input.Data.Name,
+		Description: input.Data.Description,
+	}
+
+	newUser := &model.User{
+		Name:     input.Data.User.Name,
+		Username: input.Data.User.Username,
+		PassWord: input.Data.User.Password,
+	}
+
+	newTenant, newUser, err := this.CreateTenantService.Serve(newTenant, newUser, input.GetContext())
 
 	if err != nil {
 
@@ -37,7 +49,10 @@ func (this *CreateTenantUseCase) Execute(
 	}
 
 	output.Message = "success"
-	output.Data = newTenant
+	output.Data = &responsePresenter.CreateTenantOutput{
+		Tenant: newTenant,
+		User:   newUser,
+	}
 
 	rawContent, _ := json.Marshal(output)
 

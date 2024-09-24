@@ -1,4 +1,4 @@
-package tenantAgentServiceAdapter
+package tenantServicePort
 
 import "app/domain/model"
 

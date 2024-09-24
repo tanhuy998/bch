@@ -18,14 +18,18 @@ func initTenantApi(app router.Party) {
 
 	wrapper := mvc.New(router)
 
+	// wrapper.Router.Use(
+	// 	middleware.SecretAuth,
+	// )
+
 	wrapper.Handle(
 		new(controller.TenantController),
 		applyRoutes(func(activator *mvc.ControllerActivator) {
 
-			activator.Handle(
-				"POST", "/agent", "CreateTenantAgent",
-				middleware.BindPresenters[requestPresenter.CreateTenantAgentRequest, responsePresenter.CreateTenantAgentResponse](container),
-			)
+			// activator.Handle(
+			// 	"POST", "/agent", "CreateTenantAgent",
+			// 	middleware.BindPresenters[requestPresenter.CreateTenantAgentRequest, responsePresenter.CreateTenantAgentResponse](container),
+			// )
 
 			activator.Handle(
 				"POST", "/", "CreateTenant",

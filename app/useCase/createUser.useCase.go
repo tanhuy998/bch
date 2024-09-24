@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"app/domain/model"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
 	actionResultService "app/service/actionResult"
@@ -31,7 +32,16 @@ func (this *CreateUserUsecase) Execute(
 	output *responsePresenter.CreateUserPresenter,
 ) (mvc.Result, error) {
 
-	_, err := this.CreateUserService.Serve(input.Data.Username, input.Data.Password, input.Data.Name)
+	//_, err := this.CreateUserService.Serve(input.Data.Username, input.Data.Password, input.Data.Name, input.GetContext())
+
+	newUser := &model.User{
+		Username:   input.Data.Username,
+		PassWord:   input.Data.Password,
+		Name:       input.Data.Name,
+		TenantUUID: *input.GetAuthority().GetTenantUUID(),
+	}
+
+	_, err := this.CreateUserService.CreateByModel(newUser, input.GetContext())
 
 	if err != nil {
 

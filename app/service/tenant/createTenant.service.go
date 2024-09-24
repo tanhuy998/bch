@@ -1,7 +1,7 @@
 package tenantService
 
 import (
-	tenantAgentServiceAdapter "app/adapter/tenantAgentService"
+	tenantServicePort "app/adapter/tenant"
 	"app/domain/model"
 	libCommon "app/lib/common"
 	"app/repository"
@@ -31,92 +31,74 @@ type (
 	}
 
 	CreateTenantService struct {
-		GetSingleTenantAgentService tenantAgentServiceAdapter.IGetSingleTenantAgentServiceAdapter
-		GetSingleTenantService      IGetSingleTenant
-		TenantRepo                  repository.ITenant
-		TenantAgentRepo             repository.ITenantAgent
-		UserRepo                    repository.IUser
-		MongoClient                 *mongo.Client
+		CreateTenantAgentService tenantServicePort.ICreateTenantAgent
+		GetSingleTenantService   IGetSingleTenant
+		TenantRepo               repository.ITenant
+		TenantAgentRepo          repository.ITenantAgent
+		UserRepo                 repository.IUser
+		MongoClient              *mongo.Client
 	}
 )
 
 func (this *CreateTenantService) Serve(
-	name string, description string, tenantAgentUUID string,
-) (*model.Tenant, error) {
+	inputTenant *model.Tenant, inputUser *model.User, ctx context.Context,
+) (t *model.Tenant, u *model.User, err error) {
 
-	err := this.validateTenant(name)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	tenantAgent, err := this.fetchTenantAgent(tenantAgentUUID)
+	err = this.validateTenant(inputTenant.Name, ctx)
 
 	if err != nil {
 
-		return nil, err
+		return
 	}
 
 	session, err := this.MongoClient.StartSession()
 
 	if err != nil {
 
-		return nil, err
+		return
 	}
 
 	defer session.EndSession(context.TODO())
 
-	result, err := session.WithTransaction(
-		context.TODO(),
-		func(sessionCtx mongo.SessionContext) (interface{}, error) {
+	_, err = session.WithTransaction(
+		ctx,
+		func(sessionCtx mongo.SessionContext) (any, error) {
 
-			newTenant := &model.Tenant{
-				UUID:        libCommon.PointerPrimitive(uuid.New()),
-				Name:        name,
-				Description: description,
-			}
+			inputTenant.UUID = libCommon.PointerPrimitive(uuid.New())
 
-			err = this.TenantRepo.Create(newTenant, sessionCtx)
+			err := this.TenantRepo.Create(inputTenant, sessionCtx)
 
 			if err != nil {
 
 				return nil, err
 			}
 
-			err = this.update(tenantAgent, *newTenant.UUID, sessionCtx)
+			inputUser, _, err = this.CreateTenantAgentService.Serve(inputUser, *inputTenant.UUID, sessionCtx)
 
 			if err != nil {
-
-				sessionCtx.AbortTransaction(context.TODO())
 
 				return nil, err
 			}
 
-			return newTenant, nil
+			return nil, nil
 		},
 	)
 
 	if err != nil {
 
-		return nil, err
+		return
 	}
 
-	if val, ok := result.(*model.Tenant); ok {
-
-		return val, nil
-	}
-
-	return nil, ERR_INTERNAL
+	return inputTenant, inputUser, nil
 }
 
-func (this *CreateTenantService) validateTenant(name string) error {
+func (this *CreateTenantService) validateTenant(name string, ctx context.Context) error {
 
 	tenant, err := this.TenantRepo.Find(
 		bson.D{
 			{"name", name},
 		},
-		context.TODO(),
+		ctx,
 	)
 
 	if err != nil {
@@ -130,91 +112,4 @@ func (this *CreateTenantService) validateTenant(name string) error {
 	}
 
 	return nil
-}
-
-func (this *CreateTenantService) fetchTenantAgent(tenantAgentUUID_str string) (*model.TenantAgent, error) {
-
-	tenantAgent, err := this.GetSingleTenantAgentService.Serve(tenantAgentUUID_str)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	if tenantAgent == nil {
-
-		return nil, ERR_NO_TENANT_AGENT
-	}
-
-	if tenantAgent.Deactivated {
-
-		return nil, ERR_TENANT_AGENT_DEACTIVATED
-	}
-
-	if tenantAgent.TenantUUID != nil &&
-		*tenantAgent.TenantUUID != uuid.Nil {
-
-		return nil, ERR_INVALID_TENANT_AGENT
-	}
-
-	return tenantAgent, nil
-}
-
-func (this *CreateTenantService) update(tenantAgentModel *model.TenantAgent, tenantUUID uuid.UUID, ctx context.Context) error {
-
-	g_err := ERR_INTERNAL
-
-	//tenantAgentModel.TenantUUID = &tenantUUID
-
-	// update tenantAgent repo
-	for attempt := 0; attempt < RETRY_ATTEMPT; attempt++ {
-
-		err := this.TenantAgentRepo.UpdateOneByUUID(
-			*tenantAgentModel.UUID,
-			&model.TenantAgent{
-				TenantUUID: &tenantUUID,
-			},
-			ctx,
-		)
-
-		if err != nil {
-
-			continue
-
-		} else {
-
-			g_err = nil
-			break
-		}
-	}
-
-	// if g_err != nil {
-
-	// 	return g_err
-	// }
-
-	// // update user repo
-	// for attempt := 0; attempt < RETRY_ATTEMPT; attempt++ {
-
-	// 	err := this.UserRepo.UpdateOneByUUID(
-	// 		tenantAgentModel.UserUUID,
-	// 		&model.User{
-	// 			TenantUUID: tenantUUID,
-	// 		},
-
-	// 		ctx,
-	// 	)
-
-	// 	if err != nil {
-
-	// 		continue
-
-	// 	} else {
-
-	// 		g_err = nil
-	// 		break
-	// 	}
-	// }
-
-	return g_err
 }
