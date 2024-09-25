@@ -3,9 +3,9 @@ package middleware
 import (
 	"errors"
 	"fmt"
-	"maps"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/kataras/iris/v12"
@@ -24,22 +24,12 @@ type (
 )
 
 var (
-	secret_auth_challenges = map[string]func(string) bool{
-		"realm": func(v string) bool {
-
-			v = strings.TrimPrefix(v, `"`)
-			v = strings.TrimSuffix(v, `"`)
-
-			return v == SECRET_AUTH_REALMM
-		},
-		"response": func(v string) bool {
-
-			v = strings.TrimPrefix(v, `"`)
-			v = strings.TrimSuffix(v, `"`)
-
-			return v == os.Getenv(ENV_APP_SECRET)
-		},
-	}
+	regexp_sep_realm    = regexp.MustCompile(`realm="tenant"`)
+	regexp_sep_response = regexp.MustCompile(
+		regexp.QuoteMeta(
+			fmt.Sprintf(`response="%s"`, os.Getenv(ENV_APP_SECRET)),
+		),
+	)
 )
 
 func SecretAuth(ctx iris.Context) {
@@ -86,29 +76,12 @@ func validateSecretAuth(value string) error {
 		return defaultErr
 	}
 
-	challenges := maps.Clone(secret_auth_challenges)
+	if !regexp_sep_realm.MatchString(temp[1]) {
 
-	for _, s := range params {
-
-		p := strings.Split(s, "=")
-
-		if len(p) < 2 {
-
-			return defaultErr
-		}
-
-		if validate, ok := challenges[p[0]]; ok {
-
-			if !validate(p[1]) {
-
-				return defaultErr
-			}
-
-			delete(challenges, p[0])
-		}
+		return defaultErr
 	}
 
-	if len(challenges) != 0 {
+	if !regexp_sep_response.MatchString(temp[1]) {
 
 		return defaultErr
 	}

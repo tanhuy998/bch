@@ -18,9 +18,9 @@ func initTenantApi(app router.Party) {
 
 	wrapper := mvc.New(router)
 
-	// wrapper.Router.Use(
-	// 	middleware.SecretAuth,
-	// )
+	wrapper.Router.Use(
+		middleware.SecretAuth,
+	)
 
 	wrapper.Handle(
 		new(controller.TenantController),
