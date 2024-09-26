@@ -6,5 +6,6 @@ type (
 	IResponsePreset interface {
 		UnAuthorizedResource() (mvc.Result, error)
 		NotFound() (mvc.Result, error)
+		InternalError() (mvc.Result, error)
 	}
 )

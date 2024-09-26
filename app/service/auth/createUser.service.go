@@ -3,6 +3,7 @@ package authService
 import (
 	passwordAdapter "app/adapter/passwordService"
 	"app/domain/model"
+	libCommon "app/lib/common"
 	"app/repository"
 	"context"
 	"errors"
@@ -48,7 +49,7 @@ func (this *CreateUserService) CreateByModel(model *model.User, ctx context.Cont
 		return nil, err
 	}
 
-	model.UUID = uuid.New()
+	model.UUID = libCommon.PointerPrimitive(uuid.New())
 
 	err = this.UserRepo.Create(model, ctx)
 

@@ -81,3 +81,50 @@ func (this *GetCommandGroupUsersService) Serve(groupUUID_str string) ([]*model.U
 
 	return ret, nil
 }
+
+func (this *GetCommandGroupUsersService) SearchAndRetrieveByModel(dataModel *model.CommandGroup, ctx context.Context) ([]*model.User, error) {
+
+	groupUUID := dataModel.UUID
+	group, err := this.CommandGroupRepo.FindOneByUUID(*groupUUID, context.TODO())
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	if group == nil {
+
+		return nil, ERR_NO_GROUP
+	}
+
+	ret, err := repository.Aggregate[model.User](
+		this.CommandGroupUserRepo.GetCollection(),
+		mongo.Pipeline{
+			bson.D{
+				{
+					"$match", dataModel,
+				},
+			},
+			bson.D{
+				{"$lookup",
+					bson.D{
+						{"from", "users"},
+						{"localField", "userUUID"},
+						{"foreignField", "uuid"},
+						{"as", "users"},
+					},
+				},
+			},
+			bson.D{{"$unwind", bson.D{{"path", "$users"}}}},
+			bson.D{{"$replaceRoot", bson.D{{"newRoot", "$$ROOT.users"}}}},
+		},
+		context.TODO(),
+	)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return ret, nil
+}

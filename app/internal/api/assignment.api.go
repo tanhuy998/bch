@@ -45,6 +45,14 @@ func initAssignmentApi(app router.Party) *mvc.Application {
 					middlewareHelper.UseAuthority,
 				),
 			)
+
+			activator.Handle(
+				"POST", "/{assignmentUUID:uuid}/group", "CreateAssignmentGroup",
+				middleware.BindPresenters[requestPresenter.CreateAssignmentGroupRequest, responsePresenter.CreateAssignmentGroupResponse](
+					container,
+					middlewareHelper.UseAuthority,
+				),
+			)
 		}),
 	)
 

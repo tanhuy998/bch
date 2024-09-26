@@ -267,7 +267,7 @@ func (this *CheckCommandGroupUserRoleService) differentiate(
 
 		roleUUID := v.RoleUUID
 
-		times, visited := visitedInputDistinctValues[roleUUID]
+		times, visited := visitedInputDistinctValues[*roleUUID]
 
 		if !visited {
 
@@ -278,11 +278,11 @@ func (this *CheckCommandGroupUserRoleService) differentiate(
 
 		if timesLeft > 1 {
 
-			visitedInputDistinctValues[roleUUID] = timesLeft
+			visitedInputDistinctValues[*roleUUID] = timesLeft
 
 		} else {
 
-			delete(visitedInputDistinctValues, roleUUID)
+			delete(visitedInputDistinctValues, *roleUUID)
 		}
 	}
 	//fmt.Println(visitedInputDistinctValues)

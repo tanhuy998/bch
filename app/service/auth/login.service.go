@@ -59,5 +59,5 @@ func (this *LogInService) Serve(
 		return
 	}
 
-	return this.AuthSignatureTokenProvider.GenerateStrings(existingUser.UUID, ctx)
+	return this.AuthSignatureTokenProvider.GenerateStrings(*existingUser.UUID, ctx)
 }

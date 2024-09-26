@@ -80,17 +80,17 @@ func newFromToken(token *jwt.Token) (*jwt_access_token, error) {
 
 	ret.userUUID = libCommon.PointerPrimitive(userUUID)
 
-	exp, err := token.Claims.GetExpirationTime()
+	// exp, err := token.Claims.GetExpirationTime()
 
-	if err != nil {
+	// if err != nil {
 
-		return nil, err
-	}
+	// 	return nil, err
+	// }
 
-	if exp == nil {
+	// if exp == nil {
 
-		return nil, ERR_INVALID_TOKEN
-	}
+	// 	return nil, ERR_INVALID_TOKEN
+	// }
 
 	return ret, nil
 }
@@ -110,6 +110,11 @@ func (this *jwt_access_token) Expired() bool {
 	exp, err := this.GetExpire()
 
 	if err != nil {
+
+		return false
+	}
+
+	if exp == nil {
 
 		return false
 	}

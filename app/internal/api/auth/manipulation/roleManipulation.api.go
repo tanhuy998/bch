@@ -31,7 +31,10 @@ func RegisterRoleApi(parentRoute router.Party) *mvc.Application {
 
 		activator.Handle(
 			"GET", "/", "GetAllRoles",
-			middleware.BindPresenters[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse](container),
+			middleware.BindPresenters[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse](
+				container,
+				middlewareHelper.UseAuthority,
+			),
 		)
 
 		// activator.Handle(
@@ -41,7 +44,10 @@ func RegisterRoleApi(parentRoute router.Party) *mvc.Application {
 
 		activator.Handle(
 			"POST", "/group/{groupUUID}/user/{userUUID}", "GrantCommandGroupRolesToUser",
-			middleware.BindPresenters[requestPresenter.GrantCommandGroupRolesToUserRequest, responsePresenter.GrantCommandGroupRolesToUserResponse](container),
+			middleware.BindPresenters[requestPresenter.GrantCommandGroupRolesToUserRequest, responsePresenter.GrantCommandGroupRolesToUserResponse](
+				container,
+				middlewareHelper.UseAuthority,
+			),
 		)
 	}
 

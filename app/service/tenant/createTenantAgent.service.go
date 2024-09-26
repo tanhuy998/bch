@@ -33,7 +33,7 @@ type (
 
 func (this CreateTenantAgentService) Serve(inputUser *model.User, tenantUUID uuid.UUID, ctx context.Context) (*model.User, *model.TenantAgent, error) {
 
-	inputUser.TenantUUID = tenantUUID
+	inputUser.TenantUUID = &tenantUUID
 
 	newUser, err := this.CreateUserService.CreateByModel(inputUser, ctx)
 
@@ -44,7 +44,7 @@ func (this CreateTenantAgentService) Serve(inputUser *model.User, tenantUUID uui
 
 	newAgentModel := &model.TenantAgent{
 		UUID:       libCommon.PointerPrimitive(uuid.New()),
-		UserUUID:   &newUser.UUID,
+		UserUUID:   libCommon.PointerPrimitive(uuid.UUID(*newUser.UUID)),
 		TenantUUID: libCommon.PointerPrimitive(tenantUUID),
 		//Deactivated: true,
 	}

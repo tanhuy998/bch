@@ -2,6 +2,7 @@ package authService
 
 import (
 	"app/domain/model"
+	libCommon "app/lib/common"
 	"app/repository"
 	"context"
 	"errors"
@@ -60,7 +61,7 @@ func (this *AddUserToCommandGroupService) Serve(groupUUID_str string, userUUID_s
 		return ERR_INVALID_USER
 	}
 
-	res, err := this.CheckUserInCommandGroup.Detail(group.UUID, user.UUID)
+	res, err := this.CheckUserInCommandGroup.Detail(*group.UUID, *user.UUID)
 
 	if err != nil {
 
@@ -73,7 +74,7 @@ func (this *AddUserToCommandGroupService) Serve(groupUUID_str string, userUUID_s
 	}
 
 	dataModel := &model.CommandGroupUser{
-		UUID:             uuid.New(),
+		UUID:             libCommon.PointerPrimitive(uuid.New()),
 		CommandGroupUUID: group.UUID,
 		UserUUID:         user.UUID,
 	}

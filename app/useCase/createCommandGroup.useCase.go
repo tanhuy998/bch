@@ -1,10 +1,12 @@
 package usecase
 
 import (
+	authServiceAdapter "app/adapter/auth"
+	"app/adapter/responsePresetPort"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
+	libCommon "app/lib/common"
 	actionResultService "app/service/actionResult"
-	authService "app/service/auth"
 	"encoding/json"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -19,9 +21,10 @@ type (
 	}
 
 	CreateCommandGroupUseCase struct {
-		CreateCommandGroupService    authService.ICreateCommandGroup
-		GetSingleCommandGroupService authService.IGetSingleCommandGroup
-		ActionResult                 actionResultService.IActionResult
+		CreateCommandGroupService authServiceAdapter.ICreateCommandGroup //authService.ICreateCommandGroup
+		ResponsePreset            responsePresetPort.IResponsePreset
+		//GetSingleCommandGroupService authService.IGetSingleCommandGroup
+		ActionResult actionResultService.IActionResult
 	}
 )
 
@@ -30,24 +33,26 @@ func (this *CreateCommandGroupUseCase) Execute(
 	output *responsePresenter.CreateCommandGroupResponse,
 ) (mvc.Result, error) {
 
-	err := this.CreateCommandGroupService.Serve(input.Data.Name)
+	data := input.Data
+	data.CreatedBy = libCommon.PointerPrimitive(input.GetAuthority().GetUserUUID())
+	data.TenantUUID = libCommon.PointerPrimitive(input.GetAuthority().GetTenantUUID())
+
+	data, err := this.CreateCommandGroupService.CreateByModel(data, input.GetContext())
 
 	if err != nil {
 
-		return nil, err
+		return this.ActionResult.ServeErrorResponse(err)
 	}
 
-	newGroup, err := this.GetSingleCommandGroupService.SearchByName(input.Data.Name)
+	if data == nil {
 
-	if err != nil {
-
-		return nil, err
+		return this.ResponsePreset.InternalError()
 	}
 
 	output.Message = "success"
-	output.Data.UUID = newGroup.UUID
+	output.Data.UUID = *data.UUID
 
-	rawContent, err := json.Marshal(output)
+	rawContent, _ := json.Marshal(output)
 
-	return this.ActionResult.Prepare().SetCode(201).SetContent(rawContent), nil
+	return this.ActionResult.Prepare().SetCode(201).SetContent(rawContent).Done()
 }

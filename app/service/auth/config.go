@@ -2,6 +2,7 @@ package authService
 
 import (
 	"app/domain/model"
+	libCommon "app/lib/common"
 	"app/repository"
 	"context"
 
@@ -36,7 +37,7 @@ func init_entry_role(roleName string, roleRepository repository.IRole) {
 
 		roleRepository.Create(
 			&model.Role{
-				UUID: uuid.New(),
+				UUID: libCommon.PointerPrimitive(uuid.New()),
 				Name: roleName,
 			},
 			context.TODO(),

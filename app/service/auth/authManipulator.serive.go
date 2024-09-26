@@ -4,6 +4,7 @@ import (
 	"app/domain/model"
 	authValueObject "app/domain/valueObject/auth"
 	"app/internal/common"
+	libCommon "app/lib/common"
 	"app/repository"
 	"context"
 
@@ -38,7 +39,7 @@ func (this *AuthManipulator) CreateUser(
 ) (*model.User, error) {
 
 	model := &model.User{
-		UUID:     uuid.New(),
+		UUID:     libCommon.PointerPrimitive(uuid.New()),
 		Username: username,
 		//PassWord: password,
 	}
@@ -83,9 +84,9 @@ func (this *AuthManipulator) AssignUserToCommandGroup(
 	}
 
 	model := &model.CommandGroupUser{
-		UUID:             uuid.New(),
-		UserUUID:         userUUID,
-		CommandGroupUUID: commandGroupUUID,
+		UUID:             libCommon.PointerPrimitive(uuid.New()),
+		UserUUID:         &userUUID,
+		CommandGroupUUID: &commandGroupUUID,
 	}
 
 	err = this.CommandGroupUserRepo.Create(model, context.TODO())
@@ -128,9 +129,9 @@ func (this *AuthManipulator) GrantCommandGroupUserRole(
 	}
 
 	model := &model.CommandGroupUserRole{
-		UUID:                 uuid.New(),
-		CommandGroupUserUUID: commandGroupUserUUID,
-		RoleUUID:             roleUUID,
+		UUID:                 libCommon.PointerPrimitive(uuid.New()),
+		CommandGroupUserUUID: &commandGroupUserUUID,
+		RoleUUID:             &roleUUID,
 	}
 
 	return this.CommandGroupUserRoleRepo.Create(model, context.TODO())

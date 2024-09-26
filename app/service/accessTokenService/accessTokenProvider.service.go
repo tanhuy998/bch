@@ -38,8 +38,22 @@ type (
 		//FetchAuthDataService       authServiceAdapter.IFetchAuthData
 		JWTTokenManipulatorService jwtTokenServicePort.IAsymmetricJWTTokenManipulator
 		UserRepo                   repository.IUser
+		ExpDuration                time.Duration
+		WithoutExpire              bool
 	}
 )
+
+func New(options ...AccessTokenManipulatorOption) *JWTAccessTokenManipulatorService {
+
+	ret := new(JWTAccessTokenManipulatorService)
+
+	for _, fn := range options {
+
+		fn(ret)
+	}
+
+	return ret
+}
 
 func (this *JWTAccessTokenManipulatorService) Read(token_str string) (IAccessToken, error) {
 
@@ -155,7 +169,7 @@ func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
 						{"uuid", 1},
 						{"name", 1},
 						{"username", 1},
-						{"secret", 1},
+						{"tenantUUID", 1},
 						{"participatedCommandGroups", 1},
 						{"tenantAgentData", 1},
 					},
@@ -193,18 +207,29 @@ func (this *JWTAccessTokenManipulatorService) makeFor(userUUID uuid.UUID) (*jwt_
 
 	token := this.JWTTokenManipulatorService.GenerateToken()
 
-	token.Claims = &jwt_access_token_custom_claims{
+	customeClaims := &jwt_access_token_custom_claims{
 		jwt.RegisteredClaims{
-			Subject:   userUUID.String(),
-			Issuer:    bootstrap.GetAppName(),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(exp_duration)),
+			Subject:  userUUID.String(),
+			Issuer:   bootstrap.GetAppName(),
+			IssuedAt: jwt.NewNumericDate(time.Now()),
+			//ExpiresAt: jwt.NewNumericDate(time.Now().Add(exp_duration)),
 			//Audience:  jwt.ClaimStrings(bootstrap.GetHostNames()),
 			//Issuer: ,
 		},
 		"",
 		nil,
 	}
+
+	switch {
+	case !this.WithoutExpire:
+		fallthrough
+	case this.ExpDuration > 0:
+		customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(this.ExpDuration))
+	case this.ExpDuration <= 0:
+		customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(exp_duration))
+	}
+
+	token.Claims = customeClaims
 
 	accesstoken, err := newFromToken(token)
 

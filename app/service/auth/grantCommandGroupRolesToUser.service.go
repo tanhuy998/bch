@@ -2,6 +2,7 @@ package authService
 
 import (
 	"app/domain/model"
+	libCommon "app/lib/common"
 	"app/repository"
 	"context"
 	"errors"
@@ -99,8 +100,8 @@ func (this *GrantCommandGroupRolesToUserService) Serve(
 	for i, v := range unGrantedRoles {
 
 		commandGroupUserRoleList[i] = &model.CommandGroupUserRole{
-			UUID:                 uuid.New(),
-			RoleUUID:             v,
+			UUID:                 libCommon.PointerPrimitive(uuid.New()),
+			RoleUUID:             &v,
 			CommandGroupUserUUID: commandGroupUser.UUID,
 		}
 	}

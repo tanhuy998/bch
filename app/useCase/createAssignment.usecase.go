@@ -5,7 +5,9 @@ import (
 	"app/domain/model"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
+	libCommon "app/lib/common"
 	actionResultService "app/service/actionResult"
+	"time"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -33,7 +35,9 @@ func (this *CreateAssignmentUseCase) Execute(
 
 	model := &model.Assignment{
 		Title:      inputData.Title,
-		TenantUUID: input.GetAuthority().GetTenantUUID(),
+		TenantUUID: libCommon.PointerPrimitive(input.GetAuthority().GetTenantUUID()),
+		CreatedAt:  libCommon.PointerPrimitive(time.Now()),
+		CreatedBy:  libCommon.PointerPrimitive(input.GetAuthority().GetUserUUID()),
 	}
 
 	data, err := this.CreateAssignmentService.Serve(model, input.GetContext())

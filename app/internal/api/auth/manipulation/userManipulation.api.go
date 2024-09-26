@@ -31,17 +31,26 @@ func RegisterUserApi(parentRoute router.Party) *mvc.Application {
 
 		activator.Handle(
 			"POST", "/", "CreateUser",
-			middleware.BindPresenters[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter](container),
+			middleware.BindPresenters[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter](
+				container,
+				middlewareHelper.UseAuthority,
+			),
 		)
 
 		activator.Handle(
 			"GET", "/group/{groupUUID:uuid}", "GetGroupUsers",
-			middleware.BindPresenters[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse](container),
+			middleware.BindPresenters[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse](
+				container,
+				middlewareHelper.UseAuthority,
+			),
 		)
 
 		activator.Handle(
 			"PATCH", "/{userUUID:uuid}", "ModifyUser",
-			middleware.BindPresenters[requestPresenter.ModifyUserRequest, responsePresenter.ModifyUserResponse](container),
+			middleware.BindPresenters[requestPresenter.ModifyUserRequest, responsePresenter.ModifyUserResponse](
+				container,
+				middlewareHelper.UseAuthority,
+			),
 		)
 	}
 

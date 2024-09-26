@@ -13,6 +13,14 @@ type (
 	}
 )
 
+func (this *ResponsePresetService) InternalError() (mvc.Result, error) {
+
+	return this.ActionResult.Prepare().
+		SetCode(http.StatusInternalServerError).
+		SetContent([]byte(`{"message": "500 internal error"}`)).
+		Done()
+}
+
 func (this *ResponsePresetService) UnAuthorizedResource() (mvc.Result, error) {
 
 	return this.ActionResult.Prepare().

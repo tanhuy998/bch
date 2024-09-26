@@ -46,7 +46,8 @@ type (
 	}
 
 	IAccessTokenAuthData interface {
-		GetTenantUUID() *uuid.UUID
+		GetUserUUID() uuid.UUID
+		GetTenantUUID() uuid.UUID
 		GetTenantAgentData() *model.TenantAgent
 		GetParticipatedGroups() []IParticipatedCommandGroup
 		IsTenantAgent() bool

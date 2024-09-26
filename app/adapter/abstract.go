@@ -1,4 +1,4 @@
-package adapter
+package servicePort
 
 /*
 	Adapters solve the problem of circular dependencies when

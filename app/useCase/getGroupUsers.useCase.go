@@ -1,11 +1,14 @@
 package usecase
 
 import (
+	authServiceAdapter "app/adapter/auth"
+	"app/domain/model"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
+	libCommon "app/lib/common"
 	actionResultService "app/service/actionResult"
-	authService "app/service/auth"
 
+	"github.com/google/uuid"
 	"github.com/kataras/iris/v12/mvc"
 )
 
@@ -18,7 +21,7 @@ type (
 	}
 
 	GetGroupUsersUseCase struct {
-		GetCommandGroupUsersService authService.IGetCommandGroupUsers
+		GetCommandGroupUsersService authServiceAdapter.IGetCommandGroupUsers //authService.IGetCommandGroupUsers
 		ActionResult                actionResultService.IActionResult
 	}
 )
@@ -28,7 +31,19 @@ func (this *GetGroupUsersUseCase) Execute(
 	output *responsePresenter.GetGroupUsersResponse,
 ) (mvc.Result, error) {
 
-	data, err := this.GetCommandGroupUsersService.Serve(input.GroupUUID)
+	groupUUID, err := uuid.Parse(input.GroupUUID)
+
+	if err != nil {
+
+		return this.ActionResult.ServeErrorResponse(err)
+	}
+
+	searchModel := &model.CommandGroup{
+		UUID:       libCommon.PointerPrimitive(groupUUID),
+		TenantUUID: libCommon.PointerPrimitive(input.GetAuthority().GetTenantUUID()),
+	}
+
+	data, err := this.GetCommandGroupUsersService.SearchAndRetrieveByModel(searchModel, input.GetContext()) //this.GetCommandGroupUsersService.Serve(input.GroupUUID)
 
 	if err != nil {
 

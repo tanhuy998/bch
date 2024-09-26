@@ -10,8 +10,9 @@ import (
 
 type (
 	AssignmentController struct {
-		CreateAssignmentUseCase    usecase.ICreateAssignment
-		GetSingleAssignmentUseCase usecase.IGetSingleAssignment
+		CreateAssignmentUseCase      usecase.ICreateAssignment
+		GetSingleAssignmentUseCase   usecase.IGetSingleAssignment
+		CreateAssignmentGroupUseCase usecase.ICreateAssignmentGroup
 	}
 )
 
@@ -29,4 +30,12 @@ func (this *AssignmentController) CreateAssignment(
 ) (mvc.Result, error) {
 
 	return this.CreateAssignmentUseCase.Execute(input, output)
+}
+
+func (this *AssignmentController) CreateAssignmentGroup(
+	input *requestPresenter.CreateAssignmentGroupRequest,
+	output *responsePresenter.CreateAssignmentGroupResponse,
+) (mvc.Result, error) {
+
+	return this.CreateAssignmentGroupUseCase.Execute(input, output)
 }

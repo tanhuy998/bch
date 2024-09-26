@@ -24,9 +24,9 @@ type (
 	}
 )
 
-func (this *AuthData) GetTenantUUID() *uuid.UUID {
+func (this *AuthData) GetTenantUUID() uuid.UUID {
 
-	return this.TenantUUID
+	return *this.TenantUUID
 }
 
 func (this *AuthData) GetTenantAgentData() *model.TenantAgent {
@@ -52,6 +52,11 @@ func (this *AuthData) GetParticipatedGroups() (ret []IParticipatedCommandGroup) 
 func (this *AuthData) IsTenantAgent() bool {
 
 	return this.TenantAgentData != nil
+}
+
+func (this *AuthData) GetUserUUID() uuid.UUID {
+
+	return *this.UserUUID
 }
 
 func (this *UserParticipatedCommandGroup) GetCommandGroupUUID() *uuid.UUID {

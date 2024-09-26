@@ -1,32 +1,42 @@
 package model
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type (
 	Assignment struct {
-		UUID       *uuid.UUID `json:"uuid" bson:"uuid" validate:"required"`
-		TenantUUID *uuid.UUID `json:"tenantUUID" bson:"tenantUUID" validate:"required"`
+		UUID       *uuid.UUID `json:"uuid" bson:"uuid"`
+		TenantUUID *uuid.UUID `json:"tenantUUID" bson:"tenantUUID"`
+		CreatedAt  *time.Time `json:"createdAt" bson:"createdAt,omitempty"`
+		CreatedBy  *uuid.UUID `json:"createdBy" bson:"createdBy"`
+		Deadline   *time.Time `json:"deadline" bson:"deadline"`
 		//OwnerShip  []uuid.UUID `json:"ownerShip" bson:"ownerShip"`
 		Title string `json:"title" bson:"title" validate:"required"`
 	}
 
-	AssigmentGroup struct {
-		UUID       *uuid.UUID `json:"uuid" bson:"uuid" validate:"required"`
-		TenantUUID *uuid.UUID `json:"tenantUUID" bson:"tenantUUID" validate:"required"`
-		CreatedBy  *uuid.UUID `json:"createdBy" bson:"createdBy" validate:"required"`
-		Name       string     `json:"name" bson:"name" validate:"requried"`
+	AssignmentGroup struct {
+		UUID             *uuid.UUID `json:"uuid,omitempty" bson:"uuid,omitempty"`
+		AssignmentUUID   *uuid.UUID `json:"assignmentUUID" bson:"assignmentUUID"`
+		TenantUUID       *uuid.UUID `json:"tenantUUID,omitempty" bson:"tenantUUID,omitempty"`
+		CommandGroupUUID *uuid.UUID `json:"commandGroupUUID,omitempty" bson:"commandGroupUUID,omitempty"`
+		CreatedBy        *uuid.UUID `json:"createdBy,omitempty" bson:"createdBy,omitempty"`
+		Name             string     `json:"name" bson:"name" validate:"requried,omitempty"`
 	}
 
 	AssigmentGroupMember struct {
-		UUID                 *uuid.UUID `json:"uuid" bson:"uuid" validate:"required"`
-		TenantUUID           *uuid.UUID `json:"tenantUUID" bson:"tenantUUID" validate:"required"`
-		AssigmentGroupUUID   *uuid.UUID `json:"assignmentGroupUUID" bson:"assignmentGroupUUID" validate:"required"`
-		CommandGroupUserUUID *uuid.UUID `json:"commandGroupUserUUID" bson:"commandGroupUserUUID" validate:"required"`
+		UUID                 *uuid.UUID `json:"uuid" bson:"uuid,omitempty"`
+		TenantUUID           *uuid.UUID `json:"tenantUUID" bson:"tenantUUID,omitempty"`
+		AssigmentGroupUUID   *uuid.UUID `json:"assignmentGroupUUID" bson:"assignmentGroupUUID,omitempty"`
+		CreatedBy            *uuid.UUID `json:"createdBy" bson:"createdBy"`
+		CommandGroupUserUUID *uuid.UUID `json:"commandGroupUserUUID" bson:"commandGroupUserUUID,omitempty" validate:"required"`
 	}
 
 	AssignmentTask struct {
-		AssignmentGroupMemberUUID *uuid.UUID  `json:"assignmentGroupMemberUUID" bson:"assigmnentGroupMemberUUID" validate:"required"`
-		TenantUUID                *uuid.UUID  `json:"tenantUUID" bson:"tenantUUID" validate:"required"`
-		Payload                   interface{} `json:"payload" bson:"payload"`
+		AssignmentGroupMemberUUID *uuid.UUID `json:"assignmentGroupMemberUUID" bson:"assigmnentGroupMemberUUID" validate:"required"`
+		TenantUUID                *uuid.UUID `json:"tenantUUID" bson:"tenantUUID" validate:"required"`
+		Payload                   any        `json:"payload" bson:"payload"`
 	}
 )

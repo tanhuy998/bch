@@ -4,6 +4,7 @@ import (
 	"app/domain/model"
 	requestPresenter "app/domain/presenter/request"
 	responsePresenter "app/domain/presenter/response"
+	libCommon "app/lib/common"
 	actionResultService "app/service/actionResult"
 	authService "app/service/auth"
 	"context"
@@ -38,7 +39,8 @@ func (this *CreateUserUsecase) Execute(
 		Username:   input.Data.Username,
 		PassWord:   input.Data.Password,
 		Name:       input.Data.Name,
-		TenantUUID: *input.GetAuthority().GetTenantUUID(),
+		TenantUUID: libCommon.PointerPrimitive(input.GetAuthority().GetTenantUUID()),
+		CreatedBy:  libCommon.PointerPrimitive(input.GetAuthority().GetUserUUID()),
 	}
 
 	_, err := this.CreateUserService.CreateByModel(newUser, input.GetContext())

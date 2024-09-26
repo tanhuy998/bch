@@ -30,7 +30,10 @@ func RegisterCommandGroupApi(parentRoute router.Party) *mvc.Application {
 
 		activator.Handle(
 			"GET", "/participated/user/{userUUID:uuid}", "GetParticipatedGroups",
-			middleware.BindPresenters[requestPresenter.GetParticipatedGroups, responsePresenter.GetParticipatedGroups](container),
+			middleware.BindPresenters[requestPresenter.GetParticipatedGroups, responsePresenter.GetParticipatedGroups](
+				container,
+				middlewareHelper.UseAuthority,
+			),
 		)
 
 		// activator.Handle(
@@ -39,12 +42,18 @@ func RegisterCommandGroupApi(parentRoute router.Party) *mvc.Application {
 
 		activator.Handle(
 			"POST", "/", "CreateGroup",
-			middleware.BindPresenters[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse](container),
+			middleware.BindPresenters[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse](
+				container,
+				middlewareHelper.UseAuthority,
+			),
 		)
 
 		activator.Handle(
 			"POST", "/{groupUUID:uuid}/user/{userUUID:uuid}", "AddUserToGroup",
-			middleware.BindPresenters[requestPresenter.AddUserToCommandGroupRequest, responsePresenter.AddUserToCommandGroupResponse](container),
+			middleware.BindPresenters[requestPresenter.AddUserToCommandGroupRequest, responsePresenter.AddUserToCommandGroupResponse](
+				container,
+				middlewareHelper.UseAuthority,
+			),
 		)
 	}
 

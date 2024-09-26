@@ -42,7 +42,7 @@ func (this *GetSingleAssignmentUseCase) Execute(
 		return this.ResponsePreset.NotFound()
 	}
 
-	if data.TenantUUID != input.GetAuthority().GetTenantUUID() {
+	if *data.TenantUUID != input.GetAuthority().GetTenantUUID() {
 
 		return this.ResponsePreset.UnAuthorizedResource()
 	}
