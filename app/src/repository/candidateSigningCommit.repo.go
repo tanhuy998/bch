@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"app/domain/model"
+	"app/src/model"
 	"context"
 
 	"go.mongodb.org/mongo-driver/mongo"

@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"app/domain/model"
-	libCommon "app/lib/common"
-	mongoUtil "app/repository/util"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	mongoUtil "app/src/repository/util"
 	"context"
 
 	"github.com/google/uuid"

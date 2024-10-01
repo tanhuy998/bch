@@ -1,10 +1,11 @@
-package authService
+package createUserDomain
 
 import (
-	passwordAdapter "app/adapter/passwordService"
-	"app/domain/model"
-	libCommon "app/lib/common"
-	"app/repository"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	authServicePort "app/src/port/auth"
+	passwordServicePort "app/src/port/passwordService"
+	"app/src/repository"
 	"context"
 	"errors"
 
@@ -16,15 +17,15 @@ var (
 )
 
 type (
-	ICreateUser interface {
-		Serve(username string, password string, name string, ctx context.Context) (*model.User, error)
-		CreateByModel(dataModel *model.User, ctx context.Context) (*model.User, error)
-	}
+	// ICreateUser interface {
+	// 	Serve(username string, password string, name string, ctx context.Context) (*model.User, error)
+	// 	CreateByModel(dataModel *model.User, ctx context.Context) (*model.User, error)
+	// }
 
 	CreateUserService struct {
 		UserRepo        repository.IUser
-		GetSingleUser   IGetSingleUser
-		PasswordAdapter passwordAdapter.IPassword
+		GetSingleUser   authServicePort.IGetSingleUser
+		PasswordAdapter passwordServicePort.IPassword
 	}
 )
 

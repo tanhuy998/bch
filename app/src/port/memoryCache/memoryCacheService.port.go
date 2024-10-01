@@ -1,7 +1,7 @@
 package memoryCacheServicePort
 
 import (
-	memoryCache "app/mermoryCache"
+	"app/src/internal/memoryCache"
 	"context"
 	"time"
 )

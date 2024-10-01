@@ -1,14 +1,14 @@
 package refreshTokenService
 
 import (
-	accessTokenServicePort "app/adapter/accessToken"
-	jwtTokenServicePort "app/adapter/jwtTokenService"
-	refreshTokenServicePort "app/adapter/refreshToken"
-	refreshTokenBlackListServicePort "app/adapter/refreshTokenBlackList"
-	"app/domain/valueObject"
-	"app/internal/bootstrap"
-	libCommon "app/lib/common"
-	refreshTokenIDService "app/service/refreshTokenID"
+	"app/src/internal/bootstrap"
+	libCommon "app/src/internal/lib/common"
+	accessTokenServicePort "app/src/port/accessToken"
+	jwtTokenServicePort "app/src/port/jwtTokenService"
+	refreshTokenServicePort "app/src/port/refreshToken"
+	refreshTokenBlackListServicePort "app/src/port/refreshTokenBlackList"
+	refreshTokenIDService "app/src/port/refreshTokenID"
+	"app/src/valueObject"
 	"context"
 	"errors"
 	"time"

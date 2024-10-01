@@ -1,7 +1,7 @@
 package tenantServicePort
 
 import (
-	"app/domain/model"
+	"app/src/model"
 	"context"
 )
 

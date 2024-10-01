@@ -1,8 +1,8 @@
 package middlewareHelper
 
 import (
-	accessTokenServicePort "app/adapter/accessToken"
-	"app/service/accessTokenService"
+	accessTokenServicePort "app/src/port/accessToken"
+	"app/src/service/accessTokenService"
 )
 
 type (
@@ -19,7 +19,7 @@ func AuthRequireRoles(roleNames ...string) AuthorityConstraint {
 		m[v] = struct{}{}
 	}
 
-	return func(a accessTokenService.IAccessTokenAuthData) bool {
+	return func(a accessTokenServicePort.IAccessTokenAuthData) bool {
 
 		if a == nil {
 

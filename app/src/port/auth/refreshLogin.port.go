@@ -1,4 +1,4 @@
-package authServiceAdapter
+package authServicePort
 
 import (
 	"context"

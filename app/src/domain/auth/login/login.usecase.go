@@ -1,11 +1,11 @@
-package usecase
+package loginDomain
 
 import (
-	authServiceAdapter "app/adapter/auth"
-	refreshTokenClientPort "app/adapter/refreshTokenClient"
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	actionResultService "app/service/actionResult"
+	actionResultServicePort "app/src/port/actionResult"
+	authServicePort "app/src/port/auth"
+	refreshTokenClientPort "app/src/port/refreshTokenClient"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 	"errors"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -16,13 +16,13 @@ var (
 )
 
 type (
-	ILogIn interface {
-		Execute(*requestPresenter.LoginRequest, *responsePresenter.LoginResponse) (mvc.Result, error)
-	}
+	// ILogIn interface {
+	// 	Execute(*requestPresenter.LoginRequest, *responsePresenter.LoginResponse) (mvc.Result, error)
+	// }
 
 	LogInUseCase struct {
-		LogInService       authServiceAdapter.ILogIn
-		ActionResult       actionResultService.IActionResult
+		LogInService       authServicePort.ILogIn
+		ActionResult       actionResultServicePort.IActionResult
 		RefreshTokenClient refreshTokenClientPort.IRefreshTokenClient
 	}
 )

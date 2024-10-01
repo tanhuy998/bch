@@ -3,10 +3,10 @@ package usecase
 import (
 	authServiceAdapter "app/adapter/auth"
 	"app/domain/model"
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
 	libCommon "app/lib/common"
 	actionResultService "app/service/actionResult"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 
 	"github.com/google/uuid"
 	"github.com/kataras/iris/v12/mvc"

@@ -1,9 +1,10 @@
 package authService
 
 import (
-	"app/domain/model"
-	"app/repository"
+	"app/src/model"
+	"app/src/repository"
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -123,7 +124,7 @@ func (this *CheckCommandGroupUserRoleService) _prepareRolesConditions(
 
 	if len(roleUUIDList) == 0 {
 
-		return nil, ERR_INVALID_VALUES_IN_ROLE_LIST
+		return nil, errors.New("no input")
 	}
 
 	var ret []bson.D = make([]bson.D, len(roleUUIDList))

@@ -1,11 +1,11 @@
 package api
 
 import (
-	accessTokenServicePort "app/adapter/accessToken"
-	"app/internal/api/auth/userLogging"
-	"app/internal/middleware"
-	libConfig "app/lib/config"
-	"app/service/accessTokenService"
+	"app/src/infrastructure/http/api/v1/branch/auth/userLogging"
+	"app/src/infrastructure/http/middleware"
+	libConfig "app/src/internal/lib/config"
+	accessTokenServicePort "app/src/port/accessToken"
+	"app/src/service/accessTokenService"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/core/router"

@@ -1,7 +1,7 @@
 package jwtTokenService_test
 
 import (
-	jwtTokenService "app/service/jwtToken"
+	jwtTokenService "app/src/service/jwtToken"
 	"crypto/ecdsa"
 	"fmt"
 	"testing"

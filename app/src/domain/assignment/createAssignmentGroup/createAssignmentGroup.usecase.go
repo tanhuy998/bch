@@ -1,11 +1,11 @@
-package usecase
+package createAssignmentGroupDomain
 
 import (
-	assignmentServicePort "app/adapter/assignment"
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	libCommon "app/lib/common"
-	actionResultService "app/service/actionResult"
+	libCommon "app/src/internal/lib/common"
+	actionResultServicePort "app/src/port/actionResult"
+	assignmentServicePort "app/src/port/assignment"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 	"encoding/json"
 	"net/http"
 
@@ -22,7 +22,7 @@ type (
 
 	CreateAssignmentGroupUseCase struct {
 		CreateAssignmentGroupService assignmentServicePort.ICreateAssignmentGroup
-		ActionResult                 actionResultService.IActionResult
+		ActionResult                 actionResultServicePort.IActionResult
 	}
 )
 

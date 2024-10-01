@@ -1,6 +1,8 @@
 package jwtTokenService
 
 import (
+	jwtTokenServicePort "app/src/port/jwtTokenService"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -52,7 +54,7 @@ func (this *jwt_HMACTokenService) VerifyTokenStringCustomClaim(token_str string,
 
 			if !IsHMACSigningMethod(token.Method) {
 
-				return nil, ERR_SIGNING_METHOD_MISMATCH
+				return nil, jwtTokenServicePort.ERR_SIGNING_METHOD_MISMATCH
 			}
 
 			return this.secret, nil
@@ -68,7 +70,7 @@ func (this *jwt_HMACTokenService) VerifyTokenString(token_str string) (*jwt.Toke
 
 			if !IsHMACSigningMethod(token.Method) {
 
-				return nil, ERR_SIGNING_METHOD_MISMATCH
+				return nil, jwtTokenServicePort.ERR_SIGNING_METHOD_MISMATCH
 			}
 
 			return this.secret, nil

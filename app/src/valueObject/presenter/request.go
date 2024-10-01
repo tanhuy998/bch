@@ -1,12 +1,10 @@
-package requestPresenter
+package presenter
 
 import (
 	"app/internal/common"
 	"fmt"
 	"regexp"
 	"time"
-
-	"github.com/kataras/iris/v12"
 )
 
 const (
@@ -19,15 +17,6 @@ var (
 	// match unicode letters and whiteSpace that belong to formal names
 	regex_match_name *regexp.Regexp = regexp.MustCompile(`^[\p{L}\s]{3,}$`)
 )
-
-type IRequestBinder interface {
-	/*
-		Structs that implement IRequestBinder define its own
-		request context to add extra business logic after data
-		transfered from request context to the request presenter object.
-	*/
-	Bind(ctx iris.Context) error
-}
 
 func isValidName(name string) bool {
 

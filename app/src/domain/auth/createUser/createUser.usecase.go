@@ -1,12 +1,12 @@
-package usecase
+package createUserDomain
 
 import (
-	"app/domain/model"
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	libCommon "app/lib/common"
-	actionResultService "app/service/actionResult"
-	authService "app/service/auth"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	actionResultServicePort "app/src/port/actionResult"
+	authServicePort "app/src/port/auth"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 	"context"
 	"encoding/json"
 
@@ -22,9 +22,9 @@ type (
 	}
 
 	CreateUserUsecase struct {
-		CreateUserService    authService.ICreateUser
-		ActionResult         actionResultService.IActionResult
-		GetSingleUserService authService.IGetSingleUser
+		CreateUserService    authServicePort.ICreateUser
+		ActionResult         actionResultServicePort.IActionResult
+		GetSingleUserService authServicePort.IGetSingleUser
 	}
 )
 

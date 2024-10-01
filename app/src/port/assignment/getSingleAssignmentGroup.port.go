@@ -1,7 +1,7 @@
 package assignmentServicePort
 
 import (
-	"app/domain/model"
+	"app/src/model"
 	"context"
 
 	"github.com/google/uuid"

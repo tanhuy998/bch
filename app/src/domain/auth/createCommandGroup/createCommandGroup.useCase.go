@@ -1,12 +1,12 @@
-package usecase
+package createCommandGroupDomain
 
 import (
-	authServiceAdapter "app/adapter/auth"
-	"app/adapter/responsePresetPort"
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	libCommon "app/lib/common"
-	actionResultService "app/service/actionResult"
+	libCommon "app/src/internal/lib/common"
+	actionResultServicePort "app/src/port/actionResult"
+	authServicePort "app/src/port/auth"
+	"app/src/port/responsePresetPort"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 	"encoding/json"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -21,10 +21,10 @@ type (
 	}
 
 	CreateCommandGroupUseCase struct {
-		CreateCommandGroupService authServiceAdapter.ICreateCommandGroup //authService.ICreateCommandGroup
+		CreateCommandGroupService authServicePort.ICreateCommandGroup //authService.ICreateCommandGroup
 		ResponsePreset            responsePresetPort.IResponsePreset
 		//GetSingleCommandGroupService authService.IGetSingleCommandGroup
-		ActionResult actionResultService.IActionResult
+		ActionResult actionResultServicePort.IActionResult
 	}
 )
 

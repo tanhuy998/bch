@@ -1,4 +1,4 @@
-package responsePresenter
+package presenter
 
 import (
 	"github.com/kataras/iris/v12"

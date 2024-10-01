@@ -1,7 +1,7 @@
 package authService
 
 import (
-	"app/repository"
+	"app/src/repository"
 	"context"
 
 	"github.com/golang-jwt/jwt/v5"

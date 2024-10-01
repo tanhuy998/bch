@@ -1,8 +1,8 @@
 package api
 
 import (
-	"app/internal/controller"
-	"app/internal/middleware"
+	"app/src/infrastructure/http/api/v1/controller"
+	"app/src/infrastructure/http/middleware"
 
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/mvc"
@@ -12,7 +12,7 @@ func initTenantApi(app router.Party) {
 
 	router := app.Party("tenants")
 
-	container := router.ConfigureContainer().Container
+	//container := router.ConfigureContainer().Container
 
 	wrapper := mvc.New(router)
 

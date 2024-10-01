@@ -1,10 +1,10 @@
-package usecase
+package createTenantAgentDomain
 
 import (
-	tenantServicePort "app/adapter/tenant"
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	actionResultService "app/service/actionResult"
+	actionResultServicePort "app/src/port/actionResult"
+	tenantServicePort "app/src/port/tenant"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -19,7 +19,7 @@ type (
 
 	CreateTenantAgentUseCase struct {
 		CreateTenantAgentService tenantServicePort.ICreateTenantAgent
-		ActionResult             actionResultService.IActionResult
+		ActionResult             actionResultServicePort.IActionResult
 	}
 )
 

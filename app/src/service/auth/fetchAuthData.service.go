@@ -1,9 +1,8 @@
 package authService
 
 import (
-	authServiceAdapter "app/adapter/auth"
-	"app/domain/valueObject"
-	"app/repository"
+	"app/src/repository"
+	"app/src/valueObject"
 	"context"
 	"errors"
 
@@ -17,7 +16,7 @@ var (
 )
 
 type (
-	IFetchAuthdata = authServiceAdapter.IFetchAuthData
+	//IFetchAuthdata = authServiceAdapter.IFetchAuthData
 
 	FetchAuthDataService struct {
 		UserRepo repository.IUser

@@ -1,9 +1,9 @@
 package candidateService
 
 import (
-	"app/domain/model"
-	"app/internal/common"
-	"app/repository"
+	"app/src/model"
+	"app/src/repository"
+	"errors"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -53,7 +53,7 @@ func (this *GetSingleCandidateSigningInfoService) Serve(
 
 	if *(candidate.CampaignUUID) != campaignUUID {
 
-		return nil, common.ERR_HTTP_NOT_FOUND
+		return nil, errors.New("cannot find candidate corresponding to given campaign") // common.ERR_HTTP_NOT_FOUND
 	}
 
 	return candidate.SigningInfo, nil

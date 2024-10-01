@@ -1,6 +1,6 @@
 package bootstrap
 
-import "app/infrastructure/db"
+import "app/src/internal/db"
 
 func InitDatabaseClient() {
 

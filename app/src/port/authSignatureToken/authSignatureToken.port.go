@@ -1,8 +1,8 @@
 package authSignatureTokenPort
 
 import (
-	accessTokenServicePort "app/adapter/accessToken"
-	refreshTokenServicePort "app/adapter/refreshToken"
+	accessTokenServicePort "app/src/port/accessToken"
+	refreshTokenServicePort "app/src/port/refreshToken"
 	"context"
 
 	"github.com/google/uuid"

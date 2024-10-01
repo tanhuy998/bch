@@ -2,13 +2,8 @@ package jwtTokenService
 
 import (
 	"crypto/ecdsa"
-	"errors"
 
 	"github.com/golang-jwt/jwt/v5"
-)
-
-var (
-	ERR_SIGNING_METHOD_MISMATCH = errors.New("jwt singing method mismatch")
 )
 
 func GenerateECJWTToken(signingMethod *jwt.SigningMethodECDSA) *jwt.Token {

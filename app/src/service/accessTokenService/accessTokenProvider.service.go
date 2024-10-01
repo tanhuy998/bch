@@ -1,12 +1,12 @@
 package accessTokenService
 
 import (
-	accessTokenServicePort "app/adapter/accessToken"
-	jwtTokenServicePort "app/adapter/jwtTokenService"
-	"app/domain/model"
-	"app/domain/valueObject"
-	"app/internal/bootstrap"
-	"app/repository"
+	"app/src/internal/bootstrap"
+	"app/src/model"
+	accessTokenServicePort "app/src/port/accessToken"
+	jwtTokenServicePort "app/src/port/jwtTokenService"
+	"app/src/repository"
+	"app/src/valueObject"
 	"context"
 	"errors"
 	"time"

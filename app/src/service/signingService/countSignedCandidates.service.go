@@ -1,8 +1,8 @@
 package signingService
 
 import (
-	"app/domain/valueObject"
-	"app/repository"
+	"app/src/repository"
+	"app/src/valueObject"
 	"context"
 
 	"github.com/google/uuid"

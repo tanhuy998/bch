@@ -1,11 +1,11 @@
-package usecase
+package addUserToCommandGroup
 
 import (
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	"app/repository"
-	actionResultService "app/service/actionResult"
-	authService "app/service/auth"
+	actionResultServicePort "app/src/port/actionResult"
+	authServicePort "app/src/port/auth"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
+	"app/src/repository"
 	"context"
 	"encoding/json"
 
@@ -22,9 +22,9 @@ type (
 	}
 
 	AddUserToCommandGroupUseCase struct {
-		AddUserToCommandGroupService authService.IAddUserToCommandGroup
+		AddUserToCommandGroupService authServicePort.IAddUserToCommandGroup
 		CommandGroupUserRepo         repository.ICommandGroupUser
-		ActionResult                 actionResultService.IActionResult
+		ActionResult                 actionResultServicePort.IActionResult
 	}
 )
 

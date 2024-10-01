@@ -1,11 +1,11 @@
-package tenantService
+package createTenantAgentDomain
 
 import (
-	authServiceAdapter "app/adapter/auth"
-	passwordServiceAdapter "app/adapter/passwordService"
-	"app/domain/model"
-	libCommon "app/lib/common"
-	"app/repository"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	authServicePort "app/src/port/auth"
+	passwordServicePort "app/src/port/passwordService"
+	"app/src/repository"
 	"context"
 	"errors"
 
@@ -24,10 +24,10 @@ type (
 
 	CreateTenantAgentService struct {
 		//GetSingleTenantService IGetSingleTenantAgent
-		GetSingleUserService authServiceAdapter.IGetSingleUserService
-		CreateUserService    authServiceAdapter.ICreateUserService
-		TenantAgentRepo      repository.ITenantAgent
-		PasswordService      passwordServiceAdapter.IPassword
+		// GetSingleUserService authServicePort.IGetSingleUserService
+		CreateUserService authServicePort.ICreateUser
+		TenantAgentRepo   repository.ITenantAgent
+		PasswordService   passwordServicePort.IPassword
 	}
 )
 

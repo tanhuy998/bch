@@ -1,29 +1,29 @@
-package usecase
+package getUserParticipatedCommandGroupDomain
 
 import (
-	authServiceAdapter "app/adapter/auth"
-	"app/adapter/responsePresetPort"
-	"app/domain/model"
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	libCommon "app/lib/common"
-	actionResultService "app/service/actionResult"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	actionResultServicePort "app/src/port/actionResult"
+	authServicePort "app/src/port/auth"
+	"app/src/port/responsePresetPort"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 
 	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
-	IGetParticipatedCommandGroups interface {
-		Execute(
-			input *requestPresenter.GetParticipatedGroups,
-			output *responsePresenter.GetParticipatedGroups,
-		) (mvc.Result, error)
-	}
+	// IGetParticipatedCommandGroups interface {
+	// 	Execute(
+	// 		input *requestPresenter.GetParticipatedGroups,
+	// 		output *responsePresenter.GetParticipatedGroups,
+	// 	) (mvc.Result, error)
+	// }
 
 	GetParticipatedCommandGroupsUseCase struct {
-		GetParticipatedCommandGroups authServiceAdapter.IGetParticipatedCommandGroups // authService.IGetParticipatedCommandGroups
+		GetParticipatedCommandGroups authServicePort.IGetParticipatedCommandGroups // authService.IGetParticipatedCommandGroups
 		ResponsePreset               responsePresetPort.IResponsePreset
-		ActionResult                 actionResultService.IActionResult
+		ActionResult                 actionResultServicePort.IActionResult
 	}
 )
 

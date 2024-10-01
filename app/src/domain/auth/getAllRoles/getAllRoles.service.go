@@ -1,18 +1,14 @@
-package authService
+package getAllRoleDomain
 
 import (
-	"app/domain/model"
-	"app/repository"
+	"app/src/model"
+	"app/src/repository"
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
-	IGetAllRoles interface {
-		Serve() ([]*model.Role, error)
-	}
-
 	GetAllRolesService struct {
 		RoleRepo repository.IRole
 	}

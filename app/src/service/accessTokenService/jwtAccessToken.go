@@ -1,9 +1,9 @@
 package accessTokenService
 
 import (
-	accessTokenServicePort "app/adapter/accessToken"
-	"app/domain/valueObject"
-	libCommon "app/lib/common"
+	libCommon "app/src/internal/lib/common"
+	accessTokenServicePort "app/src/port/accessToken"
+	"app/src/valueObject"
 	"errors"
 	"time"
 

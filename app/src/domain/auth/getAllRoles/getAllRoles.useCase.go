@@ -1,10 +1,10 @@
-package usecase
+package getAllRoleDomain
 
 import (
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	actionResultService "app/service/actionResult"
-	authService "app/service/auth"
+	actionResultServicePort "app/src/port/actionResult"
+	authServicePort "app/src/port/auth"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -18,8 +18,8 @@ type (
 	}
 
 	GetAllRolesUseCase struct {
-		GetAllRolesService authService.IGetAllRoles
-		ActionResult       actionResultService.IActionResult
+		GetAllRolesService authServicePort.IGetAllRoles
+		ActionResult       actionResultServicePort.IActionResult
 	}
 )
 

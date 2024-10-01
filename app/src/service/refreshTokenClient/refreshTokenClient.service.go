@@ -1,8 +1,8 @@
 package refreshTokenClientService
 
 import (
-	refreshTokenServicePort "app/adapter/refreshToken"
-	"app/internal/bootstrap"
+	"app/src/internal/bootstrap"
+	refreshTokenServicePort "app/src/port/refreshToken"
 	"net/http"
 
 	"github.com/kataras/iris/v12"

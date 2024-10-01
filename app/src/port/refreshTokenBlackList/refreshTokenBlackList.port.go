@@ -1,8 +1,8 @@
 package refreshTokenBlackListServicePort
 
 import (
-	memoryCacheServicePort "app/adapter/memoryCache"
-	memoryCache "app/mermoryCache"
+	"app/src/internal/memoryCache"
+	memoryCacheServicePort "app/src/port/memoryCache"
 	"context"
 	"time"
 

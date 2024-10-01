@@ -1,9 +1,9 @@
 package signingService
 
 import (
-	"app/internal/common"
-	"app/repository"
+	"app/src/repository"
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 )
@@ -31,7 +31,7 @@ func (this *CheckCandidateExistenceService) Serve(candidateUUID uuid.UUID) error
 
 	if candidate == nil {
 
-		return common.ERR_HTTP_NOT_FOUND
+		return errors.New("not found")
 	}
 
 	return nil

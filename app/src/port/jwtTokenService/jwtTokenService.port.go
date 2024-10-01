@@ -1,6 +1,14 @@
 package jwtTokenServicePort
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	"errors"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+var (
+	ERR_SIGNING_METHOD_MISMATCH = errors.New("jwt singing method mismatch")
+)
 
 type (
 	IJWTTokenGenerator interface {

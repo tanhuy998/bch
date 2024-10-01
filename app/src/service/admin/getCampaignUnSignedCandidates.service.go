@@ -1,10 +1,10 @@
 package adminService
 
 import (
-	signingServiceAdapter "app/adapter/signingService"
-	"app/domain/model"
-	libCommon "app/lib/common"
-	"app/repository"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	"app/src/port/signingServicePort"
+	"app/src/repository"
 	"context"
 
 	"github.com/google/uuid"
@@ -26,7 +26,7 @@ type (
 	GetCampaignUnSignedCandidatesService struct {
 		CandidateSigningCommitRepository repository.ICandidateSigningCommit
 		CandidateRepository              repository.ICandidateRepository
-		GetUnSignedCandidateAdapter      signingServiceAdapter.IGetCampaignUnSignedCandidates
+		GetUnSignedCandidateAdapter      signingServicePort.IGetCampaignUnSignedCandidates
 	}
 )
 

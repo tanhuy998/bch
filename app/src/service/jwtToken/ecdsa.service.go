@@ -1,6 +1,7 @@
 package jwtTokenService
 
 import (
+	jwtTokenServicePort "app/src/port/jwtTokenService"
 	"crypto/ecdsa"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -58,7 +59,7 @@ func (this *jwt_ECTokenService) VerifyTokenStringCustomClaim(token_str string, c
 
 			if !IsECSigningMethod(token.Method) {
 
-				return nil, ERR_SIGNING_METHOD_MISMATCH
+				return nil, jwtTokenServicePort.ERR_SIGNING_METHOD_MISMATCH
 			}
 
 			return this.public_key, nil
@@ -74,7 +75,7 @@ func (this *jwt_ECTokenService) VerifyTokenString(token_str string) (*jwt.Token,
 
 			if !IsHMACSigningMethod(token.Method) {
 
-				return nil, ERR_SIGNING_METHOD_MISMATCH
+				return nil, jwtTokenServicePort.ERR_SIGNING_METHOD_MISMATCH
 			}
 
 			return this.public_key, nil

@@ -1,9 +1,11 @@
-package authService
+package grandCommandGroupRoleToUser
 
 import (
-	"app/domain/model"
-	libCommon "app/lib/common"
-	"app/repository"
+	"app/src/internal/common"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	authServicePort "app/src/port/auth"
+	"app/src/repository"
 	"context"
 	"errors"
 
@@ -26,11 +28,11 @@ type (
 
 	GrantCommandGroupRolesToUserService struct {
 		RoleRepo                         repository.IRole
-		CheckCommandGroupUserRoleService ICheckCommandGroupUserRole
+		CheckCommandGroupUserRoleService authServicePort.ICheckCommandGroupUserRole
 		CommandGroupUserRepo             repository.ICommandGroupUser
 		CommandGroupUserRoleRepo         repository.ICommandGroupUserRole
-		GetSingleCommandGroupService     IGetSingleCommandGroup
-		CheckUserInCommandGroup          ICheckUserInCommandGroup
+		GetSingleCommandGroupService     authServicePort.IGetSingleCommandGroup
+		CheckUserInCommandGroup          authServicePort.ICheckUserInCommandGroup
 	}
 )
 
@@ -49,14 +51,14 @@ func (this *GrantCommandGroupRolesToUserService) Serve(
 
 	if err != nil {
 
-		return ERR_INVALID_GROUP
+		return errors.Join(common.ERR_BAD_REQUEST, errors.New("invalid group"))
 	}
 
 	userUUID, err := uuid.Parse(userUUID_str)
 
 	if err != nil {
 
-		return ERR_INVALID_USER
+		return errors.Join(common.ERR_BAD_REQUEST, errors.New("invalid user"))
 	}
 
 	commandGroupUser, err := this.CheckUserInCommandGroup.Detail(groupUUID, userUUID)

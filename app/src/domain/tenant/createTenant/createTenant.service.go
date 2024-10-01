@@ -1,10 +1,10 @@
-package tenantService
+package createTenantDomain
 
 import (
-	tenantServicePort "app/adapter/tenant"
-	"app/domain/model"
-	libCommon "app/lib/common"
-	"app/repository"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	tenantServicePort "app/src/port/tenant"
+	"app/src/repository"
 	"context"
 	"errors"
 
@@ -32,11 +32,11 @@ type (
 
 	CreateTenantService struct {
 		CreateTenantAgentService tenantServicePort.ICreateTenantAgent
-		GetSingleTenantService   IGetSingleTenant
-		TenantRepo               repository.ITenant
-		TenantAgentRepo          repository.ITenantAgent
-		UserRepo                 repository.IUser
-		MongoClient              *mongo.Client
+		//GetSingleTenantService   tenantServicePort.IGetSingleTenant
+		TenantRepo      repository.ITenant
+		TenantAgentRepo repository.ITenantAgent
+		UserRepo        repository.IUser
+		MongoClient     *mongo.Client
 	}
 )
 

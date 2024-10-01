@@ -1,9 +1,9 @@
 package authService
 
 import (
-	"app/domain/model"
-	libCommon "app/lib/common"
-	"app/repository"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	"app/src/repository"
 	"context"
 
 	"github.com/google/uuid"

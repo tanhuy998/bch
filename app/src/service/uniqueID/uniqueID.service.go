@@ -1,7 +1,7 @@
 package uniqueIDService
 
 import (
-	uniqueIDServicePort "app/adapter/uniqueID"
+	uniqueIDServicePort "app/src/port/uniqueID"
 	"encoding/binary"
 
 	"github.com/sqids/sqids-go"

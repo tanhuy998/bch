@@ -1,7 +1,7 @@
 package adminService
 
 import (
-	"app/repository"
+	"app/src/repository"
 	"context"
 
 	"github.com/google/uuid"

@@ -1,16 +1,26 @@
 package usecase
 
 import (
-	"app/domain/model"
-	responsePresenter "app/domain/presenter/response"
-	"app/internal/common"
-	"app/repository"
+	"app/src/model"
+	"app/src/repository"
 	"encoding/json"
 
 	"github.com/kataras/iris/v12/mvc"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+type PaginationPage int
+
+const (
+	PAGINATION_FIRST_PAGE PaginationPage = 0
+	PAGINATION_LAST_PAGE  PaginationPage = 0xffffffff
 )
 
 type (
+	// IResponsePresenter interface {
+	// 	Bind(ctx iris.Context) error
+	// }
+
 	IResponseWrapper interface {
 	}
 
@@ -32,6 +42,27 @@ type (
 	*/
 	ModelInterfaceForPagination interface {
 		model.IModel
+	}
+)
+
+type (
+	IEmptyResponse any
+
+	IPaginationResult interface {
+		GetNavigation() *PaginationNavigation
+		SetTotalCount(int64)
+	}
+
+	NavigationQuery struct {
+		Cursor primitive.ObjectID `json:"p_pivot,omitempty"`
+		Limit  *int               `json:"p_limit,omitempty"`
+		IsPrev bool               `json:"p_prev,omitempty"`
+	}
+
+	PaginationNavigation struct {
+		CurrentPage int              `json:"page"`
+		Previous    *NavigationQuery `json:"previous,omitempty"`
+		Next        *NavigationQuery `json:"next,omitempty"`
 	}
 )
 
@@ -69,9 +100,9 @@ func MarshalResponseContent(context interface{}, res *mvc.Response) error {
 }
 
 func resolveNext[Model_T ModelInterfaceForPagination](
-	output responsePresenter.IPaginationResult,
+	output IPaginationResult,
 	dataPack *repository.PaginationPack[Model_T],
-	pageNumber common.PaginationPage,
+	pageNumber PaginationPage,
 ) error {
 
 	if len(dataPack.Data) == 0 {
@@ -91,7 +122,7 @@ func resolveNext[Model_T ModelInterfaceForPagination](
 	*/
 	lastElement := dataPack.Data[lastIndex]
 
-	output.GetNavigation().Next = &responsePresenter.NavigationQuery{
+	output.GetNavigation().Next = &NavigationQuery{
 		Cursor: (*lastElement).GetObjectID(),
 	}
 
@@ -99,9 +130,9 @@ func resolveNext[Model_T ModelInterfaceForPagination](
 }
 
 func resolvePrev[Model_T ModelInterfaceForPagination](
-	output responsePresenter.IPaginationResult,
+	output IPaginationResult,
 	dataPack *repository.PaginationPack[Model_T],
-	pageNumber common.PaginationPage,
+	pageNumber PaginationPage,
 ) error {
 
 	if len(dataPack.Data) == 0 {
@@ -115,7 +146,7 @@ func resolvePrev[Model_T ModelInterfaceForPagination](
 	*/
 	firstElement := dataPack.Data[0]
 
-	output.GetNavigation().Previous = &responsePresenter.NavigationQuery{
+	output.GetNavigation().Previous = &NavigationQuery{
 		Cursor: (*firstElement).GetObjectID(),
 		IsPrev: true,
 	}
@@ -129,9 +160,9 @@ ModelInterfaceForPagination and whose methods must be implemeted as value
 receiver
 */
 func preparePaginationNavigation[Model_T ModelInterfaceForPagination](
-	output responsePresenter.IPaginationResult,
+	output IPaginationResult,
 	dataPack *repository.PaginationPack[Model_T],
-	pageNumber common.PaginationPage,
+	pageNumber PaginationPage,
 ) error {
 
 	output.SetTotalCount(dataPack.Count)

@@ -1,27 +1,27 @@
-package usecase
+package createTenantDomain
 
 import (
-	tenantServicePort "app/adapter/tenant"
-	"app/domain/model"
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	actionResultService "app/service/actionResult"
+	"app/src/model"
+	actionResultServicePort "app/src/port/actionResult"
+	tenantServicePort "app/src/port/tenant"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 	"encoding/json"
 
 	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
-	ICreateTenant interface {
-		Execute(
-			input *requestPresenter.CreateTenantRequest,
-			output *responsePresenter.CreateTenantResponse,
-		) (mvc.Result, error)
-	}
+	// ICreateTenant interface {
+	// 	Execute(
+	// 		input *requestPresenter.CreateTenantRequest,
+	// 		output *responsePresenter.CreateTenantResponse,
+	// 	) (mvc.Result, error)
+	// }
 
 	CreateTenantUseCase struct {
 		CreateTenantService tenantServicePort.ICreateTenant
-		ActionResult        actionResultService.IActionResult
+		ActionResult        actionResultServicePort.IActionResult
 	}
 )
 

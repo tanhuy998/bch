@@ -1,9 +1,9 @@
 package tenantServicePort
 
-import "app/domain/model"
+import "app/src/model"
 
 type (
-	IGetSingleTenantAgentServiceAdapter interface {
+	IGetSingleTenantAgent interface {
 		Serve(uuid string) (*model.TenantAgent, error)
 		SearchByUsername(username string) (*model.TenantAgent, error)
 		CheckUsernameExistence(username string) (bool, error)

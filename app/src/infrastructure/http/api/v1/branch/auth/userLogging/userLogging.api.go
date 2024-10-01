@@ -1,7 +1,7 @@
 package userLogging
 
 import (
-	"app/internal/controller"
+	"app/src/infrastructure/http/api/v1/controller"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
@@ -9,7 +9,7 @@ import (
 
 func RegisterUserLoggingApi(parentRoute iris.Party) *mvc.Application {
 
-	container := parentRoute.ConfigureContainer().Container
+	//container := parentRoute.ConfigureContainer().Container
 	controller := new(controller.UserLoggingController)
 
 	wrapper := mvc.New(parentRoute)

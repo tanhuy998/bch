@@ -1,11 +1,11 @@
-package usecase
+package getSingleAssignmentDomain
 
 import (
-	assignmentServicePort "app/adapter/assignment"
-	"app/adapter/responsePresetPort"
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	actionResultService "app/service/actionResult"
+	actionResultServicePort "app/src/port/actionResult"
+	assignmentServicePort "app/src/port/assignment"
+	"app/src/port/responsePresetPort"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -20,7 +20,7 @@ type (
 
 	GetSingleAssignmentUseCase struct {
 		GetSingleAssignmnetService assignmentServicePort.IGetSingleAssignnment
-		ActionResult               actionResultService.IActionResult
+		ActionResult               actionResultServicePort.IActionResult
 		ResponsePreset             responsePresetPort.IResponsePreset
 	}
 )

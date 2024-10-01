@@ -1,6 +1,7 @@
 package actionResultService
 
 import (
+	actionResultServicePort "app/src/port/actionResult"
 	"encoding/json"
 
 	"github.com/kataras/iris/v12"
@@ -8,22 +9,22 @@ import (
 )
 
 type (
-	IActionResult interface {
-		Prepare() IResponse
-		ServeResponse(content interface{}) (IResponse, error)
-		ServeErrorResponse(error) (IResponse, error)
-	}
+	// IActionResult interface {
+	// 	Prepare() IResponse
+	// 	ServeResponse(content interface{}) (IResponse, error)
+	// 	ServeErrorResponse(error) (IResponse, error)
+	// }
 
-	IResponse interface {
-		mvc.Result
-		SetCode(int) IResponse
-		Redirect(link string) IResponse
-		ContentType(string) IResponse
-		SetContent([]byte) IResponse
-		Done() (IResponse, error)
-		ServeResponse(content interface{}) (IResponse, error)
-		ServeErrorResponse(error) (IResponse, error)
-	}
+	// IResponse interface {
+	// 	mvc.Result
+	// 	SetCode(int) IResponse
+	// 	Redirect(link string) IResponse
+	// 	ContentType(string) IResponse
+	// 	SetContent([]byte) IResponse
+	// 	Done() (IResponse, error)
+	// 	ServeResponse(content interface{}) (IResponse, error)
+	// 	ServeErrorResponse(error) (IResponse, error)
+	// }
 
 	/*
 		ResponseResultService defines preset for application/json content type
@@ -42,7 +43,7 @@ type (
 	}
 )
 
-func _ServeResponse(res IResponse, content interface{}) (IResponse, error) {
+func _ServeResponse(res actionResultServicePort.IResponse, content interface{}) (actionResultServicePort.IResponse, error) {
 
 	bytes, err := json.Marshal(content)
 
@@ -57,7 +58,7 @@ func _ServeResponse(res IResponse, content interface{}) (IResponse, error) {
 	return res, nil
 }
 
-func _ServeErrorResponse(res IResponse, err error) (IResponse, error) {
+func _ServeErrorResponse(res actionResultServicePort.IResponse, err error) (actionResultServicePort.IResponse, error) {
 
 	content := &ErrorResponseFormat{
 		Message: err.Error(),
@@ -76,22 +77,22 @@ func _ServeErrorResponse(res IResponse, err error) (IResponse, error) {
 	return res, nil
 }
 
-func (this *ResponseResultService) Prepare() IResponse {
+func (this *ResponseResultService) Prepare() actionResultServicePort.IResponse {
 
 	return NewResponseEntity()
 }
 
-func (this *ResponseResultService) ServeResponse(content interface{}) (IResponse, error) {
+func (this *ResponseResultService) ServeResponse(content interface{}) (actionResultServicePort.IResponse, error) {
 
 	return _ServeResponse(NewResponseEntity(), content)
 }
 
-func (this *ResponseResultService) ServeErrorResponse(err error) (IResponse, error) {
+func (this *ResponseResultService) ServeErrorResponse(err error) (actionResultServicePort.IResponse, error) {
 
 	return _ServeErrorResponse(NewResponseEntity(), err)
 }
 
-func NewResponseEntity() IResponse {
+func NewResponseEntity() actionResultServicePort.IResponse {
 
 	return &ResponseEntity{
 		Iris_Response: &mvc.Response{
@@ -105,45 +106,45 @@ func (this *ResponseEntity) Dispatch(ctx iris.Context) {
 	this.Iris_Response.Dispatch(ctx)
 }
 
-func (this *ResponseEntity) SetCode(code int) IResponse {
+func (this *ResponseEntity) SetCode(code int) actionResultServicePort.IResponse {
 
 	this.Iris_Response.Code = code
 
 	return this
 }
 
-func (this *ResponseEntity) Redirect(link string) IResponse {
+func (this *ResponseEntity) Redirect(link string) actionResultServicePort.IResponse {
 
 	this.Iris_Response.Path = link
 
 	return this
 }
 
-func (this *ResponseEntity) ContentType(t string) IResponse {
+func (this *ResponseEntity) ContentType(t string) actionResultServicePort.IResponse {
 
 	this.Iris_Response.ContentType = t
 
 	return this
 }
 
-func (this *ResponseEntity) SetContent(content []byte) IResponse {
+func (this *ResponseEntity) SetContent(content []byte) actionResultServicePort.IResponse {
 
 	this.Iris_Response.Content = content
 
 	return this
 }
 
-func (this *ResponseEntity) ServeResponse(content interface{}) (IResponse, error) {
+func (this *ResponseEntity) ServeResponse(content interface{}) (actionResultServicePort.IResponse, error) {
 
 	return _ServeResponse(this, content)
 }
 
-func (this *ResponseEntity) ServeErrorResponse(err error) (IResponse, error) {
+func (this *ResponseEntity) ServeErrorResponse(err error) (actionResultServicePort.IResponse, error) {
 
 	return _ServeErrorResponse(this, err)
 }
 
-func (this *ResponseEntity) Done() (IResponse, error) {
+func (this *ResponseEntity) Done() (actionResultServicePort.IResponse, error) {
 
 	return this, nil
 }

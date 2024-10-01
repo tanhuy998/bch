@@ -1,7 +1,7 @@
 package responsePresetService
 
 import (
-	actionResultService "app/service/actionResult"
+	actionResultService "app/src/port/actionResult"
 	"net/http"
 
 	"github.com/kataras/iris/v12/mvc"

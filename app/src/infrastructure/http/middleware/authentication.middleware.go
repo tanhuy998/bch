@@ -1,13 +1,11 @@
 package middleware
 
 import (
-	accessTokenServicePort "app/adapter/accessToken"
-	accessTokenClientPort "app/adapter/accessTokenClient"
-	"app/internal"
-	"app/internal/common"
-	"app/internal/middlewareHelper"
-	authService "app/service/auth"
-	jwtTokenService "app/service/jwtToken"
+	"app/src/infrastructure/http/common"
+	"app/src/infrastructure/http/middleware/middlewareHelper"
+	accessTokenServicePort "app/src/port/accessToken"
+	accessTokenClientPort "app/src/port/accessTokenClient"
+	jwtTokenServicePort "app/src/port/jwtTokenService"
 	"errors"
 	"net/http"
 
@@ -37,13 +35,13 @@ type (
 	// }
 )
 
-func Authentication() func(iris.Context, authService.IAuthenticate) {
+// func Authentication() func(iris.Context, authService.IAuthenticate) {
 
-	return func(ctx iris.Context, auth authService.IAuthenticate) {
+// 	return func(ctx iris.Context, auth authService.IAuthenticate) {
 
-		ctx.Next()
-	}
-}
+// 		ctx.Next()
+// 	}
+// }
 
 func Auth(
 	container *hero.Container,
@@ -132,7 +130,7 @@ func authentication_func(
 
 	switch err {
 	case nil:
-	case jwtTokenService.ERR_SIGNING_METHOD_MISMATCH:
+	case jwtTokenServicePort.ERR_SIGNING_METHOD_MISMATCH:
 		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, err.Error())
 	default:
 		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusUnauthorized, "unauthorized")
@@ -152,7 +150,7 @@ func authentication_func(
 	}
 
 	//ctx.RegisterDependency(accessToken)
-	ctx.Values().Set(internal.CTX_ACCESS_TOKEN_KEY, accessToken)
+	ctx.Values().Set(common.CTX_ACCESS_TOKEN_KEY, accessToken)
 	//ctx.Next()
 }
 

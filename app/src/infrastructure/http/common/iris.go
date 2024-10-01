@@ -1,8 +1,7 @@
 package common
 
 import (
-	accessTokenServicePort "app/adapter/accessToken"
-	"app/internal"
+	accessTokenServicePort "app/src/port/accessToken"
 
 	"github.com/kataras/iris/v12"
 )
@@ -24,7 +23,7 @@ func SendDefaulJsonBodyAndEndRequest(ctx iris.Context, statusCode int, message s
 
 func GetAccessToken(ctx iris.Context) accessTokenServicePort.IAccessToken {
 
-	unknown := ctx.Values().Get(internal.CTX_ACCESS_TOKEN_KEY)
+	unknown := ctx.Values().Get(CTX_ACCESS_TOKEN_KEY)
 
 	if accessToken, ok := unknown.(accessTokenServicePort.IAccessToken); ok {
 

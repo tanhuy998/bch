@@ -1,9 +1,9 @@
 package authManipulationApi
 
 import (
-	"app/internal/controller"
-	"app/internal/middleware"
-	"app/internal/middlewareHelper"
+	"app/src/infrastructure/http/api/v1/controller"
+	"app/src/infrastructure/http/middleware"
+	"app/src/infrastructure/http/middleware/middlewareHelper"
 
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/mvc"

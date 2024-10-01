@@ -1,11 +1,11 @@
 package controller
 
 import (
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	"app/refactor/infrastructure/http/middleware"
-	"app/refactor/infrastructure/http/middleware/middlewareHelper"
-	usecase "app/useCase"
+	"app/src/infrastructure/http/middleware"
+	"app/src/infrastructure/http/middleware/middlewareHelper"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
+	usecase "app/src/useCase"
 
 	"github.com/kataras/iris/v12/mvc"
 )

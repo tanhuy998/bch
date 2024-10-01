@@ -1,11 +1,9 @@
 package middleware
 
 import (
-	"app/domain/presenter"
-	requestPresenter "app/domain/presenter/request"
-	"app/internal/common"
-	middlewareHelper "app/internal/middlewareHelper"
-	libCommon "app/lib/common"
+	"app/src/infrastructure/http/common"
+	"app/src/infrastructure/http/middleware/middlewareHelper"
+	libCommon "app/src/internal/lib/common"
 	"io"
 	"net/http"
 
@@ -18,6 +16,18 @@ import (
 // 	PresenterInitializer[RequestPresenter_T, ResponsePresenter_T any] func(req *RequestPresenter_T, res *ResponsePresenter_T)
 // 	RequestPresenterInitializer[RequestPresenter_T any]               func(req *RequestPresenter_T)
 // )
+
+type IRequestBinder interface {
+	/*
+		Structs that implement IRequestBinder define its own
+		request context to add extra business logic after data
+		transfered from request context to the request presenter object.
+	*/
+	Bind(ctx iris.Context) error
+}
+
+type EmptyPresenter struct {
+}
 
 func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 	container *hero.Container,
@@ -61,7 +71,7 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 			return
 		}
 
-		if p, ok := any(request).(requestPresenter.IRequestBinder); ok {
+		if p, ok := any(request).(IRequestBinder); ok {
 
 			err = p.Bind(ctx)
 
@@ -152,7 +162,7 @@ func isEmptyPresenter[T any]() bool {
 	var r any = (*T)(nil)
 
 	switch r.(type) {
-	case *presenter.IEmptyPresenter:
+	case *EmptyPresenter:
 		return true
 	default:
 		return false

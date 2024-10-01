@@ -1,8 +1,8 @@
 package api
 
 import (
-	authManipulationApi "app/internal/api/auth/manipulation"
-	"app/internal/api/auth/userLogging"
+	authManipulationApi "app/src/infrastructure/http/api/v1/branch/auth/manipulation"
+	"app/src/infrastructure/http/api/v1/branch/auth/userLogging"
 
 	"github.com/kataras/iris/v12/core/router"
 )

@@ -1,9 +1,10 @@
-package authService
+package addUserToCommandGroup
 
 import (
-	"app/domain/model"
-	libCommon "app/lib/common"
-	"app/repository"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	authServicePort "app/src/port/auth"
+	"app/src/repository"
 	"context"
 	"errors"
 
@@ -17,20 +18,15 @@ var (
 )
 
 type (
-	IAddUserToCommandGroup interface {
-		Serve(groupUUID string, userUUID string) error
-		Get() IGetSingleCommandGroup
-	}
-
 	AddUserToCommandGroupService struct {
-		GetSingleUserService         IGetSingleUser
-		GetSingleCommandGroupService IGetSingleCommandGroup
-		CheckUserInCommandGroup      ICheckUserInCommandGroup
+		GetSingleUserService         authServicePort.IGetSingleUser
+		GetSingleCommandGroupService authServicePort.IGetSingleCommandGroup
+		CheckUserInCommandGroup      authServicePort.ICheckUserInCommandGroup
 		CommandGroupUserRepo         repository.ICommandGroupUser
 	}
 )
 
-func (this *AddUserToCommandGroupService) Get() IGetSingleCommandGroup {
+func (this *AddUserToCommandGroupService) Get() authServicePort.IGetSingleCommandGroup {
 
 	return this.GetSingleCommandGroupService
 }

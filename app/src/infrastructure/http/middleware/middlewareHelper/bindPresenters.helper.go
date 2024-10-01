@@ -1,8 +1,8 @@
 package middlewareHelper
 
 import (
-	accessTokenServicePort "app/adapter/accessToken"
-	"app/internal/common"
+	"app/src/infrastructure/http/common"
+	accessTokenServicePort "app/src/port/accessToken"
 	"errors"
 
 	"github.com/kataras/iris/v12"

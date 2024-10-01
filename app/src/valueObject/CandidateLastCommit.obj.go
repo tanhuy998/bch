@@ -1,6 +1,6 @@
 package valueObject
 
-import "app/domain/model"
+import "app/src/model"
 
 type (
 	CandidateLastCommit struct {

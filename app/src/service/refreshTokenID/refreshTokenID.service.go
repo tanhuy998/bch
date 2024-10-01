@@ -1,8 +1,8 @@
 package refreshTokenIDService
 
 import (
-	refreshtokenidServicePort "app/adapter/refreshTokenidServicePort"
-	uniqueIDServicePort "app/adapter/uniqueID"
+	refreshtokenidServicePort "app/src/port/refreshTokenID"
+	uniqueIDServicePort "app/src/port/uniqueID"
 	"crypto/rand"
 
 	"github.com/google/uuid"

@@ -1,7 +1,7 @@
 package refreshTokenBlackListService
 
 import (
-	refreshTokenBlackListServicePort "app/adapter/refreshTokenBlackList"
+	refreshTokenBlackListServicePort "app/src/port/refreshTokenBlackList"
 	"context"
 	"errors"
 	"time"

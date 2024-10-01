@@ -1,12 +1,12 @@
-package usecase
+package createAssignmentDomain
 
 import (
-	assignmentServicePort "app/adapter/assignment"
-	"app/domain/model"
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	libCommon "app/lib/common"
-	actionResultService "app/service/actionResult"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	actionResultServicePort "app/src/port/actionResult"
+	assignmentServicePort "app/src/port/assignment"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 	"time"
 
 	"github.com/kataras/iris/v12/mvc"
@@ -22,7 +22,7 @@ type (
 
 	CreateAssignmentUseCase struct {
 		CreateAssignmentService assignmentServicePort.ICreateAssignment
-		ActionResult            actionResultService.IActionResult
+		ActionResult            actionResultServicePort.IActionResult
 	}
 )
 

@@ -1,7 +1,7 @@
 package config
 
 import (
-	libCommon "app/lib/common"
+	libCommon "app/src/internal/lib/common"
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson"

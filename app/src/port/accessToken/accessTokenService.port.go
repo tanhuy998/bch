@@ -1,7 +1,7 @@
 package accessTokenServicePort
 
 import (
-	"app/domain/model"
+	"app/src/model"
 	"context"
 	"time"
 

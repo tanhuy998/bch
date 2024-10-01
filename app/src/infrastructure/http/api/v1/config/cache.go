@@ -1,8 +1,8 @@
 package config
 
 import (
-	refreshTokenBlackListServicePort "app/adapter/refreshTokenBlackList"
-	memoryCache "app/mermoryCache"
+	"app/src/internal/memoryCache"
+	refreshTokenBlackListServicePort "app/src/port/refreshTokenBlackList"
 )
 
 func init() {

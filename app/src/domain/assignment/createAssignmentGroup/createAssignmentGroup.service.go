@@ -1,10 +1,10 @@
-package assignmentService
+package createAssignmentGroupDomain
 
 import (
-	assignmentServicePort "app/adapter/assignment"
-	"app/domain/model"
-	libCommon "app/lib/common"
-	"app/repository"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	assignmentServicePort "app/src/port/assignment"
+	"app/src/repository"
 	"context"
 
 	"github.com/google/uuid"

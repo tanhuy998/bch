@@ -1,9 +1,10 @@
-package authService
+package modifyUserDomain
 
 import (
-	passwordServiceAdapter "app/adapter/passwordService"
-	"app/domain/model"
-	"app/repository"
+	"app/src/model"
+	authServicePort "app/src/port/auth"
+	passwordServicePort "app/src/port/passwordService"
+	"app/src/repository"
 	"context"
 	"errors"
 
@@ -21,8 +22,8 @@ type (
 
 	ModifyUserService struct {
 		UserRepo      repository.IUser
-		GetSingleUser IGetSingleUser
-		Password      passwordServiceAdapter.IPassword
+		GetSingleUser authServicePort.IGetSingleUser
+		Password      passwordServicePort.IPassword
 	}
 )
 

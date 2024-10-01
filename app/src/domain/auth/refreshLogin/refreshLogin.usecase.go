@@ -1,12 +1,12 @@
-package usecase
+package refreshLogin
 
 import (
-	authServiceAdapter "app/adapter/auth"
-	refreshTokenServicePort "app/adapter/refreshToken"
-	refreshTokenClientPort "app/adapter/refreshTokenClient"
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	actionResultService "app/service/actionResult"
+	"app/src/internal/common"
+	actionResultServicePort "app/src/port/actionResult"
+	authServicePort "app/src/port/auth"
+	refreshTokenClientPort "app/src/port/refreshTokenClient"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -27,8 +27,8 @@ type (
 	}
 
 	RefreshLoginUseCase struct {
-		RefreshLoginService authServiceAdapter.IRefreshLogin
-		ActionResult        actionResultService.IActionResult
+		RefreshLoginService authServicePort.IRefreshLogin
+		ActionResult        actionResultServicePort.IActionResult
 		RefreshTokenClient  refreshTokenClientPort.IRefreshTokenClient
 	}
 )
@@ -49,17 +49,16 @@ func (this *RefreshLoginUseCase) Execute(
 
 	newAccessTokenString, newRefreshTokenString, err := this.RefreshLoginService.Serve(input.Data.AccessToken, refreshToken_str, reqCtx)
 
-	switch err {
-	case nil:
-		output.Message = "success"
-		output.Data = &responsePresenter.RefreshLoginData{
-			newAccessTokenString,
-		}
-	case authServiceAdapter.ERR_REFRESH_TOKEN_EXPIRE, refreshTokenServicePort.ERR_REFRESH_TOKEN_BLACK_LIST:
+	switch {
+	case errors.Is(err, common.ERR_FORBIDEN):
 		output.Message = err.Error()
 		raw_content, _ := json.Marshal(output)
 		return this.ActionResult.Prepare().SetCode(http.StatusForbidden).SetContent(raw_content).Done()
-	default:
+	case errors.Is(err, common.ERR_UNAUTHORIZED):
+		output.Message = err.Error()
+		raw_content, _ := json.Marshal(output)
+		return this.ActionResult.Prepare().SetCode(http.StatusUnauthorized).SetContent(raw_content).Done()
+	case err != nil:
 		return this.ActionResult.ServeErrorResponse(err)
 	}
 
@@ -68,6 +67,11 @@ func (this *RefreshLoginUseCase) Execute(
 	if err != nil {
 
 		return this.ActionResult.ServeErrorResponse(err)
+	}
+
+	output.Message = "success"
+	output.Data = &responsePresenter.RefreshLoginData{
+		newAccessTokenString,
 	}
 
 	return this.ActionResult.ServeResponse(output)

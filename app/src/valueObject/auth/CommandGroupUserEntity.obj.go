@@ -1,6 +1,6 @@
 package authValueObject
 
-import "app/domain/model"
+import "app/src/model"
 
 type (
 	CommandGroupUserEntity struct {

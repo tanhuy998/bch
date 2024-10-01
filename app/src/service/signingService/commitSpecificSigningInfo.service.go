@@ -1,11 +1,11 @@
 package signingService
 
 import (
-	adminServiceAdapter "app/adapter/adminService"
-	"app/domain/model"
-	"app/internal/common"
-	libCommon "app/lib/common"
-	"app/repository"
+	"app/src/internal/common"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	adminServicePort "app/src/port/adminService"
+	"app/src/repository"
 	"context"
 	"errors"
 
@@ -22,7 +22,7 @@ type (
 		CheckCandidateExistService     ICheckCandidateExistence
 		SigningCommmitLoggerService    ISigningCommitLogger
 		CandidateRepo                  repository.ICandidateRepository
-		AdminGetSingleCandidateAdapter adminServiceAdapter.IGetSingleCandidate
+		AdminGetSingleCandidateAdapter adminServicePort.IGetSingleCandidate
 	}
 )
 
@@ -48,12 +48,12 @@ func (this *CommitSpecificSigningInfoService) Serve(campaignUUID_str string, can
 
 	if err != nil {
 
-		return common.ERR_HTTP_NOT_FOUND
+		return errors.Join(errors.New("invalid uuid"), common.ERR_BAD_REQUEST)
 	}
 
 	if *candidate.CampaignUUID != campaignUUID {
 
-		return common.ERR_BAD_REQUEST
+		return errors.Join(errors.New("candidate not in campaign"), common.ERR_BAD_REQUEST)
 	}
 
 	candidateUUID, err := uuid.Parse(candidateUUID_str)

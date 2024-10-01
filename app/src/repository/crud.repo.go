@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"app/domain/model"
-	libCommon "app/lib/common"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
 	"context"
 
 	"github.com/google/uuid"

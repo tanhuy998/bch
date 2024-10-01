@@ -1,27 +1,29 @@
-package usecase
+package modifyUserDomain
 
 import (
-	"app/domain/model"
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	actionResultService "app/service/actionResult"
-	authService "app/service/auth"
+	"app/src/internal/common"
+	"app/src/model"
+	actionResultServicePort "app/src/port/actionResult"
+	authServicePort "app/src/port/auth"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 	"encoding/json"
+	"errors"
 
 	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
-	IModifyUser interface {
-		Execute(
-			input *requestPresenter.ModifyUserRequest,
-			output *responsePresenter.ModifyUserResponse,
-		) (mvc.Result, error)
-	}
+	// IModifyUser interface {
+	// 	Execute(
+	// 		input *requestPresenter.ModifyUserRequest,
+	// 		output *responsePresenter.ModifyUserResponse,
+	// 	) (mvc.Result, error)
+	// }
 
 	ModifyUserUseCase struct {
-		ModifyUser   authService.IModifyUser
-		ActionResult actionResultService.IActionResult
+		ModifyUser   authServicePort.IModifyUser
+		ActionResult actionResultServicePort.IActionResult
 	}
 )
 
@@ -37,7 +39,7 @@ func (this *ModifyUserUseCase) Execute(
 
 	err := this.ModifyUser.Serve(input.UserUUID, dataModel)
 
-	if err == authService.ERR_MODIFY_USER_NOT_FOUND {
+	if errors.Is(err, common.ERR_NOT_FOUND) {
 
 		output.Message = err.Error()
 

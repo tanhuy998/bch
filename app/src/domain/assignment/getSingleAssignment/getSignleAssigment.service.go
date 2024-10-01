@@ -1,8 +1,8 @@
-package assignmentService
+package getSingleAssignmentDomain
 
 import (
-	"app/domain/model"
-	"app/repository"
+	"app/src/model"
+	"app/src/repository"
 	"context"
 
 	"github.com/google/uuid"

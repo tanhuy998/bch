@@ -1,7 +1,7 @@
 package jwtTokenService
 
 import (
-	jwtTokenServicePort "app/adapter/jwtTokenService"
+	jwtTokenServicePort "app/src/port/jwtTokenService"
 
 	"github.com/golang-jwt/jwt/v5"
 )

@@ -1,7 +1,7 @@
 package accessTokenService
 
 import (
-	jwtTokenService "app/service/jwtToken"
+	jwtTokenService "app/src/service/jwtToken"
 	"crypto/ecdsa"
 	"testing"
 

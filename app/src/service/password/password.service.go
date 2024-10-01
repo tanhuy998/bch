@@ -1,7 +1,7 @@
 package passwordService
 
 import (
-	passwordServiceAdapter "app/adapter/passwordService"
+	passwordServicePort "app/src/port/passwordService"
 	"errors"
 
 	"golang.org/x/crypto/bcrypt"
@@ -18,8 +18,8 @@ var (
 type (
 	IPassword interface {
 		Generate(plain string) ([]byte, error)
-		Resolve(model passwordServiceAdapter.IPasswordDispatcher) error
-		Compare(model passwordServiceAdapter.IPasswordDispatcher, secret []byte) error
+		Resolve(model passwordServicePort.IPasswordDispatcher) error
+		Compare(model passwordServicePort.IPasswordDispatcher, secret []byte) error
 	}
 
 	PasswordService struct {
@@ -38,7 +38,7 @@ func (this *PasswordService) Generate(plain string) ([]byte, error) {
 	return hashed, nil
 }
 
-func (this *PasswordService) Compare(model passwordServiceAdapter.IPasswordDispatcher, secret []byte) error {
+func (this *PasswordService) Compare(model passwordServicePort.IPasswordDispatcher, secret []byte) error {
 
 	pw_token, err := merge(model.GetRawUsername(), model.GetRawPasword())
 
@@ -50,7 +50,7 @@ func (this *PasswordService) Compare(model passwordServiceAdapter.IPasswordDispa
 	return bcrypt.CompareHashAndPassword(secret, pw_token)
 }
 
-func (this *PasswordService) Resolve(model passwordServiceAdapter.IPasswordDispatcher) error {
+func (this *PasswordService) Resolve(model passwordServicePort.IPasswordDispatcher) error {
 
 	pw_token, err := merge(model.GetRawUsername(), model.GetRawPasword())
 

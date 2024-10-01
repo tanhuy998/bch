@@ -1,11 +1,11 @@
-package authService
+package getUserParticipatedCommandGroupDomain
 
 import (
-	"app/domain/valueObject"
-	"app/repository"
+	"app/src/repository"
+	"app/src/valueObject"
 	"context"
 
-	"app/domain/model"
+	"app/src/model"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"

@@ -1,9 +1,10 @@
-package authService
+package createCommandGroupDomain
 
 import (
-	"app/domain/model"
-	libCommon "app/lib/common"
-	"app/repository"
+	libCommon "app/src/internal/lib/common"
+	"app/src/model"
+	authServicePort "app/src/port/auth"
+	"app/src/repository"
 	"context"
 	"errors"
 
@@ -16,13 +17,9 @@ var (
 )
 
 type (
-	ICreateCommandGroup interface {
-		Serve(groupName string) error
-	}
-
 	CreateCommandGroupService struct {
 		CommandGroupRepo             repository.ICommandGroup
-		GetSingleCommandGroupService IGetSingleCommandGroup
+		GetSingleCommandGroupService authServicePort.IGetSingleCommandGroup
 	}
 )
 

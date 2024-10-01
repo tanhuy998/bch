@@ -1,13 +1,14 @@
-package authService
+package loginDomain
 
 import (
-	accessTokenServicePort "app/adapter/accessToken"
-	authServiceAdapter "app/adapter/auth"
-	authSignatureTokenPort "app/adapter/authSignatureToken"
-	passwordServiceAdapter "app/adapter/passwordService"
-	refreshTokenServicePort "app/adapter/refreshToken"
-	"app/domain/model"
-	"app/repository"
+	"app/src/model"
+	accessTokenServicePort "app/src/port/accessToken"
+	authServiceAdapter "app/src/port/auth"
+	authServicePort "app/src/port/auth"
+	authSignatureTokenPort "app/src/port/authSignatureToken"
+	passwordServicePort "app/src/port/passwordService"
+	refreshTokenServicePort "app/src/port/refreshToken"
+	"app/src/repository"
 	"context"
 	"errors"
 )
@@ -20,10 +21,10 @@ type (
 	ILogIn = authServiceAdapter.ILogIn
 
 	LogInService struct {
-		PasswordService         passwordServiceAdapter.IPassword
+		PasswordService         passwordServicePort.IPassword
 		UserRepo                repository.IUser
 		AccessTokenManipulator  accessTokenServicePort.IAccessTokenManipulator
-		GetSingleUser           authServiceAdapter.IGetSingleUserService
+		GetSingleUser           authServicePort.IGetSingleUser
 		RefreshTokenManipulator refreshTokenServicePort.IRefreshTokenManipulator
 
 		AuthSignatureTokenProvider authSignatureTokenPort.IAuthSignatureProvider

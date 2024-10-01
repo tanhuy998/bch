@@ -1,26 +1,26 @@
-package usecase
+package grandCommandGroupRoleToUser
 
 import (
-	requestPresenter "app/domain/presenter/request"
-	responsePresenter "app/domain/presenter/response"
-	actionResultService "app/service/actionResult"
-	authService "app/service/auth"
+	actionResultServicePort "app/src/port/actionResult"
+	authServicePort "app/src/port/auth"
+	requestPresenter "app/src/presenter/request"
+	responsePresenter "app/src/presenter/response"
 	"encoding/json"
 
 	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
-	IGrantCommandGroupRolesToUser interface {
-		Execute(
-			input *requestPresenter.GrantCommandGroupRolesToUserRequest,
-			output *responsePresenter.GrantCommandGroupRolesToUserResponse,
-		) (mvc.Result, error)
-	}
+	// IGrantCommandGroupRolesToUser interface {
+	// 	Execute(
+	// 		input *requestPresenter.GrantCommandGroupRolesToUserRequest,
+	// 		output *responsePresenter.GrantCommandGroupRolesToUserResponse,
+	// 	) (mvc.Result, error)
+	// }
 
 	GrantCommandGroupRolesToUserUseCase struct {
-		GrantCommandGroupRolesToUserService authService.IGrantCommandGroupRolesToUser
-		ActionResult                        actionResultService.IActionResult
+		GrantCommandGroupRolesToUserService authServicePort.IGrantCommandGroupRolesToUser
+		ActionResult                        actionResultServicePort.IActionResult
 	}
 )
 

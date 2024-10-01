@@ -1,8 +1,8 @@
 package valueObject
 
 import (
-	accessTokenServicePort "app/adapter/accessToken"
-	"app/domain/model"
+	"app/src/model"
+	accessTokenServicePort "app/src/port/accessToken"
 
 	"github.com/google/uuid"
 )
