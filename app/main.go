@@ -1,10 +1,11 @@
 package main
 
 import (
-	"app/infrastructure/db"
-	"app/internal/api"
+	v1 "app/infrastructure/http"
+	"app/infrastructure/http/api/v1/config"
 	"app/internal/bootstrap"
-	"app/internal/config"
+	"app/internal/db"
+
 	"os"
 	"path"
 
@@ -57,13 +58,6 @@ func main() {
 
 	//app.Validator = validator.New()
 
-	// app.UseGlobal(func(ctx iris.Context) {
-
-	// 	fmt.Println(ctx.Method(), ctx.RequestPath(false))
-
-	// 	ctx.Next()
-	// })
-
 	// app.WrapRouter(methodoverride.New(
 	// 	methodoverride.SaveOriginalMethod("_originalMethod"),
 	// ))
@@ -80,47 +74,51 @@ func main() {
 
 	defer config.ConfigureLogger(app).Close()
 
-	// app.ConfigureContainer().
-	// 	UseResultHandler(func(next iris.ResultHandler) iris.ResultHandler {
-	// 		return func(ctx iris.Context, v interface{}) error {
-	// 			fmt.Println("error catcher")
-	// 			switch val := v.(type) {
-	// 			case error:
-	// 				fmt.Println("err")
-	// 				return next(ctx, val)
-	// 			case *mvc.Response:
-	// 				fmt.Println("err res")
-	// 				return next(ctx, val)"_originalMethod"
-	// 			default:
-	// 				fmt.Println(reflect.TypeOf(val).String())
-	// 				return next(ctx, val)
-	// 			}
-	// 		}
-	// 	})
+	// defer config.ConfigureLogger(app).Close()
 
-	// app.Use(versioning.Aliases(versioning.AliasMap{
-	// 	versioning.Empty: "1.0.0",
-	// }))
+	// // app.ConfigureContainer().
+	// // 	UseResultHandler(func(next iris.ResultHandler) iris.ResultHandler {
+	// // 		return func(ctx iris.Context, v interface{}) error {
+	// // 			fmt.Println("error catcher")
+	// // 			switch val := v.(type) {
+	// // 			case error:
+	// // 				fmt.Println("err")
+	// // 				return next(ctx, val)
+	// // 			case *mvc.Response:
+	// // 				fmt.Println("err res")
+	// // 				return next(ctx, val)"_originalMethod"
+	// // 			default:
+	// // 				fmt.Println(reflect.TypeOf(val).String())
+	// // 				return next(ctx, val)
+	// // 			}
+	// // 		}
+	// // 	})
 
-	// v1 := versioning.NewGroup(app, ">=1.0.1 <2.0.0")
+	// // app.Use(versioning.Aliases(versioning.AliasMap{
+	// // 	versioning.Empty: "1.0.0",
+	// // }))
 
-	config.InitializeDatabase(app)
-	config.RegisterServices(app)
+	// // v1 := versioning.NewGroup(app, ">=1.0.1 <2.0.0")
 
-	// registerServices(app)
-	// registerDependencies(app)
+	// config.InitializeDatabase(app)
+	// config.RegisterServices(app)
 
-	api.Init(app)
+	// // registerServices(app)
+	// // registerDependencies(app)
 
-	// app.Run(
-	// 	iris.TLS(
-	// 		os.Getenv("HTTP_PORT"),
-	// 		server_ssl_cert,
-	// 		server_ssl_key,
-	// 	),
-	// 	iris.WithoutBodyConsumptionOnUnmarshal,
-	// 	iris.WithOptimizations,
-	// )
+	// api.Init(app)
+
+	// // app.Run(
+	// // 	iris.TLS(
+	// // 		os.Getenv("HTTP_PORT"),
+	// // 		server_ssl_cert,
+	// // 		server_ssl_key,
+	// // 	),
+	// // 	iris.WithoutBodyConsumptionOnUnmarshal,
+	// // 	iris.WithOptimizations,
+	// // )
+
+	v1.Initialize(app)
 
 	app.Listen(
 		env.Get("HTTP_PORT", ":80"),
