@@ -2,10 +2,11 @@ package authServicePort
 
 import (
 	"app/model"
+	"context"
 )
 
 type (
 	IGetAllRoles interface {
-		Serve() ([]*model.Role, error)
+		Serve(ctx context.Context) ([]*model.Role, error)
 	}
 )

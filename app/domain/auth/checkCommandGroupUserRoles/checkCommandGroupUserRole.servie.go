@@ -1,4 +1,4 @@
-package authService
+package checkCommandGroupUserRoles
 
 import (
 	"app/internal/common"
@@ -14,10 +14,10 @@ import (
 )
 
 type (
-	ICheckCommandGroupUserRole interface {
-		//Serve(groupUUID string, userUUID string, roleUUIDs []string) error
-		Compare(groupUUID uuid.UUID, userUUID uuid.UUID, roleUUID []uuid.UUID) (unAssignedRoles []uuid.UUID, err error)
-	}
+	// ICheckCommandGroupUserRole interface {
+	// 	//Serve(groupUUID string, userUUID string, roleUUIDs []string) error
+	// 	Compare(groupUUID uuid.UUID, userUUID uuid.UUID, roleUUID []uuid.UUID) (unAssignedRoles []uuid.UUID, err error)
+	// }
 
 	CheckCommandGroupUserRoleService struct {
 		CommandGroupUserRepo repository.ICommandGroupUser
@@ -142,6 +142,7 @@ func (this *CheckCommandGroupUserRoleService) Compare(
 	groupUUID uuid.UUID,
 	userUUID uuid.UUID,
 	roleUUIDList []uuid.UUID,
+	ctx context.Context,
 ) (unGrantedRoles []uuid.UUID, err error) {
 
 	var conditions []bson.D
@@ -200,7 +201,7 @@ func (this *CheckCommandGroupUserRoleService) Compare(
 				},
 			},
 		},
-		context.TODO(),
+		ctx,
 	)
 
 	if err != nil {

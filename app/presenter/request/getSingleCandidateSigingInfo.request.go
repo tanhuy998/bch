@@ -1,5 +1,7 @@
 package requestPresenter
 
+import "github.com/google/uuid"
+
 type GetSingleCandidateSigningInfoRequest struct {
-	CandidateUUID string `param:"candidateUUID" validate:"required,uuid_rfc4122"`
+	CandidateUUID *uuid.UUID `param:"candidateUUID" validate:"required,uuid_rfc4122"`
 }

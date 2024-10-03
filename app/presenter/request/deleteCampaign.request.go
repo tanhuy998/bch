@@ -1,5 +1,7 @@
 package requestPresenter
 
+import "github.com/google/uuid"
+
 type DeleteCampaignRequest struct {
-	UUID string `param:"uuid"`
+	UUID *uuid.UUID `param:"uuid"`
 }

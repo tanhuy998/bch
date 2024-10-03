@@ -1,4 +1,4 @@
-package authService
+package getCommandGroupUsersDomain
 
 import (
 	"app/model"
@@ -27,16 +27,16 @@ type (
 	}
 )
 
-func (this *GetCommandGroupUsersService) Serve(groupUUID_str string) ([]*model.User, error) {
+func (this *GetCommandGroupUsersService) Serve(groupUUID uuid.UUID, ctx context.Context) ([]*model.User, error) {
 
-	groupUUID, err := uuid.Parse(groupUUID_str)
+	// groupUUID, err := uuid.Parse(groupUUID_str)
 
-	if err != nil {
+	// if err != nil {
 
-		return nil, ERR_INVALID_INPUT_GROUP
-	}
+	// 	return nil, ERR_INVALID_INPUT_GROUP
+	// }
 
-	group, err := this.CommandGroupRepo.FindOneByUUID(groupUUID, context.TODO())
+	group, err := this.CommandGroupRepo.FindOneByUUID(groupUUID, ctx)
 
 	if err != nil {
 

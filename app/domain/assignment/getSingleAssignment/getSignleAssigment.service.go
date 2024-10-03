@@ -18,15 +18,8 @@ type (
 )
 
 func (this *GetSingleAssignmentService) Serve(
-	uuid_str string, ctx context.Context,
+	uuid uuid.UUID, ctx context.Context,
 ) (*model.Assignment, error) {
-
-	uuid, err := uuid.Parse(uuid_str)
-
-	if err != nil {
-
-		return nil, err
-	}
 
 	return this.AssignmentRepo.FindOneByUUID(uuid, ctx)
 }

@@ -37,7 +37,7 @@ func (this *ModifyUserUseCase) Execute(
 		PassWord: input.Data.Password,
 	}
 
-	err := this.ModifyUser.Serve(input.UserUUID, dataModel)
+	err := this.ModifyUser.Serve(*input.UserUUID, dataModel, input.GetContext())
 
 	if errors.Is(err, common.ERR_NOT_FOUND) {
 

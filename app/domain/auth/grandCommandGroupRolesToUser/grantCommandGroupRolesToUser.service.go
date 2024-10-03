@@ -1,7 +1,6 @@
 package grantCommandGroupRoleToUserDomain
 
 import (
-	"app/internal/common"
 	libCommon "app/internal/lib/common"
 	"app/model"
 	authServicePort "app/port/auth"
@@ -22,9 +21,9 @@ var (
 )
 
 type (
-	IGrantCommandGroupRolesToUser interface {
-		Serve(groupUUID string, userUUID string, roles []string) error
-	}
+	// IGrantCommandGroupRolesToUser interface {
+	// 	Serve(groupUUID string, userUUID string, roles []string) error
+	// }
 
 	GrantCommandGroupRolesToUserService struct {
 		RoleRepo                         repository.IRole
@@ -37,31 +36,32 @@ type (
 )
 
 func (this *GrantCommandGroupRolesToUserService) Serve(
-	groupUUID_str string,
-	userUUID_str string,
-	roles []string,
+	groupUUID uuid.UUID,
+	userUUID uuid.UUID,
+	roles []uuid.UUID,
+	ctx context.Context,
 ) error {
 
-	if len(roles) == 0 {
+	// if len(roles) == 0 {
 
-		return ERR_EMPTY_ROLE_LIST
-	}
+	// 	return ERR_EMPTY_ROLE_LIST
+	// }
 
-	groupUUID, err := uuid.Parse(groupUUID_str)
+	// groupUUID, err := uuid.Parse(groupUUID_str)
 
-	if err != nil {
+	// if err != nil {
 
-		return errors.Join(common.ERR_BAD_REQUEST, errors.New("invalid group"))
-	}
+	// 	return errors.Join(common.ERR_BAD_REQUEST, errors.New("invalid group"))
+	// }
 
-	userUUID, err := uuid.Parse(userUUID_str)
+	// userUUID, err := uuid.Parse(userUUID_str)
 
-	if err != nil {
+	// if err != nil {
 
-		return errors.Join(common.ERR_BAD_REQUEST, errors.New("invalid user"))
-	}
+	// 	return errors.Join(common.ERR_BAD_REQUEST, errors.New("invalid user"))
+	// }
 
-	commandGroupUser, err := this.CheckUserInCommandGroup.Detail(groupUUID, userUUID)
+	commandGroupUser, err := this.CheckUserInCommandGroup.Detail(groupUUID, userUUID, ctx)
 
 	if err != nil {
 
@@ -73,19 +73,19 @@ func (this *GrantCommandGroupRolesToUserService) Serve(
 		return ERR_INVALID_GROUP_USER
 	}
 
-	roleUUIDList, err := this._checkValidRoles(roles)
+	err = this._checkValidRoles(roles, ctx)
 
 	if err != nil {
 
 		return err
 	}
 
-	if len(roleUUIDList) == 0 {
+	if len(roles) == 0 {
 
 		return ERR_INVALID_VALUES_IN_ROLE_LIST
 	}
 
-	unGrantedRoles, err := this.CheckCommandGroupUserRoleService.Compare(groupUUID, userUUID, roleUUIDList)
+	unGrantedRoles, err := this.CheckCommandGroupUserRoleService.Compare(groupUUID, userUUID, roles, ctx)
 
 	if err != nil {
 
@@ -118,7 +118,7 @@ func (this *GrantCommandGroupRolesToUserService) Serve(
 	return nil
 }
 
-func (this *GrantCommandGroupRolesToUserService) _checkValidRoles(roleUUIDs []string) ([]uuid.UUID, error) {
+func (this *GrantCommandGroupRolesToUserService) _checkValidRoles(roleUUIDs []uuid.UUID, ctx context.Context) error {
 
 	var (
 		conditions []bson.D    = make([]primitive.D, len(roleUUIDs))
@@ -127,28 +127,28 @@ func (this *GrantCommandGroupRolesToUserService) _checkValidRoles(roleUUIDs []st
 
 	for i, v := range roleUUIDs {
 
-		roleUUID, err := uuid.Parse(v)
+		// roleUUID, err := uuid.Parse(v)
 
-		if err != nil {
+		// if err != nil {
 
-			return nil, ERR_INVALID_VALUES_IN_ROLE_LIST
-		}
+		// 	return nil, ERR_INVALID_VALUES_IN_ROLE_LIST
+		// }
 
-		ret[i] = roleUUID
-		conditions[i] = bson.D{{"uuid", roleUUID}}
+		ret[i] = v
+		conditions[i] = bson.D{{"uuid", v}}
 	}
 
 	res, err := this.RoleRepo.FindMany(
 		bson.D{
 			{"$or", conditions},
 		},
-		context.TODO(),
+		ctx,
 	)
 
 	if err != nil || res == nil || len(res) != len(roleUUIDs) {
 
-		return nil, ERR_INVALID_VALUES_IN_ROLE_LIST
+		return ERR_INVALID_VALUES_IN_ROLE_LIST
 	}
 
-	return ret, nil
+	return nil
 }

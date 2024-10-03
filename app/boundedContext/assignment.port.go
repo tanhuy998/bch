@@ -23,8 +23,8 @@ type (
 
 func RegisterAssignmentBoundedContext(container *hero.Container) {
 
-	libConfig.BindDependency[assignmentServicePort.IGetSingleAssignnment, getSingleAssignmentGroupDomain.GetSingleAssignmentGroupService](container, nil)
-	libConfig.BindDependency[assignmentServicePort.IGetSingleAssignmentGroup, getSingleAssignmentDomain.GetSingleAssignmentService](container, nil)
+	libConfig.BindDependency[assignmentServicePort.IGetSingleAssignnment, getSingleAssignmentDomain.GetSingleAssignmentService](container, nil)
+	libConfig.BindDependency[assignmentServicePort.IGetSingleAssignmentGroup, getSingleAssignmentGroupDomain.GetSingleAssignmentGroupService](container, nil)
 	libConfig.BindDependency[assignmentServicePort.ICreateAssignment, createAssignmentDomain.CreateAssignmentService](container, nil)
 	libConfig.BindDependency[assignmentServicePort.ICreateAssignmentGroup, createAssignmentGroupDomain.CreateAssignmentGroupService](container, nil)
 

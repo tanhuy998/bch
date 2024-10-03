@@ -21,7 +21,7 @@ type (
 )
 
 func (this *CreateAssignmentGroupService) Serve(
-	assignmentUUID string, ipnutData *model.AssignmentGroup, ctx context.Context,
+	assignmentUUID uuid.UUID, ipnutData *model.AssignmentGroup, ctx context.Context,
 ) (*model.AssignmentGroup, error) {
 
 	assignment, err := this.GetSingleAssignmentService.Serve(assignmentUUID, ctx)

@@ -3,6 +3,7 @@ package requestPresenter
 import (
 	accessTokenServicePort "app/port/accessToken"
 
+	"github.com/google/uuid"
 	"github.com/kataras/iris/v12"
 )
 
@@ -13,7 +14,7 @@ type (
 	}
 
 	ModifyUserRequest struct {
-		UserUUID string           `param:"userUUID" validate:"required"`
+		UserUUID *uuid.UUID       `param:"userUUID" validate:"required"`
 		Data     *InputModifyUser `json:"data" validate:"required"`
 		ctx      iris.Context
 		auth     accessTokenServicePort.IAccessTokenAuthData

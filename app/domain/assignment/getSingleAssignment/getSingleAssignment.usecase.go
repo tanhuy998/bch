@@ -30,7 +30,7 @@ func (this *GetSingleAssignmentUseCase) Execute(
 	input *requestPresenter.GetSingleAssignmentRequest,
 ) (*responsePresenter.GetSingleAssignmentResponse, error) {
 
-	data, err := this.GetSingleAssignmnetService.Serve(input.UUID, input.GetContext())
+	data, err := this.GetSingleAssignmnetService.Serve(*input.UUID, input.GetContext())
 
 	if err != nil {
 

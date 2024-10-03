@@ -33,7 +33,7 @@ func (this *AddUserToCommandGroupUseCase) Execute(
 	output *responsePresenter.AddUserToCommandGroupResponse,
 ) (mvc.Result, error) {
 
-	err := this.AddUserToCommandGroupService.Serve(input.GroupUUID, input.UserUUID)
+	err := this.AddUserToCommandGroupService.Serve(*input.GroupUUID, *input.UserUUID, input.GetContext())
 
 	if err != nil {
 

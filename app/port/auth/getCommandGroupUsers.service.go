@@ -2,10 +2,13 @@ package authServicePort
 
 import (
 	"app/model"
+	"context"
+
+	"github.com/google/uuid"
 )
 
 type (
 	IGetCommandGroupUsers interface {
-		Serve(groupUUID string) ([]*model.User, error)
+		Serve(groupUUID uuid.UUID, ctx context.Context) ([]*model.User, error)
 	}
 )

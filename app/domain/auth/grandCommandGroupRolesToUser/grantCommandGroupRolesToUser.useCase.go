@@ -29,7 +29,7 @@ func (this *GrantCommandGroupRolesToUserUseCase) Execute(
 	output *responsePresenter.GrantCommandGroupRolesToUserResponse,
 ) (mvc.Result, error) {
 
-	err := this.GrantCommandGroupRolesToUserService.Serve(input.GroupUUID, input.UserUUID, input.Data)
+	err := this.GrantCommandGroupRolesToUserService.Serve(*input.GroupUUID, *input.UserUUID, input.Data, input.GetContext())
 
 	if err != nil {
 

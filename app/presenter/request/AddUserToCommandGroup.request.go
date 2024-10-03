@@ -3,6 +3,7 @@ package requestPresenter
 import (
 	accessTokenServicePort "app/port/accessToken"
 
+	"github.com/google/uuid"
 	"github.com/kataras/iris/v12"
 )
 
@@ -12,8 +13,8 @@ type (
 	}
 
 	AddUserToCommandGroupRequest struct {
-		GroupUUID string                     `param:"groupUUID" validate:"required"`
-		UserUUID  string                     `param:"userUUID" validate:"required"`
+		GroupUUID *uuid.UUID                 `param:"groupUUID" validate:"required"`
+		UserUUID  *uuid.UUID                 `param:"userUUID" validate:"required"`
 		Data      data_AddUserToCommandGroup `json:"data"`
 		ctx       iris.Context
 		auth      accessTokenServicePort.IAccessTokenAuthData

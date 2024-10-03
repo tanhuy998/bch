@@ -28,7 +28,7 @@ func (this *GetAllRolesUseCase) Execute(
 	output *responsePresenter.GetAllRolesResponse,
 ) (mvc.Result, error) {
 
-	ret, err := this.GetAllRolesService.Serve()
+	ret, err := this.GetAllRolesService.Serve(input.GetContext())
 
 	if err != nil {
 

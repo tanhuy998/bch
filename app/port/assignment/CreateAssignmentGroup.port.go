@@ -4,6 +4,8 @@ import (
 	"app/model"
 	"context"
 	"errors"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -13,6 +15,6 @@ var (
 
 type (
 	ICreateAssignmentGroup interface {
-		Serve(assignmentUUID string, ipnutData *model.AssignmentGroup, ctx context.Context) (*model.AssignmentGroup, error)
+		Serve(assignmentUUID uuid.UUID, ipnutData *model.AssignmentGroup, ctx context.Context) (*model.AssignmentGroup, error)
 	}
 )

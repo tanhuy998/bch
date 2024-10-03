@@ -16,9 +16,9 @@ var (
 )
 
 type (
-	IModifyUser interface {
-		Serve(userUUID string, data *model.User) error
-	}
+	// IModifyUser interface {
+	// 	Serve(userUUID string, data *model.User) error
+	// }
 
 	ModifyUserService struct {
 		UserRepo      repository.IUser
@@ -27,16 +27,16 @@ type (
 	}
 )
 
-func (this *ModifyUserService) Serve(userUUID_str string, dataModel *model.User) error {
+func (this *ModifyUserService) Serve(userUUID uuid.UUID, dataModel *model.User, ctx context.Context) error {
 
-	userUUID, err := uuid.Parse(userUUID_str)
+	// userUUID, err := uuid.Parse(userUUID_str)
 
-	if err != nil {
+	// if err != nil {
 
-		return err
-	}
+	// 	return err
+	// }
 
-	user, err := this.GetSingleUser.Serve(userUUID_str, context.TODO())
+	user, err := this.GetSingleUser.Serve(userUUID, ctx)
 
 	if err != nil {
 
@@ -59,7 +59,7 @@ func (this *ModifyUserService) Serve(userUUID_str string, dataModel *model.User)
 	}
 
 	err = this.UserRepo.UpdateOneByUUID(
-		userUUID, dataModel, context.TODO(),
+		userUUID, dataModel, ctx,
 	)
 
 	if err != nil {

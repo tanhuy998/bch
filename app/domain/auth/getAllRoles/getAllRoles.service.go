@@ -14,7 +14,7 @@ type (
 	}
 )
 
-func (this *GetAllRolesService) Serve() ([]*model.Role, error) {
+func (this *GetAllRolesService) Serve(ctx context.Context) ([]*model.Role, error) {
 
 	return this.RoleRepo.FindMany(bson.D{{}}, context.TODO())
 }

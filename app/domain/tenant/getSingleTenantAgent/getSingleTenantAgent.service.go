@@ -1,4 +1,4 @@
-package tenantService
+package getSingleTenantAgent
 
 import (
 	"app/model"

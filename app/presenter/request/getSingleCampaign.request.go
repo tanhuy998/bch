@@ -1,5 +1,7 @@
 package requestPresenter
 
+import "github.com/google/uuid"
+
 type GetSingleCampaignRequest struct {
-	UUID string `param:"uuid" validate:"required"`
+	UUID *uuid.UUID `param:"uuid" validate:"required"`
 }

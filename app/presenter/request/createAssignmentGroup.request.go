@@ -4,12 +4,13 @@ import (
 	"app/model"
 	accessTokenServicePort "app/port/accessToken"
 
+	"github.com/google/uuid"
 	"github.com/kataras/iris/v12"
 )
 
 type (
 	CreateAssignmentGroupRequest struct {
-		AssignmentUUID string                 `param:"assignmnetUUID" validate:"required"`
+		AssignmentUUID *uuid.UUID             `param:"assignmnetUUID" validate:"required"`
 		Data           *model.AssignmentGroup `json:"data" validate:"required"`
 		ctx            iris.Context
 		auth           accessTokenServicePort.IAccessTokenAuthData

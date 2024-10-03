@@ -3,12 +3,13 @@ package requestPresenter
 import (
 	accessTokenServicePort "app/port/accessToken"
 
+	"github.com/google/uuid"
 	"github.com/kataras/iris/v12"
 )
 
 type (
 	GetSingleAssignmentRequest struct {
-		UUID      string `param:"uuid"`
+		UUID      *uuid.UUID `param:"uuid"`
 		ctx       iris.Context
 		authority accessTokenServicePort.IAccessTokenAuthData
 	}

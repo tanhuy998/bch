@@ -3,12 +3,13 @@ package requestPresenter
 import (
 	accessTokenServicePort "app/port/accessToken"
 
+	"github.com/google/uuid"
 	"github.com/kataras/iris/v12"
 )
 
 type (
 	GetGroupUsersRequest struct {
-		GroupUUID string `json:"groupUUID" validate:"required"`
+		GroupUUID *uuid.UUID `json:"groupUUID" validate:"required"`
 		ctx       iris.Context
 		auth      accessTokenServicePort.IAccessTokenAuthData
 	}

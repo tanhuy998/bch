@@ -1,9 +1,14 @@
 package authServicePort
 
-import "app/model"
+import (
+	"app/model"
+	"context"
+
+	"github.com/google/uuid"
+)
 
 type (
 	IModifyUser interface {
-		Serve(userUUID string, data *model.User) error
+		Serve(userUUID uuid.UUID, data *model.User, ctx context.Context) error
 	}
 )

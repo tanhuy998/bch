@@ -1,8 +1,10 @@
 package requestPresenter
 
+import "github.com/google/uuid"
+
 type (
 	CheckSigningExistenceRequest struct {
-		CampaignUUID  string `param:"campaignUUID" validate:"required,uuid_rfc4122"`
-		CandidateUUID string `param:"candidateUUID" validate:"required,uuid_rfc4122"`
+		CampaignUUID  *uuid.UUID `param:"campaignUUID" validate:"required,uuid_rfc4122"`
+		CandidateUUID *uuid.UUID `param:"candidateUUID" validate:"required,uuid_rfc4122"`
 	}
 )

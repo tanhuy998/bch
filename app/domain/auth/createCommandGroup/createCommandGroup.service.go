@@ -24,9 +24,9 @@ type (
 	}
 )
 
-func (this *CreateCommandGroupService) Serve(groupName string) error {
+func (this *CreateCommandGroupService) Serve(groupName string, ctx context.Context) error {
 
-	groupExist, err := this.GetSingleCommandGroupService.CheckCommandGroupExistence(groupName)
+	groupExist, err := this.GetSingleCommandGroupService.CheckCommandGroupExistence(groupName, ctx)
 
 	if err != nil {
 
@@ -43,11 +43,11 @@ func (this *CreateCommandGroupService) Serve(groupName string) error {
 		Name: groupName,
 	}
 
-	err = this.CommandGroupRepo.Create(model, context.TODO())
+	err = this.CommandGroupRepo.Create(model, ctx)
 
 	if err != nil {
 
-		return errors.Join(common.ERR_INTERNAL, err)
+		return err
 	}
 
 	return nil

@@ -6,12 +6,13 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/kataras/iris/v12"
 )
 
 type CommitCandidateSigningInfoRequest struct {
-	CandidateUUID string                      `param:"candidateUUID" validate:"required"`
-	CampaignUUID  string                      `param:"campaignUUID" validate:"required"`
+	CandidateUUID *uuid.UUID                  `param:"candidateUUID" validate:"required"`
+	CampaignUUID  *uuid.UUID                  `param:"campaignUUID" validate:"required"`
 	Data          *model.CandidateSigningInfo `json:"data" validate:"required"`
 }
 

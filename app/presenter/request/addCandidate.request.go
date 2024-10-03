@@ -3,11 +3,12 @@ package requestPresenter
 import (
 	"app/model"
 
+	"github.com/google/uuid"
 	"github.com/kataras/iris/v12"
 )
 
 type AddCandidateRequest struct {
-	CampaignUUID   string           `param:"campaignUUID" validate:"required"`
+	CampaignUUID   *uuid.UUID       `param:"campaignUUID" validate:"required"`
 	InputCandidate *model.Candidate `json:"data" validate:"required"`
 }
 

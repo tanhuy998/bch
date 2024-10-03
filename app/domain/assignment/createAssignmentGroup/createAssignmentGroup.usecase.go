@@ -33,7 +33,7 @@ func (this *CreateAssignmentGroupUseCase) Execute(
 
 	data.CreatedBy = libCommon.PointerPrimitive(input.GetAuthority().GetUserUUID())
 
-	ret, err := this.CreateAssignmentGroupService.Serve(input.AssignmentUUID, data, input.GetContext())
+	ret, err := this.CreateAssignmentGroupService.Serve(*input.AssignmentUUID, data, input.GetContext())
 
 	// if err == assignmentServicePort.ERR_ASSIGNMENT_NOT_FOUND {
 

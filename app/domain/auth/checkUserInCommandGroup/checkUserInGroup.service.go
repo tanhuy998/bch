@@ -1,4 +1,4 @@
-package authService
+package checkUserInCommandGroupDomain
 
 import (
 	"app/internal/common"
@@ -12,46 +12,43 @@ import (
 )
 
 type (
-	ICheckUserInCommandGroup interface {
-		Serve(groupUUID, userUUID string) (bool, error)
-		Detail(groupUUID uuid.UUID, userUUID uuid.UUID) (*model.CommandGroupUser, error)
-	}
+	// ICheckUserInCommandGroup interface {
+	// 	Serve(groupUUID, userUUID string) (bool, error)
+	// 	Detail(groupUUID uuid.UUID, userUUID uuid.UUID) (*model.CommandGroupUser, error)
+	// }
 
 	CheckUserInCommandGroupService struct {
 		CommandGroupUserRepo repository.ICommandGroupUser
 	}
 )
 
-func (this *CheckUserInCommandGroupService) Serve(groupUUID_str, userUUID_str string) (bool, error) {
+func (this *CheckUserInCommandGroupService) Serve(groupUUID, userUUID uuid.UUID, ctx context.Context) (bool, error) {
 
-	groupUUID, err := uuid.Parse(groupUUID_str)
+	// groupUUID, err := uuid.Parse(groupUUID_str)
 
-	if err != nil {
+	// if err != nil {
 
-		return false, err
-	}
+	// 	return false, err
+	// }
 
-	userUUID, err := uuid.Parse(userUUID_str)
+	// userUUID, err := uuid.Parse(userUUID_str)
 
-	if err != nil {
+	// if err != nil {
 
-		return false, err
-	}
+	// 	return false, err
+	// }
 
 	res, err := this.CommandGroupUserRepo.Find(
 		bson.D{
 			{"commandGroupUUID", groupUUID},
 			{"userUUID", userUUID},
 		},
-		context.TODO(),
+		ctx,
 	)
 
 	if err != nil {
 
-		return false, errors.Join(
-			common.ERR_INTERNAL,
-			err,
-		)
+		return false, err
 	}
 
 	if res == nil {
@@ -62,7 +59,7 @@ func (this *CheckUserInCommandGroupService) Serve(groupUUID_str, userUUID_str st
 	return true, nil
 }
 
-func (this *CheckUserInCommandGroupService) Detail(groupUUID uuid.UUID, userUUID uuid.UUID) (*model.CommandGroupUser, error) {
+func (this *CheckUserInCommandGroupService) Detail(groupUUID uuid.UUID, userUUID uuid.UUID, ctx context.Context) (*model.CommandGroupUser, error) {
 
 	ret, err := this.CommandGroupUserRepo.Find(
 		bson.D{

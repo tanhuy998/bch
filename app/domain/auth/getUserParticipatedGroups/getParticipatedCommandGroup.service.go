@@ -13,23 +13,23 @@ import (
 )
 
 type (
-	IGetParticipatedCommandGroups interface {
-		Serve(userUUID string) (*valueObject.ParticipatedCommandGroupReport, error)
-	}
+	// IGetParticipatedCommandGroups interface {
+	// 	Serve(userUUID string) (*valueObject.ParticipatedCommandGroupReport, error)
+	// }
 
 	GetParticipatedCommandGroupsService struct {
 		CommandGroupUserRepo repository.ICommandGroupUser
 	}
 )
 
-func (this *GetParticipatedCommandGroupsService) Serve(userUUID_str string) (*valueObject.ParticipatedCommandGroupReport, error) {
+func (this *GetParticipatedCommandGroupsService) Serve(userUUID uuid.UUID, ctx context.Context) (*valueObject.ParticipatedCommandGroupReport, error) {
 
-	userUUID, err := uuid.Parse(userUUID_str)
+	// userUUID, err := uuid.Parse(userUUID_str)
 
-	if err != nil {
+	// if err != nil {
 
-		return nil, err
-	}
+	// 	return nil, err
+	// }
 
 	res, err := repository.Aggregate[valueObject.ParticipatedCommandGroupDetail](
 		this.CommandGroupUserRepo.GetCollection(),
@@ -87,7 +87,7 @@ func (this *GetParticipatedCommandGroupsService) Serve(userUUID_str string) (*va
 				},
 			},
 		},
-		context.TODO(),
+		ctx,
 	)
 
 	if err != nil {
@@ -165,7 +165,7 @@ func (this *GetParticipatedCommandGroupsService) SearchAndRetrieveByModel(
 				},
 			},
 		},
-		context.TODO(),
+		ctx,
 	)
 
 	if err != nil {

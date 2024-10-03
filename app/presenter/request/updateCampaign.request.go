@@ -1,6 +1,10 @@
 package requestPresenter
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type UpdatedCampaignData struct {
 	Title  *string    `json:"title" validate:"required_without_all"`
@@ -8,6 +12,6 @@ type UpdatedCampaignData struct {
 }
 
 type UpdateCampaignRequest struct {
-	UUID string               `param:"uuid" validate:"required"`
+	UUID *uuid.UUID           `param:"uuid" validate:"required"`
 	Data *UpdatedCampaignData `json:"data" validate:"required"`
 }

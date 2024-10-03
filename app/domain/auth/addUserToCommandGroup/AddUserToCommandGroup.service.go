@@ -32,9 +32,9 @@ func (this *AddUserToCommandGroupService) Get() authServicePort.IGetSingleComman
 	return this.GetSingleCommandGroupService
 }
 
-func (this *AddUserToCommandGroupService) Serve(groupUUID_str string, userUUID_str string) error {
+func (this *AddUserToCommandGroupService) Serve(groupUUID_str uuid.UUID, userUUID_str uuid.UUID, ctx context.Context) error {
 
-	group, err := this.GetSingleCommandGroupService.Serve(groupUUID_str)
+	group, err := this.GetSingleCommandGroupService.Serve(groupUUID_str, ctx)
 
 	if err != nil {
 
@@ -46,7 +46,7 @@ func (this *AddUserToCommandGroupService) Serve(groupUUID_str string, userUUID_s
 		return ERR_INVALID_GROUP
 	}
 
-	user, err := this.GetSingleUserService.Serve(userUUID_str, context.TODO())
+	user, err := this.GetSingleUserService.Serve(userUUID_str, ctx)
 
 	if err != nil {
 
@@ -58,7 +58,7 @@ func (this *AddUserToCommandGroupService) Serve(groupUUID_str string, userUUID_s
 		return errors.Join(common.ERR_NOT_FOUND, errors.New("user not found"))
 	}
 
-	res, err := this.CheckUserInCommandGroup.Detail(*group.UUID, *user.UUID)
+	res, err := this.CheckUserInCommandGroup.Detail(*group.UUID, *user.UUID, ctx)
 
 	if err != nil {
 
@@ -76,7 +76,7 @@ func (this *AddUserToCommandGroupService) Serve(groupUUID_str string, userUUID_s
 		UserUUID:         user.UUID,
 	}
 
-	err = this.CommandGroupUserRepo.Create(dataModel, context.TODO())
+	err = this.CommandGroupUserRepo.Create(dataModel, ctx)
 
 	if err != nil {
 
