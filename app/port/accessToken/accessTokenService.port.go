@@ -18,6 +18,9 @@ type (
 		GenerateByUserUUID(userUUID uuid.UUID, tokenID string, ctx context.Context) (IAccessToken, error)
 		GenerateBased(IAccessToken IAccessToken, ctx context.Context) (IAccessToken, error)
 		DefaultExpireDuration() time.Duration
+
+		CtxNoExpireKey() string
+		IsNoExpire(ctx context.Context) bool
 	}
 
 	IAccessTokenSigning interface {

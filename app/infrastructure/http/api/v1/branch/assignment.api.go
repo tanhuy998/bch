@@ -24,8 +24,10 @@ func initAssignmentApi(app router.Party) *mvc.Application {
 		),
 	)
 
+	wrapper.Router.ConfigureContainer()
+
 	wrapper.Handle(
-		new(controller.AssignmentController),
+		new(controller.AssignmentController).BindDependencies(container),
 		// applyRoutes(func(activator *mvc.ControllerActivator) {
 
 		// 	activator.Handle(

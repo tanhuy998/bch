@@ -14,7 +14,7 @@ func RegisterRoleApi(parentRoute router.Party) *mvc.Application {
 	router := parentRoute.Party("/roles")
 
 	container := router.ConfigureContainer().Container
-	controller := new(controller.AuthRoleManipulationController)
+	controller := new(controller.AuthRoleManipulationController).BindDependencies(container)
 
 	wrapper := mvc.New(router)
 

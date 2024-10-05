@@ -4,10 +4,12 @@ import (
 	"app/internal/common"
 	"app/internal/responseOutput"
 	actionResultServicePort "app/port/actionResult"
+	loggerPort "app/port/logger"
 	"encoding/json"
 	"errors"
 	"net/http"
 
+	"github.com/kataras/iris/v12/hero"
 	"github.com/kataras/iris/v12/mvc"
 )
 
@@ -16,8 +18,13 @@ type (
 		Message string `json:"message,omitempty"`
 	}
 
+	IController interface {
+		BindDependencies(container *hero.Container) IController
+	}
+
 	Controller struct {
 		ActionResult actionResultServicePort.IActionResult
+		ErrorLogger  loggerPort.ErrorLogger
 	}
 )
 
@@ -55,12 +62,12 @@ func (this *Controller) ResultOf(output any, usecaseError error) (mvc.Result, er
 
 func (this *Controller) handleError(err error) (mvc.Result, error) {
 
-	var res actionResultServicePort.IResponse = this.ActionResult.Prepare()
-
 	if errors.Is(err, common.ERR_INTERNAL) {
 
 		return this.hanleInternalError(err)
 	}
+
+	res := this.ActionResult.Prepare()
 
 	switch {
 	case errors.Is(err, common.ERR_NOT_FOUND):
@@ -79,10 +86,19 @@ func (this *Controller) handleError(err error) (mvc.Result, error) {
 
 	raw, _ := json.Marshal(resObj)
 
-	return res.SetContent(raw).Done()
+	res.SetContent(raw)
+
+	return res.Done()
 }
 
 func (this *Controller) hanleInternalError(err error) (mvc.Result, error) {
+
+	res := this.ActionResult.Prepare()
+
+	if this.ErrorLogger != nil {
+
+		this.ErrorLogger.Error(err.Error())
+	}
 
 	resObj := default_response{
 		Message: "internal error",
@@ -90,8 +106,5 @@ func (this *Controller) hanleInternalError(err error) (mvc.Result, error) {
 
 	raw, _ := json.Marshal(resObj)
 
-	return this.ActionResult.Prepare().
-		SetCode(http.StatusInternalServerError).
-		SetContent(raw).
-		Done()
+	return res.SetCode(http.StatusInternalServerError).SetContent(raw).Done()
 }

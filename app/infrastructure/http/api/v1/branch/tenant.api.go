@@ -12,7 +12,7 @@ func initTenantApi(app router.Party) *mvc.Application {
 
 	router := app.Party("tenants")
 
-	//container := router.ConfigureContainer().Container
+	container := router.ConfigureContainer().Container
 
 	wrapper := mvc.New(router)
 
@@ -21,7 +21,7 @@ func initTenantApi(app router.Party) *mvc.Application {
 	)
 
 	wrapper.Handle(
-		new(controller.TenantController),
+		new(controller.TenantController).BindDependencies(container),
 		// applyRoutes(func(activator *mvc.ControllerActivator) {
 
 		// 	// activator.Handle(

@@ -120,11 +120,16 @@ func main() {
 
 	v1.Initialize(app)
 
-	app.Listen(
+	err := app.Listen(
 		env.Get("HTTP_PORT", ":80"),
 		iris.WithoutBodyConsumptionOnUnmarshal,
 		iris.WithOptimizations,
 	)
+
+	if err != nil {
+
+		panic(err)
+	}
 }
 
 func readSSlCert() {

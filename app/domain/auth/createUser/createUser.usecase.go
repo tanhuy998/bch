@@ -2,36 +2,32 @@ package createUserDomain
 
 import (
 	libCommon "app/internal/lib/common"
+	libError "app/internal/lib/error"
 	"app/model"
-	actionResultServicePort "app/port/actionResult"
 	authServicePort "app/port/auth"
+	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
-	"context"
-	"encoding/json"
-
-	"github.com/kataras/iris/v12/mvc"
+	"fmt"
 )
 
 type (
-	ICreateUser interface {
-		Execute(
-			input *requestPresenter.CreateUserRequestPresenter,
-			output *responsePresenter.CreateUserPresenter,
-		) (mvc.Result, error)
-	}
+	// ICreateUser interface {
+	// 	Execute(
+	// 		input *requestPresenter.CreateUserRequestPresenter,
+	// 		output *responsePresenter.CreateUserPresenter,
+	// 	) (mvc.Result, error)
+	// }
 
 	CreateUserUsecase struct {
-		CreateUserService    authServicePort.ICreateUser
-		ActionResult         actionResultServicePort.IActionResult
-		GetSingleUserService authServicePort.IGetSingleUser
+		usecasePort.UseCase[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter]
+		CreateUserService authServicePort.ICreateUser
 	}
 )
 
 func (this *CreateUserUsecase) Execute(
 	input *requestPresenter.CreateUserRequestPresenter,
-	output *responsePresenter.CreateUserPresenter,
-) (mvc.Result, error) {
+) (*responsePresenter.CreateUserPresenter, error) {
 
 	//_, err := this.CreateUserService.Serve(input.Data.Username, input.Data.Password, input.Data.Name, input.GetContext())
 
@@ -43,29 +39,24 @@ func (this *CreateUserUsecase) Execute(
 		CreatedBy:  libCommon.PointerPrimitive(input.GetAuthority().GetUserUUID()),
 	}
 
-	_, err := this.CreateUserService.CreateByModel(newUser, input.GetContext())
+	data, err := this.CreateUserService.CreateByModel(newUser, input.GetContext())
 
 	if err != nil {
 
-		return this.ActionResult.ServeErrorResponse(err)
+		return nil, this.ErrorWithContext(input, err)
 	}
 
-	ret, err := this.GetSingleUserService.SearchByUsername(input.Data.Username, context.TODO())
+	if data == nil {
 
-	if err != nil {
-
-		return nil, err
+		return nil, this.ErrorWithContext(
+			input, libError.NewInternal(fmt.Errorf("cannot create user, try again")),
+		)
 	}
+
+	output := this.GenerateOutput()
 
 	output.Message = "success"
-	output.Data = ret
+	output.Data = data
 
-	resContent, err := json.Marshal(output)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	return this.ActionResult.Prepare().SetCode(201).SetContent(resContent), nil
+	return output, nil
 }

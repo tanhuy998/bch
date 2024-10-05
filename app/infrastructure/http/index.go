@@ -9,6 +9,7 @@ import (
 
 func Initialize(app *iris.Application) {
 
+	config.InitializeDatabase(app)
 	config.RegisterServices(app)
 
 	api.Init(app)

@@ -17,7 +17,7 @@ type (
 	// }
 
 	CreateTenantUseCase struct {
-		usecasePort.UseCase[responsePresenter.CreateTenantResponse]
+		usecasePort.UseCase[requestPresenter.CreateTenantRequest, responsePresenter.CreateTenantResponse]
 		CreateTenantService tenantServicePort.ICreateTenant
 		//ActionResult        actionResultServicePort.IActionResult
 	}
@@ -44,7 +44,7 @@ func (this *CreateTenantUseCase) Execute(
 
 		//return this.ActionResult.ServeErrorResponse(err)
 
-		return nil, err
+		return nil, this.ErrorWithContext(input, err)
 	}
 
 	output := this.GenerateOutput()

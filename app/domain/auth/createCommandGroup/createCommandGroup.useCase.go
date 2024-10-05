@@ -2,12 +2,12 @@ package createCommandGroupDomain
 
 import (
 	libCommon "app/internal/lib/common"
-	actionResultServicePort "app/port/actionResult"
+	libError "app/internal/lib/error"
 	authServicePort "app/port/auth"
-	"app/port/responsePresetPort"
+	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
-	"encoding/json"
+	"fmt"
 
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -21,17 +21,14 @@ type (
 	}
 
 	CreateCommandGroupUseCase struct {
+		usecasePort.UseCase[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse]
 		CreateCommandGroupService authServicePort.ICreateCommandGroup //authService.ICreateCommandGroup
-		ResponsePreset            responsePresetPort.IResponsePreset
-		//GetSingleCommandGroupService authService.IGetSingleCommandGroup
-		ActionResult actionResultServicePort.IActionResult
 	}
 )
 
 func (this *CreateCommandGroupUseCase) Execute(
 	input *requestPresenter.CreateCommandGroupRequest,
-	output *responsePresenter.CreateCommandGroupResponse,
-) (mvc.Result, error) {
+) (*responsePresenter.CreateCommandGroupResponse, error) {
 
 	data := input.Data
 	data.CreatedBy = libCommon.PointerPrimitive(input.GetAuthority().GetUserUUID())
@@ -41,18 +38,20 @@ func (this *CreateCommandGroupUseCase) Execute(
 
 	if err != nil {
 
-		return this.ActionResult.ServeErrorResponse(err)
+		return nil, this.ErrorWithContext(input, err)
 	}
 
 	if data == nil {
 
-		return this.ResponsePreset.InternalError()
+		return nil, this.ErrorWithContext(
+			input, libError.NewInternal(fmt.Errorf("cannot create command group , try again")),
+		)
 	}
+
+	output := this.GenerateOutput()
 
 	output.Message = "success"
 	output.Data.UUID = *data.UUID
 
-	rawContent, _ := json.Marshal(output)
-
-	return this.ActionResult.Prepare().SetCode(201).SetContent(rawContent).Done()
+	return output, nil
 }

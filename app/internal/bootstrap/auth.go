@@ -12,16 +12,19 @@ import (
 const (
 	ENV_AUTH_JWT_PUBLIC_KEY_DIR  = "AUTH_JWT_PUBLIC_KEY_DIR"
 	ENV_AUTH_JWT_PRIVATE_KEY_DIR = "AUTH_JWT_PRIVATE_KEY_DIR"
+	ENV_APP_SECRET               = "APP_SECRET"
 	//ENV_AUTH_JWT_ALG         = "AUTH_JWT_ALG"
 )
 
 var (
-	jwt_private_key *ecdsa.PrivateKey
-	jwt_public_key  *ecdsa.PublicKey
-	jwt_algo        *jwt.SigningMethodECDSA = jwt.SigningMethodES256
+	jwt_asym_private_key *ecdsa.PrivateKey
+	jwt_asym_public_key  *ecdsa.PublicKey
+
+	jwt_symmetric_secret []byte
+	jwt_algo             *jwt.SigningMethodECDSA = jwt.SigningMethodES256
 )
 
-func InitializeAuthEncryptionData() {
+func initializeAuthEncryptionData() {
 
 	fmt.Println("Reading auth key pair")
 
@@ -38,41 +41,52 @@ func InitializeAuthEncryptionData() {
 
 	if err != nil {
 
-		panic("reading private key error: " + err.Error())
+		panic(fmt.Sprintf("reading private key error: %s", err.Error()))
 	}
 
-	jwt_private_key, err = jwt.ParseECPrivateKeyFromPEM(buffer)
+	jwt_asym_private_key, err = jwt.ParseECPrivateKeyFromPEM(buffer)
 
 	if err != nil {
 
-		panic("invalid private key")
+		panic(fmt.Sprintf("private key error: %s", err.Error()))
 	}
 
 	buffer, err = os.ReadFile(path.Join(__dir, os.Getenv(ENV_AUTH_JWT_PUBLIC_KEY_DIR)))
 
 	if err != nil {
 
-		panic("reading public key error: " + err.Error())
+		panic(fmt.Sprintf("reading public key error: %s", err.Error()))
 	}
 
-	jwt_public_key, err = jwt.ParseECPublicKeyFromPEM(buffer)
+	jwt_asym_public_key, err = jwt.ParseECPublicKeyFromPEM(buffer)
 
 	if err != nil {
 
-		panic("invalid public key")
+		panic(fmt.Sprintf("public key error: %s", err.Error()))
 	}
 
-	jwt_private_key.PublicKey = *jwt_public_key
+	jwt_asym_private_key.PublicKey = *jwt_asym_public_key
+
+	sym_secret_str := os.Getenv(ENV_APP_SECRET)
+	jwt_symmetric_secret = []byte(sym_secret_str)
 }
 
-func GetJWTEncryptionPrivateKey() *ecdsa.PrivateKey {
+func GetJWTSymmetricEncryptionSecret() []byte {
 
-	return jwt_private_key
+	ret := make([]byte, len(jwt_symmetric_secret))
+	copy(ret, jwt_symmetric_secret)
+
+	return ret
 }
 
-func GetJWTEncryptionPublicKey() *ecdsa.PublicKey {
+func GetJWTAsymmetricEncryptionPrivateKey() *ecdsa.PrivateKey {
 
-	return jwt_public_key
+	return jwt_asym_private_key
+}
+
+func GetJWTAsymmetricEncryptionPublicKey() *ecdsa.PublicKey {
+
+	return jwt_asym_public_key
 }
 
 func GetJWTEncryptionAlgo() *jwt.SigningMethodECDSA {

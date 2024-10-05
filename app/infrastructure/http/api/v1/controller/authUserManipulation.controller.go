@@ -1,12 +1,9 @@
 package controller
 
 import (
-	createUserDomain "app/domain/auth/createUser"
-	modifyUserDomain "app/domain/auth/modifyUser"
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
 	"app/infrastructure/http/middleware/middlewareHelper"
-	libConfig "app/internal/lib/config"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -17,7 +14,7 @@ import (
 
 type (
 	AuthUserManipulationController struct {
-		*common.Controller
+		common.Controller
 		CreateUserUsecase   usecasePort.IUseCase[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter] // usecase.ICreateUser
 		GetGroupUserUsecase usecasePort.IUseCase[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse]     // usecase.IGetGroupUsers
 		ModifyUserUsecase   usecasePort.IUseCase[requestPresenter.ModifyUserRequest, responsePresenter.ModifyUserResponse]           // usecase.IModifyUser
@@ -26,7 +23,7 @@ type (
 
 func (this *AuthUserManipulationController) BeforeActivation(activator mvc.BeforeActivation) {
 
-	container := activator.Router().ConfigureContainer().Container
+	container := activator.Dependencies()
 
 	activator.Handle(
 		"POST", "/", "CreateUser",
@@ -53,20 +50,9 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 	)
 }
 
-func (this *AuthUserManipulationController) bindDependencies(container *hero.Container) {
+func (this *AuthUserManipulationController) BindDependencies(container *hero.Container) common.IController {
 
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter],
-		createUserDomain.CreateUserUsecase,
-	](container, nil)
-	// libConfig.BindDependency[
-	// 	usecasePort.IUseCase[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse],
-	// 	getGroupUser
-	// ]()
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.ModifyUserRequest, responsePresenter.ModifyUserResponse],
-		modifyUserDomain.ModifyUserUseCase,
-	](container, nil)
+	return this
 }
 
 func (this *AuthUserManipulationController) CreateUser(

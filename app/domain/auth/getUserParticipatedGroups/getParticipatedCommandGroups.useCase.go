@@ -1,15 +1,13 @@
 package getUserParticipatedCommandGroupDomain
 
 import (
+	"app/internal/common"
 	libCommon "app/internal/lib/common"
 	"app/model"
-	actionResultServicePort "app/port/actionResult"
 	authServicePort "app/port/auth"
-	"app/port/responsePresetPort"
+	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
-
-	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
@@ -21,16 +19,14 @@ type (
 	// }
 
 	GetParticipatedCommandGroupsUseCase struct {
+		usecasePort.UseCase[requestPresenter.GetParticipatedGroups, responsePresenter.GetParticipatedGroups]
 		GetParticipatedCommandGroups authServicePort.IGetParticipatedCommandGroups // authService.IGetParticipatedCommandGroups
-		ResponsePreset               responsePresetPort.IResponsePreset
-		ActionResult                 actionResultServicePort.IActionResult
 	}
 )
 
 func (this *GetParticipatedCommandGroupsUseCase) Execute(
 	input *requestPresenter.GetParticipatedGroups,
-	output *responsePresenter.GetParticipatedGroups,
-) (mvc.Result, error) {
+) (*responsePresenter.GetParticipatedGroups, error) {
 
 	//report, err := this.GetParticipatedCommandGroups.Serve(input.UserUUID)
 
@@ -44,15 +40,20 @@ func (this *GetParticipatedCommandGroupsUseCase) Execute(
 
 	if err != nil {
 
-		return this.ActionResult.ServeErrorResponse(err)
+		return nil, this.ErrorWithContext(input, err)
 	}
 
 	if report == nil || len(report.Details) == 0 {
 
-		return this.ResponsePreset.UnAuthorizedResource()
+		return nil, this.ErrorWithContext(
+			input, common.ERR_UNAUTHORIZED,
+		)
 	}
 
+	output := this.GenerateOutput()
+
+	output.Message = "success"
 	output.Data = report
 
-	return this.ActionResult.ServeResponse(output)
+	return output, nil
 }

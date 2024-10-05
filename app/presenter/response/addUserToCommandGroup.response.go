@@ -1,9 +1,13 @@
 package responsePresenter
 
-import "app/model"
+import (
+	"app/internal/responseOutput"
+	"app/model"
+)
 
 type (
 	AddUserToCommandGroupResponse struct {
+		responseOutput.CreatedResponse
 		Message string                  `json:"message"`
 		Data    *model.CommandGroupUser `json:"data"`
 	}

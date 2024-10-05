@@ -62,7 +62,7 @@ func init() {
 		host_names_dictionary[val] = true
 	}
 
-	InitializeAuthEncryptionData()
+	initializeAuthEncryptionData()
 }
 
 // func InitEnv() error {

@@ -19,7 +19,7 @@ type (
 	}
 
 	CreateAssignmentGroupUseCase struct {
-		usecasePort.UseCase[responsePresenter.CreateAssignmentGroupResponse]
+		usecasePort.UseCase[requestPresenter.CreateAssignmentGroupRequest, responsePresenter.CreateAssignmentGroupResponse]
 		CreateAssignmentGroupService assignmentServicePort.ICreateAssignmentGroup
 		//ActionResult                 actionResultServicePort.IActionResult
 	}
@@ -50,7 +50,7 @@ func (this *CreateAssignmentGroupUseCase) Execute(
 
 		//return this.ActionResult.ServeErrorResponse(err)
 
-		return nil, err
+		return nil, this.ErrorWithContext(input, err)
 	}
 
 	output := this.GenerateOutput()

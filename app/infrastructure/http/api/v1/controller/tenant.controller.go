@@ -1,10 +1,8 @@
 package controller
 
 import (
-	createTenantDomain "app/domain/tenant/createTenant"
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
-	libConfig "app/internal/lib/config"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -16,16 +14,14 @@ import (
 type (
 	TenantController struct {
 		// CreateTenantAgentUsecase usecase.ICreateTenantAgent
-		*common.Controller
+		Controller          *common.Controller
 		CreateTenantUseCase usecasePort.IUseCase[requestPresenter.CreateTenantRequest, responsePresenter.CreateTenantResponse]
 	}
 )
 
 func (this *TenantController) BeforeActivation(activator mvc.BeforeActivation) {
 
-	container := activator.Router().ConfigureContainer().Container
-
-	this.bindDependencies(container)
+	container := activator.Dependencies()
 
 	activator.Handle(
 		"POST", "/", "CreateTenant",
@@ -33,12 +29,9 @@ func (this *TenantController) BeforeActivation(activator mvc.BeforeActivation) {
 	)
 }
 
-func (this *TenantController) bindDependencies(container *hero.Container) {
+func (this *TenantController) BindDependencies(container *hero.Container) common.IController {
 
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.CreateTenantRequest, responsePresenter.CreateTenantResponse],
-		createTenantDomain.CreateTenantUseCase,
-	](container, nil)
+	return this
 }
 
 // func (this *TenantController) CreateTenantAgent(
@@ -53,7 +46,7 @@ func (this *TenantController) CreateTenant(
 	input *requestPresenter.CreateTenantRequest,
 ) (mvc.Result, error) {
 
-	return this.ResultOf(
+	return this.Controller.ResultOf(
 		this.CreateTenantUseCase.Execute(input),
 	)
 }

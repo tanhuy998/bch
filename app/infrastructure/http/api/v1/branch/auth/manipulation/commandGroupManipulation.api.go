@@ -14,7 +14,7 @@ func RegisterCommandGroupApi(parentRoute router.Party) *mvc.Application {
 	router := parentRoute.Party("/groups")
 
 	container := router.ConfigureContainer().Container
-	controller := new(controller.AuthCommandGroupManipulationController)
+	controller := new(controller.AuthCommandGroupManipulationController).BindDependencies(container)
 
 	wrapper := mvc.New(router)
 	wrapper.Router.Use(

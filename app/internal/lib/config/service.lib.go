@@ -13,7 +13,7 @@ var (
 	concrete_pool map[reflect.Type]interface{} = map[reflect.Type]interface{}{}
 )
 
-func BindDependency[AbstractType any, ConcreteType any](
+func BindDependency[AbstractType, ConcreteType any](
 	container *hero.Container, concreteVal *ConcreteType,
 ) *hero.Dependency {
 
@@ -38,6 +38,32 @@ func BindDependency[AbstractType any, ConcreteType any](
 	dep.Explicitly()
 
 	return dep
+}
+
+func OverrideDependency[AbstractType, ConcreteType any](
+	container *hero.Container, concreateVal *ConcreteType,
+) {
+
+	t := libCommon.Wrap[AbstractType]()
+	targetIndex := -1
+
+	for i, dep := range container.Dependencies {
+
+		if dep.DestType == t {
+
+			targetIndex = i
+			break
+		}
+	}
+
+	if targetIndex >= 0 {
+
+		list := container.Dependencies
+		container.Dependencies = make([]*hero.Dependency, len(list)-1)
+		copy(container.Dependencies, append(list[:targetIndex], list[targetIndex+1:]...))
+	}
+
+	BindDependency[AbstractType](container, concreateVal)
 }
 
 func resolve_concrete_instance[Concrete_T any](container *hero.Container) *Concrete_T {

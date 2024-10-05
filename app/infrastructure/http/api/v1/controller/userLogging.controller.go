@@ -1,11 +1,8 @@
 package controller
 
 import (
-	loginDomain "app/domain/auth/login"
-	refreshLoginDomain "app/domain/auth/refreshLogin"
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
-	libConfig "app/internal/lib/config"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -24,9 +21,7 @@ type (
 
 func (this *UserLoggingController) BeforeActivation(activator mvc.BeforeActivation) {
 
-	container := activator.Router().ConfigureContainer().Container
-
-	this.bindDependencies(container)
+	container := activator.Dependencies()
 
 	activator.Handle(
 		"POST", "/login", "LogIn",
@@ -39,16 +34,9 @@ func (this *UserLoggingController) BeforeActivation(activator mvc.BeforeActivati
 	)
 }
 
-func (this *UserLoggingController) bindDependencies(container *hero.Container) {
+func (this *UserLoggingController) BindDependencies(container *hero.Container) common.IController {
 
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.LoginRequest, responsePresenter.LoginResponse],
-		loginDomain.LogInUseCase,
-	](container, nil)
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse],
-		refreshLoginDomain.RefreshLoginUseCase,
-	](container, nil)
+	return this
 }
 
 func (this *UserLoggingController) LogIn(

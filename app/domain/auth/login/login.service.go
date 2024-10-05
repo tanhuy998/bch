@@ -3,7 +3,6 @@ package loginDomain
 import (
 	"app/internal/common"
 	"app/model"
-	accessTokenServicePort "app/port/accessToken"
 	authServicePort "app/port/auth"
 	authSignatureTokenPort "app/port/authSignatureToken"
 	passwordServicePort "app/port/passwordService"
@@ -21,12 +20,10 @@ type (
 	//ILogIn = authServiceAdapter.ILogIn
 
 	LogInService struct {
-		PasswordService         passwordServicePort.IPassword
-		UserRepo                repository.IUser
-		AccessTokenManipulator  accessTokenServicePort.IAccessTokenManipulator
-		GetSingleUser           authServicePort.IGetSingleUser
-		RefreshTokenManipulator refreshTokenServicePort.IRefreshTokenManipulator
-
+		PasswordService            passwordServicePort.IPassword
+		UserRepo                   repository.IUser
+		GetSingleUser              authServicePort.IGetSingleUser
+		RefreshTokenManipulator    refreshTokenServicePort.IRefreshTokenManipulator
 		AuthSignatureTokenProvider authSignatureTokenPort.IAuthSignatureProvider
 	}
 )

@@ -14,7 +14,7 @@ func RegisterUserApi(parentRoute router.Party) *mvc.Application {
 	router := parentRoute.Party("/users")
 
 	container := router.ConfigureContainer().Container
-	controller := new(controller.AuthUserManipulationController)
+	controller := new(controller.AuthUserManipulationController).BindDependencies(container)
 
 	wrapper := mvc.New(router)
 

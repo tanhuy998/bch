@@ -2,6 +2,7 @@ package accessTokenService
 
 import (
 	jwtTokenService "app/service/jwtToken"
+	"context"
 	"crypto/ecdsa"
 	"testing"
 
@@ -65,7 +66,7 @@ func TestGenerateAccessToken(t *testing.T) {
 		return
 	}
 
-	at, err := s.makeFor(userUUID)
+	at, err := s.makeFor(userUUID, context.TODO())
 
 	if err != nil {
 
@@ -102,7 +103,7 @@ func TestVerifyAccessTokenFromString(t *testing.T) {
 		return
 	}
 
-	a, err := s.makeFor(userUUID)
+	a, err := s.makeFor(userUUID, context.TODO())
 
 	if err != nil {
 

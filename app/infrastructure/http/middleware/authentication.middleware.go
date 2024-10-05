@@ -48,13 +48,11 @@ func Auth(
 	constraints ...middlewareHelper.AuthorityConstraint,
 ) iris.Handler {
 
-	// return container.Handler(
-	// 	authentication_func,
-	// )
-
 	// to ensure constraint function list not be changed when
 	// server is running
-	copy(constraints, constraints[:])
+	temp := make([]middlewareHelper.AuthorityConstraint, len(constraints))
+	copy(temp, constraints)
+	constraints = temp
 
 	return func(ctx iris.Context) {
 
@@ -91,11 +89,6 @@ func Auth(
 		ctx.Next()
 	}
 }
-
-// func authorization_func() (passed bool) {
-
-// 	return true
-// }
 
 func validateAuthority(authority accessTokenServicePort.IAccessTokenAuthData, constraints []middlewareHelper.AuthorityConstraint) bool {
 

@@ -1,16 +1,11 @@
 package modifyUserDomain
 
 import (
-	"app/internal/common"
 	"app/model"
-	actionResultServicePort "app/port/actionResult"
 	authServicePort "app/port/auth"
+	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
-	"encoding/json"
-	"errors"
-
-	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
@@ -22,15 +17,14 @@ type (
 	// }
 
 	ModifyUserUseCase struct {
-		ModifyUser   authServicePort.IModifyUser
-		ActionResult actionResultServicePort.IActionResult
+		usecasePort.UseCase[requestPresenter.ModifyUserRequest, responsePresenter.ModifyUserResponse]
+		ModifyUser authServicePort.IModifyUser
 	}
 )
 
 func (this *ModifyUserUseCase) Execute(
 	input *requestPresenter.ModifyUserRequest,
-	output *responsePresenter.ModifyUserResponse,
-) (mvc.Result, error) {
+) (*responsePresenter.ModifyUserResponse, error) {
 
 	dataModel := &model.User{
 		Name:     input.Data.Name,
@@ -39,21 +33,13 @@ func (this *ModifyUserUseCase) Execute(
 
 	err := this.ModifyUser.Serve(*input.UserUUID, dataModel, input.GetContext())
 
-	if errors.Is(err, common.ERR_NOT_FOUND) {
-
-		output.Message = err.Error()
-
-		rawContent, _ := json.Marshal(output)
-
-		return this.ActionResult.Prepare().SetCode(404).SetContent(rawContent), nil
-	}
-
 	if err != nil {
 
-		return this.ActionResult.ServeErrorResponse(err)
+		return nil, this.ErrorWithContext(input, err)
 	}
 
+	output := this.GenerateOutput()
 	output.Message = "success"
 
-	return this.ActionResult.ServeResponse(output)
+	return output, nil
 }

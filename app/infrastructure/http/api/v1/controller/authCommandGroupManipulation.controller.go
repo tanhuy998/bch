@@ -1,13 +1,9 @@
 package controller
 
 import (
-	addUserToCommandGroupDomain "app/domain/auth/addUserToCommandGroup"
-	createCommandGroupDomain "app/domain/auth/createCommandGroup"
-	getUserParticipatedCommandGroupDomain "app/domain/auth/getUserParticipatedGroups"
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
 	"app/infrastructure/http/middleware/middlewareHelper"
-	libConfig "app/internal/lib/config"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -18,7 +14,7 @@ import (
 
 type (
 	AuthCommandGroupManipulationController struct {
-		*common.Controller
+		common.Controller
 		CreateCommandGroupUseCase          usecasePort.IUseCase[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse]
 		AddUserToCommandGroupUseCase       usecasePort.IUseCase[requestPresenter.AddUserToCommandGroupRequest, responsePresenter.AddUserToCommandGroupResponse]
 		GetParitcipatedCommandGroupUseCase usecasePort.IUseCase[requestPresenter.GetParticipatedGroups, responsePresenter.GetParticipatedGroups]
@@ -27,9 +23,7 @@ type (
 
 func (this *AuthCommandGroupManipulationController) BeforeActivation(activator mvc.BeforeActivation) {
 
-	container := activator.Router().ConfigureContainer().Container
-
-	this.bindDependencies(container)
+	container := activator.Dependencies()
 
 	activator.Handle(
 		"GET", "/participated/user/{userUUID:uuid}", "GetParticipatedGroups",
@@ -60,20 +54,9 @@ func (this *AuthCommandGroupManipulationController) BeforeActivation(activator m
 	)
 }
 
-func (this *AuthCommandGroupManipulationController) bindDependencies(container *hero.Container) {
+func (this *AuthCommandGroupManipulationController) BindDependencies(container *hero.Container) common.IController {
 
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse],
-		createCommandGroupDomain.CreateCommandGroupUseCase,
-	](container, nil)
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.AddUserToCommandGroupRequest, responsePresenter.AddUserToCommandGroupResponse],
-		addUserToCommandGroupDomain.AddUserToCommandGroupUseCase,
-	](container, nil)
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.GetParticipatedGroups, responsePresenter.GetParticipatedGroups],
-		getUserParticipatedCommandGroupDomain.GetParticipatedCommandGroupsUseCase,
-	](container, nil)
+	return this
 }
 
 func (this *AuthCommandGroupManipulationController) CreateGroup(

@@ -21,7 +21,7 @@ type (
 	}
 
 	CreateAssignmentUseCase struct {
-		usecasePort.UseCase[responsePresenter.CreateAssignmentResponse]
+		usecasePort.UseCase[requestPresenter.CreateAssigmentRequest, responsePresenter.CreateAssignmentResponse]
 		CreateAssignmentService assignmentServicePort.ICreateAssignment
 		//ActionResult            actionResultServicePort.IActionResult
 	}
@@ -44,7 +44,7 @@ func (this *CreateAssignmentUseCase) Execute(
 
 	if err != nil {
 
-		return nil, err
+		return nil, this.ErrorWithContext(input, err)
 		//return this.ActionResult.ServeErrorResponse(err)
 	}
 

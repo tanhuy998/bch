@@ -1,13 +1,14 @@
 package loginDomain
 
 import (
-	actionResultServicePort "app/port/actionResult"
+	libError "app/internal/lib/error"
 	authServicePort "app/port/auth"
 	refreshTokenClientPort "app/port/refreshTokenClient"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
 	"errors"
+	"fmt"
 )
 
 var (
@@ -20,9 +21,8 @@ type (
 	// }
 
 	LogInUseCase struct {
-		usecasePort.UseCase[responsePresenter.LoginResponse]
+		usecasePort.UseCase[requestPresenter.LoginRequest, responsePresenter.LoginResponse]
 		LogInService       authServicePort.ILogIn
-		ActionResult       actionResultServicePort.IActionResult
 		RefreshTokenClient refreshTokenClientPort.IRefreshTokenClient
 	}
 )
@@ -35,33 +35,28 @@ func (this *LogInUseCase) Execute(
 
 	if reqContext == nil {
 
-		this.ActionResult.ServeErrorResponse(ERR_NIL_CONTEXT)
+		return nil, this.ErrorWithContext(
+			input, libError.NewInternal(fmt.Errorf("loginUseCase: nil context given to usecase")),
+		)
 	}
 
 	accessToken, refreshToken, err := this.LogInService.Serve(input.Data.Username, input.Data.Password, reqContext)
 
 	if err != nil {
 
-		//return this.ActionResult.ServeErrorResponse(err)
-		return nil, err
+		return nil, this.ErrorWithContext(input, err)
 	}
 
 	err = this.RefreshTokenClient.Write(reqContext, refreshToken)
 
 	if err != nil {
 
-		//return this.ActionResult.ServeErrorResponse(err)
-		return nil, err
+		return nil, this.ErrorWithContext(input, err)
 	}
 
 	output := this.GenerateOutput()
 
 	output.Data.AccessToken = accessToken
 	output.Message = "success"
-
-	//this.RefreshTokenClient.Write(reqContext, refreshToken)
-
-	//return this.ActionResult.ServeResponse(output)
-
 	return output, nil
 }

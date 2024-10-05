@@ -36,7 +36,7 @@ func (this *RefreshTokenIDProviderService) convertUUIDToBytes(u uuid.UUID) []byt
 
 	ret := make([]byte, 16)
 
-	copy(ret, u[0:15])
+	copy(ret, u[:])
 
 	return ret
 }

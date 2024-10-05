@@ -9,8 +9,8 @@ import (
 
 func RegisterUserLoggingApi(parentRoute iris.Party) *mvc.Application {
 
-	//container := parentRoute.ConfigureContainer().Container
-	controller := new(controller.UserLoggingController)
+	container := parentRoute.ConfigureContainer().Container
+	controller := new(controller.UserLoggingController).BindDependencies(container)
 
 	wrapper := mvc.New(parentRoute)
 

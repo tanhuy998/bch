@@ -1,13 +1,9 @@
 package controller
 
 import (
-	createAssignmentDomain "app/domain/assignment/createAssignment"
-	createAssignmentGroupDomain "app/domain/assignment/createAssignmentGroup"
-	getSingleAssignmentDomain "app/domain/assignment/getSingleAssignment"
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
 	"app/infrastructure/http/middleware/middlewareHelper"
-	libConfig "app/internal/lib/config"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -18,7 +14,7 @@ import (
 
 type (
 	AssignmentController struct {
-		*common.Controller
+		common.Controller
 		CreateAssignmentUseCase      usecasePort.IUseCase[requestPresenter.CreateAssigmentRequest, responsePresenter.CreateAssignmentResponse]
 		GetSingleAssignmentUseCase   usecasePort.IUseCase[requestPresenter.GetSingleAssignmentRequest, responsePresenter.GetSingleAssignmentResponse]
 		CreateAssignmentGroupUseCase usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupRequest, responsePresenter.CreateAssignmentGroupResponse]
@@ -27,9 +23,7 @@ type (
 
 func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivation) {
 
-	container := activator.Router().ConfigureContainer().Container
-
-	this.bindDependencies(container)
+	container := activator.Dependencies()
 
 	activator.Handle(
 		"GET", "/{uuid:uuid}", "GetSingleAssignment",
@@ -56,25 +50,9 @@ func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivatio
 	)
 }
 
-func (this *AssignmentController) bindDependencies(container *hero.Container) {
+func (this *AssignmentController) BindDependencies(container *hero.Container) common.IController {
 
-	// libConfig.BindDependency[assignmentServicePort.IGetSingleAssignnment, getSingleAssignmentDomain.GetSingleAssignmentService](container, nil)
-	// libConfig.BindDependency[assignmentServicePort.ICreateAssignment, createAssignmentDomain.CreateAssignmentService](container, nil)
-	// libConfig.BindDependency[assignmentServicePort.ICreateAssignmentGroup, createAssignmentGroupDomain.CreateAssignmentGroupService](container, nil)
-
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.CreateAssigmentRequest, responsePresenter.CreateAssignmentResponse],
-		createAssignmentDomain.CreateAssignmentUseCase,
-	](container, nil)
-
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.GetSingleAssignmentRequest, responsePresenter.GetSingleAssignmentResponse],
-		getSingleAssignmentDomain.GetSingleAssignmentUseCase,
-	](container, nil)
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupRequest, responsePresenter.CreateAssignmentGroupResponse],
-		createAssignmentGroupDomain.CreateAssignmentGroupUseCase,
-	](container, nil)
+	return this
 }
 
 func (this *AssignmentController) GetSingleAssignment(

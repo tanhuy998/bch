@@ -30,5 +30,5 @@ func Init(app *iris.Application) {
 	//initCandidateGroupApi(app).EnableStructDependents()
 	initAssignmentApi(app).EnableStructDependents()
 	initInternalAPI(app).EnableStructDependents()
-	// initAuthApi(app)
+	initAuthApi(app)
 }

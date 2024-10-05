@@ -23,6 +23,8 @@ const (
 	claim_subject  = "sub"
 	claim_audience = "aud"
 	claim_expire   = "exp"
+
+	key_no_expire = "NO_EXPIRE_TOKEN"
 )
 
 var (
@@ -113,7 +115,7 @@ func (this *JWTAccessTokenManipulatorService) GenerateBased(
 	accessToken IAccessToken, ctx context.Context,
 ) (IAccessToken, error) {
 
-	newAt, err := this.makeFor(accessToken.GetUserUUID())
+	newAt, err := this.makeFor(accessToken.GetUserUUID(), ctx)
 
 	if err != nil {
 
@@ -195,7 +197,7 @@ func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
 
 	authData := data[0]
 
-	accessToken, err := this.makeFor(*authData.UserUUID)
+	accessToken, err := this.makeFor(*authData.UserUUID, ctx)
 
 	if err != nil {
 
@@ -207,7 +209,7 @@ func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
 	return accessToken, nil
 }
 
-func (this *JWTAccessTokenManipulatorService) makeFor(userUUID uuid.UUID) (*jwt_access_token, error) {
+func (this *JWTAccessTokenManipulatorService) makeFor(userUUID uuid.UUID, ctx context.Context) (*jwt_access_token, error) {
 
 	token := this.JWTTokenManipulatorService.GenerateToken()
 
@@ -224,13 +226,14 @@ func (this *JWTAccessTokenManipulatorService) makeFor(userUUID uuid.UUID) (*jwt_
 		nil,
 	}
 
-	switch {
-	case !this.WithoutExpire:
-		fallthrough
-	case this.ExpDuration > 0:
-		customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(this.ExpDuration))
-	case this.ExpDuration <= 0:
-		customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(exp_duration))
+	if !this.WithoutExpire && !this.IsNoExpire(ctx) {
+
+		switch {
+		case this.ExpDuration > 0:
+			customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(this.ExpDuration))
+		case this.ExpDuration <= 0:
+			customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(exp_duration))
+		}
 	}
 
 	token.Claims = customeClaims
@@ -258,4 +261,16 @@ func (this *JWTAccessTokenManipulatorService) SignString(accessToken IAccessToke
 func (this *JWTAccessTokenManipulatorService) DefaultExpireDuration() time.Duration {
 
 	return exp_duration
+}
+
+func (this *JWTAccessTokenManipulatorService) CtxNoExpireKey() string {
+
+	return key_no_expire
+}
+
+func (this *JWTAccessTokenManipulatorService) IsNoExpire(ctx context.Context) bool {
+
+	v, ok := ctx.Value(key_no_expire).(bool)
+
+	return ok && v
 }

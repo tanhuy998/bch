@@ -1,13 +1,10 @@
 package grantCommandGroupRoleToUserDomain
 
 import (
-	actionResultServicePort "app/port/actionResult"
 	authServicePort "app/port/auth"
+	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
-	"encoding/json"
-
-	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
@@ -19,31 +16,24 @@ type (
 	// }
 
 	GrantCommandGroupRolesToUserUseCase struct {
+		usecasePort.UseCase[requestPresenter.GrantCommandGroupRolesToUserRequest, responsePresenter.GrantCommandGroupRolesToUserResponse]
 		GrantCommandGroupRolesToUserService authServicePort.IGrantCommandGroupRolesToUser
-		ActionResult                        actionResultServicePort.IActionResult
 	}
 )
 
 func (this *GrantCommandGroupRolesToUserUseCase) Execute(
 	input *requestPresenter.GrantCommandGroupRolesToUserRequest,
-	output *responsePresenter.GrantCommandGroupRolesToUserResponse,
-) (mvc.Result, error) {
+) (*responsePresenter.GrantCommandGroupRolesToUserResponse, error) {
 
 	err := this.GrantCommandGroupRolesToUserService.Serve(*input.GroupUUID, *input.UserUUID, input.Data, input.GetContext())
 
 	if err != nil {
 
-		return this.ActionResult.ServeErrorResponse(err)
+		return nil, this.ErrorWithContext(input, err)
 	}
 
+	output := this.GenerateOutput()
 	output.Message = "success"
 
-	rawContent, err := json.Marshal(output)
-
-	if err != nil {
-
-		return this.ActionResult.ServeErrorResponse(err)
-	}
-
-	return this.ActionResult.Prepare().SetCode(201).SetContent(rawContent), nil
+	return output, nil
 }

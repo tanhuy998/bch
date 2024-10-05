@@ -20,7 +20,7 @@ type (
 	}
 
 	GetSingleAssignmentUseCase struct {
-		usecasePort.UseCase[responsePresenter.GetSingleAssignmentResponse]
+		usecasePort.UseCase[requestPresenter.GetSingleAssignmentRequest, responsePresenter.GetSingleAssignmentResponse]
 		GetSingleAssignmnetService assignmentServicePort.IGetSingleAssignnment
 		ResponsePreset             responsePresetPort.IResponsePreset
 	}
@@ -39,12 +39,12 @@ func (this *GetSingleAssignmentUseCase) Execute(
 
 	if data == nil {
 
-		return nil, common.ERR_NOT_FOUND
+		return nil, this.ErrorWithContext(input, common.ERR_NOT_FOUND)
 	}
 
 	if *data.TenantUUID != input.GetAuthority().GetTenantUUID() {
 
-		return nil, common.ERR_UNAUTHORIZED
+		return nil, this.ErrorWithContext(input, common.ERR_UNAUTHORIZED)
 	}
 
 	output := this.GenerateOutput()

@@ -1,12 +1,9 @@
 package controller
 
 import (
-	getAllRoleDomain "app/domain/auth/getAllRoles"
-	grantCommandGroupRoleToUserDomain "app/domain/auth/grandCommandGroupRolesToUser"
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
 	"app/infrastructure/http/middleware/middlewareHelper"
-	libConfig "app/internal/lib/config"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -17,7 +14,7 @@ import (
 
 type (
 	AuthRoleManipulationController struct {
-		*common.Controller
+		common.Controller
 		GetAllRolesUseCase                  usecasePort.IUseCase[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse]                                   // usecase.IGetAllRoles
 		GrantCommandGroupRolesToUserUseCase usecasePort.IUseCase[requestPresenter.GrantCommandGroupRolesToUserRequest, responsePresenter.GrantCommandGroupRolesToUserResponse] // usecase.IGrantCommandGroupRolesToUser
 	}
@@ -25,9 +22,7 @@ type (
 
 func (this *AuthRoleManipulationController) BeforeActivation(activator mvc.BeforeActivation) {
 
-	container := activator.Router().ConfigureContainer().Container
-
-	this.bindDependencies(container)
+	container := activator.Dependencies()
 
 	activator.Handle(
 		"GET", "/", "GetAllRoles",
@@ -51,16 +46,9 @@ func (this *AuthRoleManipulationController) BeforeActivation(activator mvc.Befor
 	)
 }
 
-func (this *AuthRoleManipulationController) bindDependencies(container *hero.Container) {
+func (this *AuthRoleManipulationController) BindDependencies(container *hero.Container) common.IController {
 
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse],
-		getAllRoleDomain.GetAllRolesUseCase,
-	](container, nil)
-	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.GrantCommandGroupRolesToUserRequest, responsePresenter.GrantCommandGroupRolesToUserResponse],
-		grantCommandGroupRoleToUserDomain.GrantCommandGroupRolesToUserUseCase,
-	](container, nil)
+	return this
 }
 
 func (this *AuthRoleManipulationController) GrantCommandGroupRolesToUser(
