@@ -2,6 +2,7 @@ package authSignatureTokenPort
 
 import (
 	accessTokenServicePort "app/port/accessToken"
+	"app/port/generalTokenServicePort"
 	refreshTokenServicePort "app/port/refreshToken"
 	"context"
 
@@ -9,18 +10,20 @@ import (
 )
 
 type (
+	IGeneralToken = generalTokenServicePort.IGeneralToken
+
 	IAuthSignatureProvider interface {
 		Generate(
-			userUUID uuid.UUID, ctx context.Context,
+			tenantUUID uuid.UUID, generalToken IGeneralToken, ctx context.Context,
 		) (accessTokenServicePort.IAccessToken, refreshTokenServicePort.IRefreshToken, error)
 		Rotate(
-			refreshToken refreshTokenServicePort.IRefreshToken, ctx context.Context,
+			oldRefreshToken refreshTokenServicePort.IRefreshToken, oldAccessToken accessTokenServicePort.IAccessToken, ctx context.Context,
 		) (accessTokenServicePort.IAccessToken, refreshTokenServicePort.IRefreshToken, error)
 		GenerateStrings(
-			userUUID uuid.UUID, ctx context.Context,
+			tenantUUID uuid.UUID, generalToken IGeneralToken, ctx context.Context,
 		) (at string, rt string, err error)
 		RotateStrings(
-			refreshToken refreshTokenServicePort.IRefreshToken, ctx context.Context,
+			oldRefreshToken refreshTokenServicePort.IRefreshToken, oldAccessToken accessTokenServicePort.IAccessToken, ctx context.Context,
 		) (at string, rt string, err error)
 	}
 )

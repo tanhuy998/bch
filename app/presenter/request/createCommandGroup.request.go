@@ -3,24 +3,23 @@ package requestPresenter
 import (
 	"app/model"
 	accessTokenServicePort "app/port/accessToken"
-
-	"github.com/kataras/iris/v12"
+	"context"
 )
 
 type (
 	CreateCommandGroupRequest struct {
 		Data *model.CommandGroup `json:"data" validate:"required"`
-		ctx  iris.Context
+		ctx  context.Context
 		auth accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 
-func (this *CreateCommandGroupRequest) ReceiveContext(ctx iris.Context) {
+func (this *CreateCommandGroupRequest) ReceiveContext(ctx context.Context) {
 
 	this.ctx = ctx
 }
 
-func (this *CreateCommandGroupRequest) GetContext() iris.Context {
+func (this *CreateCommandGroupRequest) GetContext() context.Context {
 
 	return this.ctx
 }

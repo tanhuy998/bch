@@ -9,6 +9,6 @@ import (
 
 type (
 	ICreateTenantAgent interface {
-		Serve(inputUser *model.User, tenantUUID uuid.UUID, ctx context.Context) (*model.User, *model.TenantAgent, error)
+		Serve(inputUser *model.User, newTenantAgent *model.TenantAgent, tenantUUID uuid.UUID, ctx context.Context) (*model.User, *model.TenantAgent, error)
 	}
 )

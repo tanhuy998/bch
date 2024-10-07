@@ -2,7 +2,6 @@ package api
 
 import (
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/mvc"
 )
 
 // const (
@@ -14,10 +13,10 @@ import (
 // 	auth_put_claim       = authService.AuthorizationClaim("put_claim")
 // )
 
-func applyRoutes(f func(*mvc.ControllerActivator)) mvc.OptionFunc {
+// func applyRoutes(f func(*mvc.ControllerActivator)) mvc.OptionFunc {
 
-	return f
-}
+// 	return f
+// }
 
 func Init(app *iris.Application) {
 
@@ -29,6 +28,6 @@ func Init(app *iris.Application) {
 	//initCampaignGroupApi(app).EnableStructDependents()
 	//initCandidateGroupApi(app).EnableStructDependents()
 	initAssignmentApi(app).EnableStructDependents()
-	initInternalAPI(app).EnableStructDependents()
+	initInternalAPI(app)
 	initAuthApi(app)
 }

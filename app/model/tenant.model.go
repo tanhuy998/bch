@@ -1,24 +1,24 @@
 package model
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 )
 
 type (
 	Tenant struct {
 		UUID        *uuid.UUID `json:"uuid" bson:"uuid"`
+		CreatedBy   *uuid.UUID `json:"createdBy" bson:"createdBy"`
 		Name        string     `bson:"title"`
 		Description string     `bson:"description"`
 	}
 
 	TenantAgent struct {
-		ProposedTime time.Time `json:"-" bson:"proposedTime,omitempty"`
+		//ProposedTime time.Time `json:"-" bson:"proposedTime,omitempty"`
 		// Secret       []byte    `json:"-" bson:"secret"`
 		UUID       *uuid.UUID `json:"uuid" bson:"uuid,omitempty"`
 		TenantUUID *uuid.UUID `json:"tenantUUID" bson:"tenantUUID,omitempty"`
 		UserUUID   *uuid.UUID `json:"userUUID" bson:"userUUID,omitempty"`
+		CreatedBy  *uuid.UUID `json:"createdBy" bson:"createdBy"`
 		// Username     string    `json:"username,omitEmpty" bson:"username"`
 		// Password     string    `json:"password,omitEmpty" bosn:"-'`
 		// Name         string    `json:"name" bson:"name"`

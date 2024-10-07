@@ -2,23 +2,22 @@ package requestPresenter
 
 import (
 	accessTokenServicePort "app/port/accessToken"
-
-	"github.com/kataras/iris/v12"
+	"context"
 )
 
 type (
 	GetAllRolesRequest struct {
-		ctx  iris.Context
+		ctx  context.Context
 		auth accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 
-func (this *GetAllRolesRequest) ReceiveContext(ctx iris.Context) {
+func (this *GetAllRolesRequest) ReceiveContext(ctx context.Context) {
 
 	this.ctx = ctx
 }
 
-func (this *GetAllRolesRequest) GetContext() iris.Context {
+func (this *GetAllRolesRequest) GetContext() context.Context {
 
 	return this.ctx
 }

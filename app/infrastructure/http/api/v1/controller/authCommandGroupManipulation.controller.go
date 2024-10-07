@@ -70,7 +70,6 @@ func (this *AuthCommandGroupManipulationController) CreateGroup(
 
 func (this *AuthCommandGroupManipulationController) AddUserToGroup(
 	input *requestPresenter.AddUserToCommandGroupRequest,
-	output *responsePresenter.AddUserToCommandGroupResponse,
 ) (mvc.Result, error) {
 
 	return this.ResultOf(
@@ -84,7 +83,6 @@ func (this *AuthCommandGroupManipulationController) GetAllGroups() {
 
 func (this *AuthCommandGroupManipulationController) GetParticipatedGroups(
 	input *requestPresenter.GetParticipatedGroups,
-	output *responsePresenter.GetParticipatedGroups,
 ) (mvc.Result, error) {
 
 	return this.ResultOf(

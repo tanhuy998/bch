@@ -2,15 +2,15 @@ package requestPresenter
 
 import (
 	accessTokenServicePort "app/port/accessToken"
+	"context"
 
 	"github.com/google/uuid"
-	"github.com/kataras/iris/v12"
 )
 
 type (
 	GetSingleAssignmentRequest struct {
 		UUID      *uuid.UUID `param:"uuid"`
-		ctx       iris.Context
+		ctx       context.Context
 		authority accessTokenServicePort.IAccessTokenAuthData
 	}
 )
@@ -25,12 +25,12 @@ func (this *GetSingleAssignmentRequest) SetAuthority(auth accessTokenServicePort
 	this.authority = auth
 }
 
-func (this *GetSingleAssignmentRequest) ReceiveContext(ctx iris.Context) {
+func (this *GetSingleAssignmentRequest) ReceiveContext(ctx context.Context) {
 
 	this.ctx = ctx
 }
 
-func (this *GetSingleAssignmentRequest) GetContext() iris.Context {
+func (this *GetSingleAssignmentRequest) GetContext() context.Context {
 
 	return this.ctx
 }

@@ -2,6 +2,7 @@ package authSignatureToken
 
 import (
 	accessTokenServicePort "app/port/accessToken"
+	"app/port/generalTokenServicePort"
 	refreshTokenServicePort "app/port/refreshToken"
 	"context"
 
@@ -9,6 +10,7 @@ import (
 )
 
 type (
+	IGeneralToken             = generalTokenServicePort.IGeneralToken
 	AuthSignatureTokenService struct {
 		AccessTokenManipulator  accessTokenServicePort.IAccessTokenManipulator
 		RefreshTokenManipulator refreshTokenServicePort.IRefreshTokenManipulator
@@ -16,17 +18,17 @@ type (
 )
 
 func (this *AuthSignatureTokenService) Generate(
-	userUUID uuid.UUID, ctx context.Context,
+	TenantUUID uuid.UUID, generalToken IGeneralToken, ctx context.Context,
 ) (at accessTokenServicePort.IAccessToken, rt refreshTokenServicePort.IRefreshToken, err error) {
 
-	rt, err = this.RefreshTokenManipulator.Generate(userUUID, ctx)
+	rt, err = this.RefreshTokenManipulator.Generate(TenantUUID, ctx)
 
 	if err != nil {
 
 		return
 	}
 
-	at, err = this.AccessTokenManipulator.GenerateByUserUUID(userUUID, rt.GetTokenID(), ctx)
+	at, err = this.AccessTokenManipulator.GenerateFor(TenantUUID, generalToken, rt.GetTokenID(), ctx)
 
 	if err != nil {
 
@@ -37,17 +39,17 @@ func (this *AuthSignatureTokenService) Generate(
 }
 
 func (this *AuthSignatureTokenService) Rotate(
-	refreshToken refreshTokenServicePort.IRefreshToken, ctx context.Context,
+	oldRefreshToken refreshTokenServicePort.IRefreshToken, oldAccessToken accessTokenServicePort.IAccessToken, ctx context.Context,
 ) (at accessTokenServicePort.IAccessToken, rt refreshTokenServicePort.IRefreshToken, err error) {
 
-	rt, err = this.RefreshTokenManipulator.Rotate(refreshToken, ctx)
+	rt, err = this.RefreshTokenManipulator.Rotate(oldRefreshToken, ctx)
 
 	if err != nil {
 
 		return
 	}
 
-	at, err = this.AccessTokenManipulator.GenerateByUserUUID(refreshToken.GetUserUUID(), rt.GetTokenID(), ctx)
+	at, err = this.AccessTokenManipulator.GenerateBased(oldAccessToken, ctx)
 
 	if err != nil {
 
@@ -58,10 +60,10 @@ func (this *AuthSignatureTokenService) Rotate(
 }
 
 func (this *AuthSignatureTokenService) GenerateStrings(
-	userUUID uuid.UUID, ctx context.Context,
+	tenantUUID uuid.UUID, generalToken IGeneralToken, ctx context.Context,
 ) (at string, rt string, err error) {
 
-	acc, re, err := this.Generate(userUUID, ctx)
+	acc, re, err := this.Generate(tenantUUID, generalToken, ctx)
 
 	if err != nil {
 
@@ -86,10 +88,10 @@ func (this *AuthSignatureTokenService) GenerateStrings(
 }
 
 func (this *AuthSignatureTokenService) RotateStrings(
-	refreshToken refreshTokenServicePort.IRefreshToken, ctx context.Context,
+	oldRefreshToken refreshTokenServicePort.IRefreshToken, oldAccessToken accessTokenServicePort.IAccessToken, ctx context.Context,
 ) (at string, rt string, err error) {
 
-	acc, re, err := this.Rotate(refreshToken, ctx)
+	acc, re, err := this.Rotate(oldRefreshToken, oldAccessToken, ctx)
 
 	if err != nil {
 

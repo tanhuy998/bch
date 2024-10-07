@@ -2,9 +2,9 @@ package requestPresenter
 
 import (
 	accessTokenServicePort "app/port/accessToken"
+	"context"
 
 	"github.com/google/uuid"
-	"github.com/kataras/iris/v12"
 )
 
 type (
@@ -16,17 +16,17 @@ type (
 		GroupUUID *uuid.UUID                 `param:"groupUUID" validate:"required"`
 		UserUUID  *uuid.UUID                 `param:"userUUID" validate:"required"`
 		Data      data_AddUserToCommandGroup `json:"data"`
-		ctx       iris.Context
+		ctx       context.Context
 		auth      accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 
-func (this *AddUserToCommandGroupRequest) ReceiveContext(ctx iris.Context) {
+func (this *AddUserToCommandGroupRequest) ReceiveContext(ctx context.Context) {
 
 	this.ctx = ctx
 }
 
-func (this *AddUserToCommandGroupRequest) GetContext() iris.Context {
+func (this *AddUserToCommandGroupRequest) GetContext() context.Context {
 
 	return this.ctx
 }

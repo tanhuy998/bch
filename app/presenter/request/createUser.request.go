@@ -2,8 +2,7 @@ package requestPresenter
 
 import (
 	accessTokenServicePort "app/port/accessToken"
-
-	"github.com/kataras/iris/v12"
+	"context"
 )
 
 type (
@@ -18,17 +17,17 @@ type (
 
 	CreateUserRequestPresenter struct {
 		Data *InputUser `json:"data" validate:"required"`
-		ctx  iris.Context
+		ctx  context.Context
 		auth accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 
-func (this *CreateUserRequestPresenter) ReceiveContext(ctx iris.Context) {
+func (this *CreateUserRequestPresenter) ReceiveContext(ctx context.Context) {
 
 	this.ctx = ctx
 }
 
-func (this *CreateUserRequestPresenter) GetContext() iris.Context {
+func (this *CreateUserRequestPresenter) GetContext() context.Context {
 
 	return this.ctx
 }

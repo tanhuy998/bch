@@ -3,14 +3,18 @@ package accessTokenService
 import (
 	"app/internal/bootstrap"
 	"app/internal/common"
-	"app/model"
+	libCommon "app/internal/lib/common"
+	libError "app/internal/lib/error"
 	accessTokenServicePort "app/port/accessToken"
 	jwtTokenServicePort "app/port/jwtTokenService"
 	"app/repository"
+	"app/service/noExpireTokenProvider"
 	"app/valueObject"
 	"context"
 	"errors"
 	"time"
+
+	"app/port/generalTokenServicePort"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -24,7 +28,7 @@ const (
 	claim_audience = "aud"
 	claim_expire   = "exp"
 
-	key_no_expire = "NO_EXPIRE_TOKEN"
+	//key_no_expire = "NO_EXPIRE_TOKEN"
 )
 
 var (
@@ -34,15 +38,17 @@ var (
 
 type (
 	IAccessTokenHandler = accessTokenServicePort.IAccessTokenManipulator
+	IGeneralToken       = generalTokenServicePort.IGeneralToken
 
 	JWTAccessTokenManipulatorService struct {
 		//JWtTokenSigningServive      jwtTokenServicePort.IJWTTokenSigning
-		AudienceList accessTokenServicePort.AccessTokenAudienceList
 		//FetchAuthDataService       authServiceAdapter.IFetchAuthData
+		AudienceList               accessTokenServicePort.AccessTokenAudienceList
 		JWTTokenManipulatorService jwtTokenServicePort.IAsymmetricJWTTokenManipulator
 		UserRepo                   repository.IUser
 		ExpDuration                time.Duration
 		WithoutExpire              bool
+		noExpireTokenProvider.NoExpireTokenProvider
 	}
 )
 
@@ -70,52 +76,59 @@ func (this *JWTAccessTokenManipulatorService) Read(token_str string) (IAccessTok
 	return newFromToken(token)
 }
 
-func (this *JWTAccessTokenManipulatorService) GenerateByUserUUID(
-	userUUID uuid.UUID, tokenID string, ctx context.Context,
-) (at accessTokenServicePort.IAccessToken, err error) {
+// func (this *JWTAccessTokenManipulatorService) GenerateByUserUUID(
+// 	userUUID uuid.UUID, tokenID string, ctx context.Context,
+// ) (at accessTokenServicePort.IAccessToken, err error) {
 
-	at, err = this.queryAndGenerate(
-		bson.D{
-			{"uuid", userUUID},
-		},
-		ctx,
-	)
+// 	authData, err := this.queryAndGenerate(
+// 		bson.D{
+// 			{"uuid", userUUID},
+// 		},
+// 		ctx,
+// 	)
 
-	if err != nil || at == nil {
+// 	if err != nil {
 
-		return
-	}
+// 		return nil, err
+// 	}
 
-	at.SetTokenID(tokenID)
-	return
-}
+// 	if authData == nil {
 
-func (this *JWTAccessTokenManipulatorService) GenerateByCredentials(
-	model *model.User, tokenID string, ctx context.Context,
-) (at accessTokenServicePort.IAccessToken, err error) {
+// 		return nil, errors.Join(common.ERR_UNAUTHORIZED)
+// 	}
 
-	at, err = this.queryAndGenerate(
-		bson.D{
-			{"username", model.Username},
-			//{"secret", model.Secret},
-		},
-		ctx,
-	)
+// 	at = this.makeFor(userUUID)
 
-	if err != nil || at == nil {
+// 	at.SetTokenID(tokenID)
+// 	return
+// }
 
-		return
-	}
+// func (this *JWTAccessTokenManipulatorService) GenerateByCredentials(
+// 	model *model.User, tokenID string, ctx context.Context,
+// ) (at accessTokenServicePort.IAccessToken, err error) {
 
-	at.SetTokenID(tokenID)
-	return
-}
+// 	authData, err = this.queryAndGenerate(
+// 		bson.D{
+// 			{"username", model.Username},
+// 			//{"secret", model.Secret},
+// 		},
+// 		ctx,
+// 	)
+
+// 	if err != nil || at == nil {
+
+// 		return
+// 	}
+
+// 	at.SetTokenID(tokenID)
+// 	return
+// }
 
 func (this *JWTAccessTokenManipulatorService) GenerateBased(
 	accessToken IAccessToken, ctx context.Context,
 ) (IAccessToken, error) {
 
-	newAt, err := this.makeFor(accessToken.GetUserUUID(), ctx)
+	newAt, err := this.makeFor(accessToken.GetTenantUUID(), ctx)
 
 	if err != nil {
 
@@ -128,7 +141,7 @@ func (this *JWTAccessTokenManipulatorService) GenerateBased(
 
 	} else {
 
-		return nil, ERR_INVALID_TOKEN
+		return nil, libError.NewInternal(ERR_INVALID_TOKEN)
 	}
 
 	return newAt, nil
@@ -136,7 +149,7 @@ func (this *JWTAccessTokenManipulatorService) GenerateBased(
 
 func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
 	condition bson.D, ctx context.Context,
-) (accessTokenServicePort.IAccessToken, error) {
+) (*valueObject.AuthData, error) {
 
 	data, err := repository.Aggregate[valueObject.AuthData](
 		this.UserRepo.GetCollection(),
@@ -197,33 +210,35 @@ func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
 
 	authData := data[0]
 
-	accessToken, err := this.makeFor(*authData.UserUUID, ctx)
+	return authData, nil
 
-	if err != nil {
+	// accessToken, err := this.makeFor(*authData.UserUUID, ctx)
 
-		return nil, err
-	}
+	// if err != nil {
 
-	accessToken.customClaims.AuthData = authData
+	// 	return nil, err
+	// }
 
-	return accessToken, nil
+	// accessToken.customClaims.AuthData = authData
+
+	// return accessToken, nil
 }
 
-func (this *JWTAccessTokenManipulatorService) makeFor(userUUID uuid.UUID, ctx context.Context) (*jwt_access_token, error) {
+func (this *JWTAccessTokenManipulatorService) makeFor(
+	tenantUUID uuid.UUID, ctx context.Context,
+) (*jwt_access_token, error) {
 
 	token := this.JWTTokenManipulatorService.GenerateToken()
 
 	customeClaims := &jwt_access_token_custom_claims{
-		jwt.RegisteredClaims{
-			Subject:  userUUID.String(),
+		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:   bootstrap.GetAppName(),
 			IssuedAt: jwt.NewNumericDate(time.Now()),
-			//ExpiresAt: jwt.NewNumericDate(time.Now().Add(exp_duration)),
 			//Audience:  jwt.ClaimStrings(bootstrap.GetHostNames()),
-			//Issuer: ,
 		},
-		"",
-		nil,
+		TokenID:    "",
+		TenantUUID: libCommon.PointerPrimitive(tenantUUID),
+		AuthData:   nil,
 	}
 
 	if !this.WithoutExpire && !this.IsNoExpire(ctx) {
@@ -255,7 +270,7 @@ func (this *JWTAccessTokenManipulatorService) SignString(accessToken IAccessToke
 		return this.JWTTokenManipulatorService.SignString(val.jwt_token)
 	}
 
-	return "", ERR_INVALID_ACCESS_TOKEN_TYPE
+	return "", libError.NewInternal(ERR_INVALID_ACCESS_TOKEN_TYPE)
 }
 
 func (this *JWTAccessTokenManipulatorService) DefaultExpireDuration() time.Duration {
@@ -263,14 +278,47 @@ func (this *JWTAccessTokenManipulatorService) DefaultExpireDuration() time.Durat
 	return exp_duration
 }
 
-func (this *JWTAccessTokenManipulatorService) CtxNoExpireKey() string {
+func (this *JWTAccessTokenManipulatorService) GenerateFor(
+	tenantUUID uuid.UUID, generalToken IGeneralToken, tokenID string, ctx context.Context,
+) (accessTokenServicePort.IAccessToken, error) {
 
-	return key_no_expire
+	authData, err := this.queryAndGenerate(
+		bson.D{
+			{"uuid", generalToken.GetUserUUID()},
+		},
+		ctx,
+	)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	if authData == nil {
+
+		return nil, errors.Join(common.ERR_UNAUTHORIZED)
+	}
+
+	at, err := this.makeFor(tenantUUID, ctx)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	at.SetTokenID(tokenID)
+
+	return at, nil
 }
 
-func (this *JWTAccessTokenManipulatorService) IsNoExpire(ctx context.Context) bool {
+// func (this *JWTAccessTokenManipulatorService) CtxNoExpireKey() string {
 
-	v, ok := ctx.Value(key_no_expire).(bool)
+// 	return key_no_expire
+// }
 
-	return ok && v
-}
+// func (this *JWTAccessTokenManipulatorService) IsNoExpire(ctx context.Context) bool {
+
+// 	v, ok := ctx.Value(key_no_expire).(bool)
+
+// 	return ok && v
+// }

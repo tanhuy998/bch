@@ -1,6 +1,7 @@
 package createCommandGroupDomain
 
 import (
+	"app/internal/common"
 	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	authServicePort "app/port/auth"
@@ -31,8 +32,16 @@ func (this *CreateCommandGroupUseCase) Execute(
 ) (*responsePresenter.CreateCommandGroupResponse, error) {
 
 	data := input.Data
-	data.CreatedBy = libCommon.PointerPrimitive(input.GetAuthority().GetUserUUID())
-	data.TenantUUID = libCommon.PointerPrimitive(input.GetAuthority().GetTenantUUID())
+
+	authority := input.GetAuthority()
+
+	if authority == nil {
+
+		return nil, common.ERR_UNAUTHORIZED
+	}
+
+	data.CreatedBy = libCommon.PointerPrimitive(authority.GetUserUUID())
+	data.TenantUUID = libCommon.PointerPrimitive(authority.GetTenantUUID())
 
 	data, err := this.CreateCommandGroupService.CreateByModel(data, input.GetContext())
 

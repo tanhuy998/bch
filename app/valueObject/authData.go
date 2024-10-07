@@ -16,7 +16,7 @@ type (
 	}
 
 	AuthData struct {
-		UserUUID                  *uuid.UUID                      `json:"-" bson:"uuid"`
+		UserUUID                  *uuid.UUID                      `json:"uuid" bson:"uuid"`
 		Name                      string                          `json:"name,omitempty" bson:"name"`
 		TenantUUID                *uuid.UUID                      `json:"tenantUUID,omitempty" bson:"tenantUUID"`
 		TenantAgentData           []*model.TenantAgent            `json:"tenantAgentData,omitempty" bson:"tenantAgentData"`
@@ -55,6 +55,16 @@ func (this *AuthData) IsTenantAgent() bool {
 }
 
 func (this *AuthData) GetUserUUID() uuid.UUID {
+
+	if this.UserUUID == nil && this.GetTenantAgentData() != nil && this.GetTenantAgentData().UserUUID != nil {
+
+		return *this.GetTenantAgentData().UserUUID
+	}
+
+	if this.UserUUID == nil {
+
+		return uuid.Nil
+	}
 
 	return *this.UserUUID
 }

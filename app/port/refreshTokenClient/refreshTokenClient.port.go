@@ -1,10 +1,13 @@
 package refreshTokenClientPort
 
-import "github.com/kataras/iris/v12"
+import (
+	refreshTokenServicePort "app/port/refreshToken"
+	"context"
+)
 
 type (
 	IRefreshTokenClient interface {
-		Read(ctx iris.Context) string
-		Write(ctx iris.Context, refreshToken string) error
+		Read(ctx context.Context) (refreshTokenServicePort.IRefreshToken, error)
+		Write(ctx context.Context, refreshToken refreshTokenServicePort.IRefreshToken) error
 	}
 )

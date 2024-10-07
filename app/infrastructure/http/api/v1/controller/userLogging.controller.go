@@ -41,7 +41,6 @@ func (this *UserLoggingController) BindDependencies(container *hero.Container) c
 
 func (this *UserLoggingController) LogIn(
 	input *requestPresenter.LoginRequest,
-	output *responsePresenter.LoginResponse,
 ) (mvc.Result, error) {
 
 	return this.ResultOf(
@@ -51,7 +50,6 @@ func (this *UserLoggingController) LogIn(
 
 func (this *UserLoggingController) Refresh(
 	input *requestPresenter.RefreshLoginRequest,
-	output *responsePresenter.RefreshLoginResponse,
 ) (mvc.Result, error) {
 
 	return this.ResultOf(

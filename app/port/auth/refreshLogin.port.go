@@ -1,6 +1,8 @@
 package authServicePort
 
 import (
+	accessTokenServicePort "app/port/accessToken"
+	refreshTokenServicePort "app/port/refreshToken"
 	"context"
 	"errors"
 )
@@ -13,6 +15,8 @@ var (
 
 type (
 	IRefreshLogin interface {
-		Serve(inputAT string, inputRT string, reqCtx context.Context) (at string, rt string, err error)
+		Serve(
+			inputAT accessTokenServicePort.IAccessToken, inputRT refreshTokenServicePort.IRefreshToken, reqCtx context.Context,
+		) (at accessTokenServicePort.IAccessToken, rt refreshTokenServicePort.IRefreshToken, err error)
 	}
 )

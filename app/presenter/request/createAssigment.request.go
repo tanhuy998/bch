@@ -2,9 +2,9 @@ package requestPresenter
 
 import (
 	accessTokenServicePort "app/port/accessToken"
+	"context"
 
 	"github.com/google/uuid"
-	"github.com/kataras/iris/v12"
 )
 
 type (
@@ -16,7 +16,7 @@ type (
 	CreateAssigmentRequest struct {
 		Data      *CreateAssignmentInput `json:"data,omitempty" validate:"required"`
 		authority accessTokenServicePort.IAccessTokenAuthData
-		ctx       iris.Context
+		ctx       context.Context
 	}
 )
 
@@ -30,12 +30,12 @@ func (this *CreateAssigmentRequest) SetAuthority(auth accessTokenServicePort.IAc
 	this.authority = auth
 }
 
-func (this *CreateAssigmentRequest) ReceiveContext(ctx iris.Context) {
+func (this *CreateAssigmentRequest) ReceiveContext(ctx context.Context) {
 
 	this.ctx = ctx
 }
 
-func (this *CreateAssigmentRequest) GetContext() iris.Context {
+func (this *CreateAssigmentRequest) GetContext() context.Context {
 
 	return this.ctx
 }

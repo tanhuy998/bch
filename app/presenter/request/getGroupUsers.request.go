@@ -2,25 +2,25 @@ package requestPresenter
 
 import (
 	accessTokenServicePort "app/port/accessToken"
+	"context"
 
 	"github.com/google/uuid"
-	"github.com/kataras/iris/v12"
 )
 
 type (
 	GetGroupUsersRequest struct {
 		GroupUUID *uuid.UUID `json:"groupUUID" validate:"required"`
-		ctx       iris.Context
+		ctx       context.Context
 		auth      accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 
-func (this *GetGroupUsersRequest) ReceiveContext(ctx iris.Context) {
+func (this *GetGroupUsersRequest) ReceiveContext(ctx context.Context) {
 
 	this.ctx = ctx
 }
 
-func (this *GetGroupUsersRequest) GetContext() iris.Context {
+func (this *GetGroupUsersRequest) GetContext() context.Context {
 
 	return this.ctx
 }

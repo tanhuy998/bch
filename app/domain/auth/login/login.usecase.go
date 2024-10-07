@@ -3,7 +3,7 @@ package loginDomain
 import (
 	libError "app/internal/lib/error"
 	authServicePort "app/port/auth"
-	refreshTokenClientPort "app/port/refreshTokenClient"
+	generalTokenClientServicePort "app/port/generalTokenClient"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -22,8 +22,9 @@ type (
 
 	LogInUseCase struct {
 		usecasePort.UseCase[requestPresenter.LoginRequest, responsePresenter.LoginResponse]
-		LogInService       authServicePort.ILogIn
-		RefreshTokenClient refreshTokenClientPort.IRefreshTokenClient
+		LogInService              authServicePort.ILogIn
+		GeneralTokenClientService generalTokenClientServicePort.IGeneralTokenClient
+		//RefreshTokenClient refreshTokenClientPort.IRefreshTokenClient
 	}
 )
 
@@ -40,14 +41,14 @@ func (this *LogInUseCase) Execute(
 		)
 	}
 
-	accessToken, refreshToken, err := this.LogInService.Serve(input.Data.Username, input.Data.Password, reqContext)
+	generalToken, err := this.LogInService.Serve(input.Data.Username, input.Data.Password, reqContext)
 
 	if err != nil {
 
 		return nil, this.ErrorWithContext(input, err)
 	}
 
-	err = this.RefreshTokenClient.Write(reqContext, refreshToken)
+	err = this.GeneralTokenClientService.Write(reqContext, generalToken)
 
 	if err != nil {
 
@@ -56,7 +57,7 @@ func (this *LogInUseCase) Execute(
 
 	output := this.GenerateOutput()
 
-	output.Data.AccessToken = accessToken
+	//output.Data.AccessToken = generalToken
 	output.Message = "success"
 	return output, nil
 }

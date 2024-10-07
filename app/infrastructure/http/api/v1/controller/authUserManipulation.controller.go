@@ -27,7 +27,7 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 
 	activator.Handle(
 		"POST", "/", "CreateUser",
-		middleware.BindPresenters[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter](
+		middleware.BindRequest[requestPresenter.CreateUserRequestPresenter](
 			container,
 			middlewareHelper.UseAuthority,
 		),
@@ -35,7 +35,7 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 
 	activator.Handle(
 		"GET", "/group/{groupUUID:uuid}", "GetGroupUsers",
-		middleware.BindPresenters[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse](
+		middleware.BindRequest[requestPresenter.GetGroupUsersRequest](
 			container,
 			middlewareHelper.UseAuthority,
 		),
@@ -43,7 +43,7 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 
 	activator.Handle(
 		"PATCH", "/{userUUID:uuid}", "ModifyUser",
-		middleware.BindPresenters[requestPresenter.ModifyUserRequest, responsePresenter.ModifyUserResponse](
+		middleware.BindRequest[requestPresenter.ModifyUserRequest](
 			container,
 			middlewareHelper.UseAuthority,
 		),
@@ -57,7 +57,6 @@ func (this *AuthUserManipulationController) BindDependencies(container *hero.Con
 
 func (this *AuthUserManipulationController) CreateUser(
 	input *requestPresenter.CreateUserRequestPresenter,
-	output *responsePresenter.CreateUserPresenter,
 ) (mvc.Result, error) {
 
 	return this.ResultOf(
@@ -67,7 +66,6 @@ func (this *AuthUserManipulationController) CreateUser(
 
 func (this *AuthUserManipulationController) GetGroupUsers(
 	input *requestPresenter.GetGroupUsersRequest,
-	output *responsePresenter.GetGroupUsersResponse,
 ) (mvc.Result, error) {
 
 	return this.ResultOf(
@@ -77,7 +75,6 @@ func (this *AuthUserManipulationController) GetGroupUsers(
 
 func (this *AuthUserManipulationController) ModifyUser(
 	input *requestPresenter.ModifyUserRequest,
-	output *responsePresenter.ModifyUserResponse,
 ) (mvc.Result, error) {
 
 	return this.ResultOf(

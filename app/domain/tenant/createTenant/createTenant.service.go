@@ -45,6 +45,11 @@ func (this *CreateTenantService) Serve(
 	inputTenant *model.Tenant, inputUser *model.User, ctx context.Context,
 ) (t *model.Tenant, u *model.User, err error) {
 
+	if ctx != nil {
+
+		ctx = context.Background()
+	}
+
 	err = this.validateTenant(inputTenant.Name, ctx)
 
 	if err != nil {
@@ -60,7 +65,13 @@ func (this *CreateTenantService) Serve(
 		return
 	}
 
-	defer session.EndSession(context.TODO())
+	defer session.EndSession(ctx)
+
+	newAgentModel := &model.TenantAgent{
+		UUID:       libCommon.PointerPrimitive(uuid.New()),
+		UserUUID:   libCommon.PointerPrimitive(uuid.UUID(*inputUser.UUID)),
+		TenantUUID: inputUser.TenantUUID,
+	}
 
 	_, err = session.WithTransaction(
 		ctx,
@@ -72,10 +83,15 @@ func (this *CreateTenantService) Serve(
 
 			if err != nil {
 
-				return nil, errors.Join(common.ERR_INTERNAL, err)
+				return nil, err
 			}
 
-			inputUser, _, err = this.CreateTenantAgentService.Serve(inputUser, *inputTenant.UUID, sessionCtx)
+			if inputUser == nil {
+
+				return nil, nil
+			}
+
+			inputUser, _, err = this.CreateTenantAgentService.Serve(inputUser, newAgentModel, *inputTenant.UUID, sessionCtx)
 
 			if err != nil {
 

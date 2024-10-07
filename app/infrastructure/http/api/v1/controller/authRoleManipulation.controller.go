@@ -53,7 +53,6 @@ func (this *AuthRoleManipulationController) BindDependencies(container *hero.Con
 
 func (this *AuthRoleManipulationController) GrantCommandGroupRolesToUser(
 	input *requestPresenter.GrantCommandGroupRolesToUserRequest,
-	output *responsePresenter.GrantCommandGroupRolesToUserResponse,
 ) (mvc.Result, error) {
 
 	return this.ResultOf(
@@ -63,7 +62,6 @@ func (this *AuthRoleManipulationController) GrantCommandGroupRolesToUser(
 
 func (this *AuthRoleManipulationController) GetAllRoles(
 	input *requestPresenter.GetAllRolesRequest,
-	output *responsePresenter.GetAllRolesResponse,
 ) (mvc.Result, error) {
 
 	return this.ResultOf(

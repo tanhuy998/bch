@@ -1,48 +1,65 @@
 package createTenantAgentDomain
 
 import (
-	actionResultServicePort "app/port/actionResult"
+	libCommon "app/internal/lib/common"
+	"app/model"
 	tenantServicePort "app/port/tenant"
+	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
 
-	"github.com/kataras/iris/v12/mvc"
+	"github.com/google/uuid"
 )
 
 type (
-	ICreateTenantAgent interface {
-		Execute(
-			input *requestPresenter.CreateTenantAgentRequest,
-			output *responsePresenter.CreateTenantAgentResponse,
-		) (mvc.Result, error)
-	}
+	// ICreateTenantAgent interface {
+	// 	Execute(
+	// 		input *requestPresenter.CreateTenantAgentRequest,
+	// 		output *responsePresenter.CreateTenantAgentResponse,
+	// 	) (mvc.Result, error)
+	// }
 
 	CreateTenantAgentUseCase struct {
+		usecasePort.UseCase[requestPresenter.CreateTenantAgentRequest, responsePresenter.CreateTenantAgentResponse]
 		CreateTenantAgentService tenantServicePort.ICreateTenantAgent
-		ActionResult             actionResultServicePort.IActionResult
 	}
 )
 
-// func (this *CreateTenantAgentUseCase) Execute(
-// 	input *requestPresenter.CreateTenantAgentRequest,
-// 	output *responsePresenter.CreateTenantAgentResponse,
-// ) (mvc.Result, error) {
+func (this *CreateTenantAgentUseCase) Execute(
+	input *requestPresenter.CreateTenantAgentRequest,
+) (*responsePresenter.CreateTenantAgentResponse, error) {
 
-// 	newAgent, err := this.CreateTenantAgentService.Serve(input.Data.Username, input.Data.Password, input.Data.Name, input.GetContext())
+	newUser := &model.User{
+		Name:     input.Data.Name,
+		Username: input.Data.Username,
+		PassWord: input.Data.Password,
+	}
 
-// 	if err != nil {
+	auth := input.GetAuthority()
 
-// 		return this.ActionResult.ServeErrorResponse(err)
-// 	}
+	if auth != nil {
 
-// 	output.Message = "success"
-// 	output.Data = newAgent
-// 	rawContent, err := json.Marshal(output)
+		newUser.CreatedBy = libCommon.PointerPrimitive(auth.GetUserUUID())
+	}
 
-// 	if err != nil {
+	newAgentModel := &model.TenantAgent{
+		UUID:       libCommon.PointerPrimitive(uuid.New()),
+		UserUUID:   libCommon.PointerPrimitive(uuid.UUID(*newUser.UUID)),
+		TenantUUID: input.TenantUUID,
+		//Deactivated: true,
+	}
 
-// 		return this.ActionResult.ServeErrorResponse(err)
-// 	}
+	_, tenantAgent, err := this.CreateTenantAgentService.Serve(newUser, newAgentModel, *input.TenantUUID, input.GetContext())
 
-// 	return this.ActionResult.Prepare().SetCode(201).SetContent(rawContent).Done()
-// }
+	if err != nil {
+
+		return nil, err
+	}
+
+	output := this.GenerateOutput()
+
+	output.Message = "success"
+	output.Data = tenantAgent
+
+	return output, nil
+}

@@ -3,26 +3,26 @@ package requestPresenter
 import (
 	"app/model"
 	accessTokenServicePort "app/port/accessToken"
+	"context"
 
 	"github.com/google/uuid"
-	"github.com/kataras/iris/v12"
 )
 
 type (
 	CreateAssignmentGroupRequest struct {
 		AssignmentUUID *uuid.UUID             `param:"assignmnetUUID" validate:"required"`
 		Data           *model.AssignmentGroup `json:"data" validate:"required"`
-		ctx            iris.Context
+		ctx            context.Context
 		auth           accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 
-func (this *CreateAssignmentGroupRequest) ReceiveContext(ctx iris.Context) {
+func (this *CreateAssignmentGroupRequest) ReceiveContext(ctx context.Context) {
 
 	this.ctx = ctx
 }
 
-func (this *CreateAssignmentGroupRequest) GetContext() iris.Context {
+func (this *CreateAssignmentGroupRequest) GetContext() context.Context {
 
 	return this.ctx
 }

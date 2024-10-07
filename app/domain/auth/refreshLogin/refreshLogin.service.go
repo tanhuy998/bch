@@ -8,6 +8,7 @@ import (
 	refreshTokenBlackListServicePort "app/port/refreshTokenBlackList"
 	"context"
 	"errors"
+	"fmt"
 )
 
 var (
@@ -28,46 +29,30 @@ type (
 )
 
 func (this *RefreshLoginService) Serve(
-	inputAT string, inputRT string, reqCtx context.Context,
-) (at string, rt string, err error) {
-
-	accessToken, err := this.AccessTokenManipulator.Read(inputAT)
-
-	if err != nil {
-
-		err = errors.Join()
-		return
-	}
+	accessToken accessTokenServicePort.IAccessToken, refreshToken refreshTokenServicePort.IRefreshToken, reqCtx context.Context,
+) (at accessTokenServicePort.IAccessToken, rt refreshTokenServicePort.IRefreshToken, err error) {
 
 	if !accessToken.Expired() {
 
 		err = errors.Join(
 			common.ERR_BAD_REQUEST,
-			errors.New("(RefreshLoginService) access token not expired"),
-		) // authServiceAdapter.ERR_ACCESS_TOKEN_NOT_EXPIRE
+			fmt.Errorf("(RefreshLoginService) access token not expired"),
+		)
 		return
 	}
 
-	refreshToken, err := this.RefreshTokenManipulator.Read(inputRT)
-
 	switch {
-	case err != nil:
-		err = errors.Join(
-			common.ERR_BAD_REQUEST,
-			err,
-		)
-		return
 	case refreshToken.Expired():
 		err = errors.Join(
 			common.ERR_UNAUTHORIZED,
-			errors.New("(RefreshLoginService) refresh Token expired"),
-		) // authServiceAdapter.ERR_REFRESH_TOKEN_EXPIRE
+			fmt.Errorf("(RefreshLoginService) refresh Token expired"),
+		)
 		return
 	case refreshToken.GetTokenID() != accessToken.GetTokenID(), refreshToken.GetUserUUID() != accessToken.GetUserUUID():
 		err = errors.Join(
 			common.ERR_UNAUTHORIZED,
-			errors.New("(RefreshLoginService) signatures mismatch"),
-		) // ERR_BAD_TOKEN_PAIR
+			fmt.Errorf("(RefreshLoginService) signatures mismatch"),
+		)
 		return
 	}
 
@@ -79,7 +64,7 @@ func (this *RefreshLoginService) Serve(
 	case refreshTokenRevoked:
 		err = errors.Join(
 			common.ERR_UNAUTHORIZED,
-			errors.New("(RefreshLoginService) refresh token revoked"),
+			fmt.Errorf("(RefreshLoginService) refresh token revoked"),
 		) //authServiceAdapter.ERR_REFRESH_TOKEN_EXPIRE
 		return
 		// case refreshToken.GetUserUUID() != accessToken.GetUserUUID():
@@ -87,5 +72,5 @@ func (this *RefreshLoginService) Serve(
 		// 	return
 	}
 
-	return this.AuthSignatureTokenProvider.RotateStrings(refreshToken, reqCtx)
+	return this.AuthSignatureTokenProvider.Rotate(refreshToken, accessToken, reqCtx)
 }

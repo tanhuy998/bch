@@ -1,8 +1,7 @@
 package createTenantAgentDomain
 
 import (
-	"app/internal/common"
-	libCommon "app/internal/lib/common"
+	libError "app/internal/lib/error"
 	"app/model"
 	authServicePort "app/port/auth"
 	passwordServicePort "app/port/passwordService"
@@ -11,6 +10,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var (
@@ -29,34 +29,54 @@ type (
 		CreateUserService authServicePort.ICreateUser
 		TenantAgentRepo   repository.ITenantAgent
 		PasswordService   passwordServicePort.IPassword
+		MongoClient       *mongo.Client
 	}
 )
 
-func (this CreateTenantAgentService) Serve(inputUser *model.User, tenantUUID uuid.UUID, ctx context.Context) (*model.User, *model.TenantAgent, error) {
+func (this CreateTenantAgentService) Serve(inputUser *model.User, newTenantAgent *model.TenantAgent, tenantUUID uuid.UUID, ctx context.Context) (*model.User, *model.TenantAgent, error) {
+
+	if ctx != nil {
+
+		ctx = context.Background()
+	}
 
 	inputUser.TenantUUID = &tenantUUID
 
-	newUser, err := this.CreateUserService.CreateByModel(inputUser, ctx)
+	session, err := this.MongoClient.StartSession()
+
+	if err != nil {
+
+		return nil, nil, libError.NewInternal(err)
+	}
+
+	defer session.EndSession(ctx)
+
+	_, err = session.WithTransaction(
+		ctx,
+		func(ctx mongo.SessionContext) (interface{}, error) {
+
+			_, err := this.CreateUserService.CreateByModel(inputUser, ctx)
+
+			if err != nil {
+
+				return nil, err
+			}
+
+			err = this.TenantAgentRepo.Create(newTenantAgent, ctx)
+
+			if err != nil {
+
+				return nil, err
+			}
+
+			return nil, nil
+		},
+	)
 
 	if err != nil {
 
 		return nil, nil, err
 	}
-
-	newAgentModel := &model.TenantAgent{
-		UUID:       libCommon.PointerPrimitive(uuid.New()),
-		UserUUID:   libCommon.PointerPrimitive(uuid.UUID(*newUser.UUID)),
-		TenantUUID: libCommon.PointerPrimitive(tenantUUID),
-		//Deactivated: true,
-	}
-
-	err = this.TenantAgentRepo.Create(newAgentModel, ctx)
-
-	if err != nil {
-
-		return nil, nil, errors.Join(common.ERR_INTERNAL, err)
-	}
-
 	//return this.GetSingleTenantService.Serve(newAgentModel.UUID.String())
-	return newUser, newAgentModel, nil
+	return inputUser, newTenantAgent, nil
 }

@@ -3,6 +3,7 @@ package middlewareHelper
 import (
 	"app/infrastructure/http/common"
 	accessTokenServicePort "app/port/accessToken"
+	"context"
 	"errors"
 
 	"github.com/kataras/iris/v12"
@@ -23,8 +24,8 @@ type (
 	}
 
 	IContextBringAlong interface {
-		ReceiveContext(ctx iris.Context)
-		GetContext() iris.Context
+		ReceiveContext(ctx context.Context)
+		GetContext() context.Context
 	}
 
 	IAuthorityBringAlong interface {

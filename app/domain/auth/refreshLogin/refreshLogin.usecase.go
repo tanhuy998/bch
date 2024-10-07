@@ -1,7 +1,9 @@
 package refreshLoginDomain
 
 import (
+	"app/internal/common"
 	libError "app/internal/lib/error"
+	accessTokenServicePort "app/port/accessToken"
 	authServicePort "app/port/auth"
 	refreshTokenClientPort "app/port/refreshTokenClient"
 	usecasePort "app/port/usecase"
@@ -27,8 +29,9 @@ type (
 
 	RefreshLoginUseCase struct {
 		usecasePort.UseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
-		RefreshLoginService authServicePort.IRefreshLogin
-		RefreshTokenClient  refreshTokenClientPort.IRefreshTokenClient
+		RefreshLoginService    authServicePort.IRefreshLogin
+		AccessTokenManipulator accessTokenServicePort.IAccessTokenManipulator
+		RefreshTokenClient     refreshTokenClientPort.IRefreshTokenClient
 	}
 )
 
@@ -45,15 +48,33 @@ func (this *RefreshLoginUseCase) Execute(
 		)
 	}
 
-	refreshToken_str := this.RefreshTokenClient.Read(reqCtx)
+	refreshToken, err := this.RefreshTokenClient.Read(reqCtx)
 
-	newAccessTokenString, newRefreshTokenString, err := this.RefreshLoginService.Serve(input.Data.AccessToken, refreshToken_str, reqCtx)
+	if err != nil {
+
+		return nil, err
+	}
+
+	if refreshToken == nil {
+
+		return nil, common.ERR_UNAUTHORIZED
+	}
+
+	accessToken, err := this.AccessTokenManipulator.Read(input.Data.AccessToken)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	newAccessToken, newRefreshToken, err := this.RefreshLoginService.Serve(accessToken, refreshToken, reqCtx)
+
 	if err != nil {
 
 		return nil, this.ErrorWithContext(input, err)
 	}
 
-	err = this.RefreshTokenClient.Write(reqCtx, newRefreshTokenString)
+	err = this.RefreshTokenClient.Write(reqCtx, newRefreshToken)
 
 	if err != nil {
 
@@ -62,9 +83,16 @@ func (this *RefreshLoginUseCase) Execute(
 
 	output := this.GenerateOutput()
 
+	at, err := this.AccessTokenManipulator.SignString(newAccessToken)
+
+	if err != nil {
+
+		return nil, err
+	}
+
 	output.Message = "success"
 	output.Data = &responsePresenter.RefreshLoginData{
-		newAccessTokenString,
+		at,
 	}
 
 	return output, nil

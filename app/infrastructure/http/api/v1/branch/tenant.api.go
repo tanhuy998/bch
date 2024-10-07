@@ -22,18 +22,6 @@ func initTenantApi(app router.Party) *mvc.Application {
 
 	wrapper.Handle(
 		new(controller.TenantController).BindDependencies(container),
-		// applyRoutes(func(activator *mvc.ControllerActivator) {
-
-		// 	// activator.Handle(
-		// 	// 	"POST", "/agent", "CreateTenantAgent",
-		// 	// 	middleware.BindPresenters[requestPresenter.CreateTenantAgentRequest, responsePresenter.CreateTenantAgentResponse](container),
-		// 	// )
-
-		// 	activator.Handle(
-		// 		"POST", "/", "CreateTenant",
-		// 		middleware.BindPresenters[requestPresenter.CreateTenantRequest, responsePresenter.CreateTenantResponse](container),
-		// 	)
-		// }),
 	)
 
 	return wrapper

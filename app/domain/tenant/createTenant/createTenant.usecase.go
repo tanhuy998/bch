@@ -1,6 +1,7 @@
 package createTenantDomain
 
 import (
+	libCommon "app/internal/lib/common"
 	"app/model"
 	tenantServicePort "app/port/tenant"
 	usecasePort "app/port/usecase"
@@ -32,10 +33,22 @@ func (this *CreateTenantUseCase) Execute(
 		Description: input.Data.Description,
 	}
 
-	newUser := &model.User{
-		Name:     input.Data.User.Name,
-		Username: input.Data.User.Username,
-		PassWord: input.Data.User.Password,
+	auth := input.GetAuthority()
+
+	if auth != nil {
+
+		newTenant.CreatedBy = libCommon.PointerPrimitive(auth.GetUserUUID())
+	}
+
+	var newUser *model.User
+
+	if input.Data.User != nil {
+
+		newUser = &model.User{
+			Name:     input.Data.User.Name,
+			Username: input.Data.User.Username,
+			PassWord: input.Data.User.Password,
+		}
 	}
 
 	newTenant, newUser, err := this.CreateTenantService.Serve(newTenant, newUser, input.GetContext())

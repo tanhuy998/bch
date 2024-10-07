@@ -17,10 +17,9 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/hero"
-	"github.com/kataras/iris/v12/mvc"
 )
 
-func initInternalAPI(app router.Party) *mvc.Application {
+func initInternalAPI(app router.Party) {
 
 	router := app.Party("/internal", middleware.SecretAuth)
 
@@ -34,7 +33,8 @@ func initInternalAPI(app router.Party) *mvc.Application {
 		},
 	)
 
-	return userLogging.RegisterUserLoggingApi(authRouter)
+	userLogging.RegisterUserLoggingApi(authRouter).EnableStructDependents()
+	initTenantApi(router).EnableStructDependents()
 }
 
 func bindDependencies(container *hero.Container) {

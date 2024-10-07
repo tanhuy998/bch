@@ -2,8 +2,7 @@ package requestPresenter
 
 import (
 	accessTokenServicePort "app/port/accessToken"
-
-	"github.com/kataras/iris/v12"
+	"context"
 )
 
 type (
@@ -16,17 +15,17 @@ type (
 
 	CreateTenantRequest struct {
 		Data CreateTenantInputData `json:"data"`
-		ctx  iris.Context
+		ctx  context.Context
 		auth accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 
-func (this *CreateTenantRequest) ReceiveContext(ctx iris.Context) {
+func (this *CreateTenantRequest) ReceiveContext(ctx context.Context) {
 
 	this.ctx = ctx
 }
 
-func (this *CreateTenantRequest) GetContext() iris.Context {
+func (this *CreateTenantRequest) GetContext() context.Context {
 
 	return this.ctx
 }

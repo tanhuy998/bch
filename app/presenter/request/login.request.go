@@ -2,8 +2,7 @@ package requestPresenter
 
 import (
 	refreshTokenServicePort "app/port/refreshToken"
-
-	"github.com/kataras/iris/v12"
+	"context"
 )
 
 type (
@@ -18,16 +17,16 @@ type (
 
 	LoginRequest struct {
 		Data         LoginInputUser `json:"data"`
-		ctx          iris.Context
+		ctx          context.Context
 		refreshToken refreshTokenServicePort.IRefreshToken
 	}
 )
 
-func (this *LoginRequest) ReceiveContext(ctx iris.Context) {
+func (this *LoginRequest) ReceiveContext(ctx context.Context) {
 
 	this.ctx = ctx
 }
-func (this *LoginRequest) GetContext() iris.Context {
+func (this *LoginRequest) GetContext() context.Context {
 
 	return this.ctx
 }

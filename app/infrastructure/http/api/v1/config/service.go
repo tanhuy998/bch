@@ -11,6 +11,8 @@ import (
 	accessTokenClientPort "app/port/accessTokenClient"
 	actionResultServicePort "app/port/actionResult"
 	authSignatureTokenPort "app/port/authSignatureToken"
+	generalTokenClientServicePort "app/port/generalTokenClient"
+	"app/port/generalTokenServicePort"
 	jwtTokenServicePort "app/port/jwtTokenService"
 	passwordServicePort "app/port/passwordService"
 	refreshTokenServicePort "app/port/refreshToken"
@@ -25,6 +27,8 @@ import (
 	actionResultService "app/service/actionResult"
 	authService "app/service/auth"
 	"app/service/authSignatureToken"
+	generalTokenClientService "app/service/generalTokenClient"
+	"app/service/generalTokenService"
 	jwtTokenService "app/service/jwtToken"
 	passwordService "app/service/password"
 	refreshTokenService "app/service/refreshToken"
@@ -234,8 +238,11 @@ func RegisterAuthDependencies(container *hero.Container) {
 	libConfig.BindDependency[uniqueIDServicePort.IUniqueIDGenerator](container, uniqueID)
 	libConfig.BindDependency[refreshTokenIdServicePort.IRefreshTokenIDProvider, refreshTokenIDService.RefreshTokenIDProviderService](container, nil)
 
-	accessTokenSevice := new(accessTokenService.JWTAccessTokenManipulatorService)
-	libConfig.BindDependency[accessTokenServicePort.IAccessTokenManipulator](container, accessTokenSevice)
+	libConfig.BindDependency[generalTokenServicePort.IGeneralTokenManipulator, generalTokenService.GeneralTokenManipulator](container, nil)
+	libConfig.BindDependency[generalTokenClientServicePort.IGeneralTokenClient, generalTokenClientService.GeneralTokenClientService](container, nil)
+
+	//accessTokenSevice := new(accessTokenService.JWTAccessTokenManipulatorService)
+	libConfig.BindDependency[accessTokenServicePort.IAccessTokenManipulator, accessTokenService.JWTAccessTokenManipulatorService](container, nil)
 
 	cacheClient, err := memoryCache.NewClient[string, refreshTokenBlackListServicePort.IRefreshTokenBlackListPayload](
 		refreshTokenBlackListServicePort.REFRESH_TOKE_BLACK_LIST_TOPIC,

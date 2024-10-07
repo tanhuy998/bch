@@ -10,6 +10,7 @@ import (
 	createTenantDomain "app/domain/tenant/createTenant"
 	createTenantAgentDomain "app/domain/tenant/createTenantAgent"
 	getSingleTenantAgentDomain "app/domain/tenant/getSingleTenantAgent"
+	switchTenantDomain "app/domain/tenant/switchTenant"
 
 	"github.com/kataras/iris/v12/hero"
 )
@@ -28,6 +29,7 @@ func RegisterTenantBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[tenantServicePort.IGetSingleTenantAgent, getSingleTenantAgentDomain.GetSingleTenantAgentService](container, nil)
 	libConfig.BindDependency[tenantServicePort.ICreateTenantAgent, createTenantAgentDomain.CreateTenantAgentService](container, nil)
 	libConfig.BindDependency[tenantServicePort.ICreateTenant, createTenantDomain.CreateTenantService](container, nil)
+	libConfig.BindDependency[tenantServicePort.ISwitchTenant, switchTenantDomain.SwitchTenantService](container, nil)
 
 	libConfig.BindDependency[
 		usecasePort.IUseCase[requestPresenter.CreateTenantRequest, responsePresenter.CreateTenantResponse],

@@ -4,9 +4,8 @@ import (
 	"app/internal/common"
 	"app/model"
 	authServicePort "app/port/auth"
-	authSignatureTokenPort "app/port/authSignatureToken"
+	"app/port/generalTokenServicePort"
 	passwordServicePort "app/port/passwordService"
-	refreshTokenServicePort "app/port/refreshToken"
 	"app/repository"
 	"context"
 	"errors"
@@ -20,17 +19,18 @@ type (
 	//ILogIn = authServiceAdapter.ILogIn
 
 	LogInService struct {
-		PasswordService            passwordServicePort.IPassword
-		UserRepo                   repository.IUser
-		GetSingleUser              authServicePort.IGetSingleUser
-		RefreshTokenManipulator    refreshTokenServicePort.IRefreshTokenManipulator
-		AuthSignatureTokenProvider authSignatureTokenPort.IAuthSignatureProvider
+		PasswordService passwordServicePort.IPassword
+		UserRepo        repository.IUser
+		GetSingleUser   authServicePort.IGetSingleUser
+		//RefreshTokenManipulator    refreshTokenServicePort.IRefreshTokenManipulator
+		//AuthSignatureTokenProvider authSignatureTokenPort.IAuthSignatureProvider
+		GeneralTokenService generalTokenServicePort.IGeneralTokenManipulator
 	}
 )
 
 func (this *LogInService) Serve(
 	username string, password string, ctx context.Context,
-) (at string, rt string, err error) {
+) (gt generalTokenServicePort.IGeneralToken, err error) {
 
 	existingUser, err := this.GetSingleUser.SearchByUsername(username, ctx)
 
@@ -60,5 +60,12 @@ func (this *LogInService) Serve(
 		return
 	}
 
-	return this.AuthSignatureTokenProvider.GenerateStrings(*existingUser.UUID, ctx)
+	generalToken, err := this.GeneralTokenService.Generate(*existingUser.UUID, ctx)
+
+	if err != nil {
+
+		return
+	}
+
+	return generalToken, nil
 }

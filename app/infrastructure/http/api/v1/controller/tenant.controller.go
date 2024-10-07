@@ -3,6 +3,8 @@ package controller
 import (
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
+	accessTokenClientPort "app/port/accessTokenClient"
+	tenantAccessTokenServicePort "app/port/generalTokenServicePort"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -14,8 +16,12 @@ import (
 type (
 	TenantController struct {
 		// CreateTenantAgentUsecase usecase.ICreateTenantAgent
-		Controller          *common.Controller
-		CreateTenantUseCase usecasePort.IUseCase[requestPresenter.CreateTenantRequest, responsePresenter.CreateTenantResponse]
+		Controller                    *common.Controller
+		AccessTokenClient             accessTokenClientPort.IAccessTokenClient
+		TenantAccessTokenManipulaotr  tenantAccessTokenServicePort.IGeneralTokenManipulator
+		CreateTenantUseCase           usecasePort.IUseCase[requestPresenter.CreateTenantRequest, responsePresenter.CreateTenantResponse]
+		GrantUserAsTenantAgentUseCase usecasePort.IUseCase[requestPresenter.GrantUserAsTenantAgent, responsePresenter.GrantUserAsTenantAgent]
+		SwitchTenantUseCase           usecasePort.IUseCase[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant]
 	}
 )
 
@@ -26,6 +32,16 @@ func (this *TenantController) BeforeActivation(activator mvc.BeforeActivation) {
 	activator.Handle(
 		"POST", "/", "CreateTenant",
 		middleware.BindRequest[requestPresenter.CreateTenantRequest](container),
+	)
+
+	activator.Handle(
+		"GET", "/agent/grant/{userUUID:uuid}", "GrantUserAsTenantAgent",
+		middleware.BindRequest[requestPresenter.CreateTenantRequest](container),
+	)
+
+	activator.Handle(
+		"GET", "/switch", "SwitchTenant",
+		middleware.BindRequest[requestPresenter.SwitchTenant](container),
 	)
 }
 
@@ -48,5 +64,23 @@ func (this *TenantController) CreateTenant(
 
 	return this.Controller.ResultOf(
 		this.CreateTenantUseCase.Execute(input),
+	)
+}
+
+func (this *TenantController) GrantUserAsTenantAgent(
+	input *requestPresenter.GrantUserAsTenantAgent,
+) (mvc.Result, error) {
+
+	return this.Controller.ResultOf(
+		this.GrantUserAsTenantAgentUseCase.Execute(input),
+	)
+}
+
+func (this *TenantController) SwitchTenant(
+	input *requestPresenter.SwitchTenant,
+) (mvc.Result, error) {
+
+	return this.Controller.ResultOf(
+		this.SwitchTenantUseCase.Execute(input),
 	)
 }

@@ -2,6 +2,7 @@ package libError
 
 import (
 	"app/infrastructure/http/common"
+	"fmt"
 
 	"github.com/go-errors/errors"
 )
@@ -32,5 +33,10 @@ func IsAcceptable(target error, exceptions ...error) bool {
 
 func NewInternal(errList ...error) error {
 
-	return errors.Join(append(errList, common.ERR_INTERNAL)...)
+	stack := errors.New("")
+
+	errList = append([]error{common.ERR_INTERNAL}, errList...)
+	errList = append(errList, fmt.Errorf(stack.ErrorStack()))
+
+	return errors.Join(errList...)
 }

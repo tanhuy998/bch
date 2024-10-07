@@ -2,6 +2,8 @@ package accessTokenServicePort
 
 import (
 	"app/model"
+	"app/port/generalTokenServicePort"
+	noExpireTokenServicePort "app/port/noExpireToken"
 	"context"
 	"time"
 
@@ -13,14 +15,22 @@ type (
 	AccessTokenAudience struct {
 	}
 
+	/*
+		IAccessTokenProvider
+	*/
 	IAccessTokenProvider interface {
-		GenerateByCredentials(model *model.User, tokenID string, ctx context.Context) (IAccessToken, error)
-		GenerateByUserUUID(userUUID uuid.UUID, tokenID string, ctx context.Context) (IAccessToken, error)
+		//GenerateByCredentials(model *model.User, tokenID string, ctx context.Context) (IAccessToken, error)
+		//GenerateByUserUUID(userUUID uuid.UUID, tokenID string, ctx context.Context) (IAccessToken, error)
+		noExpireTokenServicePort.INoExpireTokenProvider
 		GenerateBased(IAccessToken IAccessToken, ctx context.Context) (IAccessToken, error)
+
+		GenerateFor(
+			tenantUUID uuid.UUID, generalToken generalTokenServicePort.IGeneralToken, tokenID string, ctx context.Context,
+		) (IAccessToken, error)
 		DefaultExpireDuration() time.Duration
 
-		CtxNoExpireKey() string
-		IsNoExpire(ctx context.Context) bool
+		// CtxNoExpireKey() string
+		// IsNoExpire(ctx context.Context) bool
 	}
 
 	IAccessTokenSigning interface {
@@ -64,6 +74,7 @@ type (
 		// GetSubject() *uuid.UUID
 		// GetAudience() *AccessTokenAudience
 
+		GetTenantUUID() uuid.UUID
 		GetUserUUID() uuid.UUID
 		GetAudiences() []string
 		GetAuthData() IAccessTokenAuthData
