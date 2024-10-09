@@ -17,7 +17,8 @@ var (
 type (
 	jwt_refresh_token_custom_claims struct {
 		jwt.RegisteredClaims
-		RefreshTokenID string `json:"jti"`
+		RefreshTokenID string     `json:"jti"`
+		TenantUUID     *uuid.UUID `json:"sub"`
 	}
 
 	jwt_refresh_token struct {
@@ -110,4 +111,9 @@ func (this *jwt_refresh_token) GetExpireTime() (*time.Time, error) {
 	}
 
 	return &exp.Time, nil
+}
+
+func (this *jwt_refresh_token) GetTenantUUID() uuid.UUID {
+
+	return *this.claims.TenantUUID
 }

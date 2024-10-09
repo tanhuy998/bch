@@ -3,6 +3,7 @@ package createTenantDomain
 import (
 	"app/internal/common"
 	libCommon "app/internal/lib/common"
+	"app/internal/lib/libContext"
 	"app/model"
 	tenantServicePort "app/port/tenant"
 	"app/repository"
@@ -12,6 +13,9 @@ import (
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readconcern"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
 const (
@@ -57,6 +61,8 @@ func (this *CreateTenantService) Serve(
 		return
 	}
 
+	inputTenant.UUID = libCommon.PointerPrimitive(uuid.New())
+
 	session, err := this.MongoClient.StartSession()
 
 	if err != nil {
@@ -67,10 +73,17 @@ func (this *CreateTenantService) Serve(
 
 	defer session.EndSession(ctx)
 
-	newAgentModel := &model.TenantAgent{
-		UUID:       libCommon.PointerPrimitive(uuid.New()),
-		UserUUID:   libCommon.PointerPrimitive(uuid.UUID(*inputUser.UUID)),
-		TenantUUID: inputUser.TenantUUID,
+	var newAgentModel *model.TenantAgent
+
+	if inputUser != nil {
+
+		inputUser.UUID = inputTenant.UUID
+
+		newAgentModel = &model.TenantAgent{
+			UUID: libCommon.PointerPrimitive(uuid.New()),
+			//UserUUID:   libCommon.PointerPrimitive(uuid.UUID(*inputUser.UUID)),
+			TenantUUID: inputUser.TenantUUID,
+		}
 	}
 
 	_, err = session.WithTransaction(
@@ -86,12 +99,14 @@ func (this *CreateTenantService) Serve(
 				return nil, err
 			}
 
-			if inputUser == nil {
+			if newAgentModel == nil {
 
 				return nil, nil
 			}
 
-			inputUser, _, err = this.CreateTenantAgentService.Serve(inputUser, newAgentModel, *inputTenant.UUID, sessionCtx)
+			inputUser, _, err = this.CreateTenantAgentService.Serve(
+				inputUser, *inputTenant.UUID, libContext.WrapNoReadContext(sessionCtx),
+			)
 
 			if err != nil {
 
@@ -100,6 +115,9 @@ func (this *CreateTenantService) Serve(
 
 			return nil, nil
 		},
+		options.Transaction().
+			SetWriteConcern(writeconcern.Majority()).
+			SetReadConcern(readconcern.Snapshot()),
 	)
 
 	if err != nil {
@@ -121,12 +139,12 @@ func (this *CreateTenantService) validateTenant(name string, ctx context.Context
 
 	if err != nil {
 
-		return errors.Join(common.ERR_INTERNAL, err)
+		return err
 	}
 
 	if tenant != nil {
 
-		return ERR_TENANT_EXISTS
+		return errors.Join(ERR_TENANT_EXISTS)
 	}
 
 	return nil

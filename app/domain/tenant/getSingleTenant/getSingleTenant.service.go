@@ -1,4 +1,4 @@
-package tenantService
+package getSingleTenantDomain
 
 import (
 	"app/model"
@@ -9,23 +9,24 @@ import (
 )
 
 type (
-	IGetSingleTenant interface {
-		Serve(uuid string) (*model.Tenant, error)
-	}
-
 	GetSingleTenantService struct {
 		TenantRepo repository.ITenant
 	}
 )
 
-func (this *GetSingleTenantService) Serve(uuid_str string) (*model.Tenant, error) {
+func (this *GetSingleTenantService) Serve(uuid uuid.UUID, ctx context.Context) (*model.Tenant, error) {
 
-	uuid, err := uuid.Parse(uuid_str)
+	return this.TenantRepo.FindOneByUUID(uuid, ctx)
+}
+
+func (this *GetSingleTenantService) CheckExist(uuid uuid.UUID, ctx context.Context) (bool, error) {
+
+	m, err := this.Serve(uuid, ctx)
 
 	if err != nil {
 
-		return nil, err
+		return false, err
 	}
 
-	return this.TenantRepo.FindOneByUUID(uuid, context.TODO())
+	return m != nil, nil
 }

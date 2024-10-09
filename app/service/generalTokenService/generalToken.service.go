@@ -4,7 +4,9 @@ import (
 	"app/internal/common"
 	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
-	"app/port/generalTokenServicePort"
+	generalTokenServicePort "app/port/generalToken"
+	generalTokenIDServicePort "app/port/generalTokenID"
+
 	jwtTokenServicePort "app/port/jwtTokenService"
 	"app/service/noExpireTokenProvider"
 	"context"
@@ -17,12 +19,13 @@ import (
 )
 
 var (
-	default_expire_duration = 2 * time.Hour
+	DEFAULT_EXPIRY_DURATION = 2 * time.Hour
 )
 
 type (
 	IGeneralToken           = generalTokenServicePort.IGeneralToken
 	GeneralTokenManipulator struct {
+		GeneralTokenIDProvider           generalTokenIDServicePort.IGeneralTokenIDProvider
 		SymmetricTokenManipulatorService jwtTokenServicePort.ISymmetricJWTTokenManipulator
 		noExpireTokenProvider.NoExpireTokenProvider
 	}
@@ -63,7 +66,7 @@ func (this *GeneralTokenManipulator) Read(str string) (generalTokenServicePort.I
 
 func (this *GeneralTokenManipulator) SignString(at generalTokenServicePort.IGeneralToken) (string, error) {
 
-	if val, ok := at.(*jwt_tenant_access_token); ok {
+	if val, ok := at.(*jwt_general_token); ok {
 
 		return this.SymmetricTokenManipulatorService.SignString(val.jwt_token)
 	}
@@ -71,7 +74,7 @@ func (this *GeneralTokenManipulator) SignString(at generalTokenServicePort.IGene
 	return "", libError.NewInternal(fmt.Errorf("TenantAccessTokenManipulatorService error: invalid tenant access token sign"))
 }
 
-func (this *GeneralTokenManipulator) makeFor(userUUID uuid.UUID, ctx context.Context) (ITenantAccessToken, error) {
+func (this *GeneralTokenManipulator) makeFor(userUUID uuid.UUID, ctx context.Context) (IGeneralToken, error) {
 
 	if userUUID == uuid.Nil {
 
@@ -80,17 +83,25 @@ func (this *GeneralTokenManipulator) makeFor(userUUID uuid.UUID, ctx context.Con
 
 	token := this.SymmetricTokenManipulatorService.GenerateToken()
 
+	generalToken, err := this.GeneralTokenIDProvider.Serve(userUUID)
+
+	if err != nil {
+
+		return nil, err
+	}
+
 	customClaims := &custom_claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt: jwt.NewNumericDate(time.Now()),
 		},
-		UserUUID: libCommon.PointerPrimitive(userUUID),
+		UserUUID:       libCommon.PointerPrimitive(userUUID),
+		GeneralTokenID: libCommon.PointerPrimitive(generalToken),
 	}
 	token.Claims = customClaims
 
 	if !this.IsNoExpire(ctx) {
 
-		customClaims.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(default_expire_duration))
+		customClaims.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(DEFAULT_EXPIRY_DURATION))
 	}
 
 	return newFromToken(token)
@@ -98,5 +109,5 @@ func (this *GeneralTokenManipulator) makeFor(userUUID uuid.UUID, ctx context.Con
 
 func (this *GeneralTokenManipulator) GetDefaultExpireDuration() time.Duration {
 
-	return default_expire_duration
+	return DEFAULT_EXPIRY_DURATION
 }

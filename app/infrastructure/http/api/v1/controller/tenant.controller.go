@@ -4,7 +4,8 @@ import (
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
 	accessTokenClientPort "app/port/accessTokenClient"
-	tenantAccessTokenServicePort "app/port/generalTokenServicePort"
+	generalTokenServicePort "app/port/generalToken"
+
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -18,7 +19,7 @@ type (
 		// CreateTenantAgentUsecase usecase.ICreateTenantAgent
 		Controller                    *common.Controller
 		AccessTokenClient             accessTokenClientPort.IAccessTokenClient
-		TenantAccessTokenManipulaotr  tenantAccessTokenServicePort.IGeneralTokenManipulator
+		TenantAccessTokenManipulaotr  generalTokenServicePort.IGeneralTokenManipulator
 		CreateTenantUseCase           usecasePort.IUseCase[requestPresenter.CreateTenantRequest, responsePresenter.CreateTenantResponse]
 		GrantUserAsTenantAgentUseCase usecasePort.IUseCase[requestPresenter.GrantUserAsTenantAgent, responsePresenter.GrantUserAsTenantAgent]
 		SwitchTenantUseCase           usecasePort.IUseCase[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant]

@@ -1,6 +1,8 @@
 package refreshTokenIdServicePort
 
-import "github.com/google/uuid"
+import (
+	"app/internal/generalToken"
+)
 
 const (
 	REFRESH_TOKEN_COOKIE          = "refresh-token"
@@ -9,6 +11,9 @@ const (
 
 type (
 	IRefreshTokenIDProvider interface {
-		Generate(userUUID uuid.UUID) (string, error)
+		Generate(generalTokenID generalToken.GeneralTokenID) (string, error)
+		Extract(
+			ID string,
+		) (generalTokenID generalToken.GeneralTokenID, sessionID [8]byte, err error)
 	}
 )

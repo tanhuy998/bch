@@ -3,7 +3,8 @@ package generalTokenClientService
 import (
 	"app/internal/bootstrap"
 	libError "app/internal/lib/error"
-	"app/port/generalTokenServicePort"
+	generalTokenServicePort "app/port/generalToken"
+
 	"context"
 	"fmt"
 	"net/http"

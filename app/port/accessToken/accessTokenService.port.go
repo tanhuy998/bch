@@ -2,7 +2,8 @@ package accessTokenServicePort
 
 import (
 	"app/model"
-	"app/port/generalTokenServicePort"
+
+	generalTokenServicePort "app/port/generalToken"
 	noExpireTokenServicePort "app/port/noExpireToken"
 	"context"
 	"time"

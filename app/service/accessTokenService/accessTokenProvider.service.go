@@ -6,6 +6,7 @@ import (
 	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	accessTokenServicePort "app/port/accessToken"
+	generalTokenServicePort "app/port/generalToken"
 	jwtTokenServicePort "app/port/jwtTokenService"
 	"app/repository"
 	"app/service/noExpireTokenProvider"
@@ -13,8 +14,6 @@ import (
 	"context"
 	"errors"
 	"time"
-
-	"app/port/generalTokenServicePort"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"

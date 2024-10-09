@@ -29,7 +29,7 @@ func (this *CreateTenantUseCase) Execute(
 ) (*responsePresenter.CreateTenantResponse, error) {
 
 	newTenant := &model.Tenant{
-		Name:        input.Data.Name,
+		Name:        input.Data.Title,
 		Description: input.Data.Description,
 	}
 

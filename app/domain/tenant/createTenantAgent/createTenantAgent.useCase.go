@@ -7,8 +7,6 @@ import (
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
-
-	"github.com/google/uuid"
 )
 
 type (
@@ -42,14 +40,7 @@ func (this *CreateTenantAgentUseCase) Execute(
 		newUser.CreatedBy = libCommon.PointerPrimitive(auth.GetUserUUID())
 	}
 
-	newAgentModel := &model.TenantAgent{
-		UUID:       libCommon.PointerPrimitive(uuid.New()),
-		UserUUID:   libCommon.PointerPrimitive(uuid.UUID(*newUser.UUID)),
-		TenantUUID: input.TenantUUID,
-		//Deactivated: true,
-	}
-
-	_, tenantAgent, err := this.CreateTenantAgentService.Serve(newUser, newAgentModel, *input.TenantUUID, input.GetContext())
+	_, tenantAgent, err := this.CreateTenantAgentService.Serve(newUser, *input.TenantUUID, input.GetContext())
 
 	if err != nil {
 

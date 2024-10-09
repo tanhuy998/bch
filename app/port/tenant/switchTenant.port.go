@@ -2,7 +2,8 @@ package tenantServicePort
 
 import (
 	accessTokenServicePort "app/port/accessToken"
-	"app/port/generalTokenServicePort"
+	generalTokenServicePort "app/port/generalToken"
+
 	refreshTokenServicePort "app/port/refreshToken"
 	"context"
 

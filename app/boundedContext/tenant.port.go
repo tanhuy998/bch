@@ -9,6 +9,7 @@ import (
 
 	createTenantDomain "app/domain/tenant/createTenant"
 	createTenantAgentDomain "app/domain/tenant/createTenantAgent"
+	getSingleTenantDomain "app/domain/tenant/getSingleTenant"
 	getSingleTenantAgentDomain "app/domain/tenant/getSingleTenantAgent"
 	switchTenantDomain "app/domain/tenant/switchTenant"
 
@@ -26,6 +27,7 @@ type (
 
 func RegisterTenantBoundedContext(container *hero.Container) {
 
+	libConfig.BindDependency[tenantServicePort.IGetSingleTenant, getSingleTenantDomain.GetSingleTenantService](container, nil)
 	libConfig.BindDependency[tenantServicePort.IGetSingleTenantAgent, getSingleTenantAgentDomain.GetSingleTenantAgentService](container, nil)
 	libConfig.BindDependency[tenantServicePort.ICreateTenantAgent, createTenantAgentDomain.CreateTenantAgentService](container, nil)
 	libConfig.BindDependency[tenantServicePort.ICreateTenant, createTenantDomain.CreateTenantService](container, nil)

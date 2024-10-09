@@ -1,7 +1,7 @@
 package authServicePort
 
 import (
-	"app/port/generalTokenServicePort"
+	generalTokenServicePort "app/port/generalToken"
 	"context"
 )
 

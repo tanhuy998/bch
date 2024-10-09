@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	ENGINE_UNIT_SIZE = 8
+	ENGINE_UNIT_SIZE = 8 // byte length
 )
 
 type (
@@ -70,6 +70,20 @@ func (this *uniqueIDService) Serve(input []byte) (string, error) {
 	if err != nil {
 
 		return "", libError.NewInternal(err)
+	}
+
+	return ret, nil
+}
+
+func (this *uniqueIDService) Decode(input string) ([]byte, error) {
+
+	spectrum := this.engine.Decode(input)
+
+	ret := make([]byte, len(spectrum)*ENGINE_UNIT_SIZE)
+
+	for i, v := range spectrum {
+
+		binary.BigEndian.PutUint64(ret[i:], v)
 	}
 
 	return ret, nil

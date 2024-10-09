@@ -1,6 +1,7 @@
 package generalTokenServicePort
 
 import (
+	"app/internal/generalToken"
 	noExpireTokenServicePort "app/port/noExpireToken"
 	"context"
 	"time"
@@ -12,6 +13,7 @@ type (
 	IGeneralToken interface {
 		GetUserUUID() uuid.UUID
 		GetExpiretime() *time.Time
+		GetTokenID() generalToken.GeneralTokenID
 	}
 
 	IGeneralTokenProvider interface {

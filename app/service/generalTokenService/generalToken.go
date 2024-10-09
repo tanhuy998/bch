@@ -1,8 +1,8 @@
 package generalTokenService
 
 import (
+	"app/internal/generalToken"
 	libError "app/internal/lib/error"
-	tenantAccessTokenServicePort "app/port/generalTokenServicePort"
 	"fmt"
 
 	"time"
@@ -12,14 +12,13 @@ import (
 )
 
 type (
-	ITenantAccessToken = tenantAccessTokenServicePort.IGeneralToken
-
 	custom_claims struct {
 		jwt.RegisteredClaims
-		UserUUID *uuid.UUID `json:"sub"`
+		GeneralTokenID *generalToken.GeneralTokenID `json:"jti"`
+		UserUUID       *uuid.UUID                   `json:"sub"`
 	}
 
-	jwt_tenant_access_token struct {
+	jwt_general_token struct {
 		jwt_token *jwt.Token
 		claims    *custom_claims
 		// userUUID   *uuid.UUID
@@ -27,7 +26,7 @@ type (
 	}
 )
 
-func newFromToken(token *jwt.Token) (*jwt_tenant_access_token, error) {
+func newFromToken(token *jwt.Token) (*jwt_general_token, error) {
 
 	if token == nil {
 
@@ -41,7 +40,7 @@ func newFromToken(token *jwt.Token) (*jwt_tenant_access_token, error) {
 		return nil, libError.NewInternal(fmt.Errorf("tenant access token err: invalid token claim type"))
 	}
 
-	ret := &jwt_tenant_access_token{
+	ret := &jwt_general_token{
 		jwt_token: token,
 		claims:    custom_claims,
 	}
@@ -49,12 +48,12 @@ func newFromToken(token *jwt.Token) (*jwt_tenant_access_token, error) {
 	return ret, nil
 }
 
-func (this *jwt_tenant_access_token) GetUserUUID() uuid.UUID {
+func (this *jwt_general_token) GetUserUUID() uuid.UUID {
 
 	return *this.claims.UserUUID
 }
 
-func (this *jwt_tenant_access_token) GetExpiretime() *time.Time {
+func (this *jwt_general_token) GetExpiretime() *time.Time {
 
 	t, err := this.claims.GetExpirationTime()
 
@@ -64,4 +63,9 @@ func (this *jwt_tenant_access_token) GetExpiretime() *time.Time {
 	}
 
 	return &t.Time
+}
+
+func (this *jwt_general_token) GetTokenID() generalToken.GeneralTokenID {
+
+	return *this.claims.GeneralTokenID
 }

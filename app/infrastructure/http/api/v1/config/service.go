@@ -11,8 +11,10 @@ import (
 	accessTokenClientPort "app/port/accessTokenClient"
 	actionResultServicePort "app/port/actionResult"
 	authSignatureTokenPort "app/port/authSignatureToken"
+	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
-	"app/port/generalTokenServicePort"
+	generalTokenIDServicePort "app/port/generalTokenID"
+
 	jwtTokenServicePort "app/port/jwtTokenService"
 	passwordServicePort "app/port/passwordService"
 	refreshTokenServicePort "app/port/refreshToken"
@@ -28,6 +30,7 @@ import (
 	authService "app/service/auth"
 	"app/service/authSignatureToken"
 	generalTokenClientService "app/service/generalTokenClient"
+	generalTokenIDService "app/service/generalTokenID"
 	"app/service/generalTokenService"
 	jwtTokenService "app/service/jwtToken"
 	passwordService "app/service/password"
@@ -237,6 +240,8 @@ func RegisterAuthDependencies(container *hero.Container) {
 
 	libConfig.BindDependency[uniqueIDServicePort.IUniqueIDGenerator](container, uniqueID)
 	libConfig.BindDependency[refreshTokenIdServicePort.IRefreshTokenIDProvider, refreshTokenIDService.RefreshTokenIDProviderService](container, nil)
+
+	libConfig.BindDependency[generalTokenIDServicePort.IGeneralTokenIDProvider, generalTokenIDService.GeneralTokenIDProvider](container, nil)
 
 	libConfig.BindDependency[generalTokenServicePort.IGeneralTokenManipulator, generalTokenService.GeneralTokenManipulator](container, nil)
 	libConfig.BindDependency[generalTokenClientServicePort.IGeneralTokenClient, generalTokenClientService.GeneralTokenClientService](container, nil)

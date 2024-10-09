@@ -3,7 +3,8 @@ package switchTenantDomain
 import (
 	accessTokenServicePort "app/port/accessToken"
 	authSignatureTokenPort "app/port/authSignatureToken"
-	"app/port/generalTokenServicePort"
+	generalTokenServicePort "app/port/generalToken"
+
 	refreshTokenServicePort "app/port/refreshToken"
 	"context"
 

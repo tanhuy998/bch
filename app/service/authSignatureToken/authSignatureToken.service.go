@@ -2,7 +2,8 @@ package authSignatureToken
 
 import (
 	accessTokenServicePort "app/port/accessToken"
-	"app/port/generalTokenServicePort"
+	generalTokenServicePort "app/port/generalToken"
+
 	refreshTokenServicePort "app/port/refreshToken"
 	"context"
 
@@ -21,7 +22,7 @@ func (this *AuthSignatureTokenService) Generate(
 	TenantUUID uuid.UUID, generalToken IGeneralToken, ctx context.Context,
 ) (at accessTokenServicePort.IAccessToken, rt refreshTokenServicePort.IRefreshToken, err error) {
 
-	rt, err = this.RefreshTokenManipulator.Generate(TenantUUID, ctx)
+	rt, err = this.RefreshTokenManipulator.Generate(TenantUUID, generalToken.GetTokenID(), ctx)
 
 	if err != nil {
 

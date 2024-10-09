@@ -4,7 +4,8 @@ import (
 	"app/internal/common"
 	"app/model"
 	authServicePort "app/port/auth"
-	"app/port/generalTokenServicePort"
+	generalTokenServicePort "app/port/generalToken"
+
 	passwordServicePort "app/port/passwordService"
 	"app/repository"
 	"context"

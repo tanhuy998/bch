@@ -7,7 +7,7 @@ import (
 
 type (
 	CreateTenantInputData struct {
-		Name        string     `json:"name" validate:"required"`
+		Title       string     `json:"title" validate:"required"`
 		Description string     `json:"description"`
 		User        *InputUser `json:"user"`
 		//TenantAgentUUID string `json:"tenantAgentUUID"`
