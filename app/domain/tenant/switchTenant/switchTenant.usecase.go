@@ -9,6 +9,7 @@ import (
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
+	"errors"
 	"fmt"
 )
 
@@ -40,6 +41,19 @@ func (this *SwitchTenantUseCase) Execute(
 
 	at, rt, err := this.SwitchTenantService.Serve(*input.TenantUUID, generalToken, input.GetContext())
 	fmt.Println(1)
+
+	if errors.Is(err, common.ERR_UNAUTHORIZED) {
+
+		e := this.RefreshTokenClientService.Remove(input.GetContext())
+
+		if e != nil {
+
+			return nil, e
+		}
+
+		return nil, err
+	}
+
 	if err != nil {
 
 		return nil, err

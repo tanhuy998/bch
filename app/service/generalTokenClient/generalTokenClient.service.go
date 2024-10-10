@@ -95,3 +95,32 @@ func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken g
 
 	return nil
 }
+
+func (this *GeneralTokenClientService) Remove(ctx context.Context) error {
+
+	c, ok := ctx.(iris.Context)
+
+	if !ok {
+
+		return libError.NewInternal(fmt.Errorf("GeneralTokenClientService error: invalid token given (not type of iris.Context)"))
+	}
+
+	for _, hostname := range bootstrap.GetHostNames() {
+
+		if hostname == "*" {
+
+			continue
+		}
+
+		c.SetCookieKV(
+			GENERAL_TOKEN, "",
+			irisContext.CookiePath("/tenants/switch"),
+			irisContext.CookieHTTPOnly(true),
+			irisContext.CookieSameSite(http.SameSiteStrictMode),
+			irisContext.CookieDomain(hostname),
+			irisContext.CookieExpires(0),
+		)
+	}
+
+	return nil
+}

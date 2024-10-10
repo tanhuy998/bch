@@ -19,6 +19,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -41,8 +42,6 @@ type (
 	IGeneralToken       = generalTokenServicePort.IGeneralToken
 
 	JWTAccessTokenManipulatorService struct {
-		//JWtTokenSigningServive      jwtTokenServicePort.IJWTTokenSigning
-		//FetchAuthDataService       authServiceAdapter.IFetchAuthData
 		AudienceList               accessTokenServicePort.AccessTokenAudienceList
 		JWTTokenManipulatorService jwtTokenServicePort.IAsymmetricJWTTokenManipulator
 		UserRepo                   repository.IUser
@@ -76,54 +75,6 @@ func (this *JWTAccessTokenManipulatorService) Read(token_str string) (IAccessTok
 	return newFromToken(token)
 }
 
-// func (this *JWTAccessTokenManipulatorService) GenerateByUserUUID(
-// 	userUUID uuid.UUID, tokenID string, ctx context.Context,
-// ) (at accessTokenServicePort.IAccessToken, err error) {
-
-// 	authData, err := this.queryAndGenerate(
-// 		bson.D{
-// 			{"uuid", userUUID},
-// 		},
-// 		ctx,
-// 	)
-
-// 	if err != nil {
-
-// 		return nil, err
-// 	}
-
-// 	if authData == nil {
-
-// 		return nil, errors.Join(common.ERR_UNAUTHORIZED)
-// 	}
-
-// 	at = this.makeFor(userUUID)
-
-// 	at.SetTokenID(tokenID)
-// 	return
-// }
-
-// func (this *JWTAccessTokenManipulatorService) GenerateByCredentials(
-// 	model *model.User, tokenID string, ctx context.Context,
-// ) (at accessTokenServicePort.IAccessToken, err error) {
-
-// 	authData, err = this.queryAndGenerate(
-// 		bson.D{
-// 			{"username", model.Username},
-// 			//{"secret", model.Secret},
-// 		},
-// 		ctx,
-// 	)
-
-// 	if err != nil || at == nil {
-
-// 		return
-// 	}
-
-// 	at.SetTokenID(tokenID)
-// 	return
-// }
-
 func (this *JWTAccessTokenManipulatorService) GenerateBased(
 	accessToken IAccessToken, ctx context.Context,
 ) (IAccessToken, error) {
@@ -148,7 +99,7 @@ func (this *JWTAccessTokenManipulatorService) GenerateBased(
 }
 
 func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
-	condition bson.D, ctx context.Context,
+	condition bson.D, tenantUUID uuid.UUID, ctx context.Context,
 ) (*valueObject.AuthData, error) {
 
 	data, err := repository.Aggregate[valueObject.AuthData](
@@ -166,6 +117,17 @@ func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
 						{"localField", "uuid"},
 						{"foreignField", "userUUID"},
 						{"as", "participatedCommandGroups"},
+						{
+							"pipeline", mongo.Pipeline{
+								bson.D{
+									{
+										"$match", bson.D{
+											{"tenantUUID", tenantUUID},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -176,6 +138,56 @@ func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
 						{"localField", "uuid"},
 						{"foreignField", "userUUID"},
 						{"as", "tenantAgentData"},
+						{
+							"pipeline", mongo.Pipeline{
+								bson.D{
+									{
+										"$match", bson.D{
+											{"tenantUUID", tenantUUID},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			// bson.D{
+			// 	{
+			// 		"$set", bson.D{
+			// 			{
+			// 				"tenantAgentData", bson.D{
+			// 					{
+			// 						"$arrayElemAt", bson.A{"$tempTenantAgentDatas", 0},
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// },
+			bson.D{
+				{"$set",
+					bson.D{
+						{"isTenantAgent",
+							bson.D{
+								{"$cond",
+									bson.D{
+										{"if",
+											bson.D{
+												{"$ne",
+													bson.A{
+														"$tenantAgentData.0",
+														primitive.Null{},
+													},
+												},
+											},
+										},
+										{"then", true},
+										{"else", false},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -187,7 +199,8 @@ func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
 						{"username", 1},
 						{"tenantUUID", 1},
 						{"participatedCommandGroups", 1},
-						{"tenantAgentData", 1},
+						{"isTenantAgent", 1},
+						//{"tenantAgentData", 1},
 					},
 				},
 			},
@@ -205,23 +218,12 @@ func (this *JWTAccessTokenManipulatorService) queryAndGenerate(
 
 	if len(data) == 0 {
 
-		return nil, ERR_INVALID_USER_CREDENTIALS
+		return nil, common.ERR_UNAUTHORIZED
 	}
 
 	authData := data[0]
 
 	return authData, nil
-
-	// accessToken, err := this.makeFor(*authData.UserUUID, ctx)
-
-	// if err != nil {
-
-	// 	return nil, err
-	// }
-
-	// accessToken.customClaims.AuthData = authData
-
-	// return accessToken, nil
 }
 
 func (this *JWTAccessTokenManipulatorService) makeFor(
@@ -231,11 +233,6 @@ func (this *JWTAccessTokenManipulatorService) makeFor(
 	token := this.JWTTokenManipulatorService.GenerateToken()
 
 	customeClaims := &jwt_access_token_custom_claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			// Issuer:   bootstrap.GetAppName(),
-			// IssuedAt: jwt.NewNumericDate(time.Now()),
-			//Audience:  jwt.ClaimStrings(bootstrap.GetHostNames()),
-		},
 		Issuer:     bootstrap.GetAppName(),
 		IssuedAt:   jwt.NewNumericDate(time.Now()),
 		TokenID:    "",
@@ -288,6 +285,7 @@ func (this *JWTAccessTokenManipulatorService) GenerateFor(
 		bson.D{
 			{"uuid", generalToken.GetUserUUID()},
 		},
+		tenantUUID,
 		ctx,
 	)
 	fmt.Println(10, err)
@@ -309,18 +307,7 @@ func (this *JWTAccessTokenManipulatorService) GenerateFor(
 	}
 
 	at.SetTokenID(tokenID)
+	at.customClaims.AuthData = authData
 
 	return at, nil
 }
-
-// func (this *JWTAccessTokenManipulatorService) CtxNoExpireKey() string {
-
-// 	return key_no_expire
-// }
-
-// func (this *JWTAccessTokenManipulatorService) IsNoExpire(ctx context.Context) bool {
-
-// 	v, ok := ctx.Value(key_no_expire).(bool)
-
-// 	return ok && v
-// }

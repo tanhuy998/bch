@@ -16,11 +16,12 @@ type (
 	}
 
 	AuthData struct {
-		UserUUID                  *uuid.UUID                      `json:"uuid" bson:"uuid"`
-		Name                      string                          `json:"name,omitempty" bson:"name"`
-		TenantUUID                *uuid.UUID                      `json:"tenantUUID,omitempty" bson:"tenantUUID"`
-		TenantAgentData           []*model.TenantAgent            `json:"tenantAgentData,omitempty" bson:"tenantAgentData"`
 		ParticipatedCommandGroups []*UserParticipatedCommandGroup `json:"participatedGroups,omitempty" bson:"participatedGroups"`
+		Name                      string                          `json:"name,omitempty" bson:"name"`
+		UserUUID                  *uuid.UUID                      `json:"uuid" bson:"uuid"`
+		TenantUUID                *uuid.UUID                      `json:"tenantUUID,omitempty" bson:"tenantUUID"`
+		TenantAgentData           *model.TenantAgent              `json:"tenantAgentData,omitempty"`
+		IsAgent                   bool                            `json:"isTenantAgent" bson:"isTenantAgent"`
 	}
 )
 
@@ -31,12 +32,7 @@ func (this *AuthData) GetTenantUUID() uuid.UUID {
 
 func (this *AuthData) GetTenantAgentData() *model.TenantAgent {
 
-	if len(this.TenantAgentData) == 0 {
-
-		return nil
-	}
-
-	return this.TenantAgentData[0]
+	return this.TenantAgentData
 }
 
 func (this *AuthData) GetParticipatedGroups() (ret []IParticipatedCommandGroup) {
@@ -51,7 +47,7 @@ func (this *AuthData) GetParticipatedGroups() (ret []IParticipatedCommandGroup) 
 
 func (this *AuthData) IsTenantAgent() bool {
 
-	return this.TenantAgentData != nil
+	return this.IsAgent
 }
 
 func (this *AuthData) GetUserUUID() uuid.UUID {

@@ -45,9 +45,10 @@ func (this *CreateTenantUseCase) Execute(
 	if input.Data.User != nil {
 
 		newUser = &model.User{
-			Name:     input.Data.User.Name,
-			Username: input.Data.User.Username,
-			PassWord: input.Data.User.Password,
+			Name:      input.Data.User.Name,
+			Username:  input.Data.User.Username,
+			PassWord:  input.Data.User.Password,
+			CreatedBy: newTenant.CreatedBy,
 		}
 	}
 

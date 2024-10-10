@@ -9,5 +9,6 @@ type (
 	IGeneralTokenClient interface {
 		Read(ctx context.Context) (generalTokenServicePort.IGeneralToken, error)
 		Write(ctx context.Context, generalToken generalTokenServicePort.IGeneralToken) error
+		Remove(ctx context.Context) error
 	}
 )

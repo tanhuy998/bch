@@ -56,7 +56,7 @@ func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken r
 
 	if !ok {
 
-		return nil
+		return libError.NewInternal(fmt.Errorf("RefreshTokenClientService error: invalid context given (not type of iris.Context)"))
 	}
 
 	rt, err := this.RefreshTokenManipulator.SignString(refreshToken)
@@ -90,6 +90,35 @@ func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken r
 
 		c.SetCookieKV(
 			key, rt, ops...,
+		)
+	}
+
+	return nil
+}
+
+func (this *RefreshTokenClientService) Remove(ctx context.Context) error {
+
+	c, ok := ctx.(iris.Context)
+
+	if !ok {
+
+		return libError.NewInternal(fmt.Errorf("RefreshTokenClientService error: invalid context given (not type of iris.Context)"))
+	}
+
+	for _, hostname := range bootstrap.GetHostNames() {
+
+		if hostname == "*" {
+
+			continue
+		}
+
+		c.SetCookieKV(
+			key, "",
+			irisContext.CookiePath("/refresh"),
+			irisContext.CookieHTTPOnly(true),
+			irisContext.CookieSameSite(http.SameSiteStrictMode),
+			irisContext.CookieDomain(hostname),
+			irisContext.CookieExpires(0),
 		)
 	}
 

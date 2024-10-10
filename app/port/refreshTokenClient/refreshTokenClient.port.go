@@ -9,5 +9,6 @@ type (
 	IRefreshTokenClient interface {
 		Read(ctx context.Context) (refreshTokenServicePort.IRefreshToken, error)
 		Write(ctx context.Context, refreshToken refreshTokenServicePort.IRefreshToken) error
+		Remove(ctx context.Context) error
 	}
 )

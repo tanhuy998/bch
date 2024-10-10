@@ -67,14 +67,14 @@ func (this CreateTenantAgentService) Serve(inputUser *model.User, tenantUUID uui
 	}
 
 	inputUser.TenantUUID = &tenantUUID
-	inputUser.UUID = libCommon.PointerPrimitive(uuid.New())
 
 	newTenantAgent := &model.TenantAgent{
 		UUID:       libCommon.PointerPrimitive(uuid.New()),
 		TenantUUID: libCommon.PointerPrimitive(tenantUUID),
-		UserUUID:   inputUser.UUID,
 		CreatedBy:  inputUser.CreatedBy,
 	}
+
+	fmt.Println(inputUser.UUID, newTenantAgent.UserUUID)
 
 	session, err := this.MongoClient.StartSession()
 
@@ -89,13 +89,14 @@ func (this CreateTenantAgentService) Serve(inputUser *model.User, tenantUUID uui
 		ctx,
 		func(ctx mongo.SessionContext) (interface{}, error) {
 
-			_, err := this.CreateUserService.CreateByModel(inputUser, ctx)
+			newUserModel, err := this.CreateUserService.CreateByModel(inputUser, ctx)
 
 			if err != nil {
 
 				return nil, err
 			}
 
+			newTenantAgent.UserUUID = newUserModel.UUID
 			err = this.TenantAgentRepo.Create(newTenantAgent, ctx)
 
 			if err != nil {

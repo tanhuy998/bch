@@ -77,7 +77,7 @@ func (this *CreateTenantService) Serve(
 
 	if inputUser != nil {
 
-		inputUser.UUID = inputTenant.UUID
+		inputUser.TenantUUID = inputTenant.UUID
 
 		newAgentModel = &model.TenantAgent{
 			UUID: libCommon.PointerPrimitive(uuid.New()),
