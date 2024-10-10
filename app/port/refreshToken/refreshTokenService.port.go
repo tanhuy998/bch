@@ -1,7 +1,7 @@
 package refreshTokenServicePort
 
 import (
-	"app/internal/generalToken"
+	generalTokenServicePort "app/port/generalToken"
 	"context"
 	"errors"
 	"time"
@@ -20,11 +20,11 @@ type (
 		GetUserUUID() uuid.UUID
 		GetTenantUUID() uuid.UUID
 		GetTokenID() string
-		GetExpireTime() (*time.Time, error)
+		GetExpireTime() *time.Time
 	}
 
 	IRefreshTokenProvider interface {
-		Generate(tenantUUID uuid.UUID, generalTokenID generalToken.GeneralTokenID, ctx context.Context) (IRefreshToken, error)
+		Generate(tenantUUID uuid.UUID, generalTokenID generalTokenServicePort.IGeneralToken, ctx context.Context) (IRefreshToken, error)
 		Revoke(refreshToken IRefreshToken, ctx context.Context) error
 		DefaultExpireDuration() time.Duration
 	}

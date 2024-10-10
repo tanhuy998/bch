@@ -12,6 +12,10 @@ var (
 	ErrInvalidTextGeneralTokenID = fmt.Errorf("invalid GeneralTokenID length")
 )
 
+var (
+	Nil = [24]byte{}
+)
+
 type (
 	GeneralTokenID [24]byte
 )

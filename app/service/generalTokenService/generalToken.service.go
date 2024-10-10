@@ -91,9 +91,7 @@ func (this *GeneralTokenManipulator) makeFor(userUUID uuid.UUID, ctx context.Con
 	}
 
 	customClaims := &custom_claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			IssuedAt: jwt.NewNumericDate(time.Now()),
-		},
+		IssuedAt:       jwt.NewNumericDate(time.Now()),
 		UserUUID:       libCommon.PointerPrimitive(userUUID),
 		GeneralTokenID: libCommon.PointerPrimitive(generalToken),
 	}
@@ -101,7 +99,7 @@ func (this *GeneralTokenManipulator) makeFor(userUUID uuid.UUID, ctx context.Con
 
 	if !this.IsNoExpire(ctx) {
 
-		customClaims.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(DEFAULT_EXPIRY_DURATION))
+		customClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(DEFAULT_EXPIRY_DURATION))
 	}
 
 	return newFromToken(token)

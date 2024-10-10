@@ -13,6 +13,7 @@ import (
 	"app/valueObject"
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -231,10 +232,12 @@ func (this *JWTAccessTokenManipulatorService) makeFor(
 
 	customeClaims := &jwt_access_token_custom_claims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:   bootstrap.GetAppName(),
-			IssuedAt: jwt.NewNumericDate(time.Now()),
+			// Issuer:   bootstrap.GetAppName(),
+			// IssuedAt: jwt.NewNumericDate(time.Now()),
 			//Audience:  jwt.ClaimStrings(bootstrap.GetHostNames()),
 		},
+		Issuer:     bootstrap.GetAppName(),
+		IssuedAt:   jwt.NewNumericDate(time.Now()),
 		TokenID:    "",
 		TenantUUID: libCommon.PointerPrimitive(tenantUUID),
 		AuthData:   nil,
@@ -287,7 +290,7 @@ func (this *JWTAccessTokenManipulatorService) GenerateFor(
 		},
 		ctx,
 	)
-
+	fmt.Println(10, err)
 	if err != nil {
 
 		return nil, err
@@ -299,7 +302,7 @@ func (this *JWTAccessTokenManipulatorService) GenerateFor(
 	}
 
 	at, err := this.makeFor(tenantUUID, ctx)
-
+	fmt.Println(11, err)
 	if err != nil {
 
 		return nil, err

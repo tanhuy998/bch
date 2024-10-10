@@ -1,9 +1,9 @@
 package refreshTokenService
 
 import (
-	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -17,8 +17,11 @@ var (
 type (
 	jwt_refresh_token_custom_claims struct {
 		jwt.RegisteredClaims
-		RefreshTokenID string     `json:"jti"`
-		TenantUUID     *uuid.UUID `json:"sub"`
+		Issuer         string           `json:"iss"`
+		RefreshTokenID string           `json:"jti"`
+		TenantUUID     *uuid.UUID       `json:"sub"`
+		IssuedAt       *jwt.NumericDate `json:"iat"`
+		ExpiresAt      *jwt.NumericDate `json:"exp"`
 	}
 
 	jwt_refresh_token struct {
@@ -30,7 +33,9 @@ type (
 
 func newFromToken(token *jwt.Token) (*jwt_refresh_token, error) {
 
-	var ret *jwt_refresh_token
+	var (
+		ret *jwt_refresh_token
+	)
 
 	if claims, ok := token.Claims.(*jwt_refresh_token_custom_claims); ok {
 
@@ -44,33 +49,24 @@ func newFromToken(token *jwt.Token) (*jwt_refresh_token, error) {
 		return nil, ERR_INVALID_TOKEN
 	}
 
-	exp, err := token.Claims.GetExpirationTime()
+	claims := ret.claims
 
-	if err != nil {
+	if claims.TenantUUID == nil ||
+		*claims.TenantUUID == uuid.Nil {
 
-		return nil, err
+		return nil, libError.NewInternal(fmt.Errorf("refresh token contains no Tenant UUID"))
 	}
 
-	if exp == nil {
+	if claims.RefreshTokenID == "" {
 
-		return nil, ERR_INVALID_TOKEN
+		return nil, libError.NewInternal(fmt.Errorf("refresh token contains no token ID"))
 	}
 
-	subject, err := token.Claims.GetSubject()
+	// if ret.userUUID == nil ||
+	// 	*ret.userUUID == uuid.Nil {
 
-	if err != nil {
-
-		return nil, err
-	}
-
-	userUUID, err := uuid.Parse(subject)
-
-	if err != nil {
-
-		return nil, err
-	}
-
-	ret.userUUID = libCommon.PointerPrimitive(userUUID)
+	// 	return nil, libError.NewInternal(fmt.Errorf("refresh token contains to UserUUID"))
+	// }
 
 	return ret, nil
 }
@@ -96,21 +92,31 @@ func (this *jwt_refresh_token) Expired() bool {
 	return exp.Before(time.Now())
 }
 
-func (this *jwt_refresh_token) GetExpireTime() (*time.Time, error) {
+func (this *jwt_refresh_token) GetExpireTime() *time.Time {
 
-	exp, err := this.jwt_token.Claims.GetExpirationTime()
+	// exp, err := this.jwt_token.Claims.GetExpirationTime()
 
-	if err != nil {
+	// if err != nil {
 
-		return nil, libError.NewInternal(err)
+	// 	return nil, libError.NewInternal(err)
+	// }
+
+	// if exp == nil {
+
+	// 	return nil, nil
+	// }
+
+	// return &exp.Time, nil
+
+	claims := this.claims
+
+	if claims == nil ||
+		claims.ExpiresAt == nil {
+
+		return nil
 	}
 
-	if exp == nil {
-
-		return nil, nil
-	}
-
-	return &exp.Time, nil
+	return &claims.ExpiresAt.Time
 }
 
 func (this *jwt_refresh_token) GetTenantUUID() uuid.UUID {

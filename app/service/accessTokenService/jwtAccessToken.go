@@ -1,8 +1,6 @@
 package accessTokenService
 
 import (
-	"app/internal/common"
-	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	accessTokenServicePort "app/port/accessToken"
 	"app/valueObject"
@@ -31,7 +29,10 @@ type (
 		// Aud []string   `json:"aud,omitempty"`
 		// Exp time.Time  `json:"exp"`
 		jwt.RegisteredClaims
+		Issuer     string                `json:"iss"`
 		TokenID    string                `json:"jti"`
+		IssuedAt   *jwt.NumericDate      `json:"iat"`
+		ExpireAt   *jwt.NumericDate      `json:"exp"`
 		TenantUUID *uuid.UUID            `json:"sub"`
 		AuthData   *valueObject.AuthData `json:"aut"`
 	}
@@ -39,7 +40,7 @@ type (
 	jwt_access_token struct {
 		jwt_token    *jwt.Token
 		customClaims *jwt_access_token_custom_claims
-		userUUID     *uuid.UUID
+		// userUUID     *uuid.UUID
 		//authData  *AccessTokenAuthData
 		//expired bool
 		// audience  *accessTokenServicePort.AccessTokenAudience
@@ -67,27 +68,27 @@ func newFromToken(token *jwt.Token) (*jwt_access_token, error) {
 		return nil, ERR_INVALID_TOKEN
 	}
 
-	subClaim, err := token.Claims.GetSubject()
+	// subClaim, err := token.Claims.GetSubject()
 
-	if err != nil {
+	// if err != nil {
 
-		return nil, errors.Join(
-			common.ERR_INTERNAL,
-			err,
-		)
-	}
+	// 	return nil, errors.Join(
+	// 		common.ERR_INTERNAL,
+	// 		err,
+	// 	)
+	// }
 
-	userUUID, err := uuid.Parse(subClaim)
+	// userUUID, err := uuid.Parse(subClaim)
 
-	if err != nil {
+	// if err != nil {
 
-		return nil, errors.Join(
-			common.ERR_INTERNAL,
-			err,
-		)
-	}
+	// 	return nil, errors.Join(
+	// 		common.ERR_INTERNAL,
+	// 		err,
+	// 	)
+	// }
 
-	ret.userUUID = libCommon.PointerPrimitive(userUUID)
+	// ret.userUUID = libCommon.PointerPrimitive(userUUID)
 
 	// exp, err := token.Claims.GetExpirationTime()
 
@@ -106,7 +107,16 @@ func newFromToken(token *jwt.Token) (*jwt_access_token, error) {
 
 func (this *jwt_access_token) GetUserUUID() uuid.UUID {
 
-	return *this.userUUID
+	claims := this.customClaims
+
+	if claims == nil ||
+		claims.AuthData == nil ||
+		claims.AuthData.UserUUID == nil {
+
+		return uuid.Nil
+	}
+
+	return *claims.AuthData.UserUUID
 }
 
 func (this *jwt_access_token) GetAudiences() []string {
@@ -116,12 +126,7 @@ func (this *jwt_access_token) GetAudiences() []string {
 
 func (this *jwt_access_token) Expired() bool {
 
-	exp, err := this.GetExpire()
-
-	if err != nil {
-
-		return false
-	}
+	exp := this.GetExpire()
 
 	if exp == nil {
 
@@ -136,9 +141,17 @@ func (this *jwt_access_token) GetAuthData() IAccessTokenAuthData {
 	return this.customClaims.AuthData
 }
 
-func (this *jwt_access_token) GetExpire() (*jwt.NumericDate, error) {
+func (this *jwt_access_token) GetExpire() *time.Time {
 
-	return this.jwt_token.Claims.GetExpirationTime()
+	claims := this.customClaims
+
+	if claims == nil ||
+		claims.ExpireAt == nil {
+
+		return nil
+	}
+
+	return &claims.ExpireAt.Time
 }
 
 func (this *jwt_access_token) GetTokenID() string {
@@ -152,6 +165,15 @@ func (this *jwt_access_token) SetTokenID(id string) {
 }
 
 func (this *jwt_access_token) GetTenantUUID() uuid.UUID {
+
+	claims := this.customClaims
+
+	if claims == nil ||
+		claims.AuthData == nil ||
+		claims.AuthData.TenantUUID == nil {
+
+		return uuid.Nil
+	}
 
 	return *this.customClaims.TenantUUID
 }

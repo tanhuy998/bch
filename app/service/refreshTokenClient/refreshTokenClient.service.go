@@ -6,6 +6,7 @@ import (
 	refreshTokenServicePort "app/port/refreshToken"
 	"fmt"
 	"net/http"
+	"time"
 
 	"context"
 
@@ -71,16 +72,11 @@ func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken r
 		irisContext.CookieSameSite(http.SameSiteStrictMode),
 	}
 
-	expire, err := refreshToken.GetExpireTime()
-
-	if err != nil {
-
-		return err
-	}
+	expire := refreshToken.GetExpireTime()
 
 	if expire != nil {
 
-		options = append(options, irisContext.CookieExpires(this.RefreshTokenManipulator.DefaultExpireDuration()))
+		options = append(options, irisContext.CookieExpires(time.Until(*expire)))
 	}
 
 	for _, hostname := range bootstrap.GetHostNames() {

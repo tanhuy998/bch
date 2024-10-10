@@ -9,6 +9,7 @@ import (
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
+	"fmt"
 )
 
 type (
@@ -38,26 +39,26 @@ func (this *SwitchTenantUseCase) Execute(
 	}
 
 	at, rt, err := this.SwitchTenantService.Serve(*input.TenantUUID, generalToken, input.GetContext())
-
+	fmt.Println(1)
 	if err != nil {
 
 		return nil, err
 	}
 
 	err = this.RefreshTokenClientService.Write(input.GetContext(), rt)
-
+	fmt.Println(2)
 	if err != nil {
 
 		return nil, err
 	}
 
 	at_str, err := this.AccessTokenManipulator.SignString(at)
-
+	fmt.Println(3)
 	if err != nil {
 
 		return nil, err
 	}
-
+	fmt.Println(4)
 	output := this.GenerateOutput()
 	output.Data.AccessToken = at_str
 

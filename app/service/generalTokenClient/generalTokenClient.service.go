@@ -40,7 +40,14 @@ func (this *GeneralTokenClientService) Read(ctx context.Context) (generalTokenSe
 		return nil, nil
 	}
 
-	return this.GeneralTokenManipulator.Read(str)
+	ret, err := this.GeneralTokenManipulator.Read(str)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return ret, nil
 }
 
 func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken generalTokenServicePort.IGeneralToken) error {
@@ -60,7 +67,7 @@ func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken g
 	}
 
 	options := []irisContext.CookieOption{
-		irisContext.CookiePath("/access/grant"),
+		irisContext.CookiePath("/tenants/switch"),
 		irisContext.CookieHTTPOnly(true),
 		irisContext.CookieSameSite(http.SameSiteStrictMode),
 	}
@@ -79,10 +86,10 @@ func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken g
 			continue
 		}
 
-		ops := append(options, irisContext.CookieDomain(hostname))
+		opts := append(options, irisContext.CookieDomain(hostname))
 
 		c.SetCookieKV(
-			GENERAL_TOKEN, gt, ops...,
+			GENERAL_TOKEN, gt, opts...,
 		)
 	}
 

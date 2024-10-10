@@ -8,7 +8,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -80,7 +79,7 @@ type (
 		GetAudiences() []string
 		GetAuthData() IAccessTokenAuthData
 		Expired() bool
-		GetExpire() (*jwt.NumericDate, error)
+		GetExpire() *time.Time
 		GetTokenID() string
 		SetTokenID(string)
 	}

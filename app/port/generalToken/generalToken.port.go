@@ -14,6 +14,7 @@ type (
 		GetUserUUID() uuid.UUID
 		GetExpiretime() *time.Time
 		GetTokenID() generalToken.GeneralTokenID
+		Expire() bool
 	}
 
 	IGeneralTokenProvider interface {

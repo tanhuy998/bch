@@ -11,6 +11,7 @@ import (
 	createTenantAgentDomain "app/domain/tenant/createTenantAgent"
 	getSingleTenantDomain "app/domain/tenant/getSingleTenant"
 	getSingleTenantAgentDomain "app/domain/tenant/getSingleTenantAgent"
+	grantUserAsTenantAgentDomain "app/domain/tenant/grantUserAsTenantAgent"
 	switchTenantDomain "app/domain/tenant/switchTenant"
 
 	"github.com/kataras/iris/v12/hero"
@@ -36,6 +37,14 @@ func RegisterTenantBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[
 		usecasePort.IUseCase[requestPresenter.CreateTenantRequest, responsePresenter.CreateTenantResponse],
 		createTenantDomain.CreateTenantUseCase,
+	](container, nil)
+	libConfig.BindDependency[
+		usecasePort.IUseCase[requestPresenter.GrantUserAsTenantAgent, responsePresenter.GrantUserAsTenantAgent],
+		grantUserAsTenantAgentDomain.GrantUserAsTenantAgentUseCase,
+	](container, nil)
+	libConfig.BindDependency[
+		usecasePort.IUseCase[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant],
+		switchTenantDomain.SwitchTenantUseCase,
 	](container, nil)
 
 	container.Register(new(TenantBoundedContext)).Explicitly().EnableStructDependents()

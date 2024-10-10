@@ -8,7 +8,7 @@ import (
 
 type (
 	SwitchTenant struct {
-		TenantUUID *uuid.UUID
+		TenantUUID *uuid.UUID `param:"tenantUUID" validate:"required"`
 		ctx        context.Context
 	}
 )

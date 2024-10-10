@@ -3,6 +3,7 @@ package controller
 import (
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
+	"app/infrastructure/http/middleware/middlewareHelper"
 	accessTokenClientPort "app/port/accessTokenClient"
 	generalTokenServicePort "app/port/generalToken"
 
@@ -32,16 +33,24 @@ func (this *TenantController) BeforeActivation(activator mvc.BeforeActivation) {
 
 	activator.Handle(
 		"POST", "/", "CreateTenant",
+		middleware.SecretAuth,
 		middleware.BindRequest[requestPresenter.CreateTenantRequest](container),
 	)
 
 	activator.Handle(
 		"GET", "/agent/grant/{userUUID:uuid}", "GrantUserAsTenantAgent",
-		middleware.BindRequest[requestPresenter.CreateTenantRequest](container),
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequireTenantAgent,
+		),
+		middleware.BindRequest[requestPresenter.CreateTenantRequest](
+			container,
+			middlewareHelper.UseAuthority,
+		),
 	)
 
 	activator.Handle(
-		"GET", "/switch", "SwitchTenant",
+		"GET", "/switch/{tenantUUID:uuid}", "SwitchTenant",
 		middleware.BindRequest[requestPresenter.SwitchTenant](container),
 	)
 }
