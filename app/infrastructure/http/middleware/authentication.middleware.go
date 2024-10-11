@@ -7,6 +7,7 @@ import (
 	accessTokenClientPort "app/port/accessTokenClient"
 	jwtTokenServicePort "app/port/jwtTokenService"
 	"errors"
+	"fmt"
 	"net/http"
 
 	jwt "github.com/golang-jwt/jwt/v5"
@@ -150,6 +151,8 @@ func authentication_func(
 func validateAccessToken(accessToken accessTokenServicePort.IAccessToken) (errorCode int, err error) {
 
 	switch {
+	case accessToken == nil:
+		return http.StatusUnauthorized, fmt.Errorf("unauthorized")
 	case accessToken.Expired():
 		return http.StatusUnauthorized, ERR_ACCESS_TOKEN_EXPIRED
 	default:

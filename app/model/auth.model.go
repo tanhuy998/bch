@@ -49,9 +49,9 @@ type (
 	}
 
 	Role struct {
-		UUID       *uuid.UUID `json:"uuid" bson:"uuid,omitempty"`
-		TenantUUID *uuid.UUID `json:"tenantUUID" bson:"tenantUUID,omitempty"`
-		Name       string     `json:"name" bson:"name,omitempty"`
+		UUID       *uuid.UUID `json:"uuid,omitempty" bson:"uuid,omitempty"`
+		TenantUUID *uuid.UUID `json:"tenantUUID,omitempty" bson:"tenantUUID,omitempty"`
+		Name       string     `json:"name,omitempty" bson:"name,omitempty"`
 	}
 )
 

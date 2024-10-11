@@ -1,6 +1,7 @@
 package grantCommandGroupRoleToUserDomain
 
 import (
+	"app/internal/common"
 	authServicePort "app/port/auth"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
@@ -8,13 +9,6 @@ import (
 )
 
 type (
-	// IGrantCommandGroupRolesToUser interface {
-	// 	Execute(
-	// 		input *requestPresenter.GrantCommandGroupRolesToUserRequest,
-	// 		output *responsePresenter.GrantCommandGroupRolesToUserResponse,
-	// 	) (mvc.Result, error)
-	// }
-
 	GrantCommandGroupRolesToUserUseCase struct {
 		usecasePort.UseCase[requestPresenter.GrantCommandGroupRolesToUserRequest, responsePresenter.GrantCommandGroupRolesToUserResponse]
 		GrantCommandGroupRolesToUserService authServicePort.IGrantCommandGroupRolesToUser
@@ -25,7 +19,18 @@ func (this *GrantCommandGroupRolesToUserUseCase) Execute(
 	input *requestPresenter.GrantCommandGroupRolesToUserRequest,
 ) (*responsePresenter.GrantCommandGroupRolesToUserResponse, error) {
 
-	err := this.GrantCommandGroupRolesToUserService.Serve(*input.GroupUUID, *input.UserUUID, input.Data, input.GetContext())
+	if !input.IsValidTenantUUID() {
+
+		return nil, this.ErrorWithContext(
+			input, common.ERR_UNAUTHORIZED,
+		)
+	}
+
+	auth := input.GetAuthority()
+
+	err := this.GrantCommandGroupRolesToUserService.Serve(
+		input.GetTenantUUID(), *input.GroupUUID, *input.UserUUID, input.Data, auth.GetUserUUID(), input.GetContext(),
+	)
 
 	if err != nil {
 

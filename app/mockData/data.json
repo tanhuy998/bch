@@ -1,5 +1,19 @@
 [
     {
+        "roles": [
+            {
+                "uuid": "a7c3b2ff-5698-436a-bacc-7db2c741ab7b",
+                "tenantUUID": null,
+                "name": "COMMANDER"
+            },
+            {
+                "uuid": "0e34b78b-500d-4d16-8413-cff4589ef732",
+                "tenantUUID": null,
+                "name": "MEMBER"
+            }
+        ]
+    },
+    {
         "tenant": {
             "uuid": "f47b11f6-26cf-4a0b-8f02-9c59de5f60e1",
             "createdBy": null,

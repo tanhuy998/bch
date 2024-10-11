@@ -8,6 +8,6 @@ import (
 
 type (
 	IGrantCommandGroupRolesToUser interface {
-		Serve(groupUUID uuid.UUID, userUUID uuid.UUID, roles []uuid.UUID, ctx context.Context) error
+		Serve(tenantUUID uuid.UUID, groupUUID uuid.UUID, userUUID uuid.UUID, roles []uuid.UUID, createdBy uuid.UUID, ctx context.Context) error
 	}
 )

@@ -1,12 +1,14 @@
 package grantCommandGroupRoleToUserDomain
 
 import (
+	"app/internal/common"
 	libCommon "app/internal/lib/common"
 	"app/model"
 	authServicePort "app/port/auth"
 	"app/repository"
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -27,6 +29,7 @@ type (
 
 	GrantCommandGroupRolesToUserService struct {
 		RoleRepo                         repository.IRole
+		UserRepo                         repository.IUser
 		CheckCommandGroupUserRoleService authServicePort.ICheckCommandGroupUserRole
 		CommandGroupUserRepo             repository.ICommandGroupUser
 		CommandGroupUserRoleRepo         repository.ICommandGroupUserRole
@@ -36,30 +39,22 @@ type (
 )
 
 func (this *GrantCommandGroupRolesToUserService) Serve(
+	tenantUUID uuid.UUID,
 	groupUUID uuid.UUID,
 	userUUID uuid.UUID,
 	roles []uuid.UUID,
+	createdBy uuid.UUID,
 	ctx context.Context,
 ) error {
 
-	// if len(roles) == 0 {
-
-	// 	return ERR_EMPTY_ROLE_LIST
-	// }
-
-	// groupUUID, err := uuid.Parse(groupUUID_str)
-
-	// if err != nil {
-
-	// 	return errors.Join(common.ERR_BAD_REQUEST, errors.New("invalid group"))
-	// }
-
-	// userUUID, err := uuid.Parse(userUUID_str)
-
-	// if err != nil {
-
-	// 	return errors.Join(common.ERR_BAD_REQUEST, errors.New("invalid user"))
-	// }
+	switch existingUser, err := this.UserRepo.FindOneByUUID(userUUID, ctx); {
+	case err != nil:
+		return err
+	case existingUser == nil:
+		return errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("user not found"))
+	case *existingUser.TenantUUID != tenantUUID:
+		return errors.Join(common.ERR_FORBIDEN, fmt.Errorf("user not in tenant"))
+	}
 
 	commandGroupUser, err := this.CheckUserInCommandGroup.Detail(groupUUID, userUUID, ctx)
 
@@ -70,19 +65,17 @@ func (this *GrantCommandGroupRolesToUserService) Serve(
 
 	if commandGroupUser == nil {
 
-		return ERR_INVALID_GROUP_USER
-	}
-
-	err = this._checkValidRoles(roles, ctx)
-
-	if err != nil {
-
-		return err
+		return errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("user not in group"))
 	}
 
 	if len(roles) == 0 {
 
-		return ERR_INVALID_VALUES_IN_ROLE_LIST
+		return errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("no roles provided"))
+	}
+
+	if err = this.checkValidRoles(roles, ctx); err != nil {
+
+		return err
 	}
 
 	unGrantedRoles, err := this.CheckCommandGroupUserRoleService.Compare(groupUUID, userUUID, roles, ctx)
@@ -94,18 +87,25 @@ func (this *GrantCommandGroupRolesToUserService) Serve(
 
 	if len(unGrantedRoles) == 0 {
 
-		return ERR_ROLES_EXIST
+		return errors.Join(common.ERR_CONFLICT, fmt.Errorf("given roles already grant to user"))
 	}
 
 	var commandGroupUserRoleList []*model.CommandGroupUserRole = make([]*model.CommandGroupUserRole, len(unGrantedRoles))
 
 	for i, v := range unGrantedRoles {
 
-		commandGroupUserRoleList[i] = &model.CommandGroupUserRole{
+		obj := &model.CommandGroupUserRole{
 			UUID:                 libCommon.PointerPrimitive(uuid.New()),
 			RoleUUID:             &v,
 			CommandGroupUserUUID: commandGroupUser.UUID,
 		}
+
+		if createdBy != uuid.Nil {
+
+			obj.CreatedBy = &createdBy
+		}
+
+		commandGroupUserRoleList[i] = obj
 	}
 
 	err = this.CommandGroupUserRoleRepo.CreateMany(commandGroupUserRoleList, context.TODO())
@@ -118,7 +118,7 @@ func (this *GrantCommandGroupRolesToUserService) Serve(
 	return nil
 }
 
-func (this *GrantCommandGroupRolesToUserService) _checkValidRoles(roleUUIDs []uuid.UUID, ctx context.Context) error {
+func (this *GrantCommandGroupRolesToUserService) checkValidRoles(roleUUIDs []uuid.UUID, ctx context.Context) error {
 
 	var (
 		conditions []bson.D    = make([]primitive.D, len(roleUUIDs))
@@ -126,13 +126,6 @@ func (this *GrantCommandGroupRolesToUserService) _checkValidRoles(roleUUIDs []uu
 	)
 
 	for i, v := range roleUUIDs {
-
-		// roleUUID, err := uuid.Parse(v)
-
-		// if err != nil {
-
-		// 	return nil, ERR_INVALID_VALUES_IN_ROLE_LIST
-		// }
 
 		ret[i] = v
 		conditions[i] = bson.D{{"uuid", v}}
@@ -147,7 +140,7 @@ func (this *GrantCommandGroupRolesToUserService) _checkValidRoles(roleUUIDs []uu
 
 	if err != nil || res == nil || len(res) != len(roleUUIDs) {
 
-		return ERR_INVALID_VALUES_IN_ROLE_LIST
+		return errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("invalid roles provided"))
 	}
 
 	return nil

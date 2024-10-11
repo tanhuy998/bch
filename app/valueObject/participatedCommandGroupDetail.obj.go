@@ -1,10 +1,15 @@
 package valueObject
 
-import "app/model"
+import (
+	"app/model"
+
+	"github.com/google/uuid"
+)
 
 type (
 	ParticipatedCommandGroupDetail struct {
-		CommandGroup *model.CommandGroup `json:"commandGroup" bson:"commandGroup"`
-		Role         *model.Role         `json:"role" bson:"role"`
+		CommandGroupUUID uuid.UUID     `json:"commandGroupUUID" bson:"commandGroupUUID"`
+		GroupName        string        `json:"groupName" bson:"name"`
+		Roles            []*model.Role `json:"roles" bson:"roles"`
 	}
 )

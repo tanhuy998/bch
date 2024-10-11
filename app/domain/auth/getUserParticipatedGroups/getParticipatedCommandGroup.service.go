@@ -1,9 +1,12 @@
 package getUserParticipatedCommandGroupDomain
 
 import (
+	"app/internal/common"
 	"app/repository"
 	"app/valueObject"
 	"context"
+	"errors"
+	"fmt"
 
 	"app/model"
 
@@ -19,17 +22,22 @@ type (
 
 	GetParticipatedCommandGroupsService struct {
 		CommandGroupUserRepo repository.ICommandGroupUser
+		UserRepo             repository.IUser
 	}
 )
 
-func (this *GetParticipatedCommandGroupsService) Serve(userUUID uuid.UUID, ctx context.Context) (*valueObject.ParticipatedCommandGroupReport, error) {
+func (this *GetParticipatedCommandGroupsService) Serve(
+	tenantUUID uuid.UUID, userUUID uuid.UUID, ctx context.Context,
+) (*valueObject.ParticipatedCommandGroupReport, error) {
 
-	// userUUID, err := uuid.Parse(userUUID_str)
-
-	// if err != nil {
-
-	// 	return nil, err
-	// }
+	switch existingUser, err := this.UserRepo.FindOneByUUID(userUUID, ctx); {
+	case err != nil:
+		return nil, err
+	case existingUser == nil:
+		return nil, errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("user not found"))
+	case *existingUser.TenantUUID != tenantUUID:
+		return nil, errors.Join(common.ERR_FORBIDEN, fmt.Errorf("user not in tenant"))
+	}
 
 	res, err := repository.Aggregate[valueObject.ParticipatedCommandGroupDetail](
 		this.CommandGroupUserRepo.GetCollection(),
@@ -38,6 +46,39 @@ func (this *GetParticipatedCommandGroupsService) Serve(userUUID uuid.UUID, ctx c
 				{
 					"$match", bson.D{
 						{"userUUID", userUUID},
+						{"tenantUUID", tenantUUID},
+					},
+				},
+			},
+			bson.D{
+				{"$lookup",
+					bson.D{
+						{"from", "commandGroupUserRoles"},
+						{"localField", "uuid"},
+						{"foreignField", "commandGroupUserUUID"},
+						{"as", "roles"},
+						{"pipeline",
+							bson.A{
+								bson.D{
+									{"$lookup",
+										bson.D{
+											{"from", "roles"},
+											{"localField", "roleUUID"},
+											{"foreignField", "uuid"},
+											{"as", "detail"},
+										},
+									},
+								},
+								bson.D{{"$unwind", "$detail"}},
+								bson.D{{"$replaceWith", "$detail"}},
+								bson.D{{
+									"$project", bson.D{
+										{"name", 1},
+										{"uuid", 1},
+									},
+								}},
+							},
+						},
 					},
 				},
 			},
@@ -47,42 +88,24 @@ func (this *GetParticipatedCommandGroupsService) Serve(userUUID uuid.UUID, ctx c
 						{"from", "commandGroups"},
 						{"localField", "commandGroupUUID"},
 						{"foreignField", "uuid"},
-						{"as", "commandGroups"},
+						{"as", "detail"},
+						{"pipeline",
+							bson.A{
+								bson.D{{"$project", bson.D{{"name", 1}}}},
+							},
+						},
 					},
 				},
 			},
-			bson.D{
-				{"$lookup",
-					bson.D{
-						{"from", "commandGroupUserRoles"},
-						{"localField", "uuid"},
-						{"foreignField", "commandGroupUUID"},
-						{"as", "roles"},
-					},
-				},
-			},
-			bson.D{{"$unwind", bson.D{{"path", "$commandGroups"}}}},
-			bson.D{
-				{"$unwind",
-					bson.D{
-						{"path", "$roles"},
-						{"preserveNullAndEmptyArrays", true},
-					},
-				},
-			},
-			bson.D{
-				{"$set",
-					bson.D{
-						{"commandGroup", "$commandGroups"},
-						{"role", "$roles"},
-					},
-				},
-			},
+			bson.D{{"$unwind", "$detail"}},
+			bson.D{{"$set", bson.D{{"name", "$detail.name"}}}},
 			bson.D{
 				{"$project",
 					bson.D{
-						{"commandGroup", 1},
-						{"role", 1},
+						{"tenantUUID", 0},
+						{"userUUID", 0},
+						{"uuid", 0},
+						{"detail", 0},
 					},
 				},
 			},
@@ -96,12 +119,9 @@ func (this *GetParticipatedCommandGroupsService) Serve(userUUID uuid.UUID, ctx c
 	}
 
 	report := &valueObject.ParticipatedCommandGroupReport{
-		UserUUID: userUUID,
-	}
-
-	if len(res) > 0 {
-
-		report.Details = res
+		UserUUID:   userUUID,
+		TenantUUID: tenantUUID,
+		Details:    res,
 	}
 
 	return report, nil

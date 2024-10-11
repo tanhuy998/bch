@@ -2,8 +2,6 @@ package getUserParticipatedCommandGroupDomain
 
 import (
 	"app/internal/common"
-	libCommon "app/internal/lib/common"
-	"app/model"
 	authServicePort "app/port/auth"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
@@ -30,12 +28,16 @@ func (this *GetParticipatedCommandGroupsUseCase) Execute(
 
 	//report, err := this.GetParticipatedCommandGroups.Serve(input.UserUUID)
 
-	report, err := this.GetParticipatedCommandGroups.SearchAndRetrieveByModel(
-		&model.User{
-			UUID:       input.UserUUID,
-			TenantUUID: libCommon.PointerPrimitive(input.GetAuthority().GetTenantUUID()),
-		},
-		input.GetContext(),
+	// report, err := this.GetParticipatedCommandGroups.SearchAndRetrieveByModel(
+	// 	&model.User{
+	// 		UUID:       input.UserUUID,
+	// 		TenantUUID: libCommon.PointerPrimitive(input.GetAuthority().GetTenantUUID()),
+	// 	},
+	// 	input.GetContext(),
+	// )
+
+	report, err := this.GetParticipatedCommandGroups.Serve(
+		input.GetTenantUUID(), *input.UserUUID, input.GetContext(),
 	)
 
 	if err != nil {
@@ -43,7 +45,7 @@ func (this *GetParticipatedCommandGroupsUseCase) Execute(
 		return nil, this.ErrorWithContext(input, err)
 	}
 
-	if report == nil || len(report.Details) == 0 {
+	if report == nil {
 
 		return nil, this.ErrorWithContext(
 			input, common.ERR_UNAUTHORIZED,
