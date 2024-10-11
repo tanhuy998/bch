@@ -4,7 +4,6 @@ import (
 	"app/internal/common"
 	libCommon "app/internal/lib/common"
 	"app/model"
-	authServicePort "app/port/auth"
 	"app/repository"
 	"context"
 	"errors"
@@ -19,46 +18,32 @@ var (
 
 type (
 	CreateCommandGroupService struct {
-		CommandGroupRepo             repository.ICommandGroup
-		GetSingleCommandGroupService authServicePort.IGetSingleCommandGroup
+		CommandGroupRepo repository.ICommandGroup
 	}
 )
 
-func (this *CreateCommandGroupService) Serve(groupName string, ctx context.Context) error {
-
-	groupExist, err := this.GetSingleCommandGroupService.CheckCommandGroupExistence(groupName, ctx)
-
-	if err != nil {
-
-		return err
-	}
-
-	if groupExist {
-
-		return ERR_COMMAND_EXIST
-	}
+func (this *CreateCommandGroupService) Serve(tenantUUID uuid.UUID, groupName string, ctx context.Context) (*model.CommandGroup, error) {
 
 	model := &model.CommandGroup{
-		UUID: libCommon.PointerPrimitive(uuid.New()),
 		Name: groupName,
 	}
 
-	err = this.CommandGroupRepo.Create(model, ctx)
-
-	if err != nil {
-
-		return err
-	}
-
-	return nil
+	return this.CreateByModel(tenantUUID, model, ctx)
 }
 
-func (this *CreateCommandGroupService) CreateByModel(model *model.CommandGroup, ctx context.Context) (*model.CommandGroup, error) {
+func (this *CreateCommandGroupService) CreateByModel(
+	tenantUUID uuid.UUID, model *model.CommandGroup, ctx context.Context,
+) (*model.CommandGroup, error) {
+
+	if tenantUUID == uuid.Nil {
+
+		return nil, common.ERR_UNAUTHORIZED
+	}
 
 	groupExist, err := this.CommandGroupRepo.Find(
 		bson.D{
 			{"name", model.Name},
-			{"tenantUUID", model.TenantUUID},
+			{"tenantUUID", tenantUUID},
 		},
 		ctx,
 	)
@@ -74,6 +59,7 @@ func (this *CreateCommandGroupService) CreateByModel(model *model.CommandGroup, 
 	}
 
 	model.UUID = libCommon.PointerPrimitive(uuid.New())
+	model.TenantUUID = libCommon.PointerPrimitive(tenantUUID)
 
 	err = this.CommandGroupRepo.Create(model, ctx)
 

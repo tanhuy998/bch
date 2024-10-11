@@ -15,13 +15,24 @@ type (
 		Role             string     `json:"role" bson:"role"`
 	}
 
+	/*
+		Authority of a user to a specific tenant corresponding to a particular access token
+	*/
 	AuthData struct {
 		ParticipatedCommandGroups []*UserParticipatedCommandGroup `json:"participatedGroups,omitempty" bson:"participatedGroups"`
-		Name                      string                          `json:"name,omitempty" bson:"name"`
+		Name                      string                          `json:"name,omitempty" bson:"name,omitempty"`
 		UserUUID                  *uuid.UUID                      `json:"uuid" bson:"uuid"`
-		TenantUUID                *uuid.UUID                      `json:"tenantUUID,omitempty" bson:"tenantUUID"`
-		TenantAgentData           *model.TenantAgent              `json:"tenantAgentData,omitempty"`
-		IsAgent                   bool                            `json:"isTenantAgent" bson:"isTenantAgent"`
+		/*
+			TenantUUId is the tenant which the user is belonged to
+		*/
+		TenantUUID      *uuid.UUID           `json:"tenantUUID,omitempty" bson:"tenantUUID"`
+		TenantAgentData []*model.TenantAgent `json:"tenantAgentData,omitempty"`
+		/*
+			IsAgent reports that the current user is agent of the corresponding tenant access token,
+			not the user's tenant uuid.
+			IsAgent is mostly used by Auth middlewware so it is unneccesary to use in domain level
+		*/
+		IsAgent bool `json:"isTenantAgent" bson:"isTenantAgent"`
 	}
 )
 
@@ -32,7 +43,12 @@ func (this *AuthData) GetTenantUUID() uuid.UUID {
 
 func (this *AuthData) GetTenantAgentData() *model.TenantAgent {
 
-	return this.TenantAgentData
+	if len(this.TenantAgentData) == 0 {
+
+		return nil
+	}
+
+	return this.TenantAgentData[0]
 }
 
 func (this *AuthData) GetParticipatedGroups() (ret []IParticipatedCommandGroup) {

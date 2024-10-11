@@ -5,8 +5,6 @@ import (
 	memoryCacheServicePort "app/port/memoryCache"
 	"context"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const (
@@ -15,12 +13,13 @@ const (
 
 type (
 	IRefreshTokenCacheClient interface {
-		memoryCacheServicePort.IMemoryCacheClient[string, IRefreshTokenBlackListPayload]
+		memoryCacheServicePort.IMemoryCacheClient[string, IRefreshTokenBlackListPayload] // IRefreshTokenBlackListPayload]
 	}
 
-	IRefreshTokenBlackListPayload interface {
-		GetUserUUID() uuid.UUID
-	}
+	IRefreshTokenBlackListPayload = interface{}
+	// IRefreshTokenBlackListPayload interface {
+	// 	GetUserUUID() uuid.UUID
+	// }
 
 	ReadFunction   func(ctx memoryCache.IHoldContext[string, IRefreshTokenBlackListPayload], payload IRefreshTokenBlackListPayload) error
 	UpdateFunction func(ctx memoryCache.IUpdateContext[string, IRefreshTokenBlackListPayload], payload IRefreshTokenBlackListPayload) (newVal IRefreshTokenBlackListPayload, err error)

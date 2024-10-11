@@ -23,7 +23,7 @@ type (
 
 	CreateCommandGroupUseCase struct {
 		usecasePort.UseCase[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse]
-		CreateCommandGroupService authServicePort.ICreateCommandGroup //authService.ICreateCommandGroup
+		CreateCommandGroupService authServicePort.ICreateCommandGroup
 	}
 )
 
@@ -35,15 +35,15 @@ func (this *CreateCommandGroupUseCase) Execute(
 
 	authority := input.GetAuthority()
 
-	if authority == nil {
+	if authority == nil ||
+		!input.IsValidTenantUUID() {
 
 		return nil, common.ERR_UNAUTHORIZED
 	}
 
 	data.CreatedBy = libCommon.PointerPrimitive(authority.GetUserUUID())
-	data.TenantUUID = libCommon.PointerPrimitive(authority.GetTenantUUID())
 
-	data, err := this.CreateCommandGroupService.CreateByModel(data, input.GetContext())
+	data, err := this.CreateCommandGroupService.CreateByModel(input.GetTenantUUID(), data, input.GetContext())
 
 	if err != nil {
 

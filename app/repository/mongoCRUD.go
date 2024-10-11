@@ -140,6 +140,39 @@ func ParseCursor[T any](cursor *mongo.Cursor, ctx context.Context) ([]*T, error)
 	return ret, nil
 }
 
+func ParseCursorOne[T any](cursor *mongo.Cursor, ctx context.Context) (*T, error) {
+
+	defer cursor.Close(context.TODO())
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	hasDocument := cursor.Next(ctx)
+
+	if cursor.Err() != nil {
+
+		return nil, libError.NewInternal(cursor.Err())
+	}
+
+	if !hasDocument {
+
+		return nil, nil
+	}
+
+	var ret *T = new(T)
+
+	err := cursor.Decode(ret)
+
+	if err != nil {
+		//fmt.Println(reflect.TypeOf(err))
+		return nil, libError.NewInternal(err)
+	}
+
+	return ret, nil
+}
+
 func findOneDocument[T any](
 	query bson.D,
 	collection *mongo.Collection,
@@ -493,7 +526,9 @@ func count(collection *mongo.Collection, ctx context.Context, filter ...bson.E) 
 	return collection.CountDocuments(ctx, filter)
 }
 
-func Aggregate[Model_T any](collection *mongo.Collection, pipeline mongo.Pipeline, ctx context.Context, options ...*options.AggregateOptions) ([]*Model_T, error) {
+func Aggregate[Model_T any](
+	collection *mongo.Collection, pipeline mongo.Pipeline, ctx context.Context, options ...*options.AggregateOptions,
+) ([]*Model_T, error) {
 
 	if ctx == nil {
 
@@ -508,6 +543,28 @@ func Aggregate[Model_T any](collection *mongo.Collection, pipeline mongo.Pipelin
 	}
 
 	return ParseCursor[Model_T](cursor, context.TODO())
+}
+
+/*
+return the first document of the aggregated result
+*/
+func AggregateOne[Model_T any](
+	collection *mongo.Collection, pipeline mongo.Pipeline, ctx context.Context, options ...*options.AggregateOptions,
+) (*Model_T, error) {
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline, options...)
+
+	if err != nil {
+
+		return nil, libError.NewInternal(err)
+	}
+
+	return ParseCursorOne[Model_T](cursor, ctx)
 }
 
 func AggregateByPage[Model_T any](

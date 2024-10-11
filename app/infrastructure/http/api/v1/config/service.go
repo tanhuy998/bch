@@ -7,36 +7,26 @@ import (
 	"app/internal/db"
 	libConfig "app/internal/lib/config"
 	"app/internal/memoryCache"
-	accessTokenServicePort "app/port/accessToken"
-	accessTokenClientPort "app/port/accessTokenClient"
 	actionResultServicePort "app/port/actionResult"
-	authSignatureTokenPort "app/port/authSignatureToken"
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	generalTokenIDServicePort "app/port/generalTokenID"
+	refreshTokenBlackListServicePort "app/port/refreshTokenBlackList"
 
 	jwtTokenServicePort "app/port/jwtTokenService"
 	passwordServicePort "app/port/passwordService"
-	refreshTokenServicePort "app/port/refreshToken"
-	refreshTokenBlackListServicePort "app/port/refreshTokenBlackList"
-	refreshTokenClientPort "app/port/refreshTokenClient"
 	refreshTokenIdServicePort "app/port/refreshTokenID"
 	"app/port/responsePresetPort"
 	uniqueIDServicePort "app/port/uniqueID"
 	"app/repository"
-	accessTokenClientService "app/service/accessTokenClient"
-	"app/service/accessTokenService"
 	actionResultService "app/service/actionResult"
 	authService "app/service/auth"
-	"app/service/authSignatureToken"
 	generalTokenClientService "app/service/generalTokenClient"
 	generalTokenIDService "app/service/generalTokenID"
 	"app/service/generalTokenService"
 	jwtTokenService "app/service/jwtToken"
 	passwordService "app/service/password"
-	refreshTokenService "app/service/refreshToken"
 	refreshTokenBlackListService "app/service/refreshTokenBlackList"
-	refreshTokenClientService "app/service/refreshTokenClient"
 	refreshTokenIDService "app/service/refreshTokenID"
 	"app/service/responsePresetService"
 	uniqueIDService "app/service/uniqueID"
@@ -219,6 +209,18 @@ func RegisterAuthDependencies(container *hero.Container) {
 
 	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticationService](container, nil, AUTH)
 
+	cacheClient, err := memoryCache.NewClient[string, interface{}](
+		refreshTokenBlackListServicePort.REFRESH_TOKE_BLACK_LIST_TOPIC,
+	)
+
+	if err != nil {
+
+		panic("error while inittiating refresh token blacklist cache client: " + err.Error())
+	}
+
+	libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenCacheClient](container, cacheClient)
+	libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator, refreshTokenBlackListService.RefreshTokenBlackListManipulatorService](container, nil)
+
 	asymmetricJWTService := jwtTokenService.NewECDSAService(
 		jwt.SigningMethodES256, *bootstrap.GetJWTAsymmetricEncryptionPrivateKey(), *bootstrap.GetJWTAsymmetricEncryptionPublicKey(),
 	)
@@ -237,34 +239,35 @@ func RegisterAuthDependencies(container *hero.Container) {
 	}
 
 	libConfig.BindDependency[uniqueIDServicePort.IUniqueIDGenerator](container, uniqueID)
-	libConfig.BindDependency[refreshTokenIdServicePort.IRefreshTokenIDProvider, refreshTokenIDService.RefreshTokenIDProviderService](container, nil)
-
 	libConfig.BindDependency[generalTokenIDServicePort.IGeneralTokenIDProvider, generalTokenIDService.GeneralTokenIDProvider](container, nil)
+
+	libConfig.BindDependency[refreshTokenIdServicePort.IRefreshTokenIDProvider, refreshTokenIDService.RefreshTokenIDProviderService](container, nil)
 
 	libConfig.BindDependency[generalTokenServicePort.IGeneralTokenManipulator, generalTokenService.GeneralTokenManipulator](container, nil)
 	libConfig.BindDependency[generalTokenClientServicePort.IGeneralTokenClient, generalTokenClientService.GeneralTokenClientService](container, nil)
 
 	//accessTokenSevice := new(accessTokenService.JWTAccessTokenManipulatorService)
-	libConfig.BindDependency[accessTokenServicePort.IAccessTokenManipulator, accessTokenService.JWTAccessTokenManipulatorService](container, nil)
-	libConfig.BindDependency[accessTokenClientPort.IAccessTokenClient, accessTokenClientService.BearerAccessTokenClientService](container, nil)
 
-	cacheClient, err := memoryCache.NewClient[string, refreshTokenBlackListServicePort.IRefreshTokenBlackListPayload](
-		refreshTokenBlackListServicePort.REFRESH_TOKE_BLACK_LIST_TOPIC,
-	)
+	// libConfig.BindDependency[accessTokenServicePort.IAccessTokenManipulator, accessTokenService.JWTAccessTokenManipulatorService](container, nil)
+	// libConfig.BindDependency[accessTokenClientPort.IAccessTokenClient, accessTokenClientService.BearerAccessTokenClientService](container, nil)
 
-	if err != nil {
+	// cacheClient, err := memoryCache.NewClient[string, refreshTokenBlackListServicePort.IRefreshTokenBlackListPayload](
+	// 	refreshTokenBlackListServicePort.REFRESH_TOKE_BLACK_LIST_TOPIC,
+	// )
 
-		panic("error while inittiating refresh token blacklist cache client: " + err.Error())
-	}
+	// if err != nil {
 
-	libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenCacheClient](container, cacheClient)
-	libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator, refreshTokenBlackListService.RefreshTokenBlackListManipulatorService](container, nil)
+	// 	panic("error while inittiating refresh token blacklist cache client: " + err.Error())
+	// }
 
-	refreshTokenService := new(refreshTokenService.RefreshTokenManipulatorService)
-	libConfig.BindDependency[refreshTokenServicePort.IRefreshTokenManipulator](container, refreshTokenService)
+	// libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenCacheClient](container, cacheClient)
+	// libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator, refreshTokenBlackListService.RefreshTokenBlackListManipulatorService](container, nil)
 
-	libConfig.BindDependency[refreshTokenClientPort.IRefreshTokenClient, refreshTokenClientService.RefreshTokenClientService](container, nil)
-	libConfig.BindDependency[authSignatureTokenPort.IAuthSignatureProvider, authSignatureToken.AuthSignatureTokenService](container, nil)
+	// refreshTokenService := new(refreshTokenService.RefreshTokenManipulatorService)
+	// libConfig.BindDependency[refreshTokenServicePort.IRefreshTokenManipulator](container, refreshTokenService)
+
+	// libConfig.BindDependency[refreshTokenClientPort.IRefreshTokenClient, refreshTokenClientService.RefreshTokenClientService](container, nil)
+	// libConfig.BindDependency[authSignatureTokenPort.IAuthSignatureProvider, authSignatureToken.AuthSignatureTokenService](container, nil)
 
 	fmt.Println("Auth service initialized.")
 }
