@@ -1,9 +1,13 @@
 package accessTokenClientPort
 
-import "github.com/kataras/iris/v12"
+import (
+	accessTokenServicePort "app/port/accessToken"
+
+	"github.com/kataras/iris/v12"
+)
 
 type (
 	IAccessTokenClient interface {
-		Read(reqCtx iris.Context) string
+		Read(reqCtx iris.Context) (accessTokenServicePort.IAccessToken, error)
 	}
 )

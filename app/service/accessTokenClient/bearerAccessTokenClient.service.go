@@ -1,6 +1,7 @@
 package accessTokenClientService
 
 import (
+	accessTokenServicePort "app/port/accessToken"
 	"strings"
 
 	"github.com/kataras/iris/v12"
@@ -12,17 +13,20 @@ const (
 
 type (
 	BearerAccessTokenClientService struct {
+		AccessTokenManipulator accessTokenServicePort.IAccessTokenManipulator
 	}
 )
 
-func (this *BearerAccessTokenClientService) Read(ctx iris.Context) string {
+func (this *BearerAccessTokenClientService) Read(ctx iris.Context) (accessTokenServicePort.IAccessToken, error) {
 
 	header_value := ctx.GetHeader(HEADER_AUTH)
 
 	if header_value == "" {
 
-		return ""
+		return nil, nil
 	}
 
-	return strings.TrimPrefix(header_value, "Bearer ")
+	raw := strings.TrimPrefix(header_value, "Bearer ")
+
+	return this.AccessTokenManipulator.Read(raw)
 }

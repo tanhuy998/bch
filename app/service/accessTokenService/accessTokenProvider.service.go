@@ -296,7 +296,12 @@ func (this *JWTAccessTokenManipulatorService) GenerateFor(
 
 	if authData == nil {
 
-		return nil, errors.Join(common.ERR_UNAUTHORIZED)
+		return nil, common.ERR_UNAUTHORIZED
+	}
+
+	if *authData.TenantUUID != tenantUUID && !authData.IsAgent {
+
+		return nil, common.ERR_UNAUTHORIZED
 	}
 
 	at, err := this.makeFor(tenantUUID, ctx)

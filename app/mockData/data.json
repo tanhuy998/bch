@@ -4,7 +4,17 @@
             "uuid": "f47b11f6-26cf-4a0b-8f02-9c59de5f60e1",
             "createdBy": null,
             "Name": "beatae doloremque libero",
-            "Description": "Quae expedita corrupti consectetur consectetur optio quaerat. Dolor inventore culpa quae ut veritatis consectetur modi quasi. Possimus magnam recusandae earum asperiores rerum."
+            "Description": "Quae expedita corrupti consectetur consectetur optio quaerat. Dolor inventore culpa quae ut veritatis consectetur modi quasi. Possimus magnam recusandae earum asperiores rerum.",
+            "newUser": {
+                "uuid": "6411899f-d1fe-46f0-b028-c7336cba0f4a",
+                "tenantUUID": "f47b11f6-26cf-4a0b-8f02-9c59de5f60e1",
+                "createdBy": "6de61f46-f33c-4a5d-b0dd-636549f38458",
+                "name": "sit doloribus quisquam",
+                "deactivated": false
+            },
+            "group": {
+                "uuid": "86fd17af-a2cb-4003-9228-9833c155b9f5"
+            }
         },
         "user": {
             "uuid": "6de61f46-f33c-4a5d-b0dd-636549f38458",
