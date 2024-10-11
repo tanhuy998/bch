@@ -1,6 +1,8 @@
 package responsePresenter
 
-import "app/model"
+import (
+	"app/model"
+)
 
 type (
 	GetGroupUsersResponse struct {

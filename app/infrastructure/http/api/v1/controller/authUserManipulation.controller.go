@@ -51,6 +51,15 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 			middlewareHelper.UseTenantMapping,
 		),
 	)
+
+	activator.Handle(
+		"GET", "/group/{groupUUID:uuid}", "GetGroupUsers",
+		middleware.BindRequest[requestPresenter.GetGroupUsersRequest](
+			container,
+			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
+		),
+	)
 }
 
 func (this *AuthUserManipulationController) BindDependencies(container *hero.Container) common.IController {

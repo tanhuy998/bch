@@ -1,10 +1,12 @@
 package getCommandGroupUsersDomain
 
 import (
+	"app/internal/common"
 	"app/model"
 	"app/repository"
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -27,25 +29,17 @@ type (
 	}
 )
 
-func (this *GetCommandGroupUsersService) Serve(groupUUID uuid.UUID, ctx context.Context) ([]*model.User, error) {
+func (this *GetCommandGroupUsersService) Serve(
+	tenantUUID uuid.UUID, groupUUID uuid.UUID, ctx context.Context,
+) ([]*model.User, error) {
 
-	// groupUUID, err := uuid.Parse(groupUUID_str)
-
-	// if err != nil {
-
-	// 	return nil, ERR_INVALID_INPUT_GROUP
-	// }
-
-	group, err := this.CommandGroupRepo.FindOneByUUID(groupUUID, ctx)
-
-	if err != nil {
-
+	switch existingGroup, err := this.CommandGroupRepo.FindOneByUUID(groupUUID, ctx); {
+	case err != nil:
 		return nil, err
-	}
-
-	if group == nil {
-
-		return nil, ERR_NO_GROUP
+	case existingGroup == nil:
+		return nil, errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("group not found"))
+	case *existingGroup.TenantUUID != tenantUUID:
+		return nil, errors.Join(common.ERR_FORBIDEN, fmt.Errorf("group not in tenant"))
 	}
 
 	ret, err := repository.Aggregate[model.User](
@@ -54,7 +48,7 @@ func (this *GetCommandGroupUsersService) Serve(groupUUID uuid.UUID, ctx context.
 			bson.D{
 				{
 					"$match", bson.D{
-						{"commandGroupUUID", groupUUID},
+						{"tenantUUID", tenantUUID},
 					},
 				},
 			},
@@ -71,7 +65,7 @@ func (this *GetCommandGroupUsersService) Serve(groupUUID uuid.UUID, ctx context.
 			bson.D{{"$unwind", bson.D{{"path", "$users"}}}},
 			bson.D{{"$replaceRoot", bson.D{{"newRoot", "$$ROOT.users"}}}},
 		},
-		context.TODO(),
+		ctx,
 	)
 
 	if err != nil {
@@ -82,49 +76,49 @@ func (this *GetCommandGroupUsersService) Serve(groupUUID uuid.UUID, ctx context.
 	return ret, nil
 }
 
-func (this *GetCommandGroupUsersService) SearchAndRetrieveByModel(dataModel *model.CommandGroup, ctx context.Context) ([]*model.User, error) {
+// func (this *GetCommandGroupUsersService) SearchAndRetrieveByModel(dataModel *model.CommandGroup, ctx context.Context) ([]*model.User, error) {
 
-	groupUUID := dataModel.UUID
-	group, err := this.CommandGroupRepo.FindOneByUUID(*groupUUID, context.TODO())
+// 	groupUUID := dataModel.UUID
+// 	group, err := this.CommandGroupRepo.FindOneByUUID(*groupUUID, context.TODO())
 
-	if err != nil {
+// 	if err != nil {
 
-		return nil, err
-	}
+// 		return nil, err
+// 	}
 
-	if group == nil {
+// 	if group == nil {
 
-		return nil, ERR_NO_GROUP
-	}
+// 		return nil, ERR_NO_GROUP
+// 	}
 
-	ret, err := repository.Aggregate[model.User](
-		this.CommandGroupUserRepo.GetCollection(),
-		mongo.Pipeline{
-			bson.D{
-				{
-					"$match", dataModel,
-				},
-			},
-			bson.D{
-				{"$lookup",
-					bson.D{
-						{"from", "users"},
-						{"localField", "userUUID"},
-						{"foreignField", "uuid"},
-						{"as", "users"},
-					},
-				},
-			},
-			bson.D{{"$unwind", bson.D{{"path", "$users"}}}},
-			bson.D{{"$replaceRoot", bson.D{{"newRoot", "$$ROOT.users"}}}},
-		},
-		context.TODO(),
-	)
+// 	ret, err := repository.Aggregate[model.User](
+// 		this.CommandGroupUserRepo.GetCollection(),
+// 		mongo.Pipeline{
+// 			bson.D{
+// 				{
+// 					"$match", dataModel,
+// 				},
+// 			},
+// 			bson.D{
+// 				{"$lookup",
+// 					bson.D{
+// 						{"from", "users"},
+// 						{"localField", "userUUID"},
+// 						{"foreignField", "uuid"},
+// 						{"as", "users"},
+// 					},
+// 				},
+// 			},
+// 			bson.D{{"$unwind", bson.D{{"path", "$users"}}}},
+// 			bson.D{{"$replaceRoot", bson.D{{"newRoot", "$$ROOT.users"}}}},
+// 		},
+// 		context.TODO(),
+// 	)
 
-	if err != nil {
+// 	if err != nil {
 
-		return nil, err
-	}
+// 		return nil, err
+// 	}
 
-	return ret, nil
-}
+// 	return ret, nil
+// }

@@ -9,6 +9,6 @@ import (
 
 type (
 	IGetCommandGroupUsers interface {
-		Serve(groupUUID uuid.UUID, ctx context.Context) ([]*model.User, error)
+		Serve(tenantUUID uuid.UUID, groupUUID uuid.UUID, ctx context.Context) ([]*model.User, error)
 	}
 )
