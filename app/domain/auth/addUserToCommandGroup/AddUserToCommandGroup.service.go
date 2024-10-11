@@ -41,7 +41,7 @@ func (this *AddUserToCommandGroupService) Serve(tenantUUID uuid.UUID, dataModel 
 	case group == nil:
 		return errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("command group not found"))
 	case *group.TenantUUID != tenantUUID:
-		return errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("command group not in tenant"))
+		return errors.Join(common.ERR_FORBIDEN, fmt.Errorf("command group not in tenant"))
 	}
 
 	switch user, err := this.GetSingleUserService.Serve(*dataModel.UserUUID, ctx); {
@@ -50,7 +50,7 @@ func (this *AddUserToCommandGroupService) Serve(tenantUUID uuid.UUID, dataModel 
 	case user == nil:
 		return errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("user not found"))
 	case *user.TenantUUID != tenantUUID:
-		return errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("user not in tenant"))
+		return errors.Join(common.ERR_FORBIDEN, fmt.Errorf("user not in tenant"))
 	}
 
 	switch res, err := this.CheckUserInCommandGroup.Detail(*dataModel.CommandGroupUUID, *dataModel.UserUUID, ctx); {
@@ -59,7 +59,7 @@ func (this *AddUserToCommandGroupService) Serve(tenantUUID uuid.UUID, dataModel 
 	case res != nil && *res.TenantUUID == tenantUUID:
 		return errors.Join(common.ERR_CONFLICT, fmt.Errorf("user already in group"))
 	case res != nil:
-		return errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("wrong tenant"))
+		return errors.Join(common.ERR_FORBIDEN, fmt.Errorf("wrong tenant"))
 	}
 
 	dataModel.UUID = libCommon.PointerPrimitive(uuid.New())
