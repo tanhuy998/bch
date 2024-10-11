@@ -14,9 +14,12 @@
                     "deactivated": false
                 }
             ],
-            "group": {
-                "uuid": "86fd17af-a2cb-4003-9228-9833c155b9f5"
-            }
+            "groups": [
+                {
+                    "uuid": "86fd17af-a2cb-4003-9228-9833c155b9f5",
+                    "name": "sit doloribus voluptatibus"
+                }
+            ] 
         },
         "tenantAgentUser": {
             "uuid": "6de61f46-f33c-4a5d-b0dd-636549f38458",
@@ -25,7 +28,8 @@
             "username": "Meda81",
             "password": "deserunt",
             "name": "debitis numquam consequuntur",
-            "deactivated": false
+            "deactivated": false,
+            "accessToken": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiY2giLCJqdGkiOiJHYkxDT3JEWWczc3pVbmNHOWEiLCJpYXQiOjE3Mjg2NDg5NzQsImV4cCI6bnVsbCwic3ViIjoiZjQ3YjExZjYtMjZjZi00YTBiLThmMDItOWM1OWRlNWY2MGUxIiwiYXV0Ijp7Im5hbWUiOiJkZWJpdGlzIG51bXF1YW0gY29uc2VxdXVudHVyIiwidXVpZCI6IjZkZTYxZjQ2LWYzM2MtNGE1ZC1iMGRkLTYzNjU0OWYzODQ1OCIsInRlbmFudFVVSUQiOiJmNDdiMTFmNi0yNmNmLTRhMGItOGYwMi05YzU5ZGU1ZjYwZTEiLCJpc1RlbmFudEFnZW50Ijp0cnVlfX0.vler6Vj97K8ePL8OMyNFTA44WAM1ZQnribTCA9JABC4u1CINrOiuGyjW37IU89z5DEEicqOb59-Q96GND6QPRA"
         }
     },
     {

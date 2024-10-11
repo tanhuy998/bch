@@ -8,6 +8,7 @@ import (
 	"app/repository"
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -32,51 +33,39 @@ func (this *AddUserToCommandGroupService) Get() authServicePort.IGetSingleComman
 	return this.GetSingleCommandGroupService
 }
 
-func (this *AddUserToCommandGroupService) Serve(groupUUID_str uuid.UUID, userUUID_str uuid.UUID, ctx context.Context) error {
+func (this *AddUserToCommandGroupService) Serve(tenantUUID uuid.UUID, dataModel *model.CommandGroupUser, ctx context.Context) error {
 
-	group, err := this.GetSingleCommandGroupService.Serve(groupUUID_str, ctx)
-
-	if err != nil {
-
+	switch group, err := this.GetSingleCommandGroupService.Serve(*dataModel.CommandGroupUUID, ctx); {
+	case err != nil:
 		return err
+	case group == nil:
+		return errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("command group not found"))
+	case *group.TenantUUID != tenantUUID:
+		return errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("command group not in tenant"))
 	}
 
-	if group == nil {
-
-		return ERR_INVALID_GROUP
-	}
-
-	user, err := this.GetSingleUserService.Serve(userUUID_str, ctx)
-
-	if err != nil {
-
+	switch user, err := this.GetSingleUserService.Serve(*dataModel.UserUUID, ctx); {
+	case err != nil:
 		return err
+	case user == nil:
+		return errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("user not found"))
+	case *user.TenantUUID != tenantUUID:
+		return errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("user not in tenant"))
 	}
 
-	if user == nil {
-
-		return errors.Join(common.ERR_NOT_FOUND, errors.New("user not found"))
-	}
-
-	res, err := this.CheckUserInCommandGroup.Detail(*group.UUID, *user.UUID, ctx)
-
-	if err != nil {
-
+	switch res, err := this.CheckUserInCommandGroup.Detail(*dataModel.CommandGroupUUID, *dataModel.UserUUID, ctx); {
+	case err != nil:
 		return err
+	case res != nil && *res.TenantUUID == tenantUUID:
+		return errors.Join(common.ERR_CONFLICT, fmt.Errorf("user already in group"))
+	case res != nil:
+		return errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("wrong tenant"))
 	}
 
-	if res != nil {
+	dataModel.UUID = libCommon.PointerPrimitive(uuid.New())
+	dataModel.TenantUUID = libCommon.PointerPrimitive(tenantUUID)
 
-		return errors.New("user already in group") // ERR_USER_ALREADY_IN_GROUP
-	}
-
-	dataModel := &model.CommandGroupUser{
-		UUID:             libCommon.PointerPrimitive(uuid.New()),
-		CommandGroupUUID: group.UUID,
-		UserUUID:         user.UUID,
-	}
-
-	err = this.CommandGroupUserRepo.Create(dataModel, ctx)
+	err := this.CommandGroupUserRepo.Create(dataModel, ctx)
 
 	if err != nil {
 

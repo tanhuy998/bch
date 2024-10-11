@@ -1,15 +1,18 @@
 package addUserToCommandGroupDomain
 
 import (
+	"app/internal/common"
+	libCommon "app/internal/lib/common"
+	"app/model"
 	authServicePort "app/port/auth"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
 	"app/repository"
-	"context"
+	"errors"
+	"fmt"
 
 	"github.com/kataras/iris/v12/mvc"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
@@ -31,17 +34,28 @@ func (this *AddUserToCommandGroupUseCase) Execute(
 	input *requestPresenter.AddUserToCommandGroupRequest,
 ) (*responsePresenter.AddUserToCommandGroupResponse, error) {
 
-	err := this.AddUserToCommandGroupService.Serve(*input.GroupUUID, *input.UserUUID, input.GetContext())
+	if !input.IsValidTenantUUID() {
+
+		return nil, errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("invalid tenant"))
+	}
+
+	dataModel := &model.CommandGroupUser{
+		UserUUID:         input.UserUUID,
+		CommandGroupUUID: input.GroupUUID,
+		CreatedBy:        libCommon.PointerPrimitive(input.GetAuthority().GetUserUUID()),
+	}
+
+	err := this.AddUserToCommandGroupService.Serve(input.GetTenantUUID(), dataModel, input.GetContext())
 
 	if err != nil {
 
 		return nil, err
 	}
 
-	ret, err := this.CommandGroupUserRepo.Find(
-		bson.D{},
-		context.TODO(),
-	)
+	// ret, err := this.CommandGroupUserRepo.Find(
+	// 	bson.D{},
+	// 	context.TODO(),
+	// )
 
 	if err != nil {
 
@@ -51,7 +65,7 @@ func (this *AddUserToCommandGroupUseCase) Execute(
 	output := this.GenerateOutput()
 
 	output.Message = "success"
-	output.Data = ret
+	//output.Data = ret
 
 	return output, nil
 }

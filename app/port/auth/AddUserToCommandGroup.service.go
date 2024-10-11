@@ -1,6 +1,7 @@
 package authServicePort
 
 import (
+	"app/model"
 	"context"
 
 	"github.com/google/uuid"
@@ -8,7 +9,7 @@ import (
 
 type (
 	IAddUserToCommandGroup interface {
-		Serve(groupUUID uuid.UUID, userUUID uuid.UUID, ctx context.Context) error
+		Serve(tenantUUID uuid.UUID, dataModel *model.CommandGroupUser, ctx context.Context) error
 		Get() IGetSingleCommandGroup
 	}
 )

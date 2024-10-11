@@ -2,6 +2,7 @@ package getParticipatedCommandGroup
 
 import (
 	"app/model"
+	"app/repository"
 	"app/valueObject"
 	"context"
 
@@ -10,12 +11,14 @@ import (
 
 type (
 	GetParticipatedCommandGroupService struct {
+		CommandGroupRepo repository.ICommandGroup
 	}
 )
 
 func (this *GetParticipatedCommandGroupService) Serve(
 	userUUID uuid.UUID, ctx context.Context,
 ) (*valueObject.ParticipatedCommandGroupReport, error) {
+
 	return nil, nil
 }
 

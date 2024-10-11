@@ -71,13 +71,15 @@ func (this *Controller) handleError(err error) (mvc.Result, error) {
 
 	switch {
 	case errors.Is(err, common.ERR_NOT_FOUND):
-		res.SetCode(http.StatusNotFound)
+		res.SetCode(http.StatusNotFound) // 404
 	case errors.Is(err, common.ERR_UNAUTHORIZED):
-		res.SetCode(http.StatusUnauthorized)
+		res.SetCode(http.StatusUnauthorized) // 401
 	case errors.Is(err, common.ERR_FORBIDEN):
-		res.SetCode(http.StatusForbidden)
+		res.SetCode(http.StatusForbidden) // 403
+	case errors.Is(err, common.ERR_CONFLICT):
+		res.SetCode(http.StatusConflict) // 409
 	default:
-		res.SetCode(http.StatusBadRequest)
+		res.SetCode(http.StatusBadRequest) // 400
 	}
 
 	resObj := default_response{

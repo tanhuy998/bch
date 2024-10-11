@@ -1,7 +1,7 @@
 package libError
 
 import (
-	"app/infrastructure/http/common"
+	"app/internal/common"
 	"fmt"
 
 	"github.com/go-errors/errors"
