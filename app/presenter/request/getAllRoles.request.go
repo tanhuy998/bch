@@ -3,12 +3,15 @@ package requestPresenter
 import (
 	accessTokenServicePort "app/port/accessToken"
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type (
 	GetAllRolesRequest struct {
-		ctx  context.Context
-		auth accessTokenServicePort.IAccessTokenAuthData
+		ctx        context.Context
+		auth       accessTokenServicePort.IAccessTokenAuthData
+		tenantUUID uuid.UUID
 	}
 )
 
@@ -30,4 +33,19 @@ func (this *GetAllRolesRequest) GetAuthority() accessTokenServicePort.IAccessTok
 func (this *GetAllRolesRequest) SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData) {
 
 	this.auth = auth
+}
+
+func (this *GetAllRolesRequest) SetTenantUUID(tenantUUID uuid.UUID) {
+
+	this.tenantUUID = tenantUUID
+}
+
+func (this *GetAllRolesRequest) IsValidTenantUUID() bool {
+
+	return this.tenantUUID != uuid.Nil
+}
+
+func (this *GetAllRolesRequest) GetTenantUUID() uuid.UUID {
+
+	return this.tenantUUID
 }

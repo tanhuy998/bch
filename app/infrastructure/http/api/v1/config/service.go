@@ -219,8 +219,6 @@ func RegisterAuthDependencies(container *hero.Container) {
 
 	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticationService](container, nil, AUTH)
 
-	libConfig.BindDependency[accessTokenClientPort.IAccessTokenClient, accessTokenClientService.BearerAccessTokenClientService](container, nil)
-
 	asymmetricJWTService := jwtTokenService.NewECDSAService(
 		jwt.SigningMethodES256, *bootstrap.GetJWTAsymmetricEncryptionPrivateKey(), *bootstrap.GetJWTAsymmetricEncryptionPublicKey(),
 	)
@@ -248,6 +246,7 @@ func RegisterAuthDependencies(container *hero.Container) {
 
 	//accessTokenSevice := new(accessTokenService.JWTAccessTokenManipulatorService)
 	libConfig.BindDependency[accessTokenServicePort.IAccessTokenManipulator, accessTokenService.JWTAccessTokenManipulatorService](container, nil)
+	libConfig.BindDependency[accessTokenClientPort.IAccessTokenClient, accessTokenClientService.BearerAccessTokenClientService](container, nil)
 
 	cacheClient, err := memoryCache.NewClient[string, refreshTokenBlackListServicePort.IRefreshTokenBlackListPayload](
 		refreshTokenBlackListServicePort.REFRESH_TOKE_BLACK_LIST_TOPIC,

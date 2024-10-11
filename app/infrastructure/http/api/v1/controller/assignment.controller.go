@@ -30,6 +30,7 @@ func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivatio
 		middleware.BindRequest[requestPresenter.GetSingleAssignmentRequest](
 			container,
 			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
 		),
 	)
 
@@ -38,6 +39,7 @@ func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivatio
 		middleware.BindRequest[requestPresenter.CreateAssigmentRequest](
 			container,
 			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
 		),
 	)
 
@@ -46,6 +48,7 @@ func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivatio
 		middleware.BindRequest[requestPresenter.CreateAssignmentGroupRequest](
 			container,
 			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
 		),
 	)
 }

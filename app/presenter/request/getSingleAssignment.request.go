@@ -9,9 +9,10 @@ import (
 
 type (
 	GetSingleAssignmentRequest struct {
-		UUID      *uuid.UUID `param:"uuid"`
-		ctx       context.Context
-		authority accessTokenServicePort.IAccessTokenAuthData
+		tenantUUID uuid.UUID
+		ctx        context.Context
+		authority  accessTokenServicePort.IAccessTokenAuthData
+		UUID       *uuid.UUID `param:"uuid"`
 	}
 )
 
@@ -33,4 +34,19 @@ func (this *GetSingleAssignmentRequest) ReceiveContext(ctx context.Context) {
 func (this *GetSingleAssignmentRequest) GetContext() context.Context {
 
 	return this.ctx
+}
+
+func (this *GetSingleAssignmentRequest) SetTenantUUID(tenantUUID uuid.UUID) {
+
+	this.tenantUUID = tenantUUID
+}
+
+func (this *GetSingleAssignmentRequest) IsValidTenantUUID() bool {
+
+	return this.tenantUUID != uuid.Nil
+}
+
+func (this *GetSingleAssignmentRequest) GetTenantUUID() uuid.UUID {
+
+	return this.tenantUUID
 }

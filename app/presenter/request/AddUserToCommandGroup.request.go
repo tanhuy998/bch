@@ -13,11 +13,12 @@ type (
 	}
 
 	AddUserToCommandGroupRequest struct {
-		GroupUUID *uuid.UUID                 `param:"groupUUID" validate:"required"`
-		UserUUID  *uuid.UUID                 `param:"userUUID" validate:"required"`
-		Data      data_AddUserToCommandGroup `json:"data"`
-		ctx       context.Context
-		auth      accessTokenServicePort.IAccessTokenAuthData
+		tenantUUID uuid.UUID
+		GroupUUID  *uuid.UUID                 `param:"groupUUID" validate:"required"`
+		UserUUID   *uuid.UUID                 `param:"userUUID" validate:"required"`
+		Data       data_AddUserToCommandGroup `json:"data"`
+		ctx        context.Context
+		auth       accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 
@@ -39,4 +40,19 @@ func (this *AddUserToCommandGroupRequest) GetAuthority() accessTokenServicePort.
 func (this *AddUserToCommandGroupRequest) SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData) {
 
 	this.auth = auth
+}
+
+func (this *AddUserToCommandGroupRequest) SetTenantUUID(tenantUUID uuid.UUID) {
+
+	this.tenantUUID = tenantUUID
+}
+
+func (this *AddUserToCommandGroupRequest) IsValidTenantUUID() bool {
+
+	return this.tenantUUID != uuid.Nil
+}
+
+func (this *AddUserToCommandGroupRequest) GetTenantUUID() uuid.UUID {
+
+	return this.tenantUUID
 }

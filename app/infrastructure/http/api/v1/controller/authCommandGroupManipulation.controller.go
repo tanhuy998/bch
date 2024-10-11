@@ -30,6 +30,7 @@ func (this *AuthCommandGroupManipulationController) BeforeActivation(activator m
 		middleware.BindRequest[requestPresenter.GetParticipatedGroups](
 			container,
 			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
 		),
 	)
 
@@ -42,6 +43,7 @@ func (this *AuthCommandGroupManipulationController) BeforeActivation(activator m
 		middleware.BindRequest[requestPresenter.CreateCommandGroupRequest](
 			container,
 			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
 		),
 	)
 
@@ -50,6 +52,7 @@ func (this *AuthCommandGroupManipulationController) BeforeActivation(activator m
 		middleware.BindRequest[requestPresenter.AddUserToCommandGroupRequest](
 			container,
 			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
 		),
 	)
 }

@@ -9,9 +9,10 @@ import (
 
 type (
 	GetGroupUsersRequest struct {
-		GroupUUID *uuid.UUID `json:"groupUUID" validate:"required"`
-		ctx       context.Context
-		auth      accessTokenServicePort.IAccessTokenAuthData
+		tenantUUID uuid.UUID
+		ctx        context.Context
+		auth       accessTokenServicePort.IAccessTokenAuthData
+		GroupUUID  *uuid.UUID `json:"groupUUID" validate:"required"`
 	}
 )
 
@@ -33,4 +34,19 @@ func (this *GetGroupUsersRequest) GetAuthority() accessTokenServicePort.IAccessT
 func (this *GetGroupUsersRequest) SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData) {
 
 	this.auth = auth
+}
+
+func (this *GetGroupUsersRequest) SetTenantUUID(tenantUUID uuid.UUID) {
+
+	this.tenantUUID = tenantUUID
+}
+
+func (this *GetGroupUsersRequest) IsValidTenantUUID() bool {
+
+	return this.tenantUUID != uuid.Nil
+}
+
+func (this *GetGroupUsersRequest) GetTenantUUID() uuid.UUID {
+
+	return this.tenantUUID
 }

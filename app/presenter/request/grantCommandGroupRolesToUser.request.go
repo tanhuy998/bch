@@ -9,11 +9,12 @@ import (
 
 type (
 	GrantCommandGroupRolesToUserRequest struct {
-		GroupUUID *uuid.UUID  `param:"groupUUID"`
-		UserUUID  *uuid.UUID  `param:"userUUID"`
-		Data      []uuid.UUID `json:"data"`
-		ctx       context.Context
-		auth      accessTokenServicePort.IAccessTokenAuthData
+		tenantUUID uuid.UUID
+		GroupUUID  *uuid.UUID  `param:"groupUUID"`
+		UserUUID   *uuid.UUID  `param:"userUUID"`
+		Data       []uuid.UUID `json:"data"`
+		ctx        context.Context
+		auth       accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 
@@ -35,4 +36,19 @@ func (this *GrantCommandGroupRolesToUserRequest) GetAuthority() accessTokenServi
 func (this *GrantCommandGroupRolesToUserRequest) SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData) {
 
 	this.auth = auth
+}
+
+func (this *GrantCommandGroupRolesToUserRequest) SetTenantUUID(tenantUUID uuid.UUID) {
+
+	this.tenantUUID = tenantUUID
+}
+
+func (this *GrantCommandGroupRolesToUserRequest) IsValidTenantUUID() bool {
+
+	return this.tenantUUID != uuid.Nil
+}
+
+func (this *GrantCommandGroupRolesToUserRequest) GetTenantUUID() uuid.UUID {
+
+	return this.tenantUUID
 }

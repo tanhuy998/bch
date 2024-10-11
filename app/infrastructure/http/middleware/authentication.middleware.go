@@ -117,9 +117,9 @@ func authentication_func(
 	accessTokenManipulator accessTokenServicePort.IAccessTokenManipulator,
 ) {
 
-	tokenString := accessTokenClient.Read(ctx)
+	accessToken, err := accessTokenClient.Read(ctx)
 
-	accessToken, err := accessTokenManipulator.Read(tokenString)
+	//accessToken, err := accessTokenManipulator.Read(tokenString)
 
 	switch err {
 	case nil:

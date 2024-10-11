@@ -3,6 +3,8 @@ package requestPresenter
 import (
 	accessTokenServicePort "app/port/accessToken"
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type (
@@ -14,9 +16,10 @@ type (
 	}
 
 	CreateTenantRequest struct {
-		Data CreateTenantInputData `json:"data"`
-		ctx  context.Context
-		auth accessTokenServicePort.IAccessTokenAuthData
+		Data       CreateTenantInputData `json:"data"`
+		tenantUUID uuid.UUID
+		ctx        context.Context
+		auth       accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 
@@ -38,4 +41,19 @@ func (this *CreateTenantRequest) GetAuthority() accessTokenServicePort.IAccessTo
 func (this *CreateTenantRequest) SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData) {
 
 	this.auth = auth
+}
+
+func (this *CreateTenantRequest) SetTenantUUID(tenantUUID uuid.UUID) {
+
+	this.tenantUUID = tenantUUID
+}
+
+func (this *CreateTenantRequest) GetTenantUUID() uuid.UUID {
+
+	return this.tenantUUID
+}
+
+func (this *CreateTenantRequest) IsValidTenantUUID() bool {
+
+	return this.tenantUUID != uuid.Nil
 }

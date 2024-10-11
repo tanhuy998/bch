@@ -30,6 +30,7 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 		middleware.BindRequest[requestPresenter.CreateUserRequestPresenter](
 			container,
 			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
 		),
 	)
 
@@ -38,6 +39,7 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 		middleware.BindRequest[requestPresenter.GetGroupUsersRequest](
 			container,
 			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
 		),
 	)
 
@@ -46,6 +48,7 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 		middleware.BindRequest[requestPresenter.ModifyUserRequest](
 			container,
 			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
 		),
 	)
 }

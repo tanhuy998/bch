@@ -29,6 +29,7 @@ func (this *AuthRoleManipulationController) BeforeActivation(activator mvc.Befor
 		middleware.BindRequest[requestPresenter.GetAllRolesRequest](
 			container,
 			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
 		),
 	)
 
@@ -42,6 +43,7 @@ func (this *AuthRoleManipulationController) BeforeActivation(activator mvc.Befor
 		middleware.BindRequest[requestPresenter.GrantCommandGroupRolesToUserRequest](
 			container,
 			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
 		),
 	)
 }

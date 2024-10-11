@@ -77,5 +77,5 @@ func AuthRequireTenantAgent(a accessTokenService.IAccessTokenAuthData) bool {
 		return false
 	}
 
-	return a.GetTenantAgentData() != nil
+	return a.IsTenantAgent()
 }

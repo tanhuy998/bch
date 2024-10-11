@@ -14,10 +14,11 @@ type (
 	}
 
 	ModifyUserRequest struct {
-		UserUUID *uuid.UUID       `param:"userUUID" validate:"required"`
-		Data     *InputModifyUser `json:"data" validate:"required"`
-		ctx      context.Context
-		auth     accessTokenServicePort.IAccessTokenAuthData
+		UserUUID   *uuid.UUID       `param:"userUUID" validate:"required"`
+		Data       *InputModifyUser `json:"data" validate:"required"`
+		ctx        context.Context
+		tenantUUID uuid.UUID
+		auth       accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 
@@ -39,4 +40,19 @@ func (this *ModifyUserRequest) GetAuthority() accessTokenServicePort.IAccessToke
 func (this *ModifyUserRequest) SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData) {
 
 	this.auth = auth
+}
+
+func (this *ModifyUserRequest) SetTenantUUID(tenantUUID uuid.UUID) {
+
+	this.tenantUUID = tenantUUID
+}
+
+func (this *ModifyUserRequest) IsValidTenantUUID() bool {
+
+	return this.tenantUUID != uuid.Nil
+}
+
+func (this *ModifyUserRequest) GetTenantUUID() uuid.UUID {
+
+	return this.tenantUUID
 }

@@ -34,7 +34,10 @@ func (this *TenantController) BeforeActivation(activator mvc.BeforeActivation) {
 	activator.Handle(
 		"POST", "/", "CreateTenant",
 		middleware.SecretAuth,
-		middleware.BindRequest[requestPresenter.CreateTenantRequest](container),
+		middleware.BindRequest[requestPresenter.CreateTenantRequest](
+			container,
+			middlewareHelper.UseAuthority,
+		),
 	)
 
 	activator.Handle(
@@ -46,12 +49,15 @@ func (this *TenantController) BeforeActivation(activator mvc.BeforeActivation) {
 		middleware.BindRequest[requestPresenter.CreateTenantRequest](
 			container,
 			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
 		),
 	)
 
 	activator.Handle(
 		"GET", "/switch/{tenantUUID:uuid}", "SwitchTenant",
-		middleware.BindRequest[requestPresenter.SwitchTenant](container),
+		middleware.BindRequest[requestPresenter.SwitchTenant](
+			container,
+		),
 	)
 }
 

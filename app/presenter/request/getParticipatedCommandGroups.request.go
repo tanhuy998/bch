@@ -9,9 +9,10 @@ import (
 
 type (
 	GetParticipatedGroups struct {
-		UserUUID *uuid.UUID `param:"userUUID" validate:"required"`
-		ctx      context.Context
-		auth     accessTokenServicePort.IAccessTokenAuthData
+		tenantUUID uuid.UUID
+		ctx        context.Context
+		auth       accessTokenServicePort.IAccessTokenAuthData
+		UserUUID   *uuid.UUID `param:"userUUID" validate:"required"`
 	}
 )
 
@@ -33,4 +34,19 @@ func (this *GetParticipatedGroups) GetAuthority() accessTokenServicePort.IAccess
 func (this *GetParticipatedGroups) SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData) {
 
 	this.auth = auth
+}
+
+func (this *GetParticipatedGroups) SetTenantUUID(tenantUUID uuid.UUID) {
+
+	this.tenantUUID = tenantUUID
+}
+
+func (this *GetParticipatedGroups) IsValidTenantUUID() bool {
+
+	return this.tenantUUID != uuid.Nil
+}
+
+func (this *GetParticipatedGroups) GetTenantUUID() uuid.UUID {
+
+	return this.tenantUUID
 }
