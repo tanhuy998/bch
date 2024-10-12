@@ -14,16 +14,17 @@ type (
 		CreatedBy  *uuid.UUID `json:"createdBy" bson:"createdBy"`
 		Deadline   *time.Time `json:"deadline" bson:"deadline"`
 		//OwnerShip  []uuid.UUID `json:"ownerShip" bson:"ownerShip"`
-		Title string `json:"title" bson:"title" validate:"required"`
+		Title      string `json:"title" bson:"title" validate:"required"`
+		Desciption string `json:"description" bson:"description"`
 	}
 
 	AssignmentGroup struct {
-		UUID             *uuid.UUID `json:"uuid,omitempty" bson:"uuid,omitempty"`
-		AssignmentUUID   *uuid.UUID `json:"assignmentUUID" bson:"assignmentUUID"`
-		TenantUUID       *uuid.UUID `json:"tenantUUID,omitempty" bson:"tenantUUID,omitempty"`
-		CommandGroupUUID *uuid.UUID `json:"commandGroupUUID,omitempty" bson:"commandGroupUUID,omitempty"`
-		CreatedBy        *uuid.UUID `json:"createdBy,omitempty" bson:"createdBy,omitempty"`
-		Name             string     `json:"name" bson:"name" validate:"requried,omitempty"`
+		UUID           *uuid.UUID `json:"uuid,omitempty" bson:"uuid,omitempty"`
+		AssignmentUUID *uuid.UUID `json:"assignmentUUID" bson:"assignmentUUID"`
+		TenantUUID     *uuid.UUID `json:"tenantUUID,omitempty" bson:"tenantUUID,omitempty"`
+		CreatedBy      *uuid.UUID `json:"createdBy,omitempty" bson:"createdBy,omitempty"`
+		Name           string     `json:"name" bson:"name" validate:"required,omitempty"`
+		// *uuid.UUID `json:"commandGroupUUID,omitempty" bson:"commandGroupUUID,omitempty"`
 	}
 
 	AssigmentGroupMember struct {

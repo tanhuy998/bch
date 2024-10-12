@@ -33,7 +33,27 @@
                     "uuid": "86fd17af-a2cb-4003-9228-9833c155b9f5",
                     "name": "sit doloribus voluptatibus"
                 }
-            ] 
+            ],
+            "assignments": [
+                {
+                    "uuid": "9b9560e4-0e20-4266-b6a4-bfaccf73a846",
+                    "tenantUUID": "f47b11f6-26cf-4a0b-8f02-9c59de5f60e1",
+                    "createdAt": "2024-10-12T14:55:38.277083397+07:00",
+                    "createdBy": "6de61f46-f33c-4a5d-b0dd-636549f38458",
+                    "deadline": "2024-12-16T03:14:42.803Z",
+                    "title": "accusantium exercitationem mollitia",
+                    "description": "A deleniti deleniti. Recusandae ea necessitatibus mollitia occaecati quae reprehenderit. Vel corrupti debitis dicta voluptatem modi non perspiciatis eaque. Odio nesciunt quae iste deleniti eos odit veritatis illo ut. Suscipit assumenda itaque adipisci nihil totam perspiciatis."
+                }
+            ],
+            "assignmentGroups": [
+                {
+                    "uuid": "317359e0-33ca-458e-b2f3-29f7f8792465",
+                    "assignmentUUID": "9b9560e4-0e20-4266-b6a4-bfaccf73a846",
+                    "tenantUUID": "f47b11f6-26cf-4a0b-8f02-9c59de5f60e1",
+                    "createdBy": "6de61f46-f33c-4a5d-b0dd-636549f38458",
+                    "name": "quas id dicta"
+                }
+            ]
         },
         "tenantAgentUser": {
             "uuid": "6de61f46-f33c-4a5d-b0dd-636549f38458",

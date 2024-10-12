@@ -8,6 +8,7 @@ import (
 	"app/repository"
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,27 +22,22 @@ type (
 )
 
 func (this *CreateAssignmentGroupService) Serve(
-	assignmentUUID uuid.UUID, ipnutData *model.AssignmentGroup, ctx context.Context,
+	tenantUUID uuid.UUID, assignmentUUID uuid.UUID, dataModel *model.AssignmentGroup, ctx context.Context,
 ) (*model.AssignmentGroup, error) {
 
-	assignment, err := this.GetSingleAssignmentService.Serve(assignmentUUID, ctx)
+	_, err := this.GetSingleAssignmentService.Serve(tenantUUID, assignmentUUID, ctx)
 
 	if err != nil {
 
 		return nil, err
 	}
 
-	if assignment == nil {
-
-		return nil, errors.Join(common.ERR_BAD_REQUEST, errors.New("assignment not found")) // assignmentServicePort.ERR_ASSIGNMENT_NOT_FOUND
-	}
-
 	existing, err := this.AssignmentGroupRepo.Find(
 		bson.D{
-			{"assignmentUUID", ipnutData.AssignmentUUID},
-			{"tenantUUID", ipnutData.TenantUUID},
-			{"commandGroupUUID", ipnutData.CommandGroupUUID},
-			{"name", ipnutData.CommandGroupUUID},
+			{"assignmentUUID", dataModel.AssignmentUUID},
+			{"tenantUUID", dataModel.TenantUUID},
+			{"name", dataModel.Name},
+			// {"commandGroupUUID", dataModel.CommandGroupUUID},
 		},
 		ctx,
 	)
@@ -53,17 +49,19 @@ func (this *CreateAssignmentGroupService) Serve(
 
 	if existing != nil {
 
-		return nil, errors.Join(common.ERR_BAD_REQUEST, errors.New("duplicate assignment group")) //assignmentServicePort.ERR_DUPLICATE_ASSIGNMENT_GROUP
+		return nil, errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("duplicate assignment group"))
 	}
 
-	ipnutData.UUID = libCommon.PointerPrimitive(uuid.New())
+	dataModel.UUID = libCommon.PointerPrimitive(uuid.New())
+	dataModel.AssignmentUUID = &assignmentUUID
+	dataModel.TenantUUID = &tenantUUID
 
-	err = this.AssignmentGroupRepo.Create(ipnutData, ctx)
+	err = this.AssignmentGroupRepo.Create(dataModel, ctx)
 
 	if err != nil {
 
-		return nil, errors.Join(common.ERR_INTERNAL, err)
+		return nil, err
 	}
 
-	return ipnutData, nil
+	return dataModel, nil
 }

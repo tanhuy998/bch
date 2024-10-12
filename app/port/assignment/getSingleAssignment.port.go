@@ -9,7 +9,7 @@ import (
 
 type (
 	IGetSingleAssignnment interface {
-		Serve(uuid uuid.UUID, ctx context.Context) (*model.Assignment, error)
+		Serve(tenantUUID uuid.UUID, assignmentUUID uuid.UUID, ctx context.Context) (*model.Assignment, error)
 		Search(model *model.Assignment, ctx context.Context) (*model.Assignment, error)
 	}
 )

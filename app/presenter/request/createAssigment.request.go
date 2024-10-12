@@ -3,14 +3,16 @@ package requestPresenter
 import (
 	accessTokenServicePort "app/port/accessToken"
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
 
 type (
 	CreateAssignmentInput struct {
-		TenantUUID *uuid.UUID `json:"tenantUUID" bson:"tenantUUID"`
-		Title      string     `json:"title" bson:"title" validate:"required"`
+		Title      string     `json:"title" validate:"required"`
+		Desciption string     `json:"description"`
+		DeadLine   *time.Time `json:"deadline" validate:"required"`
 	}
 
 	CreateAssigmentRequest struct {

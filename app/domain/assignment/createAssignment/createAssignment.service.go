@@ -4,7 +4,6 @@ import (
 	"app/internal/common"
 	libCommon "app/internal/lib/common"
 	"app/model"
-	assignmentServicePort "app/port/assignment"
 	"app/repository"
 	"context"
 	"errors"
@@ -16,76 +15,65 @@ import (
 )
 
 const (
-	MIN_DEALINE time.Duration = time.Hour * 24 * 7
+	MIN_DEADLINE_PERIOD_DAY               = 7
+	MIN_DEALINE_DUR         time.Duration = time.Hour * 24 * MIN_DEADLINE_PERIOD_DAY
 )
 
 var (
 	ERR_DUPLICATE_ASSIGNMENT = errors.New("createAssignmentService error: dublicate assignment")
-	ERR_INVALID_DEADLINE     = fmt.Errorf(`assignment deadline must be at least %d days`, MIN_DEALINE)
+	ERR_INVALID_DEADLINE     = fmt.Errorf(`assignment deadline must be at least %d days`, MIN_DEADLINE_PERIOD_DAY)
 )
 
 type (
 	CreateAssignmentService struct {
-		GetSingleAssignmentService assignmentServicePort.IGetSingleAssignnment
-		AssignmentRepo             repository.IAssignment
+		AssignmentRepo repository.IAssignment
 	}
 )
 
-func (this *CreateAssignmentService) Serve(data *model.Assignment, ctx context.Context) (*model.Assignment, error) {
+func (this *CreateAssignmentService) Serve(
+	tenantUUID uuid.UUID, dataModel *model.Assignment, ctx context.Context,
+) (*model.Assignment, error) {
 
-	// existing, err := this.GetSingleAssignmentService.Search(
-	// 	&model.Assignment{
-	// 		TenantUUID: data.TenantUUID,
+	dataModel.CreatedAt = libCommon.PointerPrimitive(time.Now())
 
-	// 	},
-	// 	ctx,
-	// )
-
-	if !this.validateCreateAt(*data.CreatedAt) {
-
-		return nil, errors.New("assignment issue date must be the same day")
-	}
-
-	if !this.validateDeadLine(*data.Deadline) {
-
+	switch {
+	case !this.validateCreateAt(*dataModel.CreatedAt):
+		return nil, fmt.Errorf("assignment issue date must be the same day")
+	case !this.validateDeadLine(*dataModel.Deadline):
 		return nil, ERR_INVALID_DEADLINE
 	}
 
-	existSimilar, err := this.AssignmentRepo.Find(
-		bson.D{
-			{"tenantUUID", data.TenantUUID},
-			{
-				"createdAt", bson.D{
-					{
-						// check if there is no similar assignment in the same year
-						"$gte", time.Date(data.Deadline.Year(), 1, 0, 0, 0, 0, 0, time.UTC),
-					},
+	findSimilarQuery := bson.D{
+		{"tenantUUID", tenantUUID},
+		{
+			"createdAt", bson.D{
+				{
+					// check if there is no similar assignment in the same year
+					"$gte", time.Date(dataModel.Deadline.Year(), 1, 0, 0, 0, 0, 0, time.UTC),
 				},
 			},
 		},
-		ctx,
-	)
+	}
 
-	if err != nil {
-
+	switch existSimilar, err := this.AssignmentRepo.Find(findSimilarQuery, ctx); {
+	case err != nil:
 		return nil, err
+	case existSimilar != nil:
+		return nil, errors.Join(common.ERR_CONFLICT, fmt.Errorf("there are similar assignment in this year"))
 	}
 
-	if existSimilar != nil {
+	dataModel.UUID = libCommon.PointerPrimitive(uuid.New())
+	dataModel.CreatedAt = libCommon.PointerPrimitive(time.Now())
+	dataModel.TenantUUID = &tenantUUID
 
-		return nil, ERR_DUPLICATE_ASSIGNMENT
-	}
-
-	data.UUID = libCommon.PointerPrimitive(uuid.New())
-
-	err = this.AssignmentRepo.Create(data, context.TODO())
+	err := this.AssignmentRepo.Create(dataModel, context.TODO())
 
 	if err != nil {
 
 		return nil, errors.Join(common.ERR_INTERNAL, err)
 	}
 
-	return data, nil
+	return dataModel, nil
 }
 
 func (this *CreateAssignmentService) validateCreateAt(c time.Time) bool {
@@ -93,6 +81,6 @@ func (this *CreateAssignmentService) validateCreateAt(c time.Time) bool {
 	return time.Until(c) < time.Hour*24
 }
 func (this *CreateAssignmentService) validateDeadLine(d time.Time) bool {
-
-	return time.Until(d) >= MIN_DEALINE
+	fmt.Println(time.Until(d), MIN_DEALINE_DUR)
+	return time.Until(d) >= MIN_DEALINE_DUR
 }

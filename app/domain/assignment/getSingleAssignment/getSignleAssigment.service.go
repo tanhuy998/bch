@@ -2,10 +2,12 @@ package getSingleAssignmentDomain
 
 import (
 	"app/internal/common"
+	libError "app/internal/lib/error"
 	"app/model"
 	"app/repository"
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,10 +20,32 @@ type (
 )
 
 func (this *GetSingleAssignmentService) Serve(
-	uuid uuid.UUID, ctx context.Context,
+	tenantUUID uuid.UUID, uuid uuid.UUID, ctx context.Context,
 ) (*model.Assignment, error) {
 
-	return this.AssignmentRepo.FindOneByUUID(uuid, ctx)
+	ret, err := this.AssignmentRepo.FindOneByUUID(uuid, ctx)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	if ret == nil {
+
+		return nil, errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("assignment not found"))
+	}
+
+	if ret.TenantUUID == nil {
+
+		return nil, libError.NewInternal(fmt.Errorf("wrong data"))
+	}
+
+	if *ret.TenantUUID != tenantUUID {
+
+		return nil, errors.Join(common.ERR_FORBIDEN, fmt.Errorf("assignment not in tenant"))
+	}
+
+	return ret, nil
 }
 
 func (this *GetSingleAssignmentService) Search(

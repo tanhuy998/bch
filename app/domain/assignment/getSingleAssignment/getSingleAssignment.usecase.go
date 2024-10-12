@@ -30,21 +30,18 @@ func (this *GetSingleAssignmentUseCase) Execute(
 	input *requestPresenter.GetSingleAssignmentRequest,
 ) (*responsePresenter.GetSingleAssignmentResponse, error) {
 
-	data, err := this.GetSingleAssignmnetService.Serve(*input.UUID, input.GetContext())
+	if !input.IsValidTenantUUID() {
+
+		return nil, common.ERR_UNAUTHORIZED
+	}
+
+	data, err := this.GetSingleAssignmnetService.Serve(
+		input.GetTenantUUID(), *input.UUID, input.GetContext(),
+	)
 
 	if err != nil {
 
-		return nil, err
-	}
-
-	if data == nil {
-
-		return nil, this.ErrorWithContext(input, common.ERR_NOT_FOUND)
-	}
-
-	if *data.TenantUUID != input.GetAuthority().GetTenantUUID() {
-
-		return nil, this.ErrorWithContext(input, common.ERR_UNAUTHORIZED)
+		return nil, this.ErrorWithContext(input, err)
 	}
 
 	output := this.GenerateOutput()
