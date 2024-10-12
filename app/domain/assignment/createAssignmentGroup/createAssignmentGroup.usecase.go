@@ -34,7 +34,7 @@ func (this *CreateAssignmentGroupUseCase) Execute(
 	data.CreatedBy = libCommon.PointerPrimitive(input.GetAuthority().GetUserUUID())
 
 	ret, err := this.CreateAssignmentGroupService.Serve(
-		input.GetTenantUUID(), *input.AssignmentUUID, data, input.GetContext(),
+		input.GetTenantUUID(), *input.AssignmentUUID, *input.CommandGroupUUID, data, input.GetContext(),
 	)
 
 	if err != nil {

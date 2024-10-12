@@ -28,7 +28,7 @@
                     "deactivated": false
                 }
             ],
-            "groups": [
+            "commandGroups": [
                 {
                     "uuid": "86fd17af-a2cb-4003-9228-9833c155b9f5",
                     "name": "sit doloribus voluptatibus"
@@ -47,11 +47,11 @@
             ],
             "assignmentGroups": [
                 {
-                    "uuid": "317359e0-33ca-458e-b2f3-29f7f8792465",
+                    "uuid": "987bdf71-a10a-4144-b580-106e133e8fef",
                     "assignmentUUID": "9b9560e4-0e20-4266-b6a4-bfaccf73a846",
                     "tenantUUID": "f47b11f6-26cf-4a0b-8f02-9c59de5f60e1",
                     "createdBy": "6de61f46-f33c-4a5d-b0dd-636549f38458",
-                    "name": "quas id dicta"
+                    "name": "quisquam quasi cum"
                 }
             ]
         },

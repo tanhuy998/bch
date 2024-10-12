@@ -10,12 +10,11 @@ type (
 		IsNotContent() bool
 	}
 
-	NoContent struct {
+	ICreatedOutput interface {
+		IsCreatedStatus() bool
 	}
 
-	ErrorOutput[Input_T any] struct {
-		error
-		Input *Input_T
+	NoContent struct {
 	}
 
 	Result[Input_T, Output_T any] struct {
@@ -23,19 +22,9 @@ type (
 		Output *Output_T
 	}
 
-	ErrorResult[Input_T, Output_T any] struct {
-		Result[Input_T, Output_T]
-		error
+	CreatedResponse struct {
 	}
 )
-
-func NewErrorOutput[Input_T any](input *Input_T, err error) *ErrorOutput[Input_T] {
-
-	return &ErrorOutput[Input_T]{
-		err,
-		input,
-	}
-}
 
 func NewResult[Input_T, Output_T any](input *Input_T, output *Output_T) *Result[Input_T, Output_T] {
 
@@ -45,30 +34,12 @@ func NewResult[Input_T, Output_T any](input *Input_T, output *Output_T) *Result[
 	}
 }
 
-func NewErrorResult[Input_T, Output_T any](input *Input_T, output *Output_T, err error) *ErrorResult[Input_T, Output_T] {
-
-	return &ErrorResult[Input_T, Output_T]{
-		Result: Result[Input_T, Output_T]{
-			Input:  input,
-			Output: output,
-		},
-		error: err,
-	}
-}
-
 func (this *NoContent) IsNotContent() bool {
 
 	return true
 }
 
-type (
-	ICreatedOutput interface {
-		IsCreatedStatus() bool
-	}
-
-	CreatedResponse struct {
-	}
-)
+type ()
 
 func (this CreatedResponse) IsCreatedStatus() bool {
 

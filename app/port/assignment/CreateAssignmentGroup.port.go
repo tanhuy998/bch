@@ -15,6 +15,8 @@ var (
 
 type (
 	ICreateAssignmentGroup interface {
-		Serve(tenantUUID, assignmentUUID uuid.UUID, ipnutData *model.AssignmentGroup, ctx context.Context) (*model.AssignmentGroup, error)
+		Serve(
+			tenantUUID, assignmentUUID uuid.UUID, commandGroupUUID uuid.UUID, ipnutData *model.AssignmentGroup, ctx context.Context,
+		) (*model.AssignmentGroup, error)
 	}
 )

@@ -10,11 +10,12 @@ import (
 
 type (
 	CreateAssignmentGroupRequest struct {
-		tenantUUID     uuid.UUID
-		AssignmentUUID *uuid.UUID             `param:"assignmentUUID" validate:"required"`
-		Data           *model.AssignmentGroup `json:"data" validate:"required"`
-		ctx            context.Context
-		auth           accessTokenServicePort.IAccessTokenAuthData
+		tenantUUID       uuid.UUID
+		AssignmentUUID   *uuid.UUID             `param:"assignmentUUID" validate:"required"`
+		CommandGroupUUID *uuid.UUID             `param:"commandGroupUUID" validate:"required"`
+		Data             *model.AssignmentGroup `json:"data" validate:"required"`
+		ctx              context.Context
+		auth             accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 

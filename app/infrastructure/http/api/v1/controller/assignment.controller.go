@@ -45,7 +45,7 @@ func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivatio
 	)
 
 	activator.Handle(
-		"POST", "/{assignmentUUID:uuid}/group", "CreateAssignmentGroup",
+		"POST", "/{assignmentUUID:uuid}/group/command/{commandGroupUUID:uuid}", "CreateAssignmentGroup",
 		middleware.BindRequest[requestPresenter.CreateAssignmentGroupRequest](
 			container,
 			middlewareHelper.UseAuthority,

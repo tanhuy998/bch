@@ -19,12 +19,12 @@ type (
 	}
 
 	AssignmentGroup struct {
-		UUID           *uuid.UUID `json:"uuid,omitempty" bson:"uuid,omitempty"`
-		AssignmentUUID *uuid.UUID `json:"assignmentUUID" bson:"assignmentUUID"`
-		TenantUUID     *uuid.UUID `json:"tenantUUID,omitempty" bson:"tenantUUID,omitempty"`
-		CreatedBy      *uuid.UUID `json:"createdBy,omitempty" bson:"createdBy,omitempty"`
-		Name           string     `json:"name" bson:"name" validate:"required,omitempty"`
-		// *uuid.UUID `json:"commandGroupUUID,omitempty" bson:"commandGroupUUID,omitempty"`
+		UUID             *uuid.UUID `json:"uuid,omitempty" bson:"uuid,omitempty"`
+		AssignmentUUID   *uuid.UUID `json:"assignmentUUID" bson:"assignmentUUID"`
+		TenantUUID       *uuid.UUID `json:"tenantUUID,omitempty" bson:"tenantUUID,omitempty"`
+		CreatedBy        *uuid.UUID `json:"createdBy,omitempty" bson:"createdBy,omitempty"`
+		CommandGroupUUID *uuid.UUID `json:"commandGroupUUID,omitempty" bson:"commandGroupUUID,omitempty"`
+		Name             string     `json:"name" bson:"name" validate:"required"`
 	}
 
 	AssigmentGroupMember struct {
