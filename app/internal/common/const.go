@@ -10,6 +10,6 @@ var (
 	ERR_UNAUTHORIZED = fmt.Errorf("(unauthorized)")
 	ERR_FORBIDEN     = fmt.Errorf("(forbiden)")
 	ERR_INTERNAL     = fmt.Errorf("(internal error)")
-	ERR_CONFLICT     = fmt.Errorf("(conflit)")
+	ERR_CONFLICT     = fmt.Errorf("(conflict)")
 	ERR_TIMEOUT      = fmt.Errorf("(timeout)")
 )

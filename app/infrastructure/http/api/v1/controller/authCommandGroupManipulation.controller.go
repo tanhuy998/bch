@@ -17,7 +17,7 @@ type (
 		common.Controller
 		CreateCommandGroupUseCase          usecasePort.IUseCase[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse]
 		AddUserToCommandGroupUseCase       usecasePort.IUseCase[requestPresenter.AddUserToCommandGroupRequest, responsePresenter.AddUserToCommandGroupResponse]
-		GetParitcipatedCommandGroupUseCase usecasePort.IUseCase[requestPresenter.GetParticipatedGroups, responsePresenter.GetParticipatedGroups]
+		GetParitcipatedCommandGroupUseCase usecasePort.IUseCase[requestPresenter.GetUserParticipatedCommandGroups, responsePresenter.GetUserParticipatedCommandGroups]
 	}
 )
 
@@ -27,7 +27,7 @@ func (this *AuthCommandGroupManipulationController) BeforeActivation(activator m
 
 	activator.Handle(
 		"GET", "/participated/user/{userUUID:uuid}", "GetParticipatedGroups",
-		middleware.BindRequest[requestPresenter.GetParticipatedGroups](
+		middleware.BindRequest[requestPresenter.GetUserParticipatedCommandGroups](
 			container,
 			middlewareHelper.UseAuthority,
 			middlewareHelper.UseTenantMapping,
@@ -85,18 +85,10 @@ func (this *AuthCommandGroupManipulationController) GetAllGroups() {
 }
 
 func (this *AuthCommandGroupManipulationController) GetParticipatedGroups(
-	input *requestPresenter.GetParticipatedGroups,
+	input *requestPresenter.GetUserParticipatedCommandGroups,
 ) (mvc.Result, error) {
 
 	return this.ResultOf(
 		this.GetParitcipatedCommandGroupUseCase.Execute(input),
 	)
 }
-
-// func (this *AuthCommandGroupManipulationController) GrantCommandGroupRolesToUser(
-// 	input *requestPresenter.GrantCommandGroupRolesToUserRequest,
-// 	output *responsePresenter.GrantCommandGroupRolesToUserResponse,
-// ) (mvc.Result, error) {
-
-// 	return this.GrantCommandGroupRolesToUserUseCase.Execute(input, output)
-// }

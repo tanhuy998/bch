@@ -27,7 +27,10 @@ import (
 	"app/domain/auth/getSingleCommandGroupDomain"
 	getSingleUserDomain "app/domain/auth/getSingleUser"
 	getUserAuthorityDomain "app/domain/auth/getUserAuthority"
-	getUserParticipatedCommandGroupDomain "app/domain/auth/getUserParticipatedGroups"
+	getUserParticipatedCommandGroupsDomain "app/domain/auth/getUserParticipatedCommandGroups"
+	"app/domain/auth/reportUserParticipatedCommandGroupsDomain"
+
+	//getUserParticipatedCommandGroupDomain "app/domain/auth/getUserParticipatedGroups"
 	grantCommandGroupRoleToUserDomain "app/domain/auth/grandCommandGroupRolesToUser"
 	loginDomain "app/domain/auth/login"
 	modifyUserDomain "app/domain/auth/modifyUser"
@@ -38,20 +41,20 @@ import (
 
 type (
 	AuthBoundedContext struct {
-		AddUserToCommandGroup        authServicePort.IAddUserToCommandGroup
-		CheckCommandGroupUserRole    authServicePort.ICheckCommandGroupUserRole
-		CheckUserInCommandGroup      authServicePort.ICheckUserInCommandGroup
-		CreateCommandGroup           authServicePort.ICreateCommandGroup
-		CreateUser                   authServicePort.ICreateUser
-		GetAllRoles                  authServicePort.IGetAllRoles
-		GetCommandGroupUsers         authServicePort.IGetCommandGroupUsers
-		GetParticipatedCommandGroups authServicePort.IGetParticipatedCommandGroups
-		GetSingleCommandGroup        authServicePort.IGetSingleCommandGroup
-		GetSingleUser                authServicePort.IGetSingleUser
-		GrantCommandGroupRolesToUser authServicePort.IGrantCommandGroupRolesToUser
-		LogIn                        authServicePort.ILogIn
-		ModifyUser                   authServicePort.IModifyUser
-		RefreshLogin                 authServicePort.IRefreshLogin
+		AddUserToCommandGroup            authServicePort.IAddUserToCommandGroup
+		CheckCommandGroupUserRole        authServicePort.ICheckCommandGroupUserRole
+		CheckUserInCommandGroup          authServicePort.ICheckUserInCommandGroup
+		CreateCommandGroup               authServicePort.ICreateCommandGroup
+		CreateUser                       authServicePort.ICreateUser
+		GetAllRoles                      authServicePort.IGetAllRoles
+		GetCommandGroupUsers             authServicePort.IGetCommandGroupUsers
+		GetSingleCommandGroup            authServicePort.IGetSingleCommandGroup
+		GetSingleUser                    authServicePort.IGetSingleUser
+		GrantCommandGroupRolesToUser     authServicePort.IGrantCommandGroupRolesToUser
+		LogIn                            authServicePort.ILogIn
+		ModifyUser                       authServicePort.IModifyUser
+		RefreshLogin                     authServicePort.IRefreshLogin
+		GetUserParticipatedCommandGroups authServicePort.IGetUserParticipatedCommandGroups
 	}
 )
 
@@ -75,7 +78,10 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[authServicePort.IGetUserAuthorityServicePort, getUserAuthorityDomain.GetUsertAuthorityService](container, nil)
 	libConfig.BindDependency[authServicePort.IGetAllRoles, getAllRoleDomain.GetAllRolesService](container, nil)
 	libConfig.BindDependency[authServicePort.IGetCommandGroupUsers, getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
-	libConfig.BindDependency[authServicePort.IGetParticipatedCommandGroups, getUserParticipatedCommandGroupDomain.GetParticipatedCommandGroupsService](container, nil)
+	//libConfig.BindDependency[authServicePort.IGetParticipatedCommandGroups, getUserParticipatedCommandGroupDomain.GetParticipatedCommandGroupsService](container, nil)
+	//libConfig.BindDependency[]()
+	libConfig.BindDependency[authServicePort.IReportParticipatedCommandGroups, reportUserParticipatedCommandGroupsDomain.ReportParticipatedCommandGroupsService](container, nil)
+	libConfig.BindDependency[authServicePort.IGetUserParticipatedCommandGroups, getUserParticipatedCommandGroupsDomain.GetUserParticipatedCommandGroupService](container, nil)
 	libConfig.BindDependency[authServicePort.IGetSingleCommandGroup, getSingleCommandGroupDomain.GetSingleCommandGroupService](container, nil)
 	libConfig.BindDependency[authServicePort.IGetSingleUser, getSingleUserDomain.GetSingleUserService](container, nil)
 	libConfig.BindDependency[authServicePort.IGetCommandGroupUsers, getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
@@ -132,8 +138,12 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 		addUserToCommandGroupDomain.AddUserToCommandGroupUseCase,
 	](container, nil)
 	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.GetParticipatedGroups, responsePresenter.GetParticipatedGroups],
-		getUserParticipatedCommandGroupDomain.GetParticipatedCommandGroupsUseCase,
+		usecasePort.IUseCase[requestPresenter.GetUserParticipatedCommandGroups, responsePresenter.GetUserParticipatedCommandGroups],
+		getUserParticipatedCommandGroupsDomain.GetUserParticipatedCommandGroupsUseCase,
+	](container, nil)
+	libConfig.BindDependency[
+		usecasePort.IUseCase[requestPresenter.ReportParticipatedGroups, responsePresenter.ReportParticipatedGroups],
+		reportUserParticipatedCommandGroupsDomain.ReportParticipatedCommandGroupsUseCase,
 	](container, nil)
 
 	container.Register(new(AuthBoundedContext)).Explicitly().EnableStructDependents()

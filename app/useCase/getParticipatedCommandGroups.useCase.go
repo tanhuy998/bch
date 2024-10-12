@@ -10,8 +10,8 @@ import (
 type (
 	IGetParticipatedCommandGroups interface {
 		Execute(
-			input *requestPresenter.GetParticipatedGroups,
-			output *responsePresenter.GetParticipatedGroups,
+			input *requestPresenter.ReportParticipatedGroups,
+			output *responsePresenter.ReportParticipatedGroups,
 		) (mvc.Result, error)
 	}
 )

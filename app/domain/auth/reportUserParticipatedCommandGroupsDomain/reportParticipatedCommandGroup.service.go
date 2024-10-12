@@ -1,4 +1,4 @@
-package getUserParticipatedCommandGroupDomain
+package reportUserParticipatedCommandGroupsDomain
 
 import (
 	"app/internal/common"
@@ -16,17 +16,13 @@ import (
 )
 
 type (
-	// IGetParticipatedCommandGroups interface {
-	// 	Serve(userUUID string) (*valueObject.ParticipatedCommandGroupReport, error)
-	// }
-
-	GetParticipatedCommandGroupsService struct {
+	ReportParticipatedCommandGroupsService struct {
 		CommandGroupUserRepo repository.ICommandGroupUser
 		UserRepo             repository.IUser
 	}
 )
 
-func (this *GetParticipatedCommandGroupsService) Serve(
+func (this *ReportParticipatedCommandGroupsService) Serve(
 	tenantUUID uuid.UUID, userUUID uuid.UUID, ctx context.Context,
 ) (*valueObject.ParticipatedCommandGroupReport, error) {
 
@@ -127,7 +123,7 @@ func (this *GetParticipatedCommandGroupsService) Serve(
 	return report, nil
 }
 
-func (this *GetParticipatedCommandGroupsService) SearchAndRetrieveByModel(
+func (this *ReportParticipatedCommandGroupsService) SearchAndRetrieveByModel(
 	searchModel *model.User, ctx context.Context,
 ) (*valueObject.ParticipatedCommandGroupReport, error) {
 
