@@ -18,6 +18,7 @@ type (
 		CreateCommandGroupUseCase          usecasePort.IUseCase[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse]
 		AddUserToCommandGroupUseCase       usecasePort.IUseCase[requestPresenter.AddUserToCommandGroupRequest, responsePresenter.AddUserToCommandGroupResponse]
 		GetParitcipatedCommandGroupUseCase usecasePort.IUseCase[requestPresenter.GetUserParticipatedCommandGroups, responsePresenter.GetUserParticipatedCommandGroups]
+		GetTenantAllGroupsUseCase          usecasePort.IUseCase[requestPresenter.GetTenantAllGroups, responsePresenter.GetTenantAllGroups]
 	}
 )
 
@@ -34,9 +35,14 @@ func (this *AuthCommandGroupManipulationController) BeforeActivation(activator m
 		),
 	)
 
-	// activator.Handle(
-	// 	"GET", "/", "GetAllGroups",
-	// )
+	activator.Handle(
+		"GET", "/", "GetAllGroups",
+		middleware.BindRequest[requestPresenter.GetTenantAllGroups](
+			container,
+			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
+		),
+	)
 
 	activator.Handle(
 		"POST", "/", "CreateGroup",
@@ -80,8 +86,13 @@ func (this *AuthCommandGroupManipulationController) AddUserToGroup(
 	)
 }
 
-func (this *AuthCommandGroupManipulationController) GetAllGroups() {
+func (this *AuthCommandGroupManipulationController) GetAllGroups(
+	input *requestPresenter.GetTenantAllGroups,
+) (mvc.Result, error) {
 
+	return this.ResultOf(
+		this.GetTenantAllGroupsUseCase.Execute(input),
+	)
 }
 
 func (this *AuthCommandGroupManipulationController) GetParticipatedGroups(

@@ -26,6 +26,7 @@ import (
 	getCommandGroupUsersDomain "app/domain/auth/getCommandGroupUsers"
 	"app/domain/auth/getSingleCommandGroupDomain"
 	getSingleUserDomain "app/domain/auth/getSingleUser"
+	getTenantAllGroupsDomain "app/domain/auth/getTenantAllGroups"
 	getUserAuthorityDomain "app/domain/auth/getUserAuthority"
 	getUserParticipatedCommandGroupsDomain "app/domain/auth/getUserParticipatedCommandGroups"
 	"app/domain/auth/reportUserParticipatedCommandGroupsDomain"
@@ -80,6 +81,8 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[authServicePort.IGetCommandGroupUsers, getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
 	//libConfig.BindDependency[authServicePort.IGetParticipatedCommandGroups, getUserParticipatedCommandGroupDomain.GetParticipatedCommandGroupsService](container, nil)
 	//libConfig.BindDependency[]()
+	libConfig.BindDependency[authServicePort.IGetTenantAllGroups, getTenantAllGroupsDomain.GetTenantAllGroupService](container, nil)
+
 	libConfig.BindDependency[authServicePort.IReportParticipatedCommandGroups, reportUserParticipatedCommandGroupsDomain.ReportParticipatedCommandGroupsService](container, nil)
 	libConfig.BindDependency[authServicePort.IGetUserParticipatedCommandGroups, getUserParticipatedCommandGroupsDomain.GetUserParticipatedCommandGroupService](container, nil)
 	libConfig.BindDependency[authServicePort.IGetSingleCommandGroup, getSingleCommandGroupDomain.GetSingleCommandGroupService](container, nil)
@@ -144,6 +147,10 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[
 		usecasePort.IUseCase[requestPresenter.ReportParticipatedGroups, responsePresenter.ReportParticipatedGroups],
 		reportUserParticipatedCommandGroupsDomain.ReportParticipatedCommandGroupsUseCase,
+	](container, nil)
+	libConfig.BindDependency[
+		usecasePort.IUseCase[requestPresenter.GetTenantAllGroups, responsePresenter.GetTenantAllGroups],
+		getTenantAllGroupsDomain.GetTenantAllGroupUseCase,
 	](container, nil)
 
 	container.Register(new(AuthBoundedContext)).Explicitly().EnableStructDependents()
