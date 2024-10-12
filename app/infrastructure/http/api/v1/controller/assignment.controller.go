@@ -18,6 +18,7 @@ type (
 		CreateAssignmentUseCase      usecasePort.IUseCase[requestPresenter.CreateAssigmentRequest, responsePresenter.CreateAssignmentResponse]
 		GetSingleAssignmentUseCase   usecasePort.IUseCase[requestPresenter.GetSingleAssignmentRequest, responsePresenter.GetSingleAssignmentResponse]
 		CreateAssignmentGroupUseCase usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupRequest, responsePresenter.CreateAssignmentGroupResponse]
+		ModifyAssignmentUseCase      usecasePort.IUseCase[requestPresenter.ModifyAssignment, responsePresenter.ModifyAssignment]
 	}
 )
 
@@ -46,6 +47,15 @@ func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivatio
 	activator.Handle(
 		"POST", "/{assignmentUUID:uuid}/group", "CreateAssignmentGroup",
 		middleware.BindRequest[requestPresenter.CreateAssignmentGroupRequest](
+			container,
+			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
+		),
+	)
+
+	activator.Handle(
+		"PATCH", "/{assignmentUUID}", "ModifyAssignment",
+		middleware.BindRequest[requestPresenter.ModifyAssignment](
 			container,
 			middlewareHelper.UseAuthority,
 			middlewareHelper.UseTenantMapping,
@@ -82,5 +92,14 @@ func (this *AssignmentController) CreateAssignmentGroup(
 
 	return this.ResultOf(
 		this.CreateAssignmentGroupUseCase.Execute(input),
+	)
+}
+
+func (this *AssignmentController) ModifyAssignment(
+	input *requestPresenter.ModifyAssignment,
+) (mvc.Result, error) {
+
+	return this.ResultOf(
+		this.ModifyAssignmentUseCase.Execute(input),
 	)
 }

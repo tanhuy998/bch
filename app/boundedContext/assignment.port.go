@@ -11,6 +11,7 @@ import (
 	createAssignmentGroupDomain "app/domain/assignment/createAssignmentGroup"
 	getSingleAssignmentDomain "app/domain/assignment/getSingleAssignment"
 	getSingleAssignmentGroupDomain "app/domain/assignment/getSingleAssignmentGroup"
+	modifyAssignmentDomain "app/domain/assignment/modifyAssignment"
 
 	"github.com/kataras/iris/v12/hero"
 )
@@ -30,6 +31,7 @@ func RegisterAssignmentBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[assignmentServicePort.IGetSingleAssignmentGroup, getSingleAssignmentGroupDomain.GetSingleAssignmentGroupService](container, nil)
 	libConfig.BindDependency[assignmentServicePort.ICreateAssignment, createAssignmentDomain.CreateAssignmentService](container, nil)
 	libConfig.BindDependency[assignmentServicePort.ICreateAssignmentGroup, createAssignmentGroupDomain.CreateAssignmentGroupService](container, nil)
+	libConfig.BindDependency[assignmentServicePort.IModifyAssignment, modifyAssignmentDomain.ModifyAssignmentService](container, nil)
 
 	libConfig.BindDependency[
 		usecasePort.IUseCase[requestPresenter.CreateAssigmentRequest, responsePresenter.CreateAssignmentResponse],
@@ -42,6 +44,10 @@ func RegisterAssignmentBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[
 		usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupRequest, responsePresenter.CreateAssignmentGroupResponse],
 		createAssignmentGroupDomain.CreateAssignmentGroupUseCase,
+	](container, nil)
+	libConfig.BindDependency[
+		usecasePort.IUseCase[requestPresenter.ModifyAssignment, responsePresenter.ModifyAssignment],
+		modifyAssignmentDomain.ModifyAssignmentUseCase,
 	](container, nil)
 
 	container.Register(new(AssignmentBoundedContext)).Explicitly().EnableStructDependents()

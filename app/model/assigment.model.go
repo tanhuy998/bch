@@ -8,14 +8,14 @@ import (
 
 type (
 	Assignment struct {
-		UUID       *uuid.UUID `json:"uuid" bson:"uuid"`
-		TenantUUID *uuid.UUID `json:"tenantUUID" bson:"tenantUUID"`
+		UUID       *uuid.UUID `json:"uuid" bson:"uuid,omitempty"`
+		TenantUUID *uuid.UUID `json:"tenantUUID" bson:"tenantUUID,omitempty"`
 		CreatedAt  *time.Time `json:"createdAt" bson:"createdAt,omitempty"`
-		CreatedBy  *uuid.UUID `json:"createdBy" bson:"createdBy"`
-		Deadline   *time.Time `json:"deadline" bson:"deadline"`
+		CreatedBy  *uuid.UUID `json:"createdBy" bson:"createdBy,omitempty"`
+		Deadline   *time.Time `json:"deadline" bson:"deadline,omitempty"`
 		//OwnerShip  []uuid.UUID `json:"ownerShip" bson:"ownerShip"`
-		Title      string `json:"title" bson:"title" validate:"required"`
-		Desciption string `json:"description" bson:"description"`
+		Title      string `json:"title" bson:"title" validate:"required,omitempty"`
+		Desciption string `json:"description" bson:"description,omitempty"`
 	}
 
 	AssignmentGroup struct {
