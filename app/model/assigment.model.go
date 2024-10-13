@@ -27,7 +27,7 @@ type (
 		Name             string     `json:"name" bson:"name" validate:"required"`
 	}
 
-	AssigmentGroupMember struct {
+	AssignmentGroupMember struct {
 		UUID                 *uuid.UUID `json:"uuid" bson:"uuid,omitempty"`
 		TenantUUID           *uuid.UUID `json:"tenantUUID" bson:"tenantUUID,omitempty"`
 		AssigmentGroupUUID   *uuid.UUID `json:"assignmentGroupUUID" bson:"assignmentGroupUUID,omitempty"`

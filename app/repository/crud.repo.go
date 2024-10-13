@@ -2,7 +2,6 @@ package repository
 
 import (
 	libCommon "app/internal/lib/common"
-	"app/model"
 	"context"
 	"errors"
 
@@ -22,8 +21,9 @@ type (
 
 	ICRUDMongoRepository[Model_T any] interface {
 		Create(model *Model_T, ctx context.Context) error
-		Find(query bson.D, ctx context.Context) (*Model_T, error)
+		FindMany(query bson.D, ctx context.Context, projection ...bson.E) ([]*Model_T, error)
 		FindOneByUUID(uuid uuid.UUID, ctx context.Context) (*Model_T, error)
+		Find(query bson.D, ctx context.Context) (*Model_T, error)
 		UpdateOneByUUID(uuid uuid.UUID, model *Model_T, ctx context.Context) error
 		Delete(query bson.D, ctx context.Context) error
 	}
@@ -116,7 +116,7 @@ func (this *crud_mongo_repository[Model_T]) Delete(query bson.D, ctx context.Con
 	return nil
 }
 
-func (this *crud_mongo_repository[Model_T]) CreateMany(models []*model.Role, ctx context.Context) error {
+func (this *crud_mongo_repository[Model_T]) CreateMany(models []*Model_T, ctx context.Context) error {
 
 	_, err := insertMany(models, this.collection, context.TODO())
 

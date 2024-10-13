@@ -49,12 +49,6 @@ func Auth(
 	constraints ...middlewareHelper.AuthorityConstraint,
 ) iris.Handler {
 
-	// to ensure constraint function list not be changed when
-	// server is running
-	temp := make([]middlewareHelper.AuthorityConstraint, len(constraints))
-	copy(temp, constraints)
-	constraints = temp
-
 	return func(ctx iris.Context) {
 
 		accessToken := common.GetAccessToken(ctx)
@@ -81,9 +75,9 @@ func Auth(
 
 		//container.Handler(authorization_func)(ctx)
 
-		if !validateAuthority(accessToken.GetAuthData(), constraints) {
+		if !validateAuthority(accessToken, constraints) {
 
-			common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusForbidden, "user authority unauthorized")
+			common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusForbidden, "forbiden authority")
 			return
 		}
 
@@ -91,16 +85,16 @@ func Auth(
 	}
 }
 
-func validateAuthority(authority accessTokenServicePort.IAccessTokenAuthData, constraints []middlewareHelper.AuthorityConstraint) bool {
+func validateAuthority(accessToken accessTokenServicePort.IAccessToken, constraints []middlewareHelper.AuthorityConstraint) bool {
 
-	if authority == nil {
+	if accessToken == nil {
 
 		return false
 	}
 
 	for _, f := range constraints {
 
-		if !f(authority) {
+		if !f(accessToken) {
 
 			return false
 		}

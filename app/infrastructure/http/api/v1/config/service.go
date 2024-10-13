@@ -112,6 +112,9 @@ func InitializeDatabase(app router.Party) {
 	libConfig.BindDependency[repository.IAssignmentGroup](
 		container, new(repository.AssignmentGroupRepository).Init(db),
 	)
+	libConfig.BindDependency[repository.IAssignmentGroupMember](
+		container, new(repository.AssignmentGroupMemberRepository).Init(db),
+	)
 	fmt.Println("Repositories Initialized.")
 }
 

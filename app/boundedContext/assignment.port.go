@@ -9,6 +9,7 @@ import (
 
 	createAssignmentDomain "app/domain/assignment/createAssignment"
 	createAssignmentGroupDomain "app/domain/assignment/createAssignmentGroup"
+	"app/domain/assignment/createAssignmentGroupMemberDomain"
 	getSingleAssignmentDomain "app/domain/assignment/getSingleAssignment"
 	getSingleAssignmentGroupDomain "app/domain/assignment/getSingleAssignmentGroup"
 	modifyAssignmentDomain "app/domain/assignment/modifyAssignment"
@@ -48,6 +49,10 @@ func RegisterAssignmentBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[
 		usecasePort.IUseCase[requestPresenter.ModifyAssignment, responsePresenter.ModifyAssignment],
 		modifyAssignmentDomain.ModifyAssignmentUseCase,
+	](container, nil)
+	libConfig.BindDependency[
+		usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupMember, responsePresenter.CreateAssignmentGroupMemeber],
+		createAssignmentGroupMemberDomain.CreateAssignmentGroupMemberService,
 	](container, nil)
 
 	container.Register(new(AssignmentBoundedContext)).Explicitly().EnableStructDependents()

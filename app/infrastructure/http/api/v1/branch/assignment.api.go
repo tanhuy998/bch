@@ -2,8 +2,6 @@ package api
 
 import (
 	"app/infrastructure/http/api/v1/controller"
-	"app/infrastructure/http/middleware"
-	"app/infrastructure/http/middleware/middlewareHelper"
 
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/mvc"
@@ -17,12 +15,9 @@ func initAssignmentApi(app router.Party) *mvc.Application {
 
 	wrapper := mvc.New(router)
 
-	wrapper.Router.Use(
-		middleware.Auth(
-			container,
-			middlewareHelper.AuthRequireTenantAgent,
-		),
-	)
+	// wrapper.Router.Use(
+	// 	middleware.Auth(container),
+	// )
 
 	wrapper.Router.ConfigureContainer()
 

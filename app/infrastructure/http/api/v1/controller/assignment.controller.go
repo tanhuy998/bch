@@ -15,16 +15,24 @@ import (
 type (
 	AssignmentController struct {
 		common.Controller
-		CreateAssignmentUseCase      usecasePort.IUseCase[requestPresenter.CreateAssigmentRequest, responsePresenter.CreateAssignmentResponse]
-		GetSingleAssignmentUseCase   usecasePort.IUseCase[requestPresenter.GetSingleAssignmentRequest, responsePresenter.GetSingleAssignmentResponse]
-		CreateAssignmentGroupUseCase usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupRequest, responsePresenter.CreateAssignmentGroupResponse]
-		ModifyAssignmentUseCase      usecasePort.IUseCase[requestPresenter.ModifyAssignment, responsePresenter.ModifyAssignment]
+		CreateAssignmentUseCase                     usecasePort.IUseCase[requestPresenter.CreateAssigmentRequest, responsePresenter.CreateAssignmentResponse]
+		GetSingleAssignmentUseCase                  usecasePort.IUseCase[requestPresenter.GetSingleAssignmentRequest, responsePresenter.GetSingleAssignmentResponse]
+		CreateAssignmentGroupUseCase                usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupRequest, responsePresenter.CreateAssignmentGroupResponse]
+		ModifyAssignmentUseCase                     usecasePort.IUseCase[requestPresenter.ModifyAssignment, responsePresenter.ModifyAssignment]
+		AddCommandGroupUserToAssignmentGroupUseCase usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupMember, responsePresenter.CreateAssignmentGroupMemeber]
 	}
 )
 
 func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivation) {
 
 	container := activator.Dependencies()
+
+	// default
+	activator.Router().Use(
+		middleware.Auth(
+			container,
+		),
+	)
 
 	activator.Handle(
 		"GET", "/{uuid:uuid}", "GetSingleAssignment",
@@ -37,6 +45,10 @@ func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivatio
 
 	activator.Handle(
 		"POST", "/", "CreateAssignment",
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequireTenantAgent,
+		),
 		middleware.BindRequest[requestPresenter.CreateAssigmentRequest](
 			container,
 			middlewareHelper.UseAuthority,
@@ -46,6 +58,10 @@ func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivatio
 
 	activator.Handle(
 		"POST", "/{assignmentUUID:uuid}/group/command/{commandGroupUUID:uuid}", "CreateAssignmentGroup",
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequireTenantAgent,
+		),
 		middleware.BindRequest[requestPresenter.CreateAssignmentGroupRequest](
 			container,
 			middlewareHelper.UseAuthority,
@@ -54,8 +70,25 @@ func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivatio
 	)
 
 	activator.Handle(
-		"PATCH", "/{assignmentUUID}", "ModifyAssignment",
+		"PATCH", "/{assignmentUUID:uuid}", "ModifyAssignment",
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequireTenantAgent,
+		),
 		middleware.BindRequest[requestPresenter.ModifyAssignment](
+			container,
+			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
+		),
+	)
+
+	activator.Handle(
+		"POST", "/group/{groupUUID:uuid}/member", "CreateAssignmentGroupMember",
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequiredTenantAgentExceptMeetRoles("COMMANDER"),
+		),
+		middleware.BindRequest[requestPresenter.CreateAssignmentGroupMember](
 			container,
 			middlewareHelper.UseAuthority,
 			middlewareHelper.UseTenantMapping,
@@ -101,5 +134,14 @@ func (this *AssignmentController) ModifyAssignment(
 
 	return this.ResultOf(
 		this.ModifyAssignmentUseCase.Execute(input),
+	)
+}
+
+func (this *AssignmentController) CreateAssignmentGroupMember(
+	input *requestPresenter.CreateAssignmentGroupMember,
+) (mvc.Result, error) {
+
+	return this.ResultOf(
+		this.AddCommandGroupUserToAssignmentGroupUseCase.Execute(input),
 	)
 }
