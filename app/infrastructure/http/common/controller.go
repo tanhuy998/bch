@@ -7,6 +7,7 @@ import (
 	loggerPort "app/port/logger"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/kataras/iris/v12/hero"
@@ -100,6 +101,9 @@ func (this *Controller) hanleInternalError(err error) (mvc.Result, error) {
 	if this.ErrorLogger != nil {
 
 		this.ErrorLogger.Error(err.Error())
+	} else {
+
+		fmt.Println(err)
 	}
 
 	resObj := default_response{

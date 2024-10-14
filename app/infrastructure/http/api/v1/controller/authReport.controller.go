@@ -22,8 +22,18 @@ func (this *AuthReportController) BeforeActivation(activator mvc.BeforeActivatio
 
 	container := activator.Dependencies()
 
+	activator.Router().Use(
+		middleware.Auth(
+			container,
+		),
+	)
+
 	activator.Handle(
 		"GET", "/groups/participated/user/{userUUID:uuid}", "ReportParticipatedGroups",
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequiredTenantAgentExceptMeetRoles("COMMANDER"),
+		),
 		middleware.BindRequest[requestPresenter.ReportParticipatedGroups](
 			container,
 			middlewareHelper.UseAuthority,

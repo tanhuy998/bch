@@ -1,6 +1,7 @@
 package reportUserParticipatedCommandGroupsDomain
 
 import (
+	"app/domain"
 	"app/internal/common"
 	"app/repository"
 	"app/valueObject"
@@ -17,6 +18,7 @@ import (
 
 type (
 	ReportParticipatedCommandGroupsService struct {
+		domain.ContextualDomainService[domain_context]
 		CommandGroupUserRepo repository.ICommandGroupUser
 		UserRepo             repository.IUser
 	}
@@ -26,13 +28,16 @@ func (this *ReportParticipatedCommandGroupsService) Serve(
 	tenantUUID uuid.UUID, userUUID uuid.UUID, ctx context.Context,
 ) (*valueObject.ParticipatedCommandGroupReport, error) {
 
-	switch existingUser, err := this.UserRepo.FindOneByUUID(userUUID, ctx); {
-	case err != nil:
-		return nil, err
-	case existingUser == nil:
-		return nil, errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("user not found"))
-	case *existingUser.TenantUUID != tenantUUID:
-		return nil, errors.Join(common.ERR_FORBIDEN, fmt.Errorf("user not in tenant"))
+	if !this.InDomainContext(ctx) {
+
+		switch existingUser, err := this.UserRepo.FindOneByUUID(userUUID, ctx); {
+		case err != nil:
+			return nil, err
+		case existingUser == nil:
+			return nil, errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("user not found"))
+		case *existingUser.TenantUUID != tenantUUID:
+			return nil, errors.Join(common.ERR_FORBIDEN, fmt.Errorf("user not in tenant"))
+		}
 	}
 
 	res, err := repository.Aggregate[valueObject.ParticipatedCommandGroupDetail](
@@ -94,7 +99,14 @@ func (this *ReportParticipatedCommandGroupsService) Serve(
 				},
 			},
 			bson.D{{"$unwind", "$detail"}},
-			bson.D{{"$set", bson.D{{"name", "$detail.name"}}}},
+			bson.D{
+				{
+					"$set", bson.D{
+						{"name", "$detail.name"},
+						{"commandGroupUserUUID", "$uuid"},
+					},
+				},
+			},
 			bson.D{
 				{"$project",
 					bson.D{
