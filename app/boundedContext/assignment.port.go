@@ -52,7 +52,7 @@ func RegisterAssignmentBoundedContext(container *hero.Container) {
 	](container, nil)
 	libConfig.BindDependency[
 		usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupMember, responsePresenter.CreateAssignmentGroupMemeber],
-		createAssignmentGroupMemberDomain.CreateAssignmentGroupMemberService,
+		createAssignmentGroupMemberDomain.CreateAssignmentGroupMemberUseCase,
 	](container, nil)
 
 	container.Register(new(AssignmentBoundedContext)).Explicitly().EnableStructDependents()

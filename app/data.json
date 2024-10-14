@@ -25,7 +25,17 @@
                     "tenantUUID": "f47b11f6-26cf-4a0b-8f02-9c59de5f60e1",
                     "createdBy": "6de61f46-f33c-4a5d-b0dd-636549f38458",
                     "name": "sit doloribus quisquam",
-                    "deactivated": false
+                    "deactivated": false,
+                    "username": "Brenna_Dickens",
+                    "password": "adlaboris"
+                },
+                {
+                    "uuid": "06fd6472-a14a-4d43-b5b3-e92031a17593",
+                    "tenantUUID": "f47b11f6-26cf-4a0b-8f02-9c59de5f60e1",
+                    "createdBy": "6de61f46-f33c-4a5d-b0dd-636549f38458",
+                    "name": "dolore nisi tempora",
+                    "username": "Priscilla71",
+                    "password": "Excedeserunt"
                 }
             ],
             "commandGroups": [

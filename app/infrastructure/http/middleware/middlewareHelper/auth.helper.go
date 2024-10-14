@@ -77,13 +77,6 @@ func AuthRequireRoles(roleNames ...string) AuthorityConstraint {
 		panic("there is no role constraint")
 	}
 
-	m := make(map[string]struct{})
-
-	for _, v := range roleNames {
-
-		m[v] = struct{}{}
-	}
-
 	markAsPass, markUnPass, lastMark := beginCache()
 
 	return func(accessToken accessTokenServicePort.IAccessToken) bool {
@@ -101,28 +94,17 @@ func AuthRequireRoles(roleNames ...string) AuthorityConstraint {
 
 			return false
 		}
+		for _, group := range a.GetParticipatedGroups() {
 
-		counter := 0
+			if group.HasRoles(roleNames...) {
 
-		for _, v := range a.GetParticipatedGroups() {
-
-			if _, ok := m[v.GetCommandGroupRoleName()]; !ok {
-
-				continue
+				markAsPass(accessToken)
+				return true
 			}
-
-			counter++
-		}
-
-		pass := counter == len(m)
-
-		if pass {
-
-			markAsPass(accessToken)
 		}
 
 		markUnPass(accessToken)
-		return pass
+		return false
 	}
 }
 
@@ -133,13 +115,6 @@ func AuthRequireOneOfRoles(roleNames ...string) AuthorityConstraint {
 		panic("there is no role")
 	}
 
-	m := make(map[string]struct{})
-
-	for _, v := range roleNames {
-
-		m[v] = struct{}{}
-	}
-
 	markAsPass, markUnPass, lastMark := beginCache()
 
 	return func(accessToken accessTokenServicePort.IAccessToken) bool {
@@ -158,9 +133,9 @@ func AuthRequireOneOfRoles(roleNames ...string) AuthorityConstraint {
 			return false
 		}
 
-		for _, v := range a.GetParticipatedGroups() {
+		for _, group := range a.GetParticipatedGroups() {
 
-			if _, ok := m[v.GetCommandGroupRoleName()]; !ok {
+			if group.HasRoles(roleNames...) {
 
 				markAsPass(accessToken)
 				return true

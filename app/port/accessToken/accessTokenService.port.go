@@ -56,6 +56,7 @@ type (
 	IParticipatedCommandGroup interface {
 		GetCommandGroupUUID() *uuid.UUID
 		GetCommandGroupRoleName() string
+		HasRoles(name ...string) bool
 	}
 
 	IAccessTokenAuthData interface {

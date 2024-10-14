@@ -5,6 +5,8 @@ import (
 	"app/repository"
 	"app/valueObject"
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,7 +22,7 @@ type (
 func (this *GetUsertAuthorityService) Serve(
 	tenantUUID uuid.UUID, userUUID uuid.UUID, ctx context.Context,
 ) (*valueObject.AuthData, error) {
-
+	fmt.Println(userUUID)
 	return this.query(
 		bson.D{
 			{"uuid", userUUID},
@@ -49,12 +51,65 @@ func (this *GetUsertAuthorityService) query(
 						{"localField", "uuid"},
 						{"foreignField", "userUUID"},
 						{"as", "participatedCommandGroups"},
-						{
-							"pipeline", mongo.Pipeline{
+						{"pipeline",
+							mongo.Pipeline{
 								bson.D{
 									{
 										"$match", bson.D{
 											{"tenantUUID", tenantUUID},
+										},
+									},
+								},
+								bson.D{
+									{"$lookup",
+										bson.D{
+											{"from", "commandGroupUserRoles"},
+											{"localField", "uuid"},
+											{"foreignField", "commandGroupUserUUID"},
+											{"as", "roles"},
+											{"pipeline",
+												mongo.Pipeline{
+													bson.D{
+														{
+															"$match", bson.D{
+																{"tenantUUID", tenantUUID},
+															},
+														},
+													},
+													bson.D{
+														{"$lookup",
+															bson.D{
+																{"from", "roles"},
+																{"localField", "roleUUID"},
+																{"foreignField", "uuid"},
+																{"as", "details"},
+																{"pipeline",
+																	mongo.Pipeline{
+																		bson.D{{"$project", bson.D{{"name", 1}}}},
+																	},
+																},
+															},
+														},
+													},
+													bson.D{{"$unwind", "$details"}},
+													//bson.D{{"$replaceWith", "$details"}},
+												},
+											},
+										},
+									},
+								},
+								bson.D{
+									{
+										"$set", bson.D{
+											{"roles", "$roles.details.name"},
+										},
+									},
+								},
+								bson.D{
+									{"$project",
+										bson.D{
+											{"commandGroupUUID", 1},
+											{"roles", 1},
 										},
 									},
 								},
@@ -100,18 +155,6 @@ func (this *GetUsertAuthorityService) query(
 				},
 			},
 			bson.D{
-				{"$match",
-					bson.D{
-						{"$or",
-							bson.A{
-								bson.D{{"isTenantAgent", true}},
-								bson.D{{"tenantUUID", "$tenantAgentData.0.uuid"}},
-							},
-						},
-					},
-				},
-			},
-			bson.D{
 				{"$project",
 					bson.D{
 						{"uuid", 1},
@@ -135,6 +178,13 @@ func (this *GetUsertAuthorityService) query(
 	if data == nil {
 
 		return nil, common.ERR_UNAUTHORIZED
+	}
+
+	if !data.IsTenantAgent() && *data.TenantUUID != tenantUUID {
+
+		return nil, errors.Join(
+			common.ERR_FORBIDEN, fmt.Errorf("could no switch to the tenant that the user haven't belonged to"),
+		)
 	}
 
 	return data, nil
