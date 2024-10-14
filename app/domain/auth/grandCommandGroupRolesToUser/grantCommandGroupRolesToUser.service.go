@@ -3,6 +3,7 @@ package grantCommandGroupRoleToUserDomain
 import (
 	"app/internal/common"
 	libCommon "app/internal/lib/common"
+	libError "app/internal/lib/error"
 	"app/model"
 	authServicePort "app/port/auth"
 	"app/repository"
@@ -13,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var (
@@ -23,10 +25,6 @@ var (
 )
 
 type (
-	// IGrantCommandGroupRolesToUser interface {
-	// 	Serve(groupUUID string, userUUID string, roles []string) error
-	// }
-
 	GrantCommandGroupRolesToUserService struct {
 		RoleRepo                         repository.IRole
 		UserRepo                         repository.IUser
@@ -35,6 +33,7 @@ type (
 		CommandGroupUserRoleRepo         repository.ICommandGroupUserRole
 		GetSingleCommandGroupService     authServicePort.IGetSingleCommandGroup
 		CheckUserInCommandGroup          authServicePort.ICheckUserInCommandGroup
+		MongoClient                      *mongo.Client
 	}
 )
 
@@ -47,6 +46,11 @@ func (this *GrantCommandGroupRolesToUserService) Serve(
 	ctx context.Context,
 ) error {
 
+	if len(roles) == 0 {
+
+		return errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("no roles provided"))
+	}
+
 	switch existingUser, err := this.UserRepo.FindOneByUUID(userUUID, ctx); {
 	case err != nil:
 		return err
@@ -56,21 +60,11 @@ func (this *GrantCommandGroupRolesToUserService) Serve(
 		return errors.Join(common.ERR_FORBIDEN, fmt.Errorf("user not in tenant"))
 	}
 
-	commandGroupUser, err := this.CheckUserInCommandGroup.Detail(groupUUID, userUUID, ctx)
+	existingCommandGroupUser, err := this.CheckUserInCommandGroup.Detail(groupUUID, userUUID, ctx)
 
-	if err != nil {
+	if err != nil && !errors.Is(err, common.ERR_NOT_FOUND) {
 
 		return err
-	}
-
-	if commandGroupUser == nil {
-
-		return errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("user not in group"))
-	}
-
-	if len(roles) == 0 {
-
-		return errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("no roles provided"))
 	}
 
 	if err = this.checkValidRoles(roles, ctx); err != nil {
@@ -78,11 +72,30 @@ func (this *GrantCommandGroupRolesToUserService) Serve(
 		return err
 	}
 
-	unGrantedRoles, err := this.CheckCommandGroupUserRoleService.Compare(groupUUID, userUUID, roles, ctx)
+	var (
+		unGrantedRoles      []uuid.UUID
+		newCommandGroupUser *model.CommandGroupUser
+	)
 
-	if err != nil {
+	if existingCommandGroupUser == nil {
+		// if error was not added to group, prepare new data model
+		// and create later
+		unGrantedRoles = roles
 
-		return err
+		newCommandGroupUser = &model.CommandGroupUser{
+			UUID:             libCommon.PointerPrimitive(uuid.New()),
+			UserUUID:         &userUUID,
+			CommandGroupUUID: &groupUUID,
+		}
+
+	} else {
+
+		unGrantedRoles, err = this.CheckCommandGroupUserRoleService.Compare(groupUUID, userUUID, roles, ctx)
+
+		if err != nil {
+
+			return err
+		}
 	}
 
 	if len(unGrantedRoles) == 0 {
@@ -97,7 +110,8 @@ func (this *GrantCommandGroupRolesToUserService) Serve(
 		obj := &model.CommandGroupUserRole{
 			UUID:                 libCommon.PointerPrimitive(uuid.New()),
 			RoleUUID:             &v,
-			CommandGroupUserUUID: commandGroupUser.UUID,
+			CommandGroupUserUUID: libCommon.Ternary(existingCommandGroupUser != nil, existingCommandGroupUser.UUID, newCommandGroupUser.UUID),
+			TenantUUID:           &tenantUUID,
 		}
 
 		if createdBy != uuid.Nil {
@@ -108,7 +122,38 @@ func (this *GrantCommandGroupRolesToUserService) Serve(
 		commandGroupUserRoleList[i] = obj
 	}
 
-	err = this.CommandGroupUserRoleRepo.CreateMany(commandGroupUserRoleList, context.TODO())
+	session, err := this.MongoClient.StartSession()
+
+	if err != nil {
+
+		return libError.NewInternal(err)
+	}
+
+	defer session.EndSession(ctx)
+
+	_, err = session.WithTransaction(
+		ctx, func(sessionCtx mongo.SessionContext) (interface{}, error) {
+
+			if existingCommandGroupUser == nil {
+
+				err := this.CommandGroupUserRepo.Create(newCommandGroupUser, sessionCtx)
+
+				if err != nil {
+
+					return nil, err
+				}
+			}
+
+			err = this.CommandGroupUserRoleRepo.CreateMany(commandGroupUserRoleList, sessionCtx)
+
+			if err != nil {
+
+				return nil, err
+			}
+
+			return nil, nil
+		},
+	)
 
 	if err != nil {
 
