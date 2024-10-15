@@ -45,6 +45,7 @@ func (this *CreateAssignmentService) Serve(
 
 	findSimilarQuery := bson.D{
 		{"tenantUUID", tenantUUID},
+		{"title", dataModel.Title},
 		{
 			"createdAt", bson.D{
 				{
