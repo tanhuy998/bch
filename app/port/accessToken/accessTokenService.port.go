@@ -1,7 +1,7 @@
 package accessTokenServicePort
 
 import (
-	"app/model"
+	"app/valueObject"
 
 	generalTokenServicePort "app/port/generalToken"
 	noExpireTokenServicePort "app/port/noExpireToken"
@@ -53,19 +53,23 @@ type (
 		IAccessTokenSigning
 	}
 
-	IParticipatedCommandGroup interface {
-		GetCommandGroupUUID() *uuid.UUID
-		GetCommandGroupRoleName() string
-		HasRoles(name ...string) bool
-	}
+	// IParticipatedCommandGroup interface {
+	// 	GetCommandGroupUUID() *uuid.UUID
+	// 	GetCommandGroupRoleName() string
+	// 	HasRoles(name ...string) bool
+	// }
 
-	IAccessTokenAuthData interface {
-		GetUserUUID() uuid.UUID
-		GetTenantUUID() uuid.UUID
-		GetTenantAgentData() *model.TenantAgent
-		GetParticipatedGroups() []IParticipatedCommandGroup
-		IsTenantAgent() bool
-	}
+	IParticipatedCommandGroup = valueObject.IParticipatedCommandGroup
+
+	// IAccessTokenAuthData interface {
+	// 	GetUserUUID() uuid.UUID
+	// 	GetTenantUUID() uuid.UUID
+	// 	GetTenantAgentData() *model.TenantAgent
+	// 	GetParticipatedGroups() []IParticipatedCommandGroup
+	// 	IsTenantAgent() bool
+	// }
+
+	IAccessTokenAuthData = valueObject.IAuthorityData
 
 	IAccessToken interface {
 		// GetExpirationTime() time.Time

@@ -3,8 +3,10 @@ package repository
 import (
 	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
+	libMongo "app/internal/lib/mongo"
 	"context"
 	"errors"
+	"slices"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,6 +23,16 @@ type (
 	}
 
 	MongoDBCursorSortOrder = int
+
+	/*
+		Models that inplement this interface must define
+		two mehod to return the pagination query based on
+		current value of the model
+	*/
+	ICustomCursorPaginationModel interface {
+		QueryBefore() bson.D
+		QueryAfter() bson.D
+	}
 )
 
 const (
@@ -133,6 +145,20 @@ func ParseCursor[T any](cursor *mongo.Cursor, ctx context.Context) ([]*T, error)
 	}
 
 	if err := cursor.Err(); err != nil {
+
+		return nil, libError.NewInternal(err)
+	}
+
+	return ret, nil
+}
+
+func ParseValCursor[T any](cursor *mongo.Cursor, ctx context.Context) ([]T, error) {
+
+	ret := make([]T, 0)
+
+	err := cursor.All(ctx, &ret)
+
+	if err != nil {
 
 		return nil, libError.NewInternal(err)
 	}
@@ -567,6 +593,12 @@ func AggregateOne[Model_T any](
 	return ParseCursorOne[Model_T](cursor, ctx)
 }
 
+// func AgggregateCursor[Model_T any]([]Model_T, error) (
+// 	collection *mongo.Collection,
+// ) {
+
+// }
+
 func AggregateByPage[Model_T any](
 	collection *mongo.Collection,
 	pipeline mongo.Pipeline,
@@ -645,4 +677,95 @@ func prepareAggregationPaginationStages(
 	return mongo.Pipeline{
 		pivotStage, sortStage,
 	}
+}
+
+func FindNext[Model_T libMongo.IBsonDocument](
+	collection *mongo.Collection, dataModel Model_T, size uint64, ctx context.Context, filters ...bson.E,
+) ([]Model_T, error) {
+
+	if size == 0 {
+
+		size = DEFAULT_PAGINATION_SIZE
+	}
+
+	query := make(bson.D, len(filters)+1)
+
+	query[0] = bson.E{
+		"_id", bson.D{
+			{"$lt", dataModel.GetObjectID()},
+		},
+	}
+
+	for i, f := range filters {
+
+		query[i+1] = f
+	}
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	findOption := options.Find()
+	findOption.Limit = libCommon.PointerPrimitive(int64(size))
+	findOption.Sort = bson.D{{"_id", SORT_DESC}}
+
+	c, err := collection.Find(ctx, query, findOption)
+
+	if err != nil {
+
+		return nil, libError.NewInternal(err)
+	}
+
+	return ParseValCursor[Model_T](c, ctx)
+}
+
+func FindPrevious[Model_T libMongo.IBsonDocument](
+	collection *mongo.Collection, dataModel Model_T, size uint64, ctx context.Context, filters ...bson.E,
+) ([]Model_T, error) {
+
+	if size == 0 {
+
+		size = DEFAULT_PAGINATION_SIZE
+	}
+
+	query := make(bson.D, len(filters)+1)
+
+	query[0] = bson.E{
+		"_id", bson.D{
+			{"$gt", dataModel.GetObjectID()},
+		},
+	}
+
+	for i, f := range filters {
+
+		query[i+1] = f
+	}
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	findOption := options.Find()
+	findOption.Limit = libCommon.PointerPrimitive(int64(size))
+	findOption.Sort = bson.D{{"_id", SORT_ASC}}
+
+	c, err := collection.Find(ctx, query, findOption)
+
+	if err != nil {
+
+		return nil, libError.NewInternal(err)
+	}
+
+	ret, err := ParseValCursor[Model_T](c, ctx)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	slices.Reverse(ret)
+
+	return ret, nil
 }

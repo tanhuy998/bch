@@ -3,10 +3,10 @@ package middlewareHelper
 import (
 	"app/infrastructure/http/common"
 	accessTokenServicePort "app/port/accessToken"
-	"context"
+	"app/valueObject/requestInput"
+
 	"errors"
 
-	"github.com/google/uuid"
 	"github.com/kataras/iris/v12"
 )
 
@@ -17,31 +17,9 @@ var (
 type (
 	PresenterInitializer[RequestPresenter_T, ResponsePresenter_T any] func(ctx iris.Context, req *RequestPresenter_T, res *ResponsePresenter_T) error
 	RequestPresenterInitializer[RequestPresenter_T any]               func(req *RequestPresenter_T) error
-
-	IAccessTokenBringAlong interface {
-		//IContextBringAlong
-		ReceiveAccessToken(at accessTokenServicePort.IAccessToken)
-		GetAccessToken() accessTokenServicePort.IAccessToken
-	}
-
-	IContextBringAlong interface {
-		ReceiveContext(ctx context.Context)
-		GetContext() context.Context
-	}
-
-	IAuthorityBringAlong interface {
-		GetAuthority() accessTokenServicePort.IAccessTokenAuthData
-		SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData)
-	}
-
-	ITenantMappingInput interface {
-		SetTenantUUID(tenantUUID uuid.UUID)
-		IsValidTenantUUID() bool
-		GetTenantUUID() uuid.UUID
-	}
 )
 
-func UseAccessToken[Req_T IAccessTokenBringAlong, Res_T any](ctx iris.Context, req Req_T, res Res_T) error {
+func UseAccessToken[Req_T accessTokenServicePort.IAccessTokenBringAlong, Res_T any](ctx iris.Context, req Req_T, res Res_T) error {
 
 	if ctx == nil {
 
@@ -53,7 +31,7 @@ func UseAccessToken[Req_T IAccessTokenBringAlong, Res_T any](ctx iris.Context, r
 	return nil
 }
 
-func UseAuthority[Req_T IAuthorityBringAlong, Res_T any](ctx iris.Context, req Req_T, res Res_T) error {
+func UseAuthority[Req_T requestInput.IAuthorityBringAlong, Res_T any](ctx iris.Context, req Req_T, res Res_T) error {
 
 	accessToken := common.GetAccessToken(ctx)
 
@@ -66,7 +44,7 @@ func UseAuthority[Req_T IAuthorityBringAlong, Res_T any](ctx iris.Context, req R
 	return nil
 }
 
-func UseTenantMapping[Req_T ITenantMappingInput, Res_T any](ctx iris.Context, req Req_T, res Res_T) error {
+func UseTenantMapping[Req_T requestInput.ITenantMappingInput, Res_T any](ctx iris.Context, req Req_T, res Res_T) error {
 
 	accessToken := common.GetAccessToken(ctx)
 

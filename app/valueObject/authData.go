@@ -2,13 +2,26 @@ package valueObject
 
 import (
 	"app/model"
-	accessTokenServicePort "app/port/accessToken"
 
 	"github.com/google/uuid"
 )
 
 type (
-	IParticipatedCommandGroup = accessTokenServicePort.IParticipatedCommandGroup
+	IParticipatedCommandGroup interface {
+		GetCommandGroupUUID() *uuid.UUID
+		GetCommandGroupRoleName() string
+		HasRoles(name ...string) bool
+	}
+
+	IAuthorityData interface {
+		GetUserUUID() uuid.UUID
+		GetTenantUUID() uuid.UUID
+		GetTenantAgentData() *model.TenantAgent
+		GetParticipatedGroups() []IParticipatedCommandGroup
+		IsTenantAgent() bool
+	}
+
+	// IParticipatedCommandGroup = accessTokenServicePort.IParticipatedCommandGroup
 
 	UserParticipatedCommandGroup struct {
 		CommandGroupUUID *uuid.UUID `json:"commandGroupUUID,omitempty" bson:"commandGroupUUID"`

@@ -1,6 +1,8 @@
 package usecasePort
 
-import "app/internal/responseOutput"
+import (
+	"app/internal/responseOutput"
+)
 
 type (
 	IUseCase[Request_Struc_T, Response_Struct_T any] interface {

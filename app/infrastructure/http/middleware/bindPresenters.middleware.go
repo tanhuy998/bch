@@ -4,6 +4,8 @@ import (
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware/middlewareHelper"
 	libCommon "app/internal/lib/common"
+	"app/valueObject/requestInput"
+
 	"io"
 	"net/http"
 
@@ -58,7 +60,7 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 			err      error
 		)
 
-		if val, ok := any(request).(middlewareHelper.IContextBringAlong); ok {
+		if val, ok := any(request).(requestInput.IContextBringAlong); ok {
 
 			val.ReceiveContext(ctx)
 		}

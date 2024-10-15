@@ -2,12 +2,18 @@ package repository
 
 import (
 	libCommon "app/internal/lib/common"
+	libError "app/internal/lib/error"
 	"context"
 	"errors"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+const (
+	DEFAULT_PAGINATION_SIZE = 10
 )
 
 type (
@@ -24,6 +30,9 @@ type (
 		FindMany(query bson.D, ctx context.Context, projection ...bson.E) ([]*Model_T, error)
 		FindOneByUUID(uuid uuid.UUID, ctx context.Context) (*Model_T, error)
 		Find(query bson.D, ctx context.Context) (*Model_T, error)
+		FindOffset(
+			query interface{}, offset uint64, size uint64, sort *bson.D, ctx context.Context, projection ...bson.E,
+		) ([]Model_T, error)
 		UpdateOneByUUID(uuid uuid.UUID, model *Model_T, ctx context.Context) error
 		Delete(query bson.D, ctx context.Context) error
 	}
@@ -94,10 +103,47 @@ func (this *crud_mongo_repository[Model_T]) FindOneByUUID(uuid uuid.UUID, ctx co
 	return ret, nil
 }
 
-// func (this *crud_mongo_repository[Model_T]) FindByUUID(uuid uuid.UUID, ctx context.Context) ([]*Model_T, error) {
+func (this *crud_mongo_repository[Model_T]) FindOffset(
+	query interface{}, offset uint64, size uint64, sort *bson.D, ctx context.Context, projection ...bson.E,
+) ([]Model_T, error) {
 
-// 	return nil, nil
-// }
+	findOption := options.Find()
+	findOption.Limit = libCommon.PointerPrimitive(int64(size))
+
+	if sort == nil {
+
+		findOption.Sort = &bson.D{{"_id", SORT_DESC}}
+	} else {
+
+		findOption.Sort = sort
+	}
+
+	if offset > 1 {
+
+		findOption.Skip = libCommon.PointerPrimitive(int64(offset))
+	}
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	cursor, err := this.collection.Find(ctx, query, findOption)
+
+	if err != nil {
+
+		return nil, libError.NewInternal(err)
+	}
+
+	ret, err := ParseValCursor[Model_T](cursor, ctx)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return ret, nil
+}
 
 func (this *crud_mongo_repository[Model_T]) UpdateOneByUUID(uuid uuid.UUID, model *Model_T, ctx context.Context) error {
 
