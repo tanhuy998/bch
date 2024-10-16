@@ -21,6 +21,7 @@ type (
 		ModifyAssignmentUseCase                     usecasePort.IUseCase[requestPresenter.ModifyAssignment, responsePresenter.ModifyAssignment]
 		AddCommandGroupUserToAssignmentGroupUseCase usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupMember, responsePresenter.CreateAssignmentGroupMemeber]
 		GetAssignmentsUseCase                       usecasePort.IUseCase[requestPresenter.GetAssignments, responsePresenter.GetAssignments]
+		GetAssignmnentGroupsUseCase                 usecasePort.IUseCase[requestPresenter.GetAssignmentGroups, responsePresenter.GetAssignmentGroups]
 	}
 )
 
@@ -32,6 +33,7 @@ func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivatio
 	activator.Router().Use(
 		middleware.Auth(
 			container,
+			middlewareHelper.AuthRequiredTenantAgentExceptOneOfRoles("COMMANDER"),
 		),
 	)
 
@@ -51,6 +53,19 @@ func (this *AssignmentController) BeforeActivation(activator mvc.BeforeActivatio
 			middlewareHelper.AuthRequireTenantAgent,
 		),
 		middleware.BindRequest[requestPresenter.GetAssignments](
+			container,
+			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
+		),
+	)
+
+	activator.Handle(
+		"GET", "/{uuid:uuid}/group/list", "GetAssignmentGroups",
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequireTenantAgent,
+		),
+		middleware.BindRequest[requestPresenter.GetAssignmentGroups](
 			container,
 			middlewareHelper.UseAuthority,
 			middlewareHelper.UseTenantMapping,
@@ -166,5 +181,14 @@ func (this *AssignmentController) GetAssignments(
 
 	return this.ResultOf(
 		this.GetAssignmentsUseCase.Execute(input),
+	)
+}
+
+func (this *AssignmentController) GetAssignmentGroups(
+	input *requestPresenter.GetAssignmentGroups,
+) (mvc.Result, error) {
+
+	return this.ResultOf(
+		this.GetAssignmnentGroupsUseCase.Execute(input),
 	)
 }

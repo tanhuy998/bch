@@ -22,12 +22,14 @@ type (
 	}
 
 	AssignmentGroup struct {
-		Name             string     `json:"name" bson:"name" validate:"required"`
-		UUID             *uuid.UUID `json:"uuid,omitempty" bson:"uuid,omitempty"`
-		AssignmentUUID   *uuid.UUID `json:"assignmentUUID" bson:"assignmentUUID"`
-		TenantUUID       *uuid.UUID `json:"tenantUUID,omitempty" bson:"tenantUUID,omitempty"`
-		CreatedBy        *uuid.UUID `json:"createdBy,omitempty" bson:"createdBy,omitempty"`
-		CommandGroupUUID *uuid.UUID `json:"commandGroupUUID,omitempty" bson:"commandGroupUUID,omitempty"`
+		Name             string        `json:"name" bson:"name" validate:"required"`
+		UUID             *uuid.UUID    `json:"uuid,omitempty" bson:"uuid,omitempty"`
+		AssignmentUUID   *uuid.UUID    `json:"assignmentUUID" bson:"assignmentUUID"`
+		TenantUUID       *uuid.UUID    `json:"tenantUUID,omitempty" bson:"tenantUUID,omitempty"`
+		CreatedBy        *uuid.UUID    `json:"createdBy,omitempty" bson:"createdBy,omitempty"`
+		CommandGroupUUID *uuid.UUID    `json:"commandGroupUUID,omitempty" bson:"commandGroupUUID,omitempty"`
+		CreatedUser      *User         `json:"createdUser" bson:"createdUser,omitempty"`
+		CommandGroup     *CommandGroup `json:"commandGroup" bson:"commandGroup,omitempty"`
 	}
 
 	AssignmentGroupMember struct {

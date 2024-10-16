@@ -10,6 +10,7 @@ import (
 	createAssignmentDomain "app/domain/assignment/createAssignment"
 	createAssignmentGroupDomain "app/domain/assignment/createAssignmentGroup"
 	"app/domain/assignment/createAssignmentGroupMemberDomain"
+	"app/domain/assignment/getAssignmentGroupsDomain"
 	getAssignmentsDomain "app/domain/assignment/getAssignments"
 	getSingleAssignmentDomain "app/domain/assignment/getSingleAssignment"
 	getSingleAssignmentGroupDomain "app/domain/assignment/getSingleAssignmentGroup"
@@ -30,6 +31,7 @@ type (
 func RegisterAssignmentBoundedContext(container *hero.Container) {
 
 	libConfig.BindDependency[assignmentServicePort.IGetAssignments, getAssignmentsDomain.GetAssignmentsService](container, nil)
+	libConfig.BindDependency[assignmentServicePort.IGetAssignmentGroups, getAssignmentGroupsDomain.GetAssignmentGroupsService](container, nil)
 	libConfig.BindDependency[assignmentServicePort.IGetSingleAssignnment, getSingleAssignmentDomain.GetSingleAssignmentService](container, nil)
 	libConfig.BindDependency[assignmentServicePort.IGetSingleAssignmentGroup, getSingleAssignmentGroupDomain.GetSingleAssignmentGroupService](container, nil)
 	libConfig.BindDependency[assignmentServicePort.ICreateAssignment, createAssignmentDomain.CreateAssignmentService](container, nil)
@@ -59,6 +61,10 @@ func RegisterAssignmentBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetAssignments, responsePresenter.GetAssignments],
 		getAssignmentsDomain.GetAssignmentUseCase,
+	](container, nil)
+	libConfig.BindDependency[
+		usecasePort.IUseCase[requestPresenter.GetAssignmentGroups, responsePresenter.GetAssignmentGroups],
+		getAssignmentGroupsDomain.GetAssignmentGroupsUseCase,
 	](container, nil)
 
 	container.Register(new(AssignmentBoundedContext)).Explicitly().EnableStructDependents()
