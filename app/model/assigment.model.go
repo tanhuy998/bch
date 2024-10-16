@@ -18,18 +18,21 @@ type (
 		Deadline              *time.Time `json:"deadline" bson:"deadline,omitempty"`
 		CreatedBy             *uuid.UUID `json:"createdBy" bson:"createdBy,omitempty"`
 		TenantUUID            *uuid.UUID `json:"tenantUUID" bson:"tenantUUID,omitempty"`
+		// join fields
+		CreatedUser *User `json:"createdUser" bson:"createdUser,omitempty"`
 		//OwnerShip  []uuid.UUID `json:"ownerShip" bson:"ownerShip"`
 	}
 
 	AssignmentGroup struct {
-		Name             string        `json:"name" bson:"name" validate:"required"`
-		UUID             *uuid.UUID    `json:"uuid,omitempty" bson:"uuid,omitempty"`
-		AssignmentUUID   *uuid.UUID    `json:"assignmentUUID" bson:"assignmentUUID"`
-		TenantUUID       *uuid.UUID    `json:"tenantUUID,omitempty" bson:"tenantUUID,omitempty"`
-		CreatedBy        *uuid.UUID    `json:"createdBy,omitempty" bson:"createdBy,omitempty"`
-		CommandGroupUUID *uuid.UUID    `json:"commandGroupUUID,omitempty" bson:"commandGroupUUID,omitempty"`
-		CreatedUser      *User         `json:"createdUser" bson:"createdUser,omitempty"`
-		CommandGroup     *CommandGroup `json:"commandGroup" bson:"commandGroup,omitempty"`
+		Name             string     `json:"name" bson:"name" validate:"required"`
+		UUID             *uuid.UUID `json:"uuid,omitempty" bson:"uuid,omitempty"`
+		AssignmentUUID   *uuid.UUID `json:"assignmentUUID" bson:"assignmentUUID"`
+		TenantUUID       *uuid.UUID `json:"tenantUUID,omitempty" bson:"tenantUUID,omitempty"`
+		CreatedBy        *uuid.UUID `json:"createdBy,omitempty" bson:"createdBy,omitempty"`
+		CommandGroupUUID *uuid.UUID `json:"commandGroupUUID,omitempty" bson:"commandGroupUUID,omitempty"`
+		// join fields
+		CreatedUser  *User         `json:"createdUser" bson:"createdUser,omitempty"`
+		CommandGroup *CommandGroup `json:"commandGroup" bson:"commandGroup,omitempty"`
 	}
 
 	AssignmentGroupMember struct {
@@ -39,6 +42,8 @@ type (
 		AssigmentGroupUUID    *uuid.UUID `json:"assignmentGroupUUID" bson:"assignmentGroupUUID,omitempty"`
 		CreatedBy             *uuid.UUID `json:"createdBy" bson:"createdBy"`
 		CommandGroupUserUUID  *uuid.UUID `json:"commandGroupUserUUID" bson:"commandGroupUserUUID,omitempty" validate:"required"`
+		// join fields
+		CommandGroupUser *CommandGroupUser `json:"commandGroupUser" bson:"commandGroupUser,omitempty"`
 	}
 
 	AssignmentTask struct {

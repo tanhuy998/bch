@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type (
@@ -23,7 +24,41 @@ func (this *GetSingleAssignmentService) Serve(
 	tenantUUID uuid.UUID, uuid uuid.UUID, ctx context.Context,
 ) (*model.Assignment, error) {
 
-	ret, err := this.AssignmentRepo.FindOneByUUID(uuid, ctx)
+	ret, err := repository.AggregateOne[model.Assignment](
+		this.AssignmentRepo.GetCollection(),
+		mongo.Pipeline{
+			bson.D{
+				{
+					"$match", bson.D{
+						{"tenantUUID", tenantUUID},
+						{"uuid", uuid},
+					},
+				},
+			},
+			bson.D{
+				{
+					"$lookup", bson.D{
+						{"from", "users"},
+						{"localField", "createdBy"},
+						{"foreignField", "uuid"},
+						{"as", "createdUser"},
+					},
+				},
+			},
+			bson.D{
+				{
+					"$set", bson.D{
+						{
+							"createdUser", bson.D{
+								{"$arrayElemAt", bson.A{"$createdUser", 0}},
+							},
+						},
+					},
+				},
+			},
+		},
+		ctx,
+	)
 
 	if err != nil {
 

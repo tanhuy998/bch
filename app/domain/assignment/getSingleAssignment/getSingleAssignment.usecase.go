@@ -21,6 +21,7 @@ type (
 
 	GetSingleAssignmentUseCase struct {
 		usecasePort.UseCase[requestPresenter.GetSingleAssignmentRequest, responsePresenter.GetSingleAssignmentResponse]
+		usecasePort.AuthDomainUseCase[*requestPresenter.GetSingleAssignmentRequest]
 		GetSingleAssignmnetService assignmentServicePort.IGetSingleAssignnment
 		ResponsePreset             responsePresetPort.IResponsePreset
 	}
@@ -35,8 +36,19 @@ func (this *GetSingleAssignmentUseCase) Execute(
 		return nil, common.ERR_UNAUTHORIZED
 	}
 
+	err := this.CheckUserJoinedAssignment(
+		input, *input.AssignmentUUID,
+	)
+
+	if err != nil {
+
+		return nil, this.ErrorWithContext(
+			input, err,
+		)
+	}
+
 	data, err := this.GetSingleAssignmnetService.Serve(
-		input.GetTenantUUID(), *input.UUID, input.GetContext(),
+		input.GetTenantUUID(), *input.AssignmentUUID, input.GetContext(),
 	)
 
 	if err != nil {
@@ -51,3 +63,10 @@ func (this *GetSingleAssignmentUseCase) Execute(
 
 	return output, nil
 }
+
+// func (this *GetSingleAssignmentUseCase) validateAuthority(
+// 	input *requestPresenter.GetSingleAssignmentRequest,
+// ) error {
+
+// 	return nil
+// }

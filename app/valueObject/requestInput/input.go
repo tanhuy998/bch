@@ -41,6 +41,7 @@ type (
 	}
 
 	ITenantDomainInput interface {
+		IContextBringAlong
 		IAuthorityBringAlong
 		ITenantMappingInput
 	}
