@@ -8,7 +8,7 @@ import (
 
 type (
 	IParticipatedCommandGroup interface {
-		GetCommandGroupUUID() *uuid.UUID
+		GetCommandGroupUUID() uuid.UUID
 		GetCommandGroupRoleName() string
 		HasRoles(name ...string) bool
 	}
@@ -18,7 +18,15 @@ type (
 		GetTenantUUID() uuid.UUID
 		GetTenantAgentData() *model.TenantAgent
 		GetParticipatedGroups() []IParticipatedCommandGroup
+		JoinedGroups(groupUUIID ...uuid.UUID) bool
+		QueryCommandGroup(commandGroupUUID uuid.UUID) ICommandGroupQueryBuilder
+		//Joined(commandGroupUUID uuid.UUID) ICommandGroupQueryBuilder
 		IsTenantAgent() bool
+	}
+
+	ICommandGroupQueryBuilder interface {
+		HasRoles(name ...string) ICommandGroupQueryBuilder
+		Done() bool
 	}
 
 	// IParticipatedCommandGroup = accessTokenServicePort.IParticipatedCommandGroup
@@ -32,14 +40,15 @@ type (
 		Authority of a user to a specific tenant corresponding to a particular access token
 	*/
 	AuthData struct {
-		ParticipatedCommandGroups []*UserParticipatedCommandGroup `json:"participatedCommandGroups,omitempty" bson:"participatedCommandGroups"`
-		TenantAgentData           []model.TenantAgent             `json:"tenantAgentData,omitempty"`
-		Name                      string                          `json:"name,omitempty" bson:"name,omitempty"`
-		UserUUID                  *uuid.UUID                      `json:"uuid" bson:"uuid"`
+		P               []UserParticipatedCommandGroup `json:"-" bson:"participatedCommandGroups"`
+		TenantAgentData []model.TenantAgent            `json:"tenantAgentData,omitempty"`
+		Name            string                         `json:"name,omitempty" bson:"name,omitempty"`
+		UserUUID        *uuid.UUID                     `json:"uuid" bson:"uuid"`
 		/*
 			TenantUUId is the tenant which the user is belonged to
 		*/
-		TenantUUID *uuid.UUID `json:"tenantUUID,omitempty" bson:"tenantUUID"`
+		TenantUUID                *uuid.UUID             `json:"tenantUUID,omitempty" bson:"tenantUUID"`
+		ParticipatedCommandGroups map[uuid.UUID][]string `json:"participatedCommandGroups,omitempty"`
 
 		/*
 			IsAgent reports that the current user is agent of the corresponding tenant access token,
@@ -48,7 +57,25 @@ type (
 		*/
 		IsAgent bool `json:"isTenantAgent" bson:"isTenantAgent"`
 	}
+
+	role_query struct {
+		ref             map[uuid.UUID][]string
+		lookupGroupUUID uuid.UUID
+		lookupRoles     []string
+	}
 )
+
+func (this *AuthData) Init() {
+
+	this.ParticipatedCommandGroups = make(map[uuid.UUID][]string, 0)
+
+	for _, v := range this.P {
+
+		this.ParticipatedCommandGroups[*v.CommandGroupUUID] = v.Roles
+	}
+
+	this.P = nil
+}
 
 func (this *AuthData) GetTenantUUID() uuid.UUID {
 
@@ -69,11 +96,25 @@ func (this *AuthData) GetTenantAgentData() *model.TenantAgent {
 
 func (this *AuthData) GetParticipatedGroups() []IParticipatedCommandGroup {
 
+	// ret := make([]IParticipatedCommandGroup, len(this.P))
+
+	// for i, val := range this.P {
+
+	// 	ret[i] = &val
+	// }
+
 	ret := make([]IParticipatedCommandGroup, len(this.ParticipatedCommandGroups))
 
-	for i, val := range this.ParticipatedCommandGroups {
+	i := 0
 
-		ret[i] = val
+	for UUID, roles := range this.ParticipatedCommandGroups {
+
+		ret[i] = &UserParticipatedCommandGroup{
+			CommandGroupUUID: &UUID,
+			Roles:            roles,
+		}
+
+		i++
 	}
 
 	return ret
@@ -99,9 +140,41 @@ func (this *AuthData) GetUserUUID() uuid.UUID {
 	return *this.UserUUID
 }
 
-func (this *UserParticipatedCommandGroup) GetCommandGroupUUID() *uuid.UUID {
+func (this *AuthData) JoinedGroups(listUUID ...uuid.UUID) bool {
 
-	return this.CommandGroupUUID
+	if len(listUUID) == 0 && len(this.ParticipatedCommandGroups) == 0 {
+
+		return true
+
+	} else if len(listUUID) == 0 {
+
+		return false
+	}
+
+	conter := 0
+
+	for _, v := range listUUID {
+
+		if _, ok := this.ParticipatedCommandGroups[v]; ok {
+
+			conter++
+		}
+	}
+
+	return conter == len(this.ParticipatedCommandGroups)
+}
+
+func (this *AuthData) QueryCommandGroup(commandGroupUUID uuid.UUID) ICommandGroupQueryBuilder {
+
+	return &role_query{
+		ref:             this.ParticipatedCommandGroups,
+		lookupGroupUUID: commandGroupUUID,
+	}
+}
+
+func (this *UserParticipatedCommandGroup) GetCommandGroupUUID() uuid.UUID {
+
+	return *this.CommandGroupUUID
 }
 func (this *UserParticipatedCommandGroup) GetCommandGroupRoleName() string {
 
@@ -138,4 +211,40 @@ func (this *UserParticipatedCommandGroup) HasRoles(names ...string) bool {
 	}
 
 	return len(m) == 0
+}
+
+func (this *role_query) HasRoles(name ...string) ICommandGroupQueryBuilder {
+
+	this.lookupRoles = name
+
+	return this
+}
+
+func (this *role_query) Done() bool {
+
+	if this.lookupGroupUUID == uuid.Nil {
+
+		return false
+	}
+
+	refRoles, ok := this.ref[this.lookupGroupUUID]
+
+	if !ok {
+
+		return false
+	}
+
+	lookupMap := make(map[string]struct{}, 0)
+
+	for _, v := range this.lookupRoles {
+
+		lookupMap[v] = struct{}{}
+	}
+
+	for _, name := range refRoles {
+
+		delete(lookupMap, name)
+	}
+
+	return len(lookupMap) == 0
 }

@@ -162,7 +162,7 @@ func (this *CreateAssignmentGroupMemberUseCase) validateCommandGroupOwnnershipAn
 
 	for _, commandGroup := range auth.GetParticipatedGroups() {
 
-		if commandGroup.GetCommandGroupUUID() == existingAssignmentGroup.CommandGroupUUID {
+		if commandGroup.GetCommandGroupUUID() == *existingAssignmentGroup.CommandGroupUUID {
 			// check whether or not the user is holding the COMMAND role of the command group
 			// that is assigned to the assignment group
 			// * Role checking is done by middleware.Auth() on the endpoint, no need no check again

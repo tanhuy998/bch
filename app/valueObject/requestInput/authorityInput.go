@@ -19,3 +19,8 @@ func (this *AuthorityInput) SetAuthority(auth valueObject.IAuthorityData) {
 
 	this.IAuthorityData = auth
 }
+
+func (this *AuthorityInput) HasAuthority() bool {
+
+	return this.IAuthorityData != nil
+}

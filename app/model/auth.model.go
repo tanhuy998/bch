@@ -6,11 +6,12 @@ import (
 
 type (
 	User struct {
+		*CommandGroup `bson:"groups,omitempty"`
 		UUID          *uuid.UUID `json:"uuid" bson:"uuid,omitempty"`
 		TenantUUID    *uuid.UUID `json:"tenantUUID" bson:"tenantUUID" validate:"required"`
 		CreatedBy     *uuid.UUID `json:"createdBy" bson:"createdBy"`
 		Name          string     `json:"name,omitempty" bson:"name"`
-		Username      string     `json:"-" bson:"username" validate:"required"`
+		Username      string     `json:"username" bson:"username" validate:"required"`
 		PassWord      string     `json:"-" bson:"password" validate:"required"`
 		Secret        []byte     `json:"-" bson:"secret"`
 		IsDeactivated bool       `json:"deactivated" bson:"deactivated"`
@@ -31,6 +32,7 @@ type (
 	}
 
 	CommandGroupUser struct {
+		*User            `bson:"user,omitempty"`
 		UUID             *uuid.UUID `json:"uuid" bson:"uuid,omitempty"`
 		TenantUUID       *uuid.UUID `json:"tenantUUID" bson:"tenantUUID,omitempty"`
 		UserUUID         *uuid.UUID `json:"userUUID" bson:"userUUID,omitempty"`
@@ -41,6 +43,8 @@ type (
 	}
 
 	CommandGroupUserRole struct {
+		*CommandGroupUser    `bson:"group,omitempty"`
+		*Role                `bson:"roles,omitempty"`
 		UUID                 *uuid.UUID `json:"uuid" bson:"uuid,omitempty" validate:"required"`
 		TenantUUID           *uuid.UUID `json:"tenantUUID" bson:"tenantUUID,omitempty" validate:"required"`
 		CommandGroupUserUUID *uuid.UUID `json:"commandGroupUserUUID" bson:"commandGroupUserUUID,omitempty" validate:"required"`
@@ -52,6 +56,11 @@ type (
 		UUID       *uuid.UUID `json:"uuid,omitempty" bson:"uuid,omitempty"`
 		TenantUUID *uuid.UUID `json:"tenantUUID,omitempty" bson:"tenantUUID,omitempty"`
 		Name       string     `json:"name,omitempty" bson:"name,omitempty"`
+	}
+)
+
+type (
+	ParticipatedUsers struct {
 	}
 )
 

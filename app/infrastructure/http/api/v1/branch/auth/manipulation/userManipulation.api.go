@@ -2,7 +2,6 @@ package authManipulationApi
 
 import (
 	"app/infrastructure/http/api/v1/controller"
-	"app/infrastructure/http/middleware"
 
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/mvc"
@@ -17,11 +16,11 @@ func RegisterUserApi(parentRoute router.Party) *mvc.Application {
 
 	wrapper := mvc.New(router)
 
-	wrapper.Router.Use(
-		middleware.Auth(
-			container,
-		),
-	)
+	// wrapper.Router.Use(
+	// 	middleware.Auth(
+	// 		container,
+	// 	),
+	// )
 
 	// var hanldFunc mvc.OptionFunc = func(activator *mvc.ControllerActivator) {
 

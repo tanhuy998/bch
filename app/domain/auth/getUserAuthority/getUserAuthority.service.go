@@ -187,5 +187,7 @@ func (this *GetUsertAuthorityService) query(
 		)
 	}
 
+	data.Init()
+
 	return data, nil
 }

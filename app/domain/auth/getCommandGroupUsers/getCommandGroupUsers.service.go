@@ -31,7 +31,7 @@ type (
 
 func (this *GetCommandGroupUsersService) Serve(
 	tenantUUID uuid.UUID, groupUUID uuid.UUID, ctx context.Context,
-) ([]*model.User, error) {
+) ([]*model.CommandGroupUser, error) {
 
 	switch existingGroup, err := this.CommandGroupRepo.FindOneByUUID(groupUUID, ctx); {
 	case err != nil:
@@ -42,7 +42,7 @@ func (this *GetCommandGroupUsersService) Serve(
 		return nil, errors.Join(common.ERR_FORBIDEN, fmt.Errorf("group not in tenant"))
 	}
 
-	ret, err := repository.Aggregate[model.User](
+	ret, err := repository.Aggregate[model.CommandGroupUser](
 		this.CommandGroupUserRepo.GetCollection(),
 		mongo.Pipeline{
 			bson.D{
@@ -59,11 +59,37 @@ func (this *GetCommandGroupUsersService) Serve(
 						{"localField", "userUUID"},
 						{"foreignField", "uuid"},
 						{"as", "users"},
+						{
+							"pipeline", mongo.Pipeline{
+								bson.D{
+									{
+										"$project", bson.D{
+											{"name", 1},
+											{"username", 1},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
 			bson.D{{"$unwind", bson.D{{"path", "$users"}}}},
-			bson.D{{"$replaceRoot", bson.D{{"newRoot", "$$ROOT.users"}}}},
+			bson.D{
+				{
+					"$set", bson.D{
+						{"user", "$users"},
+					},
+				},
+			},
+			bson.D{
+				{
+					"$project", bson.D{
+						{"users", 0},
+					},
+				},
+			},
+			//bson.D{{"$replaceRoot", bson.D{{"newRoot", "$$ROOT.users"}}}},
 		},
 		ctx,
 	)

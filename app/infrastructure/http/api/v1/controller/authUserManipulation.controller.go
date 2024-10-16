@@ -25,6 +25,12 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 
 	container := activator.Dependencies()
 
+	activator.Router().Use(
+		middleware.Auth(
+			container,
+		),
+	)
+
 	activator.Handle(
 		"POST", "/", "CreateUser",
 		middleware.BindRequest[requestPresenter.CreateUserRequestPresenter](
@@ -54,6 +60,10 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 
 	activator.Handle(
 		"GET", "/group/{groupUUID:uuid}", "GetGroupUsers",
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequiredTenantAgentExceptMeetRoles("COMMANDER"),
+		),
 		middleware.BindRequest[requestPresenter.GetGroupUsersRequest](
 			container,
 			middlewareHelper.UseAuthority,
