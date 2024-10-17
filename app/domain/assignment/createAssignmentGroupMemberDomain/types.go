@@ -1,6 +1,13 @@
 package createAssignmentGroupMemberDomain
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
+
+var (
+	err_already_assigned = fmt.Errorf("the given command group users already assigned")
+)
 
 type (
 	query_result struct {

@@ -9,6 +9,8 @@ import (
 
 type (
 	ICreateAssignmentGroupMember interface {
-		Serve(tenantUUID uuid.UUID, assignmentGroupUUID uuid.UUID, commandGroupUserUUIDList []*model.AssignmentGroupMember, ctx context.Context) error
+		Serve(
+			tenantUUID uuid.UUID, assignmentGroupUUID uuid.UUID, commandGroupUserUUIDList []*model.AssignmentGroupMember, ctx context.Context,
+		) ([]*model.AssignmentGroupMember, error)
 	}
 )

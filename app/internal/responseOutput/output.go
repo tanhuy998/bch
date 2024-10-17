@@ -14,6 +14,10 @@ type (
 		IsCreatedStatus() bool
 	}
 
+	IAcceptedOuput interface {
+		IsAccepptedStatus() bool
+	}
+
 	NoContent struct {
 	}
 
@@ -23,6 +27,9 @@ type (
 	}
 
 	CreatedResponse struct {
+	}
+
+	AccepptedReponse struct {
 	}
 )
 
@@ -42,6 +49,11 @@ func (this *NoContent) IsNotContent() bool {
 type ()
 
 func (this CreatedResponse) IsCreatedStatus() bool {
+
+	return true
+}
+
+func (this *AccepptedReponse) IsAccepptedStatus() bool {
 
 	return true
 }

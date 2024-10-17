@@ -4,7 +4,7 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type (
 	BsonDocument struct {
-		ObjectID *primitive.ObjectID `json:"_id" bson:"_id"`
+		ObjectID *primitive.ObjectID `json:"-" bson:"_id,omitempty"`
 	}
 )
 

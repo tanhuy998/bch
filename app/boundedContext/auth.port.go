@@ -27,6 +27,7 @@ import (
 	"app/domain/auth/getSingleCommandGroupDomain"
 	getSingleUserDomain "app/domain/auth/getSingleUser"
 	getTenantAllGroupsDomain "app/domain/auth/getTenantAllGroups"
+	"app/domain/auth/getUnAssignedCommandGroupUsersDomain"
 	getUserAuthorityDomain "app/domain/auth/getUserAuthority"
 	getUserParticipatedCommandGroupsDomain "app/domain/auth/getUserParticipatedCommandGroups"
 	"app/domain/auth/reportUserParticipatedCommandGroupsDomain"
@@ -76,6 +77,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[authServicePort.ICheckUserInCommandGroup, checkUserInCommandGroupDomain.CheckUserInCommandGroupService](container, nil)
 	libConfig.BindDependency[authServicePort.ICheckCommandGroupUserRole, checkCommandGroupUserRolesDomain.CheckCommandGroupUserRoleService](container, nil)
 
+	libConfig.BindDependency[authServicePort.IGetUnAssignedCommandGroupUsers, getUnAssignedCommandGroupUsersDomain.GetUnAssignedCommandGroupUser](container, nil)
 	libConfig.BindDependency[authServicePort.IGetUserAuthorityServicePort, getUserAuthorityDomain.GetUsertAuthorityService](container, nil)
 	libConfig.BindDependency[authServicePort.IGetAllRoles, getAllRoleDomain.GetAllRolesService](container, nil)
 	libConfig.BindDependency[authServicePort.IGetCommandGroupUsers, getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)

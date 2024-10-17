@@ -2,6 +2,6 @@ package responsePresenter
 
 type (
 	ModifyAssignment struct {
-		Message string `json:'message"`
+		Message string `json:"message"`
 	}
 )

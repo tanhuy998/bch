@@ -5,6 +5,7 @@ import (
 	"app/internal/common"
 	libCommon "app/internal/lib/common"
 	"app/model"
+	authServicePort "app/port/auth"
 	"app/repository"
 	"context"
 	"errors"
@@ -17,53 +18,71 @@ import (
 type (
 	CreateAssignmentGroupMemberService struct {
 		domain.ContextualDomainService[domain_context]
-		AssignmentGroupRepo       repository.AssignmentGroupRepository
-		AssignmentGroupMemberRepo repository.IAssignmentGroupMember
-		CommandGroupUserRepo      repository.ICommandGroupUser
+		GetUnAssignedCommandGroupUsersService authServicePort.IGetUnAssignedCommandGroupUsers
+		AssignmentGroupRepo                   repository.IAssignmentGroup
+		AssignmentGroupMemberRepo             repository.IAssignmentGroupMember
+		CommandGroupUserRepo                  repository.ICommandGroupUser
 	}
 )
 
 func (this *CreateAssignmentGroupMemberService) Serve(
-	tenantUUID uuid.UUID, assignmentGroupUUID uuid.UUID, commandGroupUserUUIDList []*model.AssignmentGroupMember, ctx context.Context,
-) error {
+	tenantUUID uuid.UUID, assignmentGroupUUID uuid.UUID, data []*model.AssignmentGroupMember, ctx context.Context,
+) ([]*model.AssignmentGroupMember, error) {
+
+	if len(data) == 0 {
+
+		return nil, errors.Join(
+			common.ERR_BAD_REQUEST, fmt.Errorf("(CreateAssignmentGroupMemberService error) empty command group user list given"),
+		)
+	}
 
 	if !this.InDomainContext(ctx) {
 
 		switch {
 		case tenantUUID == uuid.Nil:
-			return common.ERR_UNAUTHORIZED
+			return nil, common.ERR_UNAUTHORIZED
 		case assignmentGroupUUID == uuid.Nil:
-			return common.ERR_UNAUTHORIZED
-		case len(commandGroupUserUUIDList) == 0:
-			return errors.Join(
-				common.ERR_BAD_REQUEST, fmt.Errorf("(CreateAssignmentGroupMemberService error) empty command group user list given"),
-			)
+			return nil, common.ERR_UNAUTHORIZED
 		}
 
-		switch existingAssignmentGroup, err := this.AssignmentGroupRepo.FindOneByUUID(assignmentGroupUUID, ctx); {
-		case err != nil:
-			return err
-		case existingAssignmentGroup == nil:
-			return errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("command group not found"))
-		case *existingAssignmentGroup.TenantUUID != tenantUUID:
-			return errors.Join(common.ERR_FORBIDEN, fmt.Errorf("command group not in tenant"))
-		}
+	}
 
-		if err := this.validateCommandGroupUsers(tenantUUID, commandGroupUserUUIDList, ctx); err != nil {
+	existingAssignmentGroup, err := this.AssignmentGroupRepo.FindOneByUUID(assignmentGroupUUID, ctx)
 
-			return err
+	switch {
+	case err != nil:
+		return nil, err
+	case existingAssignmentGroup == nil:
+		return nil, errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("assignment group not found"))
+	case *existingAssignmentGroup.TenantUUID != tenantUUID:
+		return nil, errors.Join(common.ERR_FORBIDEN, fmt.Errorf("assignment group not in tenant"))
+	}
+
+	if !this.InDomainContext(ctx) {
+
+		if err := this.validateCommandGroupUsers(tenantUUID, data, ctx); err != nil {
+
+			return nil, err
 		}
 	}
 
-	for _, v := range commandGroupUserUUIDList {
+	data, err = this.lookupUnAssigned(
+		tenantUUID, *existingAssignmentGroup.AssignmentUUID, data, ctx,
+	)
 
-		v.TenantUUID = &tenantUUID
-		v.UUID = libCommon.PointerPrimitive(uuid.New())
+	if err != nil {
+
+		return nil, err
 	}
 
-	err := this.AssignmentGroupMemberRepo.CreateMany(commandGroupUserUUIDList, ctx)
+	if len(data) == 0 {
 
-	return err
+		return nil, nil
+	}
+
+	err = this.AssignmentGroupMemberRepo.CreateMany(data, ctx)
+
+	return data, err
 }
 
 func (this *CreateAssignmentGroupMemberService) validateCommandGroupUsers(
@@ -74,15 +93,17 @@ func (this *CreateAssignmentGroupMemberService) validateCommandGroupUsers(
 
 	for i, v := range uList {
 
-		criterias[i] = bson.D{
-			{"uuid", v.CommandGroupUserUUID},
-			{"tenantUUID", tenantUUID},
-		}
+		criterias[i] = v.CommandGroupUserUUID
 	}
 
 	res, err := this.CommandGroupUserRepo.FindMany(
 		bson.D{
-			{"$or", criterias},
+			{
+				"uuid", bson.D{
+					{"$in", criterias},
+				},
+			},
+			{"tenantUUID", tenantUUID},
 		},
 		ctx,
 	)
@@ -100,4 +121,46 @@ func (this *CreateAssignmentGroupMemberService) validateCommandGroupUsers(
 	}
 
 	return nil
+}
+
+func (this *CreateAssignmentGroupMemberService) lookupUnAssigned(
+	tenantUUID, AssignmentUUID uuid.UUID, data []*model.AssignmentGroupMember, ctx context.Context,
+) ([]*model.AssignmentGroupMember, error) {
+
+	commandGroupUserUUIDList := make([]uuid.UUID, len(data))
+
+	for i, v := range data {
+
+		commandGroupUserUUIDList[i] = *v.CommandGroupUserUUID
+	}
+
+	unAssignedList, err := this.GetUnAssignedCommandGroupUsersService.LookupUnAssigned(
+		commandGroupUserUUIDList, tenantUUID, AssignmentUUID, ctx,
+	)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	m := make(map[uuid.UUID]*model.AssignmentGroupMember)
+
+	for _, v := range data {
+
+		m[*v.CommandGroupUserUUID] = v
+	}
+
+	ret := make([]*model.AssignmentGroupMember, len(unAssignedList))
+
+	for i, v := range unAssignedList {
+
+		if v, ok := m[*v.UUID]; ok {
+
+			v.UUID = libCommon.PointerPrimitive(uuid.New())
+			v.TenantUUID = &tenantUUID
+			ret[i] = v
+		}
+	}
+
+	return ret, nil
 }

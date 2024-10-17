@@ -38,12 +38,12 @@ func (this *Controller) ResultOf(output any, usecaseError error) (mvc.Result, er
 
 	if output == nil {
 
-		return this.ActionResult.Prepare().SetCode(200).Done()
+		return this.ActionResult.Prepare().SetCode(http.StatusNoContent).Done()
 	}
 
 	if v, ok := output.(responseOutput.INoContentOutput); ok && v.IsNotContent() {
 
-		return this.ActionResult.Prepare().SetCode(200).Done()
+		return this.ActionResult.Prepare().SetCode(http.StatusNoContent).Done()
 	}
 
 	if v, ok := output.(responseOutput.ICreatedOutput); ok && v.IsCreatedStatus() {
@@ -56,6 +56,18 @@ func (this *Controller) ResultOf(output any, usecaseError error) (mvc.Result, er
 		}
 
 		return this.ActionResult.Prepare().SetCode(http.StatusCreated).SetContent(raw).Done()
+	}
+
+	if v, ok := output.(responseOutput.IAcceptedOuput); ok && v.IsAccepptedStatus() {
+
+		raw, err := json.Marshal(output)
+
+		if err != nil {
+
+			return this.hanleInternalError(err)
+		}
+
+		return this.ActionResult.Prepare().SetCode(http.StatusAccepted).SetContent(raw).Done()
 	}
 
 	return this.ActionResult.ServeResponse(output)
