@@ -47,6 +47,16 @@ func (this *GetSingleAssignmentService) Serve(
 			},
 			bson.D{
 				{
+					"$lookup", bson.D{
+						{"from", "assignmentGroups"},
+						{"localField", "uuid"},
+						{"foreignField", "assignmentUUID"},
+						{"as", "assignmentGroups"},
+					},
+				},
+			},
+			bson.D{
+				{
 					"$set", bson.D{
 						{
 							"createdUser", bson.D{

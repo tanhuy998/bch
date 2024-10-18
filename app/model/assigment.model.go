@@ -19,7 +19,8 @@ type (
 		CreatedBy             *uuid.UUID `json:"createdBy" bson:"createdBy,omitempty"`
 		TenantUUID            *uuid.UUID `json:"tenantUUID" bson:"tenantUUID,omitempty"`
 		// join fields
-		CreatedUser *User `json:"createdUser" bson:"createdUser,omitempty"`
+		CreatedUser      *User              `json:"createdUser" bson:"createdUser,omitempty"`
+		AssignmentGroups []*AssignmentGroup `json:"assignmentGroups" bson:"assignmentGroups,omitempty"`
 		//OwnerShip  []uuid.UUID `json:"ownerShip" bson:"ownerShip"`
 	}
 
@@ -30,6 +31,7 @@ type (
 		TenantUUID       *uuid.UUID `json:"tenantUUID,omitempty" bson:"tenantUUID,omitempty"`
 		CreatedBy        *uuid.UUID `json:"createdBy,omitempty" bson:"createdBy,omitempty"`
 		CommandGroupUUID *uuid.UUID `json:"commandGroupUUID,omitempty" bson:"commandGroupUUID,omitempty"`
+		//TenantDomainModel `bson:",inline"`
 		// join fields
 		CreatedUser  *User         `json:"createdUser" bson:"createdUser,omitempty"`
 		CommandGroup *CommandGroup `json:"commandGroup" bson:"commandGroup,omitempty"`
