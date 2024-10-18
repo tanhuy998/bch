@@ -15,10 +15,11 @@ import (
 type (
 	AuthCommandGroupManipulationController struct {
 		common.Controller
-		CreateCommandGroupUseCase          usecasePort.IUseCase[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse]
-		AddUserToCommandGroupUseCase       usecasePort.IUseCase[requestPresenter.AddUserToCommandGroupRequest, responsePresenter.AddUserToCommandGroupResponse]
-		GetParitcipatedCommandGroupUseCase usecasePort.IUseCase[requestPresenter.GetUserParticipatedCommandGroups, responsePresenter.GetUserParticipatedCommandGroups]
-		GetTenantAllGroupsUseCase          usecasePort.IUseCase[requestPresenter.GetTenantAllGroups, responsePresenter.GetTenantAllGroups]
+		CreateCommandGroupUseCase                       usecasePort.IUseCase[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse]
+		AddUserToCommandGroupUseCase                    usecasePort.IUseCase[requestPresenter.AddUserToCommandGroupRequest, responsePresenter.AddUserToCommandGroupResponse]
+		GetParitcipatedCommandGroupUseCase              usecasePort.IUseCase[requestPresenter.GetUserParticipatedCommandGroups, responsePresenter.GetUserParticipatedCommandGroups]
+		GetTenantAllGroupsUseCase                       usecasePort.IUseCase[requestPresenter.GetTenantAllGroups, responsePresenter.GetTenantAllGroups]
+		GetAssignmentUnAssignedCommandGroupUsersUseCase usecasePort.IUseCase[requestPresenter.GetAssignmentGroupUnAssignedCommandGroupUsers, responsePresenter.GetAssignmentGroupUnAssignedCommandGroupUsers]
 	}
 )
 
@@ -38,6 +39,15 @@ func (this *AuthCommandGroupManipulationController) BeforeActivation(activator m
 	activator.Handle(
 		"GET", "/", "GetAllGroups",
 		middleware.BindRequest[requestPresenter.GetTenantAllGroups](
+			container,
+			middlewareHelper.UseAuthority,
+			middlewareHelper.UseTenantMapping,
+		),
+	)
+
+	activator.Handle(
+		"GET", "/users/unassigned/{assignmentGroupUUID:uuid}", "GetUnAssignedCommandGroupUsers",
+		middleware.BindRequest[requestPresenter.GetAssignmentGroupUnAssignedCommandGroupUsers](
 			container,
 			middlewareHelper.UseAuthority,
 			middlewareHelper.UseTenantMapping,
@@ -101,5 +111,14 @@ func (this *AuthCommandGroupManipulationController) GetParticipatedGroups(
 
 	return this.ResultOf(
 		this.GetParitcipatedCommandGroupUseCase.Execute(input),
+	)
+}
+
+func (this *AuthCommandGroupManipulationController) GetUnAssignedCommandGroupUsers(
+	input *requestPresenter.GetAssignmentGroupUnAssignedCommandGroupUsers,
+) (mvc.Result, error) {
+
+	return this.ResultOf(
+		this.GetAssignmentUnAssignedCommandGroupUsersUseCase.Execute(input),
 	)
 }

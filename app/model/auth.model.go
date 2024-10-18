@@ -39,6 +39,8 @@ type (
 		CommandGroupUUID *uuid.UUID `json:"commandGroupUUID" bson:"commandGroupUUID"`
 		CreatedBy        *uuid.UUID `json:"createdBy" bson:"createdBy,omitempty"`
 		Claims           []string   `json:"claims,omitempty" bson:"claims,omitempty"`
+		// join fields
+		CreatedUser *User `json:"createdUser" bson:"createdUser,omitempty"`
 		//RoleUUID         uuid.UUID `json:"roleUUID" bson:"roleUUID"`
 	}
 

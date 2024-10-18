@@ -18,7 +18,7 @@ import (
 type (
 	CreateAssignmentGroupMemberService struct {
 		domain.ContextualDomainService[domain_context]
-		GetUnAssignedCommandGroupUsersService authServicePort.IGetUnAssignedCommandGroupUsers
+		GetUnAssignedCommandGroupUsersService authServicePort.IGetAssignmentGroupUnAssignedCommandGroupUsers
 		AssignmentGroupRepo                   repository.IAssignmentGroup
 		AssignmentGroupMemberRepo             repository.IAssignmentGroupMember
 		CommandGroupUserRepo                  repository.ICommandGroupUser
@@ -67,7 +67,7 @@ func (this *CreateAssignmentGroupMemberService) Serve(
 	}
 
 	data, err = this.lookupUnAssigned(
-		tenantUUID, *existingAssignmentGroup.AssignmentUUID, data, ctx,
+		tenantUUID, *existingAssignmentGroup.UUID, data, ctx,
 	)
 
 	if err != nil {
@@ -124,7 +124,7 @@ func (this *CreateAssignmentGroupMemberService) validateCommandGroupUsers(
 }
 
 func (this *CreateAssignmentGroupMemberService) lookupUnAssigned(
-	tenantUUID, AssignmentUUID uuid.UUID, data []*model.AssignmentGroupMember, ctx context.Context,
+	tenantUUID, AssignmentGroupUUID uuid.UUID, data []*model.AssignmentGroupMember, ctx context.Context,
 ) ([]*model.AssignmentGroupMember, error) {
 
 	commandGroupUserUUIDList := make([]uuid.UUID, len(data))
@@ -135,7 +135,7 @@ func (this *CreateAssignmentGroupMemberService) lookupUnAssigned(
 	}
 
 	unAssignedList, err := this.GetUnAssignedCommandGroupUsersService.LookupUnAssigned(
-		commandGroupUserUUIDList, tenantUUID, AssignmentUUID, ctx,
+		commandGroupUserUUIDList, tenantUUID, AssignmentGroupUUID, ctx,
 	)
 
 	if err != nil {
