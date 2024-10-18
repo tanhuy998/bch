@@ -14,8 +14,9 @@ import (
 type (
 	UserLoggingController struct {
 		common.Controller
-		LoginUseCase        usecasePort.IUseCase[requestPresenter.LoginRequest, responsePresenter.LoginResponse]
-		RefreshLoginUseCase usecasePort.IUseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
+		LoginUseCase          usecasePort.IUseCase[requestPresenter.LoginRequest, responsePresenter.LoginResponse]
+		RefreshLoginUseCase   usecasePort.IUseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
+		NavigateTenantUseCase usecasePort.IUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant]
 	}
 )
 
@@ -31,6 +32,11 @@ func (this *UserLoggingController) BeforeActivation(activator mvc.BeforeActivati
 	activator.Handle(
 		"POST", "/refresh", "Refresh",
 		middleware.BindPresenters[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse](container),
+	)
+
+	activator.Handle(
+		"GET", "/nav", "NavigateTenant",
+		middleware.BindRequest[requestPresenter.AuthNavigateTenant](container),
 	)
 }
 
@@ -59,4 +65,13 @@ func (this *UserLoggingController) Refresh(
 
 func (this *UserLoggingController) Temp() {
 
+}
+
+func (this *UserLoggingController) NavigateTenant(
+	input *requestPresenter.AuthNavigateTenant,
+) (mvc.Result, error) {
+
+	return this.ResultOf(
+		this.NavigateTenantUseCase.Execute(input),
+	)
 }

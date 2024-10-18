@@ -67,7 +67,6 @@ func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken g
 	}
 
 	options := []irisContext.CookieOption{
-		irisContext.CookiePath("/tenants/switch"),
 		irisContext.CookieHTTPOnly(true),
 		irisContext.CookieSameSite(http.SameSiteStrictMode),
 	}
@@ -86,10 +85,24 @@ func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken g
 			continue
 		}
 
-		opts := append(options, irisContext.CookieDomain(hostname))
+		c.SetCookieKV(
+			GENERAL_TOKEN,
+			gt,
+			append(
+				options,
+				irisContext.CookieDomain(hostname),
+				irisContext.CookiePath("/tenants/switch"),
+			)...,
+		)
 
 		c.SetCookieKV(
-			GENERAL_TOKEN, gt, opts...,
+			GENERAL_TOKEN,
+			gt,
+			append(
+				options,
+				irisContext.CookieDomain(hostname),
+				irisContext.CookiePath("/auth/nav"),
+			)...,
 		)
 	}
 

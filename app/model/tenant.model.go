@@ -7,9 +7,16 @@ import (
 type (
 	Tenant struct {
 		UUID        *uuid.UUID `json:"uuid" bson:"uuid"`
-		CreatedBy   *uuid.UUID `json:"createdBy" bson:"createdBy"`
-		Name        string     `bson:"title"`
-		Description string     `bson:"description"`
+		CreatedBy   *uuid.UUID `json:"createdBy,omitempty" bson:"createdBy"`
+		Name        string     `json:"name,omitempty" bson:"title"`
+		Description string     `json:"description,omitempty" bson:"description,omitempty"`
+
+		// join fields
+		*NavigateTenantAggregate `bson:",inline,omitempty"`
+	}
+
+	NavigateTenantAggregate struct {
+		IsTenantAgent bool `json:"isTenantAgent,omitempty" bson:"isTenantAgent"`
 	}
 
 	TenantAgent struct {

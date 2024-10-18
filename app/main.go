@@ -19,7 +19,7 @@ const (
 )
 
 var (
-	//host_names           []string
+	host_names           []string = make([]string, 0)
 	cors_allowed_methods []string = []string{
 		"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH",
 	}
@@ -50,6 +50,7 @@ func init() {
 	db := db.GetDB()
 
 	config.InitDomainIndexes(db)
+	host_names = append(host_names, bootstrap.GetHostNames()...)
 }
 
 func main() {
@@ -62,17 +63,16 @@ func main() {
 	// 	methodoverride.SaveOriginalMethod("_originalMethod"),
 	// ))
 
+	defer config.ConfigureLogger(app).Close()
 	//app.UseGlobal(middleware.RedirectInternalError())
 	app.UseRouter(
 		cors.New(cors.Options{
-			AllowedOrigins:   bootstrap.GetHostNames(),
+			AllowedOrigins:   host_names,
 			AllowedMethods:   cors_allowed_methods,
 			AllowedHeaders:   cors_allowed_headers,
 			AllowCredentials: true,
 		}),
 	)
-
-	defer config.ConfigureLogger(app).Close()
 
 	// defer config.ConfigureLogger(app).Close()
 

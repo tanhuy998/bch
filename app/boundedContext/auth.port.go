@@ -30,6 +30,7 @@ import (
 	getTenantAllGroupsDomain "app/domain/auth/getTenantAllGroups"
 	getUserAuthorityDomain "app/domain/auth/getUserAuthority"
 	getUserParticipatedCommandGroupsDomain "app/domain/auth/getUserParticipatedCommandGroups"
+	navigateTenantDomain "app/domain/auth/navigateTenant"
 	"app/domain/auth/reportUserParticipatedCommandGroupsDomain"
 
 	//getUserParticipatedCommandGroupDomain "app/domain/auth/getUserParticipatedGroups"
@@ -99,6 +100,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[authServicePort.ILogIn, loginDomain.LogInService](container, nil)
 	libConfig.BindDependency[authServicePort.IModifyUser, modifyUserDomain.ModifyUserService](container, nil)
 	libConfig.BindDependency[authServicePort.IRefreshLogin, refreshLoginDomain.RefreshLoginService](container, nil)
+	libConfig.BindDependency[authServicePort.INavigateTenant, navigateTenantDomain.NavigateTenantService](container, nil)
 
 	registerDomainSpecificUtils(container)
 
@@ -157,6 +159,10 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetAssignmentGroupUnAssignedCommandGroupUsers, responsePresenter.GetAssignmentGroupUnAssignedCommandGroupUsers],
 		getAssignmentGroupUnAssignedCommandGroupUsersDomain.GetAssignmentGroupUnAssignedCommandGroupUsersUseCase,
+	](container, nil)
+	libConfig.BindDependency[
+		usecasePort.IUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant],
+		navigateTenantDomain.NavigateTenantUseCase,
 	](container, nil)
 
 	container.Register(new(AuthBoundedContext)).Explicitly().EnableStructDependents()
