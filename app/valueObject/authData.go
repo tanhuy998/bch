@@ -49,6 +49,7 @@ type (
 		*/
 		TenantUUID                *uuid.UUID             `json:"tenantUUID,omitempty" bson:"tenantUUID"`
 		ParticipatedCommandGroups map[uuid.UUID][]string `json:"participatedCommandGroups,omitempty"`
+		UserSession               []*model.UserSession   `json"-" bson:"user"`
 
 		/*
 			IsAgent reports that the current user is agent of the corresponding tenant access token,

@@ -2,15 +2,15 @@ package memoryCache
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"time"
 )
 
 var (
-	ERR_CACHE_TERMINATED       = errors.New("cache client error: cache terminated")
-	ERR_CACHE_TOPIC_NOT_EXISTS = errors.New("cache client error: cache topic not exists")
-	ERR_CACHE_KEY_NOT_EXISTS   = errors.New("cache client error: key not exists")
-	ERR_TODO_FUNC_ABSENT       = errors.New("cache client error: toDo function is nil")
+	ERR_CACHE_TERMINATED       = fmt.Errorf("cache client error: cache terminated")
+	ERR_CACHE_TOPIC_NOT_EXISTS = fmt.Errorf("cache client error: no cache topic")
+	ERR_CACHE_KEY_NOT_EXISTS   = fmt.Errorf("cache client error: no key")
+	ERR_TODO_FUNC_ABSENT       = fmt.Errorf("cache client error: toDo function is nil")
 )
 
 type (
@@ -35,11 +35,16 @@ this method does not lock the cache value
 */
 func (this *CacheClient[Key_T, Value_T]) Read(ctx context.Context, key Key_T) (value Value_T, exists bool, err error) {
 
-	cacheUnit, exists := GetTopic[Key_T, Value_T](this.topic)
+	cacheUnit, exists, err := GetTopic[Key_T, Value_T](this.topic)
+
+	if err != nil {
+
+		return
+	}
 
 	if !exists {
 
-		err = ERR_CACHE_TOPIC_NOT_EXISTS
+		err = fmt.Errorf(`%w "%s"`, ERR_CACHE_TOPIC_NOT_EXISTS, this.topic)
 		return
 	}
 
@@ -62,11 +67,16 @@ func (this *CacheClient[Key_T, Value_T]) Hold(
 		return ERR_TODO_FUNC_ABSENT
 	}
 
-	cacheUnit, exists := GetTopic[Key_T, Value_T](this.topic)
+	cacheUnit, exists, err := GetTopic[Key_T, Value_T](this.topic)
+
+	if err != nil {
+
+		return
+	}
 
 	if !exists {
 
-		err = ERR_CACHE_TOPIC_NOT_EXISTS
+		err = fmt.Errorf(`%w "%s"`, ERR_CACHE_TOPIC_NOT_EXISTS, this.topic)
 		return
 	}
 
@@ -110,11 +120,16 @@ if the cached key exists, the progress wiil lock for write operations
 */
 func (this *CacheClient[Key_T, Value_T]) Set(ctx context.Context, key Key_T, value Value_T) error {
 
-	cacheUnit, exists := GetTopic[Key_T, Value_T](this.topic)
+	cacheUnit, exists, err := GetTopic[Key_T, Value_T](this.topic)
+
+	if err != nil {
+
+		return err
+	}
 
 	if !exists {
 
-		return ERR_CACHE_TOPIC_NOT_EXISTS
+		return fmt.Errorf(`%w "%s"`, ERR_CACHE_TOPIC_NOT_EXISTS, this.topic)
 	}
 
 	return cacheUnit.Set(ctx, key, value)
@@ -126,11 +141,16 @@ The delete progress locks on both read and write operations
 */
 func (this *CacheClient[Key_T, Value_T]) Delete(ctx context.Context, key Key_T) (deleted bool, err error) {
 
-	cacheUnit, exists := GetTopic[Key_T, Value_T](this.topic)
+	cacheUnit, exists, err := GetTopic[Key_T, Value_T](this.topic)
+
+	if err != nil {
+
+		return
+	}
 
 	if !exists {
 
-		err = ERR_CACHE_TOPIC_NOT_EXISTS
+		err = fmt.Errorf(`%w "%s"`, ERR_CACHE_TOPIC_NOT_EXISTS, this.topic)
 		return
 	}
 
@@ -145,11 +165,16 @@ func (this *CacheClient[Key_T, Value_T]) Update(
 	ctx context.Context, key Key_T, toDo func(ctx IUpdateContext[Key_T, Value_T], val Value_T) (Value_T, error),
 ) (err error) {
 
-	cacheUnit, exists := GetTopic[Key_T, Value_T](this.topic)
+	cacheUnit, exists, err := GetTopic[Key_T, Value_T](this.topic)
+
+	if err != nil {
+
+		return
+	}
 
 	if !exists {
 
-		err = ERR_CACHE_TOPIC_NOT_EXISTS
+		err = fmt.Errorf(`%w "%s"`, ERR_CACHE_TOPIC_NOT_EXISTS, this.topic)
 		return
 	}
 
@@ -191,11 +216,16 @@ func (this *CacheClient[Key_T, Value_T]) SetWithExpire(
 	ctx context.Context, key Key_T, value Value_T, moment time.Time,
 ) error {
 
-	cacheUnit, exists := GetTopic[Key_T, Value_T](this.topic)
+	cacheUnit, exists, err := GetTopic[Key_T, Value_T](this.topic)
+
+	if err != nil {
+
+		return err
+	}
 
 	if !exists {
 
-		return ERR_CACHE_TOPIC_NOT_EXISTS
+		return fmt.Errorf(`%w "%s"`, ERR_CACHE_TOPIC_NOT_EXISTS, this.topic)
 	}
 
 	return cacheUnit.SetWithExpire(ctx, key, value, moment)

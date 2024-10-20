@@ -34,7 +34,10 @@ type (
 			query interface{}, offset uint64, size uint64, sort *bson.D, ctx context.Context, projection ...bson.E,
 		) ([]Model_T, error)
 		UpdateOneByUUID(uuid uuid.UUID, model *Model_T, ctx context.Context) error
-		Delete(query bson.D, ctx context.Context) error
+		UpdateManyByFilter(filter bson.D, update bson.D, ctx context.Context) error
+		UpsertManyByFilter(filter bson.D, update bson.D, ctx context.Context) error
+		DeleteMany(model *Model_T, ctx context.Context) error
+		DeleteManyByFilter(filter bson.D, ctx context.Context) error
 	}
 
 	crud_mongo_repository[Model_T any] struct {
@@ -157,7 +160,52 @@ func (this *crud_mongo_repository[Model_T]) UpdateOneByUUID(uuid uuid.UUID, mode
 	return CheckUpdateOneResult(res)
 }
 
-func (this *crud_mongo_repository[Model_T]) Delete(query bson.D, ctx context.Context) error {
+func (this *crud_mongo_repository[Model_T]) UpdateManyByFilter(filter bson.D, update bson.D, ctx context.Context) error {
+
+	res, err := this.collection.UpdateMany(ctx, filter, bson.D{{"$set", update}})
+
+	if err != nil {
+
+		return err
+	}
+
+	return CheckUpdateOneResult(res)
+}
+
+func (this *crud_mongo_repository[Model_T]) UpsertManyByFilter(filter bson.D, update bson.D, ctx context.Context) error {
+
+	opts := options.Update().SetUpsert(true)
+
+	_, err := this.collection.UpdateMany(ctx, filter, bson.D{{"$set", update}}, opts)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
+}
+
+func (this *crud_mongo_repository[Model_T]) DeleteMany(model *Model_T, ctx context.Context) error {
+
+	_, err := this.collection.DeleteMany(ctx, model)
+
+	if err != nil {
+
+		return libError.NewInternal(err)
+	}
+
+	return nil
+}
+
+func (this *crud_mongo_repository[Model_T]) DeleteManyByFilter(filter bson.D, ctx context.Context) error {
+
+	_, err := this.collection.DeleteMany(ctx, filter)
+
+	if err != nil {
+
+		return libError.NewInternal(err)
+	}
 
 	return nil
 }

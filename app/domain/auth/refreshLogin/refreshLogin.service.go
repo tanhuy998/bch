@@ -5,7 +5,6 @@ import (
 	accessTokenServicePort "app/port/accessToken"
 	authSignatureTokenPort "app/port/authSignatureToken"
 	refreshTokenServicePort "app/port/refreshToken"
-	refreshTokenBlackListServicePort "app/port/refreshTokenBlackList"
 	"context"
 	"errors"
 	"fmt"
@@ -21,7 +20,7 @@ const (
 
 type (
 	RefreshLoginService struct {
-		RefreshTokenBlackList      refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator
+		//RefreshTokenBlackList      refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator
 		RefreshTokenManipulator    refreshTokenServicePort.IRefreshTokenManipulator
 		AccessTokenManipulator     accessTokenServicePort.IAccessTokenManipulator
 		AuthSignatureTokenProvider authSignatureTokenPort.IAuthSignatureProvider
@@ -56,21 +55,21 @@ func (this *RefreshLoginService) Serve(
 		return
 	}
 
-	refreshTokenRevoked, err := this.RefreshTokenBlackList.Has(refreshToken.GetTokenID(), reqCtx)
+	// refreshTokenRevoked, err := this.RefreshTokenBlackList.Has(refreshToken.GetTokenID(), reqCtx)
 
-	switch {
-	case err != nil:
-		return
-	case refreshTokenRevoked:
-		err = errors.Join(
-			common.ERR_UNAUTHORIZED,
-			fmt.Errorf("(RefreshLoginService) refresh token revoked"),
-		) //authServiceAdapter.ERR_REFRESH_TOKEN_EXPIRE
-		return
-		// case refreshToken.GetUserUUID() != accessToken.GetUserUUID():
-		// 	err = errors.New() //authServiceAdapter.ERR_REFESH_LOGIN_INVALID_ACCESS_TOKEN
-		// 	return
-	}
+	// switch {
+	// case err != nil:
+	// 	return
+	// case refreshTokenRevoked:
+	// 	err = errors.Join(
+	// 		common.ERR_UNAUTHORIZED,
+	// 		fmt.Errorf("(RefreshLoginService) refresh token revoked"),
+	// 	) //authServiceAdapter.ERR_REFRESH_TOKEN_EXPIRE
+	// 	return
+	// 	// case refreshToken.GetUserUUID() != accessToken.GetUserUUID():
+	// 	// 	err = errors.New() //authServiceAdapter.ERR_REFESH_LOGIN_INVALID_ACCESS_TOKEN
+	// 	// 	return
+	// }
 
 	return this.AuthSignatureTokenProvider.Rotate(refreshToken, accessToken, reqCtx)
 }

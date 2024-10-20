@@ -2,6 +2,7 @@ package repository
 
 import (
 	libCommon "app/internal/lib/common"
+	libError "app/internal/lib/error"
 	"app/model"
 	"context"
 	"errors"
@@ -158,11 +159,11 @@ func CheckUpdateOneResult(result *mongo.UpdateResult) error {
 
 	if result.MatchedCount < 1 {
 
-		return ERR_UPDATE_NO_MATCH
+		return libError.NewInternal(ERR_UPDATE_NO_MATCH)
 
 	} else if result.ModifiedCount == 0 {
 
-		return NOTHING_CHANGED_ON_UPDATE
+		return libError.NewInternal(NOTHING_CHANGED_ON_UPDATE)
 	}
 
 	return nil

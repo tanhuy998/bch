@@ -19,21 +19,21 @@ type (
 	}
 )
 
+// func (this *GetUsertAuthorityService) Serve(
+// 	tenantUUID uuid.UUID, userUUID uuid.UUID, ctx context.Context,
+// ) (*valueObject.AuthData, error) {
+// 	fmt.Println(userUUID)
+// 	return this.query(
+// 		bson.D{
+// 			{"uuid", userUUID},
+// 		},
+// 		tenantUUID,
+// 		ctx,
+// 	)
+// }
+
 func (this *GetUsertAuthorityService) Serve(
 	tenantUUID uuid.UUID, userUUID uuid.UUID, ctx context.Context,
-) (*valueObject.AuthData, error) {
-	fmt.Println(userUUID)
-	return this.query(
-		bson.D{
-			{"uuid", userUUID},
-		},
-		tenantUUID,
-		ctx,
-	)
-}
-
-func (this *GetUsertAuthorityService) query(
-	criterias bson.D, tenantUUID uuid.UUID, ctx context.Context,
 ) (*valueObject.AuthData, error) {
 
 	data, err := repository.AggregateOne[valueObject.AuthData](
@@ -41,9 +41,45 @@ func (this *GetUsertAuthorityService) query(
 		mongo.Pipeline{
 			bson.D{
 				{
-					"$match", criterias,
+					"$match", bson.D{
+						{"uuid", userUUID},
+						{"tenantUUID", tenantUUID},
+					},
 				},
 			},
+			// bson.D{
+			// 	{
+			// 		"$lookup", bson.D{
+			// 			{"from", "userSessions"},
+			// 			{"localField", "uuid"},
+			// 			{"foreignField", "userUUID"},
+			// 			{"as", "userSessions"},
+			// 			{
+			// 				"$pipeline", mongo.Pipeline{
+			// 					{
+			// 						{
+			// 							"$match", bson.D{
+			// 								{"uuid", userUUID},
+			// 								{"tenantUUID", tenantUUID},
+			// 							},
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// },
+			// bson.D{
+			// 	{
+			// 		"$match", bson.D{
+			// 			{
+			// 				"userSessions", bson.D{
+			// 					{"$ne", bson.A{}},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// },
 			bson.D{
 				{"$lookup",
 					bson.D{

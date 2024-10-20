@@ -41,6 +41,23 @@ func (this *Controller) ResultOf(output any, usecaseError error) (mvc.Result, er
 		return this.ActionResult.Prepare().SetCode(http.StatusNoContent).Done()
 	}
 
+	if v, ok := output.(responseOutput.IHTTPStatusResponse); ok {
+
+		raw, err := json.Marshal(output)
+
+		if err != nil {
+
+			return this.hanleInternalError(err)
+		}
+
+		return this.ActionResult.Prepare().
+			SetCode(
+				v.GetHTTPStatus(),
+			).
+			SetContent(raw).
+			Done()
+	}
+
 	if v, ok := output.(responseOutput.INoContentOutput); ok && v.IsNotContent() {
 
 		return this.ActionResult.Prepare().SetCode(http.StatusNoContent).Done()

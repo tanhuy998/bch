@@ -1,6 +1,8 @@
 package model
 
 import (
+	"app/internal/generalToken"
+
 	"github.com/google/uuid"
 )
 
@@ -17,6 +19,12 @@ type (
 		IsDeactivated bool       `json:"deactivated" bson:"deactivated"`
 		//OriginCommandGroupUUID *uuid.UUID `json:"-" bson:"originGroupUUIDCommandGroupUUID"`
 		//Info          UserInfo  `json:"userInfo" bson:"userInfo"`
+	}
+
+	UserSession struct {
+		UserUUID   *uuid.UUID                   `bson:"userUUID,omitempty"`
+		TenantUUID *uuid.UUID                   `bson:"tenantUUID,omitempty"`
+		SessionID  *generalToken.GeneralTokenID `bson:"sessionID,omitempty"`
 	}
 
 	// UserInfo struct {

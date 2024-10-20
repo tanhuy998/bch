@@ -6,12 +6,10 @@ import (
 	"app/internal/bootstrap"
 	"app/internal/db"
 	libConfig "app/internal/lib/config"
-	"app/internal/memoryCache"
 	actionResultServicePort "app/port/actionResult"
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	generalTokenIDServicePort "app/port/generalTokenID"
-	refreshTokenBlackListServicePort "app/port/refreshTokenBlackList"
 
 	jwtTokenServicePort "app/port/jwtTokenService"
 	passwordServicePort "app/port/passwordService"
@@ -26,7 +24,6 @@ import (
 	"app/service/generalTokenService"
 	jwtTokenService "app/service/jwtToken"
 	passwordService "app/service/password"
-	refreshTokenBlackListService "app/service/refreshTokenBlackList"
 	refreshTokenIDService "app/service/refreshTokenID"
 	"app/service/responsePresetService"
 	uniqueIDService "app/service/uniqueID"
@@ -114,6 +111,9 @@ func InitializeDatabase(app router.Party) {
 	)
 	libConfig.BindDependency[repository.IAssignmentGroupMember](
 		container, new(repository.AssignmentGroupMemberRepository).Init(db),
+	)
+	libConfig.BindDependency[repository.IUserSession](
+		container, new(repository.UserSessionRepository).Init(db),
 	)
 	fmt.Println("Repositories Initialized.")
 }
@@ -215,17 +215,25 @@ func RegisterAuthDependencies(container *hero.Container) {
 
 	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticationService](container, nil, AUTH)
 
-	cacheClient, err := memoryCache.NewClient[string, interface{}](
-		refreshTokenBlackListServicePort.REFRESH_TOKE_BLACK_LIST_TOPIC,
-	)
+	refreshTokenBlackListCacheClient, err := bootstrap.NewRefreshTokenBlackListClient()
 
 	if err != nil {
 
 		panic("error while inittiating refresh token blacklist cache client: " + err.Error())
 	}
 
-	libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenCacheClient](container, cacheClient)
-	libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator, refreshTokenBlackListService.RefreshTokenBlackListManipulatorService](container, nil)
+	container.Register(refreshTokenBlackListCacheClient)
+	//libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenCacheClient](container, cacheClient)
+	//libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator, refreshTokenBlackListService.RefreshTokenBlackListManipulatorService](container, nil)
+
+	generalTokenWhiteListCacheClient, err := bootstrap.NewGeneralTokenWhiteListClient()
+
+	if err != nil {
+
+		panic("error while inittiating general token whitelist cache client: " + err.Error())
+	}
+
+	container.Register(generalTokenWhiteListCacheClient)
 
 	asymmetricJWTService := jwtTokenService.NewECDSAService(
 		jwt.SigningMethodES256, *bootstrap.GetJWTAsymmetricEncryptionPrivateKey(), *bootstrap.GetJWTAsymmetricEncryptionPublicKey(),

@@ -1,7 +1,7 @@
 package memoryCache
 
 import (
-	"errors"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -23,7 +23,8 @@ var (
 )
 
 var (
-	ERR_TOPIC_EXIST = errors.New("topic exists")
+	ERR_TOPIC_EXIST              = fmt.Errorf("topic exists")
+	ERR_INVALID_TOPIC_CONSTRAINT = fmt.Errorf("invalid topic constraint")
 )
 
 func init() {
@@ -70,21 +71,21 @@ func Terminate() {
 	endSignal <- true
 }
 
-func GetTopic[Key_T, Value_T comparable](topic string) (*cache_unit[Key_T, Value_T], bool) {
+func GetTopic[Key_T, Value_T comparable](topic string) (*cache_unit[Key_T, Value_T], bool, error) {
 
 	unknown, ok := cache_topics.Load(topic)
 
 	if !ok {
 
-		return nil, false
+		return nil, false, nil
 	}
 
 	if val, ok := unknown.(*cache_unit[Key_T, Value_T]); ok {
 
-		return val, true
+		return val, true, nil
 	}
 
-	return nil, false
+	return nil, true, ERR_INVALID_TOPIC_CONSTRAINT
 }
 
 func NewTopic[Key_T, Value_T comparable](topic string) error {

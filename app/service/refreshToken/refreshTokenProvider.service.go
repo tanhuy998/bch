@@ -9,12 +9,9 @@ import (
 	generalTokenServicePort "app/port/generalToken"
 	jwtTokenServicePort "app/port/jwtTokenService"
 	refreshTokenServicePort "app/port/refreshToken"
-	refreshTokenBlackListServicePort "app/port/refreshTokenBlackList"
 	refreshTokenIDService "app/port/refreshTokenID"
-	"app/valueObject"
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -41,7 +38,7 @@ type (
 		AudienceList           accessTokenServicePort.AccessTokenAudienceList
 		RefreshTokenIDProvider refreshTokenIDService.IRefreshTokenIDProvider
 		JWTTokenService        jwtTokenServicePort.ISymmetricJWTTokenManipulator
-		RefreshTokenBlackList  refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator
+		//RefreshTokenBlackList  refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator
 	}
 )
 
@@ -98,11 +95,11 @@ func (this *RefreshTokenManipulatorService) makeFor(
 
 func (this *RefreshTokenManipulatorService) Revoke(refreshToken refreshTokenServicePort.IRefreshToken, ctx context.Context) error {
 
-	refreshTokenID := refreshToken.GetTokenID()
+	// refreshTokenID := refreshToken.GetTokenID()
 
-	payload := &valueObject.RefreshTokenBlackListPayload{
-		UserUUID: libCommon.PointerPrimitive(refreshToken.GetUserUUID()),
-	}
+	// payload := &valueObject.RefreshTokenBlackListPayload{
+	// 	UserUUID: libCommon.PointerPrimitive(refreshToken.GetUserUUID()),
+	// }
 
 	// exp, err := refreshToken.GetExpireTime()
 
@@ -116,14 +113,14 @@ func (this *RefreshTokenManipulatorService) Revoke(refreshToken refreshTokenServ
 	// 	return libError.NewInternal(err)
 	// }
 
-	exp := refreshToken.GetExpireTime()
+	// exp := refreshToken.GetExpireTime()
 
-	err := this.RefreshTokenBlackList.SetWithExpire(refreshTokenID, payload, *exp, ctx)
+	// err := this.RefreshTokenBlackList.SetWithExpire(refreshTokenID, payload, *exp, ctx)
 
-	if err != nil {
+	// if err != nil {
 
-		return err
-	}
+	// 	return err
+	// }
 
 	return nil
 }
@@ -199,14 +196,14 @@ func (this *RefreshTokenManipulatorService) Rotate(refreshToken IRefreshToken, c
 		return nil, refreshTokenServicePort.ERR_TOKEN_EXPIRE
 	}
 
-	refreshTokenInBlackList, err := this.RefreshTokenBlackList.Has(refreshToken.GetTokenID(), ctx)
+	// refreshTokenInBlackList, err := this.RefreshTokenBlackList.Has(refreshToken.GetTokenID(), ctx)
 
-	switch {
-	case err != nil:
-		return nil, err
-	case refreshTokenInBlackList:
-		return nil, libError.NewInternal(fmt.Errorf("refresh token in black list"))
-	}
+	// switch {
+	// case err != nil:
+	// 	return nil, err
+	// case refreshTokenInBlackList:
+	// 	return nil, libError.NewInternal(fmt.Errorf("refresh token in black list"))
+	// }
 
 	// exp, err := refreshToken.GetExpireTime()
 

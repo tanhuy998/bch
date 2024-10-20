@@ -133,6 +133,15 @@ func (this *GeneralTokenClientService) Remove(ctx context.Context) error {
 			irisContext.CookieDomain(hostname),
 			irisContext.CookieExpires(0),
 		)
+
+		c.SetCookieKV(
+			GENERAL_TOKEN, "",
+			irisContext.CookiePath("/auth/nav"),
+			irisContext.CookieHTTPOnly(true),
+			irisContext.CookieSameSite(http.SameSiteStrictMode),
+			irisContext.CookieDomain(hostname),
+			irisContext.CookieExpires(0),
+		)
 	}
 
 	return nil
