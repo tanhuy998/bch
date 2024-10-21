@@ -17,7 +17,9 @@ import (
 	refreshTokenService "app/service/refreshToken"
 	refreshTokenClientService "app/service/refreshTokenClient"
 
+	removeDBUserSessionDomain "app/domain/auth/RemoveDBUserSession"
 	addUserToCommandGroupDomain "app/domain/auth/addUserToCommandGroup"
+	checkAuthorityDomain "app/domain/auth/checkAuthority"
 	checkCommandGroupUserRolesDomain "app/domain/auth/checkCommandGroupUserRoles"
 	checkUserInCommandGroupDomain "app/domain/auth/checkUserInCommandGroup"
 	createCommandGroupDomain "app/domain/auth/createCommandGroup"
@@ -30,6 +32,7 @@ import (
 	getTenantAllGroupsDomain "app/domain/auth/getTenantAllGroups"
 	getUserAuthorityDomain "app/domain/auth/getUserAuthority"
 	getUserParticipatedCommandGroupsDomain "app/domain/auth/getUserParticipatedCommandGroups"
+	logoutDomain "app/domain/auth/logout"
 	navigateTenantDomain "app/domain/auth/navigateTenant"
 	"app/domain/auth/reportUserParticipatedCommandGroupsDomain"
 
@@ -75,6 +78,7 @@ func registerDomainSpecificUtils(container *hero.Container) {
 
 func RegisterAuthBoundedContext(container *hero.Container) {
 
+	libConfig.BindDependency[authServicePort.IRemoveDBUserSession, removeDBUserSessionDomain.RemoveDBUserSessionService](container, nil)
 	libConfig.BindDependency[authServicePort.ICheckUserInCommandGroup, checkUserInCommandGroupDomain.CheckUserInCommandGroupService](container, nil)
 	libConfig.BindDependency[authServicePort.ICheckCommandGroupUserRole, checkCommandGroupUserRolesDomain.CheckCommandGroupUserRoleService](container, nil)
 
@@ -101,6 +105,8 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[authServicePort.IModifyUser, modifyUserDomain.ModifyUserService](container, nil)
 	libConfig.BindDependency[authServicePort.IRefreshLogin, refreshLoginDomain.RefreshLoginService](container, nil)
 	libConfig.BindDependency[authServicePort.INavigateTenant, navigateTenantDomain.NavigateTenantService](container, nil)
+	libConfig.BindDependency[authServicePort.ILogout, logoutDomain.LogoutService](container, nil)
+	libConfig.BindDependency[authServicePort.ICheckAuthority, checkAuthorityDomain.CheckAuthorityService](container, nil)
 
 	registerDomainSpecificUtils(container)
 
@@ -163,6 +169,13 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[
 		usecasePort.IUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant],
 		navigateTenantDomain.NavigateTenantUseCase,
+	](container, nil)
+	libConfig.BindDependency[
+		usecasePort.IUseCase[requestPresenter.Logout, responsePresenter.Logout],
+		logoutDomain.LogoutUseCase,
+	](container, nil)
+	libConfig.BindDependency[
+		usecasePort.IMiddlewareUseCase, checkAuthorityDomain.CheckAuthorityUseCase,
 	](container, nil)
 
 	container.Register(new(AuthBoundedContext)).Explicitly().EnableStructDependents()

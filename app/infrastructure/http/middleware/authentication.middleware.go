@@ -3,14 +3,13 @@ package middleware
 import (
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware/middlewareHelper"
+	internalCommon "app/internal/common"
 	accessTokenServicePort "app/port/accessToken"
 	accessTokenClientPort "app/port/accessTokenClient"
-	jwtTokenServicePort "app/port/jwtTokenService"
+	usecasePort "app/port/usecase"
 	"errors"
-	"fmt"
 	"net/http"
 
-	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/hero"
 )
@@ -30,19 +29,7 @@ var (
 	ERR_ACCESS_TOKEN_EXPIRED = errors.New("access token expired")
 )
 
-type (
-	SigningMethod jwt.SigningMethodECDSA
-	// 	Message string `json:"message"`
-	// }
-)
-
-// func Authentication() func(iris.Context, authService.IAuthenticate) {
-
-// 	return func(ctx iris.Context, auth authService.IAuthenticate) {
-
-// 		ctx.Next()
-// 	}
-// }
+type ()
 
 func Auth(
 	container *hero.Container,
@@ -109,19 +96,17 @@ This func argument is injected by the dependency injection container
 func authentication_func(
 	ctx iris.Context,
 	accessTokenClient accessTokenClientPort.IAccessTokenClient,
-	accessTokenManipulator accessTokenServicePort.IAccessTokenManipulator,
+	checkAuthorityUseCase usecasePort.IMiddlewareUseCase,
 ) {
 
 	accessToken, err := accessTokenClient.Read(ctx)
 
-	//accessToken, err := accessTokenManipulator.Read(tokenString)
-
 	switch err {
 	case nil:
-	case jwtTokenServicePort.ERR_SIGNING_METHOD_MISMATCH:
-		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, err.Error())
+	// case jwtTokenServicePort.ERR_SIGNING_METHOD_MISMATCH:
+	// 	common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, err.Error())
 	default:
-		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusUnauthorized, "unauthorized")
+		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusUnauthorized, "(Authentication middleware error) unauthorized")
 	}
 
 	if err != nil {
@@ -129,27 +114,49 @@ func authentication_func(
 		return
 	}
 
-	errCode, err := validateAccessToken(accessToken)
-
-	if err != nil {
-
-		common.SendDefaulJsonBodyAndEndRequest(ctx, errCode, err.Error())
-		return
-	}
-
-	//ctx.RegisterDependency(accessToken)
 	ctx.Values().Set(common.CTX_ACCESS_TOKEN_KEY, accessToken)
-	//ctx.Next()
-}
 
-func validateAccessToken(accessToken accessTokenServicePort.IAccessToken) (errorCode int, err error) {
+	err = checkAuthorityUseCase.Execute(ctx)
 
-	switch {
-	case accessToken == nil:
-		return http.StatusUnauthorized, fmt.Errorf("unauthorized")
-	case accessToken.Expired():
-		return http.StatusUnauthorized, ERR_ACCESS_TOKEN_EXPIRED
-	default:
-		return 0, nil
+	if err != nil {
+
+		ctx.Values().Remove(common.CTX_ACCESS_TOKEN_KEY)
+
+		if errors.Is(err, internalCommon.ERR_INTERNAL) {
+
+			common.SendDefaulJsonBodyAndEndRequest(ctx, 500, err.Error())
+			return
+		}
+
+		common.SendDefaulJsonBodyAndEndRequest(ctx, 401, err.Error())
+		return
 	}
 }
+
+// func validateAccessToken(
+// 	accessToken accessTokenServicePort.IAccessToken, blackList *usecasePort.RefreshTokenBlackList, ctx context.Context,
+// ) (errorCode int, err error) {
+
+// 	switch {
+// 	case accessToken == nil:
+// 		return http.StatusUnauthorized, fmt.Errorf("unauthorized")
+// 	case accessToken.Expired():
+// 		return http.StatusUnauthorized, ERR_ACCESS_TOKEN_EXPIRED
+
+// 	}
+
+// 	inBlackList, err := blackList.Has(accessToken.GetTokenID(), ctx)
+
+// 	if err != nil {
+
+// 		return http.StatusInternalServerError, fmt.Errorf("error while checking access token in black list")
+
+// 	}
+
+// 	if inBlackList {
+
+// 		return http.StatusUnauthorized, fmt.Errorf("unauthorized")
+// 	}
+
+// 	return 0, nil
+// }

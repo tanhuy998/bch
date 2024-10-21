@@ -67,7 +67,6 @@ func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken r
 	}
 
 	options := []irisContext.CookieOption{
-		irisContext.CookiePath("/refresh"),
 		irisContext.CookieHTTPOnly(true),
 		irisContext.CookieSameSite(http.SameSiteStrictMode),
 	}
@@ -86,10 +85,16 @@ func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken r
 			continue
 		}
 
-		ops := append(options, irisContext.CookieDomain(hostname))
+		c.SetCookieKV(
+			key, rt, append(
+				options, irisContext.CookieDomain(hostname), irisContext.CookiePath("/refresh"),
+			)...,
+		)
 
 		c.SetCookieKV(
-			key, rt, ops...,
+			key, rt, append(
+				options, irisContext.CookieDomain(hostname), irisContext.CookiePath("/tenants/switch"),
+			)...,
 		)
 	}
 
@@ -115,6 +120,15 @@ func (this *RefreshTokenClientService) Remove(ctx context.Context) error {
 		c.SetCookieKV(
 			key, "",
 			irisContext.CookiePath("/refresh"),
+			irisContext.CookieHTTPOnly(true),
+			irisContext.CookieSameSite(http.SameSiteStrictMode),
+			irisContext.CookieDomain(hostname),
+			irisContext.CookieExpires(0),
+		)
+
+		c.SetCookieKV(
+			key, "",
+			irisContext.CookiePath("/tenants/switch"),
 			irisContext.CookieHTTPOnly(true),
 			irisContext.CookieSameSite(http.SameSiteStrictMode),
 			irisContext.CookieDomain(hostname),

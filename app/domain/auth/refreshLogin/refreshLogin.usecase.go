@@ -40,7 +40,7 @@ type (
 	}
 
 	RefreshLoginUseCase struct {
-		usecasePort.UserSessionCacheUseCase
+		usecasePort.MongoUserSessionCacheUseCase[responsePresenter.RefreshLoginResponse]
 		usecasePort.UseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
 		RefreshTokenIDProvider refreshTokenIdServicePort.IRefreshTokenIDProvider
 		RefreshLoginService    authServicePort.IRefreshLogin

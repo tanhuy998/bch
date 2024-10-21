@@ -3,6 +3,7 @@ package controller
 import (
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
+	"app/infrastructure/http/middleware/middlewareHelper"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -17,6 +18,7 @@ type (
 		LoginUseCase          usecasePort.IUseCase[requestPresenter.LoginRequest, responsePresenter.LoginResponse]
 		RefreshLoginUseCase   usecasePort.IUseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
 		NavigateTenantUseCase usecasePort.IUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant]
+		LogoutUseCase         usecasePort.IUseCase[requestPresenter.Logout, responsePresenter.Logout]
 	}
 )
 
@@ -37,6 +39,14 @@ func (this *UserLoggingController) BeforeActivation(activator mvc.BeforeActivati
 	activator.Handle(
 		"GET", "/nav", "NavigateTenant",
 		middleware.BindRequest[requestPresenter.AuthNavigateTenant](container),
+	)
+
+	activator.Handle(
+		"DELETE", "/logout", "Logout",
+		middleware.BindRequest[requestPresenter.Logout](
+			container,
+			middlewareHelper.UseTenantMapping,
+		),
 	)
 }
 
@@ -73,5 +83,14 @@ func (this *UserLoggingController) NavigateTenant(
 
 	return this.ResultOf(
 		this.NavigateTenantUseCase.Execute(input),
+	)
+}
+
+func (this *UserLoggingController) Logout(
+	input *requestPresenter.Logout,
+) (mvc.Result, error) {
+
+	return this.ResultOf(
+		this.LogoutUseCase.Execute(input),
 	)
 }

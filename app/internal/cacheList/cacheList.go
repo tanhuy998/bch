@@ -1,6 +1,8 @@
 package cacheList
 
 import (
+	"app/internal/common"
+	libError "app/internal/lib/error"
 	"app/internal/memoryCache"
 	"context"
 	"errors"
@@ -24,7 +26,7 @@ func (this *CacheListManipulator[Key_T, Value_T]) Has(tokenId Key_T, ctx context
 
 	if err != nil {
 
-		return false, err
+		return false, libError.NewInternal(err)
 	}
 
 	return exists, nil
@@ -32,7 +34,14 @@ func (this *CacheListManipulator[Key_T, Value_T]) Has(tokenId Key_T, ctx context
 
 func (this *CacheListManipulator[Key_T, Value_T]) Get(tokenID Key_T, ctx context.Context) (Value_T, bool, error) {
 
-	return this.CacheClient.Read(ctx, tokenID)
+	val, exists, err := this.CacheClient.Read(ctx, tokenID)
+
+	if err != nil {
+
+		return val, false, libError.NewInternal(err)
+	}
+
+	return val, exists, nil
 }
 
 func (this *CacheListManipulator[Key_T, Value_T]) Read(
@@ -41,7 +50,19 @@ func (this *CacheListManipulator[Key_T, Value_T]) Read(
 	ctx context.Context,
 ) error {
 
-	return this.CacheClient.Hold(ctx, tokenID, readFunc)
+	err := this.CacheClient.Hold(ctx, tokenID, readFunc)
+
+	if !errors.Is(err, common.ERR_INTERNAL) {
+
+		return libError.NewInternal(err)
+	}
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
 }
 
 func (this *CacheListManipulator[Key_T, Value_T]) Update(
@@ -50,7 +71,17 @@ func (this *CacheListManipulator[Key_T, Value_T]) Update(
 	ctx context.Context,
 ) error {
 
-	this.CacheClient.Update(ctx, tokenId, updatefunc)
+	err := this.CacheClient.Update(ctx, tokenId, updatefunc)
+
+	if !errors.Is(err, common.ERR_INTERNAL) {
+
+		return libError.NewInternal(err)
+	}
+
+	if err != nil {
+
+		return err
+	}
 
 	return nil
 }
@@ -65,7 +96,7 @@ func (this *CacheListManipulator[Key_T, Value_T]) Set(
 
 	if err != nil {
 
-		return false, err
+		return false, libError.NewInternal(err)
 	}
 
 	return true, nil
@@ -75,10 +106,24 @@ func (this *CacheListManipulator[Key_T, Value_T]) SetWithExpire(
 	tokenID Key_T, value Value_T, expire time.Time, ctx context.Context,
 ) error {
 
-	return this.CacheClient.SetWithExpire(ctx, tokenID, value, expire)
+	err := this.CacheClient.SetWithExpire(ctx, tokenID, value, expire)
+
+	if err != nil {
+
+		return libError.NewInternal(err)
+	}
+
+	return nil
 }
 
 func (this *CacheListManipulator[Key_T, Value_T]) Delete(key Key_T, ctx context.Context) (bool, error) {
 
-	return this.CacheClient.Delete(ctx, key)
+	isDeleted, err := this.CacheClient.Delete(ctx, key)
+
+	if err != nil {
+
+		return false, libError.NewInternal(err)
+	}
+
+	return isDeleted, nil
 }

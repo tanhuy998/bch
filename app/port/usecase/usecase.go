@@ -2,9 +2,14 @@ package usecasePort
 
 import (
 	"app/internal/responseOutput"
+	"context"
 )
 
 type (
+	IMiddlewareUseCase interface {
+		Execute(ctx context.Context) error
+	}
+
 	IUseCase[Request_Struc_T, Response_Struct_T any] interface {
 		Execute(*Request_Struc_T) (*Response_Struct_T, error)
 	}

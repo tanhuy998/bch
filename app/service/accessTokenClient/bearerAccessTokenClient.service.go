@@ -1,7 +1,10 @@
 package accessTokenClientService
 
 import (
+	libError "app/internal/lib/error"
 	accessTokenServicePort "app/port/accessToken"
+	"context"
+	"fmt"
 	"strings"
 
 	"github.com/kataras/iris/v12"
@@ -17,9 +20,16 @@ type (
 	}
 )
 
-func (this *BearerAccessTokenClientService) Read(ctx iris.Context) (accessTokenServicePort.IAccessToken, error) {
+func (this *BearerAccessTokenClientService) Read(ctx context.Context) (accessTokenServicePort.IAccessToken, error) {
 
-	header_value := ctx.GetHeader(HEADER_AUTH)
+	c, ok := ctx.(iris.Context)
+
+	if !ok {
+
+		return nil, libError.NewInternal(fmt.Errorf("context passed to BearerAccessTokenClientService is not type of iris.Context"))
+	}
+
+	header_value := c.GetHeader(HEADER_AUTH)
 
 	if header_value == "" {
 

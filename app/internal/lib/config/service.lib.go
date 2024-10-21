@@ -13,6 +13,14 @@ var (
 	concrete_pool map[reflect.Type]interface{} = map[reflect.Type]interface{}{}
 )
 
+func RegisterObject(container *hero.Container, obj any) {
+
+	dep := container.Register(obj)
+
+	dep.StructDependents = true
+	dep.Explicitly()
+}
+
 func BindDependency[AbstractType, ConcreteType any](
 	container *hero.Container, concreteVal *ConcreteType,
 ) *hero.Dependency {

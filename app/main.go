@@ -5,11 +5,15 @@ import (
 	"app/infrastructure/http/api/v1/config"
 	"app/internal/bootstrap"
 	"app/internal/db"
+	"app/internal/memoryCache"
+	"fmt"
+	"net/http"
 
 	"os"
 	"path"
 
 	"github.com/gofor-little/env"
+	socketio "github.com/googollee/go-socket.io"
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
 )
@@ -29,6 +33,24 @@ var (
 	server_ssl_cert string
 	server_ssl_key  string
 )
+
+type (
+	cache_log_t struct {
+		socketio.Conn
+	}
+)
+
+func (this *cache_log_t) Write(b []byte) (n int, err error) {
+
+	if this.Conn == nil {
+
+		return
+	}
+
+	this.Conn.Emit("log", b)
+
+	return
+}
 
 func init() {
 
@@ -74,50 +96,6 @@ func main() {
 		}),
 	)
 
-	// defer config.ConfigureLogger(app).Close()
-
-	// // app.ConfigureContainer().
-	// // 	UseResultHandler(func(next iris.ResultHandler) iris.ResultHandler {
-	// // 		return func(ctx iris.Context, v interface{}) error {
-	// // 			fmt.Println("error catcher")
-	// // 			switch val := v.(type) {
-	// // 			case error:
-	// // 				fmt.Println("err")
-	// // 				return next(ctx, val)
-	// // 			case *mvc.Response:
-	// // 				fmt.Println("err res")
-	// // 				return next(ctx, val)"_originalMethod"
-	// // 			default:
-	// // 				fmt.Println(reflect.TypeOf(val).String())
-	// // 				return next(ctx, val)
-	// // 			}
-	// // 		}
-	// // 	})
-
-	// // app.Use(versioning.Aliases(versioning.AliasMap{
-	// // 	versioning.Empty: "1.0.0",
-	// // }))
-
-	// // v1 := versioning.NewGroup(app, ">=1.0.1 <2.0.0")
-
-	// config.InitializeDatabase(app)
-	// config.RegisterServices(app)
-
-	// // registerServices(app)
-	// // registerDependencies(app)
-
-	// api.Init(app)
-
-	// // app.Run(
-	// // 	iris.TLS(
-	// // 		os.Getenv("HTTP_PORT"),
-	// // 		server_ssl_cert,
-	// // 		server_ssl_key,
-	// // 	),
-	// // 	iris.WithoutBodyConsumptionOnUnmarshal,
-	// // 	iris.WithOptimizations,
-	// // )
-
 	v1.Initialize(app)
 
 	err := app.Listen(
@@ -130,6 +108,38 @@ func main() {
 
 		panic(err)
 	}
+
+	//initWebsocket()
+}
+
+func initWebsocket() {
+
+	socketServer := socketio.NewServer(nil)
+	socketServer.Serve()
+
+	defer socketServer.Close()
+
+	socketServer.OnConnect("/monitor/cache", func(c socketio.Conn) error {
+
+		fmt.Printf("new cache monitor %s", c.ID())
+		memoryCache.AddLogListener(c.ID(), &cache_log_t{c})
+
+		return nil
+	})
+
+	socketServer.OnDisconnect("/monitor/cache", func(c socketio.Conn, s string) {
+
+		fmt.Printf("cache monitor %s exit", c.ID())
+		memoryCache.RemoveListener(c.ID())
+	})
+
+	go func() {
+
+		err := http.ListenAndServe(":3000", socketServer)
+
+		fmt.Println(err)
+	}()
+	//http.Handle("/monitor/cache", socketServer)
 }
 
 func readSSlCert() {

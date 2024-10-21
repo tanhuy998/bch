@@ -4,6 +4,7 @@ import (
 	libTryLock "app/internal/lib/tryLock"
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -33,7 +34,7 @@ type (
 
 	cache_unit[Key_T, Value_T comparable] struct {
 		sync.Map
-
+		topic string
 		//cleanupFunc CacheUnitCleanupFunction[Key_T, Value_T]
 	}
 
@@ -247,7 +248,17 @@ func (this *cache_unit[Key_T, Value_T]) Set(ctx context.Context, key Key_T, valu
 		}()
 	}
 
-	return this.set(ctx, cache, value)
+	err = this.set(ctx, cache, value)
+
+	if err != nil {
+
+		return err
+	}
+
+	// writeLog(fmt.Sprintf(`topic "%s" set key "%s"`, this.topic, key))
+	fmt.Println("topic", this.topic, "set key", key)
+
+	return nil
 }
 
 func (this *cache_unit[Key_T, Value_T]) set(ctx context.Context, cache *cache_value[Value_T], value Value_T) error {

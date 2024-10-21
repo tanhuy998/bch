@@ -2,7 +2,6 @@ package switchTenantDomain
 
 import (
 	"app/internal/common"
-	libError "app/internal/lib/error"
 	accessTokenServicePort "app/port/accessToken"
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
@@ -15,14 +14,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type (
 	SwitchTenantUseCase struct {
-		usecasePort.UserSessionCacheUseCase
+		usecasePort.MongoUserSessionCacheUseCase[responsePresenter.SwitchTenant]
 		GeneralTokenClientService generalTokenClientServicePort.IGeneralTokenClient
 		SwitchTenantService       tenantServicePort.ISwitchTenant
 		AccessTokenManipulator    accessTokenServicePort.IAccessTokenManipulator
@@ -48,20 +44,105 @@ func (this *SwitchTenantUseCase) Execute(
 		return nil, common.ERR_UNAUTHORIZED
 	}
 
-	session, err := this.MongoClient.StartSession()
+	// session, err := this.MongoClient.StartSession()
 
-	if err != nil {
+	// if err != nil {
 
-		return nil, this.ErrorWithContext(
-			input, libError.NewInternal(err),
-		)
-	}
+	// 	return nil, this.ErrorWithContext(
+	// 		input, libError.NewInternal(err),
+	// 	)
+	// }
 
-	defer session.EndSession(input.GetContext())
+	// defer session.EndSession(input.GetContext())
 
-	unknown, err := session.WithTransaction(
+	// unknown, err := session.WithTransaction(
+	// 	input.GetContext(),
+	// 	func(sesstionCtx mongo.SessionContext) (ret interface{}, err error) {
+
+	// 		at, rt, err := this.SwitchTenantService.Serve(*input.TenantUUID, generalToken, sesstionCtx)
+	// 		fmt.Println(1)
+
+	// 		if errors.Is(err, common.ERR_UNAUTHORIZED) {
+
+	// 			e := this.RefreshTokenClientService.Remove(input.GetContext())
+
+	// 			if e != nil {
+
+	// 				return nil, e
+	// 			}
+
+	// 			return nil, err
+	// 		}
+
+	// 		if err != nil {
+
+	// 			return nil, err
+	// 		}
+
+	// 		defer func() {
+
+	// 			if err != nil {
+
+	// 				ret = nil
+	// 				return
+	// 			}
+
+	// 			err = this.GeneralTokenClientService.Remove(input.GetContext())
+
+	// 			if err != nil {
+
+	// 				ret = nil
+	// 				return //nil, err
+	// 			}
+
+	// 			err = this.RefreshTokenClientService.Write(input.GetContext(), rt)
+	// 			fmt.Println(2)
+	// 			if err != nil {
+
+	// 				ret = nil
+	// 				return //nil, err
+	// 			}
+	// 		}()
+
+	// 		at_str, err := this.AccessTokenManipulator.SignString(at)
+	// 		fmt.Println(3)
+	// 		if err != nil {
+
+	// 			return nil, err
+	// 		}
+	// 		fmt.Println(4)
+
+	// 		err = this.manageSessions(generalToken, sesstionCtx)
+
+	// 		if err != nil {
+
+	// 			return nil, err
+	// 		}
+
+	// 		output := this.GenerateOutput()
+	// 		output.Data.AccessToken = at_str
+
+	// 		return output, nil
+	// 	},
+	// )
+
+	// if err != nil {
+
+	// 	return nil, this.ErrorWithContext(
+	// 		input, err,
+	// 	)
+	// }
+
+	// output, ok := unknown.(*responsePresenter.SwitchTenant)
+
+	// if !ok {
+
+	// 	return nil, libError.NewInternal(fmt.Errorf("unknown error"))
+	// }
+
+	output, err := this.ModifyUserSession(
 		input.GetContext(),
-		func(sesstionCtx mongo.SessionContext) (ret interface{}, err error) {
+		func(sesstionCtx context.Context) (ret *responsePresenter.SwitchTenant, err error) {
 
 			at, rt, err := this.SwitchTenantService.Serve(*input.TenantUUID, generalToken, sesstionCtx)
 			fmt.Println(1)
@@ -137,13 +218,6 @@ func (this *SwitchTenantUseCase) Execute(
 		)
 	}
 
-	output, ok := unknown.(*responsePresenter.SwitchTenant)
-
-	if !ok {
-
-		return nil, libError.NewInternal(fmt.Errorf("unknown error"))
-	}
-
 	return output, nil
 }
 
@@ -151,56 +225,84 @@ func (this *SwitchTenantUseCase) manageSessions(
 	generalToken generalTokenServicePort.IGeneralToken, ctx context.Context,
 ) (err error) {
 
-	userSessions, err := this.UserSessionRepo.FindMany(
-		bson.D{
-			{"userUUID", generalToken.GetUserUUID()},
-		},
+	// userSessions, err := this.UserSessionRepo.FindMany(
+	// 	bson.D{
+	// 		{"userUUID", generalToken.GetUserUUID()},
+	// 	},
+	// 	ctx,
+	// )
+
+	// if err != nil {
+
+	// 	return err
+	// }
+
+	// defer func() {
+
+	// 	if err != nil {
+
+	// 		return
+	// 	}
+
+	// 	for _, v := range userSessions {
+	// 		// Delete caches of current user sessions
+	// 		// ctx of this funciton is a transaction context, therefore fetched data from
+	// 		// db have not committed until the whole transaction committed
+	// 		_, err = this.GeneralTokenWhiteList.Delete(*v.SessionID, ctx)
+
+	// 		if err != nil {
+
+	// 			return
+	// 		}
+	// 	}
+	// }()
+
+	// expire := generalToken.GetExpiretime()
+
+	// if expire != nil {
+
+	// 	err = this.GeneralTokenWhiteList.SetWithExpire(
+	// 		generalToken.GetTokenID(), struct{}{}, *expire, ctx,
+	// 	)
+	// } else {
+
+	// 	_, err = this.GeneralTokenWhiteList.Set(
+	// 		generalToken.GetTokenID(), struct{}{}, ctx,
+	// 	)
+	// }
+
+	// if err != nil {
+
+	// 	return err
+	// }
+
+	err = this.RemoveUserSession(
 		ctx,
-	)
+		generalToken.GetUserUUID(),
+		func() error {
 
-	if err != nil {
+			expire := generalToken.GetExpiretime()
 
-		return err
-	}
+			if expire != nil {
 
-	defer func() {
+				err = this.GeneralTokenWhiteList.SetWithExpire(
+					generalToken.GetTokenID(), struct{}{}, *expire, ctx,
+				)
+			} else {
 
-		if err != nil {
-
-			return
-		}
-
-		for _, v := range userSessions {
-			// Delete caches of current user sessions
-			// ctx of this funciton is a transaction context, therefore fetched data from
-			// db have not committed until the whole transaction committed
-			_, err = this.GeneralTokenWhiteList.Delete(*v.SessionID, ctx)
+				_, err = this.GeneralTokenWhiteList.Set(
+					generalToken.GetTokenID(), struct{}{}, ctx,
+				)
+			}
 
 			if err != nil {
 
-				return
+				return err
 			}
-		}
-	}()
 
-	expire := generalToken.GetExpiretime()
-
-	if expire != nil {
-
-		err = this.GeneralTokenWhiteList.SetWithExpire(
-			generalToken.GetTokenID(), struct{}{}, *expire, ctx,
-		)
-	} else {
-
-		_, err = this.GeneralTokenWhiteList.Set(
-			generalToken.GetTokenID(), struct{}{}, ctx,
-		)
-	}
-
-	if err != nil {
-
-		return err
-	}
+			return nil
+		},
+	)
 
 	return nil
 }

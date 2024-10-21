@@ -15,6 +15,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -119,6 +120,11 @@ func (this *JWTAccessTokenManipulatorService) makeFor(
 		case this.ExpDuration <= 0:
 			customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(exp_duration))
 		}
+	}
+
+	if os.Getenv("TEST-LOGIN") == "1" {
+
+		customeClaims.ExpireAt = jwt.NewNumericDate(time.Now())
 	}
 
 	token.Claims = customeClaims
