@@ -2,6 +2,7 @@ package model
 
 import (
 	"app/internal/generalToken"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -25,6 +26,7 @@ type (
 		UserUUID   *uuid.UUID                   `bson:"userUUID,omitempty"`
 		TenantUUID *uuid.UUID                   `bson:"tenantUUID,omitempty"`
 		SessionID  *generalToken.GeneralTokenID `bson:"sessionID,omitempty"`
+		Expire     *time.Time                   `bson:"expire,omitempty"`
 	}
 
 	// UserInfo struct {

@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	ID_SPECTRUM_SIZE = 32
+	ID_SPECTRUM_LIMIT      = 32 // byte
+	SESSION_SPECTRUM_LIMIT = 8
 )
 
 type (
@@ -24,7 +25,7 @@ type (
 
 func (this *RefreshTokenIDProviderService) Generate(generalTokenID GeneralTokenID) (string, error) {
 
-	sessionID := make([]byte, 8)
+	sessionID := make([]byte, SESSION_SPECTRUM_LIMIT)
 
 	_, err := rand.Read(sessionID)
 
@@ -33,14 +34,12 @@ func (this *RefreshTokenIDProviderService) Generate(generalTokenID GeneralTokenI
 		return "", nil
 	}
 
-	extraBytes := make([]byte, len(generalTokenID))
-
-	return this.UniqueIDGenerator.Serve(append(sessionID, extraBytes...))
+	return this.UniqueIDGenerator.Serve(append(generalTokenID[:], sessionID...))
 }
 
 func (this *RefreshTokenIDProviderService) Extract(
 	ID string,
-) (generalTokenID GeneralTokenID, sessionID [8]byte, err error) {
+) (generalTokenID GeneralTokenID, sessionID [SESSION_SPECTRUM_LIMIT]byte, err error) {
 
 	spectrum, err := this.UniqueIDGenerator.Decode(ID)
 
@@ -50,14 +49,14 @@ func (this *RefreshTokenIDProviderService) Extract(
 		return
 	}
 
-	if len(spectrum) != ID_SPECTRUM_SIZE {
+	if len(spectrum) != ID_SPECTRUM_LIMIT {
 
 		err = libError.NewInternal(fmt.Errorf("invalid refresh token id"))
 		return
 	}
 
-	copy(generalTokenID[:], spectrum[:24])
-	copy(sessionID[:], spectrum[24:ID_SPECTRUM_SIZE])
+	copy(generalTokenID[:], spectrum[:cap(generalTokenID)])
+	copy(sessionID[:], spectrum[cap(generalTokenID):ID_SPECTRUM_LIMIT])
 
 	return
 }

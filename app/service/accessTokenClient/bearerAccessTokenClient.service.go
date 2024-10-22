@@ -1,6 +1,7 @@
 package accessTokenClientService
 
 import (
+	"app/infrastructure/http/common"
 	libError "app/internal/lib/error"
 	accessTokenServicePort "app/port/accessToken"
 	"context"
@@ -29,7 +30,19 @@ func (this *BearerAccessTokenClientService) Read(ctx context.Context) (accessTok
 		return nil, libError.NewInternal(fmt.Errorf("context passed to BearerAccessTokenClientService is not type of iris.Context"))
 	}
 
-	header_value := c.GetHeader(HEADER_AUTH)
+	at := common.GetAccessToken(c)
+
+	if at != nil {
+
+		return at, nil
+	}
+
+	return this.readRaw(c)
+}
+
+func (this *BearerAccessTokenClientService) readRaw(ctx iris.Context) (accessTokenServicePort.IAccessToken, error) {
+
+	header_value := ctx.GetHeader(HEADER_AUTH)
 
 	if header_value == "" {
 

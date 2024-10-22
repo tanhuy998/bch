@@ -12,7 +12,9 @@ import (
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 )
 
 type (
@@ -32,7 +34,9 @@ func (this *LogoutUseCase) Execute(
 
 	if !input.IsValidTenantUUID() {
 
-		return nil, common.ERR_UNAUTHORIZED
+		return nil, this.ErrorWithContext(
+			input, errors.Join(common.ERR_UNAUTHORIZED, fmt.Errorf("nil access token given")),
+		)
 	}
 
 	accessToken, err := this.AccessTokenClientService.Read(input.GetContext())
@@ -54,7 +58,7 @@ func (this *LogoutUseCase) Execute(
 	}
 
 	output, err = this.ModifyUserSession(
-		input.Context,
+		input.GetContext(),
 		func(ctx context.Context) (ret *responsePresenter.Logout, err error) {
 
 			defer func() {
@@ -64,15 +68,7 @@ func (this *LogoutUseCase) Execute(
 					return
 				}
 
-				// generalTokenID, _, err := this.RefreshTokenIDProvider.Extract(refreshToken.GetTokenID())
-
-				// if err != nil {
-
-				// 	output = nil
-				// 	return
-				// }
-
-				err = this.markRefreshToken(refreshToken, ctx)
+				err = this.markRefreshToken(refreshToken, input.GetContext())
 
 				if err != nil {
 
@@ -102,6 +98,7 @@ func (this *LogoutUseCase) Execute(
 
 			output := this.GenerateOutput()
 			output.Message = "success"
+			output.SetHTTPStatus(http.StatusAccepted)
 
 			return output, nil
 		},
@@ -143,6 +140,13 @@ func (this *LogoutUseCase) markRefreshToken(refreshToken refreshTokenServicePort
 	if !setted {
 
 		return libError.NewInternal(fmt.Errorf("cannot set refresh token id to black list"))
+	}
+
+	err = this.RefreshTokenClientService.Remove(ctx)
+
+	if err != nil {
+
+		return err
 	}
 
 	return nil

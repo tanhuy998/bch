@@ -125,8 +125,8 @@ func (this *GeneralTokenClientService) Remove(ctx context.Context) error {
 			continue
 		}
 
-		c.SetCookieKV(
-			GENERAL_TOKEN, "",
+		c.RemoveCookie(
+			GENERAL_TOKEN,
 			irisContext.CookiePath("/tenants/switch"),
 			irisContext.CookieHTTPOnly(true),
 			irisContext.CookieSameSite(http.SameSiteStrictMode),
@@ -134,8 +134,8 @@ func (this *GeneralTokenClientService) Remove(ctx context.Context) error {
 			irisContext.CookieExpires(0),
 		)
 
-		c.SetCookieKV(
-			GENERAL_TOKEN, "",
+		c.RemoveCookie(
+			GENERAL_TOKEN,
 			irisContext.CookiePath("/auth/nav"),
 			irisContext.CookieHTTPOnly(true),
 			irisContext.CookieSameSite(http.SameSiteStrictMode),

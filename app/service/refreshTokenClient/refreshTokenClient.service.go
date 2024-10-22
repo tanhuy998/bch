@@ -87,13 +87,19 @@ func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken r
 
 		c.SetCookieKV(
 			key, rt, append(
-				options, irisContext.CookieDomain(hostname), irisContext.CookiePath("/refresh"),
+				options, irisContext.CookieDomain(hostname), irisContext.CookiePath("/auth/refresh"),
 			)...,
 		)
 
 		c.SetCookieKV(
 			key, rt, append(
 				options, irisContext.CookieDomain(hostname), irisContext.CookiePath("/tenants/switch"),
+			)...,
+		)
+
+		c.SetCookieKV(
+			key, rt, append(
+				options, irisContext.CookieDomain(hostname), irisContext.CookiePath("/auth/logout"),
 			)...,
 		)
 	}
@@ -117,18 +123,27 @@ func (this *RefreshTokenClientService) Remove(ctx context.Context) error {
 			continue
 		}
 
-		c.SetCookieKV(
-			key, "",
-			irisContext.CookiePath("/refresh"),
+		c.RemoveCookie(
+			key,
+			irisContext.CookiePath("/auth/refresh"),
 			irisContext.CookieHTTPOnly(true),
 			irisContext.CookieSameSite(http.SameSiteStrictMode),
 			irisContext.CookieDomain(hostname),
 			irisContext.CookieExpires(0),
 		)
 
-		c.SetCookieKV(
-			key, "",
+		c.RemoveCookie(
+			key,
 			irisContext.CookiePath("/tenants/switch"),
+			irisContext.CookieHTTPOnly(true),
+			irisContext.CookieSameSite(http.SameSiteStrictMode),
+			irisContext.CookieDomain(hostname),
+			irisContext.CookieExpires(0),
+		)
+
+		c.RemoveCookie(
+			key,
+			irisContext.CookiePath("/auth/logout"),
 			irisContext.CookieHTTPOnly(true),
 			irisContext.CookieSameSite(http.SameSiteStrictMode),
 			irisContext.CookieDomain(hostname),

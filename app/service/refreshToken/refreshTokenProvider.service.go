@@ -81,14 +81,14 @@ func (this *RefreshTokenManipulatorService) makeFor(
 		optionFunc(&customClaims.RegisteredClaims)
 	}
 
-	rt, err := newFromToken(token)
+	rt, err := newFromToken(token, this.RefreshTokenIDProvider)
 
 	if err != nil {
 
 		return nil, err
 	}
 
-	rt.userUUID = libCommon.PointerPrimitive(generalToken.GetUserUUID())
+	// rt.userUUID = generalToken.GetUserUUID() // libCommon.PointerPrimitive(generalToken.GetUserUUID())
 
 	return rt, nil
 }
@@ -144,7 +144,7 @@ func (this *RefreshTokenManipulatorService) Read(str string) (IRefreshToken, err
 		return nil, err
 	}
 
-	return newFromToken(token)
+	return newFromToken(token, this.RefreshTokenIDProvider)
 }
 
 func (this *RefreshTokenManipulatorService) DefaultExpireDuration() time.Duration {
@@ -184,7 +184,7 @@ func (this *RefreshTokenManipulatorService) makeBase(refreshToken IRefreshToken)
 
 	token.Claims = customClaims
 
-	return newFromToken(token)
+	return newFromToken(token, this.RefreshTokenIDProvider)
 }
 
 func (this *RefreshTokenManipulatorService) Rotate(refreshToken IRefreshToken, ctx context.Context) (IRefreshToken, error) {

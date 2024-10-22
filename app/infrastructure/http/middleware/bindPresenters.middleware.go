@@ -65,7 +65,7 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 			val.ReceiveContext(ctx)
 		}
 
-		err = runInitializers(ctx, request, response, initializers)
+		err = runInitializers(container, ctx, request, response, initializers)
 
 		if err != nil {
 
@@ -184,6 +184,7 @@ func isEmptyPresenter[T any]() bool {
 // }
 
 func runInitializers[RequestPresenter_T, ResponsePresenter_T any](
+	container *hero.Container,
 	ctx iris.Context,
 	req *RequestPresenter_T,
 	res *ResponsePresenter_T,
@@ -192,7 +193,7 @@ func runInitializers[RequestPresenter_T, ResponsePresenter_T any](
 
 	for _, f := range initializers {
 
-		err := f(ctx, req, res)
+		err := f(container, ctx, req, res)
 
 		if err != nil {
 

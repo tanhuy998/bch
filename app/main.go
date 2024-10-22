@@ -115,9 +115,6 @@ func main() {
 func initWebsocket() {
 
 	socketServer := socketio.NewServer(nil)
-	socketServer.Serve()
-
-	defer socketServer.Close()
 
 	socketServer.OnConnect("/monitor/cache", func(c socketio.Conn) error {
 
@@ -132,6 +129,10 @@ func initWebsocket() {
 		fmt.Printf("cache monitor %s exit", c.ID())
 		memoryCache.RemoveListener(c.ID())
 	})
+
+	socketServer.Serve()
+
+	defer socketServer.Close()
 
 	go func() {
 

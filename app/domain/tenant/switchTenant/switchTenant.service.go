@@ -26,7 +26,7 @@ type (
 func (this *SwitchTenantService) Serve(
 	tenantUUID uuid.UUID, generalToken generalTokenServicePort.IGeneralToken, ctx context.Context,
 ) (at accessTokenServicePort.IAccessToken, rt refreshTokenServicePort.IRefreshToken, err error) {
-
+	fmt.Println(generalToken.GetTokenID())
 	if generalToken.Expire() {
 
 		err = errors.Join(
@@ -44,6 +44,7 @@ func (this *SwitchTenantService) Serve(
 			{"userUUID", generalToken.GetUserUUID()},
 			{"tenantUUID", tenantUUID},
 			{"sessionID", generalToken.GetTokenID()},
+			{"expire", generalToken.GetExpiretime()},
 		},
 		ctx,
 	)

@@ -20,9 +20,14 @@ type (
 	}
 )
 
-func New(minLength uint) (*uniqueIDService, error) {
+func New(minLength uint8) (*uniqueIDService, error) {
 
-	engine, err := sqids.New(sqids.Options{MinLength: 10})
+	if minLength == 0 {
+
+		minLength = 10
+	}
+
+	engine, err := sqids.New(sqids.Options{MinLength: uint8(minLength)})
 
 	if err != nil {
 
@@ -45,24 +50,16 @@ func (this *uniqueIDService) Serve(input []byte) (string, error) {
 		buffer_capacity++
 	}
 
-	buffer := []uint64{}
+	spectrum := make([]byte, buffer_capacity*ENGINE_UNIT_SIZE)
+	copy(spectrum, input)
 
-	for i := 0; i < input_length; i += ENGINE_UNIT_SIZE {
+	buffer := make([]uint64, buffer_capacity)
 
-		var (
-			i_end int
-		)
+	for i := 0; i < buffer_capacity; i++ {
 
-		if input_length-i == odd {
+		offset := i * ENGINE_UNIT_SIZE
 
-			i_end = i + odd
-
-		} else {
-
-			i_end = i + ENGINE_UNIT_SIZE
-		}
-
-		buffer = append(buffer, binary.BigEndian.Uint64(input[i:i_end]))
+		buffer[i] = binary.BigEndian.Uint64(spectrum[offset : offset+ENGINE_UNIT_SIZE])
 	}
 
 	ret, err := this.engine.Encode(buffer)
@@ -77,13 +74,15 @@ func (this *uniqueIDService) Serve(input []byte) (string, error) {
 
 func (this *uniqueIDService) Decode(input string) ([]byte, error) {
 
-	spectrum := this.engine.Decode(input)
+	extracted := this.engine.Decode(input)
 
-	ret := make([]byte, len(spectrum)*ENGINE_UNIT_SIZE)
+	ret := make([]byte, len(extracted)*ENGINE_UNIT_SIZE)
 
-	for i, v := range spectrum {
+	for i, v := range extracted {
 
-		binary.BigEndian.PutUint64(ret[i:], v)
+		offset := i * ENGINE_UNIT_SIZE
+
+		binary.BigEndian.PutUint64(ret[offset:offset+ENGINE_UNIT_SIZE], v)
 	}
 
 	return ret, nil

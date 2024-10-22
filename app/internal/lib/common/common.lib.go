@@ -7,7 +7,7 @@ import (
 )
 
 func Ternary[T any](criteria bool, valIfTrue T, valIfFalse T) T {
-
+	fmt.Println(criteria)
 	if criteria {
 
 		return valIfTrue

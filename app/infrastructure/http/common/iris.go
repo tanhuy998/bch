@@ -32,3 +32,18 @@ func GetAccessToken(ctx iris.Context) accessTokenServicePort.IAccessToken {
 
 	return nil
 }
+
+func SetAccessToken(ctx iris.Context, at accessTokenServicePort.IAccessToken) {
+
+	if at == nil {
+
+		return
+	}
+
+	ctx.Values().Set(CTX_ACCESS_TOKEN_KEY, at)
+}
+
+func RemoveAccessToken(ctx iris.Context) {
+
+	ctx.Values().Remove(CTX_ACCESS_TOKEN_KEY)
+}

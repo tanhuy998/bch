@@ -13,7 +13,7 @@ var (
 )
 
 var (
-	Nil = [24]byte{}
+	Nil = GeneralTokenID{}
 )
 
 type (

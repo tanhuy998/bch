@@ -2,6 +2,7 @@ package refreshTokenService
 
 import (
 	libError "app/internal/lib/error"
+	refreshTokenIdServicePort "app/port/refreshTokenID"
 	"errors"
 	"fmt"
 	"time"
@@ -25,13 +26,15 @@ type (
 	}
 
 	jwt_refresh_token struct {
+		userUUID  uuid.UUID
 		jwt_token *jwt.Token
 		claims    *jwt_refresh_token_custom_claims
-		userUUID  *uuid.UUID
 	}
 )
 
-func newFromToken(token *jwt.Token) (*jwt_refresh_token, error) {
+func newFromToken(
+	token *jwt.Token, refreshTokenIDProvider refreshTokenIdServicePort.IRefreshTokenIDProvider,
+) (*jwt_refresh_token, error) {
 
 	var (
 		ret *jwt_refresh_token
@@ -62,18 +65,26 @@ func newFromToken(token *jwt.Token) (*jwt_refresh_token, error) {
 		return nil, libError.NewInternal(fmt.Errorf("refresh token contains no token ID"))
 	}
 
-	// if ret.userUUID == nil ||
-	// 	*ret.userUUID == uuid.Nil {
+	generalTokenID, _, err := refreshTokenIDProvider.Extract(claims.RefreshTokenID)
 
-	// 	return nil, libError.NewInternal(fmt.Errorf("refresh token contains to UserUUID"))
-	// }
+	if err != nil {
+
+		return nil, err
+	}
+
+	if generalTokenID.GetUserUUID() == uuid.Nil {
+
+		return nil, libError.NewInternal(fmt.Errorf("refresh token contain invalid token id"))
+	}
+
+	ret.userUUID = generalTokenID.GetUserUUID()
 
 	return ret, nil
 }
 
 func (this *jwt_refresh_token) GetUserUUID() uuid.UUID {
 
-	return *this.userUUID
+	return this.userUUID
 }
 func (this *jwt_refresh_token) GetTokenID() string {
 
@@ -89,24 +100,15 @@ func (this *jwt_refresh_token) Expired() bool {
 		return false
 	}
 
+	if exp == nil {
+
+		return false
+	}
+
 	return exp.Before(time.Now())
 }
 
 func (this *jwt_refresh_token) GetExpireTime() *time.Time {
-
-	// exp, err := this.jwt_token.Claims.GetExpirationTime()
-
-	// if err != nil {
-
-	// 	return nil, libError.NewInternal(err)
-	// }
-
-	// if exp == nil {
-
-	// 	return nil, nil
-	// }
-
-	// return &exp.Time, nil
 
 	claims := this.claims
 

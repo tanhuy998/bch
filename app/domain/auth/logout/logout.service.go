@@ -42,6 +42,7 @@ func (this *LogoutService) Serve(
 			fmt.Errorf("nil signature given"),
 		)
 	case refreshToken.GetTokenID() != accessToken.GetTokenID():
+
 		return libError.NewInternal(
 			fmt.Errorf("auth signatures not matches"),
 		)
