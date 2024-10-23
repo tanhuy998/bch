@@ -1,4 +1,5 @@
 import CRUDEndpoint from "../../backend/crudEndpoint";
+import HttpEndpoint from "../../backend/endpoint";
 import ErrorResponse from "../../backend/error/errorResponse";
 import AdvanceValidationFormDelegator from "./advancedValidationFormdelegator";
 
@@ -34,6 +35,11 @@ export default class EndpointFormDelegator extends AdvanceValidationFormDelegato
         return EndpointFormDelegatorAction.CREATE;
     }
 
+    get endpointAction() {
+
+        return this.action
+    }
+
     /**
      * @param {any} 
      * @returns {string}
@@ -46,14 +52,11 @@ export default class EndpointFormDelegator extends AdvanceValidationFormDelegato
     async interceptSubmission() {
         console.log('submit', this.dataModel)
 
-        if (!(this.endpoint instanceof CRUDEndpoint)) {
-
-            throw new Error('invalid endpoint to sumit a form which is not an instance of CRUDEndpoint')
-        }
+        this.#checkEnpoint();
 
         try {
 
-            const action = this.action;
+            const action = this.endpointAction;
             const res = await this.endpoint[action](this.dataModel);
 
             this.navigateAfterInterceptionSuccess(res);
@@ -61,6 +64,19 @@ export default class EndpointFormDelegator extends AdvanceValidationFormDelegato
         catch (e) {
             console.log('endpoint throw error')
             this.#handleError(e);
+        }
+    }
+
+    #checkEnpoint() {
+
+        if (!(this.endpoint instanceof HttpEndpoint)) {
+
+            throw new Error('invalid endpoint to sumit a form which is not an instance of CRUDEndpoint');
+        }
+
+        if (typeof this.endpoint[this.endpointAction] != 'function') {
+
+            throw new Error('the endpoint action of FormDelegator is not a function');
         }
     }
 

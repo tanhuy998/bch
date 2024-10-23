@@ -2,7 +2,7 @@ import ErrorResponse from "./error/errorResponse";
 import HttpRequestBuilder from "./httpRequestBuilder";
 import MockEndpoint from "./mockEndpoint";
 
-const DEFAULT_HOST = '127.0.0.1';
+const DEFAULT_HOST = 'localhost';
 const DEFAULT_SCHEME = 'http';
 const DEFAULT_URI = '';
 const DEFAULT_PORT = 8000;
@@ -109,7 +109,8 @@ export default class HttpEndpoint extends MockEndpoint{
                 headers: {
                     ...this.#defaultRequestHeaders,
                     ...options.headers,
-                }
+                },
+                credentials: 'include',
             }
         )
     }

@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter, Routes, Route, Router, Outlet } from 'react-router-dom'
 import Home from './pages/home';
-import Login from './pages/login'
+import Login from './pages/login/login.page'
 import AdminHomePage from './pages/adminHomePage';
 import CandidateSigning from './pages/candidateSinging';
 import AdminTemplate from './components/adminTemplate';
@@ -38,6 +38,9 @@ import EditSingleCandidatePage from './pages/editSingleCandidatePage';
 import EditSingleCandidateUseCase from './domain/usecases/editSingleCandidate.usecase';
 import EditSingleCampaignPage from './pages/editSingleCampaignPage';
 import EditSingleCampaignUseCase from './domain/usecases/editSingleCampaign.usecase';
+import LoginUseCase from './pages/login/usecase'
+import SwithcTenantPage from './pages/switchTenant/switchTenant.page';
+import SwitchTenantUseCase from './pages/switchTenant/usecase';
 // import CandidateSigningPage from './pages/candidateSigning/candidateSinging.page';
 
 const campaignlistUseCase = new CampaignListUseCase()
@@ -48,6 +51,8 @@ const singleCandidateUseCase = new SingleCandidateUseCase();
 const candidateSigningUseCase = new CandidateSigningUseCase();
 const editSingleCandidateUseCase = new EditSingleCandidateUseCase();
 const editSingleCampaignUsecase = new EditSingleCampaignUseCase();
+const loginUseCase = new LoginUseCase();
+const switchTenantUseCase = new SwitchTenantUseCase()
 
 const pageAnimationVariants = {
   hidden: { opacity: 0, x: 0, y: 20 },
@@ -68,7 +73,10 @@ function App() {
           <Route path='/signing' element={<AnimatePage><SingingPageTemplate /></AnimatePage>}>
             <Route path='campaign/:campaignUUID/candidate/:candidateUUID' element={<CandidateSigningPage usecase={candidateSigningUseCase} />} />
           </Route>
-          <Route path='/login' element={<AnimatePage><Login /></AnimatePage>} />
+          <Route path='/login' element={<AnimatePage><Login usecase={loginUseCase}/></AnimatePage>} />
+          <Route path="/auth">
+            <Route path="switch" element={<AnimatePage><SwithcTenantPage usecase={switchTenantUseCase}/></AnimatePage>} />
+          </Route>
           <Route path='/admin' element={<AdminTemplate />}>
             <Route index element={<AnimatePage><AdminDashboad /></AnimatePage>} />
             {/* <Route path="campaigns" element={<PaginationTable idField={"uuid"} endpoint={campaignlistUseCase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} /> */}
