@@ -66,21 +66,21 @@ func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken g
 		return err
 	}
 
-	options := []irisContext.CookieOption{
+	c.AddCookieOptions(
 		irisContext.CookieHTTPOnly(true),
 		irisContext.CookieSameSite(http.SameSiteStrictMode),
-	}
+	)
 
 	expire := generalToken.GetExpiretime()
 
 	if expire != nil {
 
-		options = append(options, irisContext.CookieExpires(time.Until(*expire)))
+		c.AddCookieOptions(irisContext.CookieExpires(time.Until(*expire)))
 	}
 
-	for _, hostname := range bootstrap.GetHostNames() {
+	for _, domain := range bootstrap.GetDomainNames() {
 
-		if hostname == "*" {
+		if domain == "*" {
 
 			continue
 		}
@@ -88,31 +88,22 @@ func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken g
 		c.SetCookieKV(
 			GENERAL_TOKEN,
 			gt,
-			append(
-				options,
-				irisContext.CookieDomain(hostname),
-				irisContext.CookiePath("/tenants/switch"),
-			)...,
+			irisContext.CookieDomain(domain),
+			irisContext.CookiePath("/tenants/switch"),
 		)
 
 		c.SetCookieKV(
 			GENERAL_TOKEN,
 			gt,
-			append(
-				options,
-				irisContext.CookieDomain(hostname),
-				irisContext.CookiePath("/auth/nav"),
-			)...,
+			irisContext.CookieDomain(domain),
+			irisContext.CookiePath("/auth/nav"),
 		)
 
 		c.SetCookieKV(
 			GENERAL_TOKEN,
 			gt,
-			append(
-				options,
-				irisContext.CookieDomain(hostname),
-				irisContext.CookiePath("/auth/login"),
-			)...,
+			irisContext.CookieDomain(domain),
+			irisContext.CookiePath("/auth/login"),
 		)
 	}
 
@@ -128,9 +119,14 @@ func (this *GeneralTokenClientService) Remove(ctx context.Context) error {
 		return libError.NewInternal(fmt.Errorf("GeneralTokenClientService error: invalid token given (not type of iris.Context)"))
 	}
 
-	for _, hostname := range bootstrap.GetHostNames() {
+	c.AddCookieOptions(
+		irisContext.CookieHTTPOnly(true),
+		irisContext.CookieSameSite(http.SameSiteStrictMode),
+	)
 
-		if hostname == "*" {
+	for _, domain := range bootstrap.GetDomainNames() {
+
+		if domain == "*" {
 
 			continue
 		}
@@ -138,28 +134,19 @@ func (this *GeneralTokenClientService) Remove(ctx context.Context) error {
 		c.RemoveCookie(
 			GENERAL_TOKEN,
 			irisContext.CookiePath("/tenants/switch"),
-			irisContext.CookieHTTPOnly(true),
-			irisContext.CookieSameSite(http.SameSiteStrictMode),
-			irisContext.CookieDomain(hostname),
-			irisContext.CookieExpires(0),
+			irisContext.CookieDomain(domain),
 		)
 
 		c.RemoveCookie(
 			GENERAL_TOKEN,
 			irisContext.CookiePath("/auth/nav"),
-			irisContext.CookieHTTPOnly(true),
-			irisContext.CookieSameSite(http.SameSiteStrictMode),
-			irisContext.CookieDomain(hostname),
-			irisContext.CookieExpires(0),
+			irisContext.CookieDomain(domain),
 		)
 
 		c.RemoveCookie(
 			GENERAL_TOKEN,
 			irisContext.CookiePath("/auth/login"),
-			irisContext.CookieHTTPOnly(true),
-			irisContext.CookieSameSite(http.SameSiteStrictMode),
-			irisContext.CookieDomain(hostname),
-			irisContext.CookieExpires(0),
+			irisContext.CookieDomain(domain),
 		)
 	}
 

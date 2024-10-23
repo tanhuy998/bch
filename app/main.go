@@ -72,7 +72,7 @@ func init() {
 	db := db.GetDB()
 
 	config.InitDomainIndexes(db)
-	host_names = append(host_names, bootstrap.GetHostNames()...)
+	host_names = append(host_names, bootstrap.GetDomainNames()...)
 }
 
 func main() {

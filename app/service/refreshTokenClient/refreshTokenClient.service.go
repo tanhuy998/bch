@@ -66,41 +66,43 @@ func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken r
 		return err
 	}
 
-	options := []irisContext.CookieOption{
+	c.AddCookieOptions(
 		irisContext.CookieHTTPOnly(true),
 		irisContext.CookieSameSite(http.SameSiteStrictMode),
-	}
+	)
 
 	expire := refreshToken.GetExpireTime()
 
 	if expire != nil {
 
-		options = append(options, irisContext.CookieExpires(time.Until(*expire)))
+		c.AddCookieOptions(
+			irisContext.CookieExpires(time.Until(*expire)),
+		)
 	}
 
-	for _, hostname := range bootstrap.GetHostNames() {
+	for _, domain := range bootstrap.GetDomainNames() {
 
-		if hostname == "*" {
+		if domain == "*" {
 
 			continue
 		}
 
 		c.SetCookieKV(
-			key, rt, append(
-				options, irisContext.CookieDomain(hostname), irisContext.CookiePath("/auth/refresh"),
-			)...,
+			key, rt,
+			irisContext.CookieDomain(domain),
+			irisContext.CookiePath("/auth/refresh"),
 		)
 
 		c.SetCookieKV(
-			key, rt, append(
-				options, irisContext.CookieDomain(hostname), irisContext.CookiePath("/tenants/switch"),
-			)...,
+			key, rt,
+			irisContext.CookieDomain(domain),
+			irisContext.CookiePath("/tenants/switch"),
 		)
 
 		c.SetCookieKV(
-			key, rt, append(
-				options, irisContext.CookieDomain(hostname), irisContext.CookiePath("/auth/logout"),
-			)...,
+			key, rt,
+			irisContext.CookieDomain(domain),
+			irisContext.CookiePath("/auth/logout"),
 		)
 	}
 
@@ -116,9 +118,14 @@ func (this *RefreshTokenClientService) Remove(ctx context.Context) error {
 		return libError.NewInternal(fmt.Errorf("RefreshTokenClientService error: invalid context given (not type of iris.Context)"))
 	}
 
-	for _, hostname := range bootstrap.GetHostNames() {
+	c.AddCookieOptions(
+		irisContext.CookieHTTPOnly(true),
+		irisContext.CookieSameSite(http.SameSiteStrictMode),
+	)
 
-		if hostname == "*" {
+	for _, domain := range bootstrap.GetDomainNames() {
+
+		if domain == "*" {
 
 			continue
 		}
@@ -126,28 +133,19 @@ func (this *RefreshTokenClientService) Remove(ctx context.Context) error {
 		c.RemoveCookie(
 			key,
 			irisContext.CookiePath("/auth/refresh"),
-			irisContext.CookieHTTPOnly(true),
-			irisContext.CookieSameSite(http.SameSiteStrictMode),
-			irisContext.CookieDomain(hostname),
-			irisContext.CookieExpires(0),
+			irisContext.CookieDomain(domain),
 		)
 
 		c.RemoveCookie(
 			key,
 			irisContext.CookiePath("/tenants/switch"),
-			irisContext.CookieHTTPOnly(true),
-			irisContext.CookieSameSite(http.SameSiteStrictMode),
-			irisContext.CookieDomain(hostname),
-			irisContext.CookieExpires(0),
+			irisContext.CookieDomain(domain),
 		)
 
 		c.RemoveCookie(
 			key,
 			irisContext.CookiePath("/auth/logout"),
-			irisContext.CookieHTTPOnly(true),
-			irisContext.CookieSameSite(http.SameSiteStrictMode),
-			irisContext.CookieDomain(hostname),
-			irisContext.CookieExpires(0),
+			irisContext.CookieDomain(domain),
 		)
 	}
 

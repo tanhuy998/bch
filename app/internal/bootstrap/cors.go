@@ -9,7 +9,24 @@ import (
 
 var (
 	allowed_origins []string
+	scheme          string
 )
+
+func GetCORSSheme() string {
+
+	if scheme != "" {
+
+		return scheme
+	}
+
+	scheme = libCommon.Ternary(
+		env.Get("HTTPS", "false") == "true",
+		"https",
+		"http",
+	)
+
+	return scheme
+}
 
 func GetAllowedOrigins() []string {
 
@@ -18,17 +35,19 @@ func GetAllowedOrigins() []string {
 		return allowed_origins
 	}
 
-	hostNames := GetHostNames()
+	hostNames := GetDomainNames()
 
 	ports := RetrieveAllowedCORSPorts()
 
 	allowed_origins = make([]string, len(hostNames)+len(ports))
 
-	scheme := libCommon.Ternary(
-		env.Get("HTTPS", "false") == "true",
-		"https",
-		"http",
-	)
+	// scheme := libCommon.Ternary(
+	// 	env.Get("HTTPS", "false") == "true",
+	// 	"https",
+	// 	"http",
+	// )
+
+	scheme := GetCORSSheme()
 
 	for i, hName := range hostNames {
 

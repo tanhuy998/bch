@@ -13,6 +13,7 @@ const (
 	ENV_ALLOWED_CORS_PORTS = "ALLOWED_CORS_PORTS"
 	ENV_PROJECT_STAGE      = "PROJECT_STAGE"
 	ENV_APP_NAME           = "APP_NAME"
+	ENV_HTTPS              = "HTTPS"
 )
 
 var (
@@ -26,7 +27,7 @@ var (
 // 	isLoaded bool = false
 // )
 
-func GetHostNames() []string {
+func GetDomainNames() []string {
 
 	return host_names
 }
@@ -66,6 +67,12 @@ func init() {
 	}
 
 	initializeAuthEncryptionData()
+
+}
+
+func IsHTTPS() bool {
+
+	return env.Get(ENV_HTTPS, "false") == "true	"
 }
 
 // func InitEnv() error {
