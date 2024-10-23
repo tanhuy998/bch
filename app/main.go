@@ -79,17 +79,11 @@ func main() {
 
 	var app *iris.Application = iris.New()
 
-	//app.Validator = validator.New()
-
-	// app.WrapRouter(methodoverride.New(
-	// 	methodoverride.SaveOriginalMethod("_originalMethod"),
-	// ))
-
 	defer config.ConfigureLogger(app).Close()
-	//app.UseGlobal(middleware.RedirectInternalError())
+
 	app.UseRouter(
 		cors.New(cors.Options{
-			AllowedOrigins:   host_names,
+			AllowedOrigins:   bootstrap.GetAllowedOrigins(),
 			AllowedMethods:   cors_allowed_methods,
 			AllowedHeaders:   cors_allowed_headers,
 			AllowCredentials: true,

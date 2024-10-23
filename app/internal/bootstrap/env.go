@@ -4,18 +4,21 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gofor-little/env"
 	"github.com/joho/godotenv"
 )
 
 const (
-	ENV_HOSTS         = "HOSTS"
-	ENV_PROJECT_STAGE = "PROJECT_STAGE"
-	ENV_APP_NAME      = "APP_NAME"
+	ENV_HOSTS              = "HOSTS"
+	ENV_ALLOWED_CORS_PORTS = "ALLOWED_CORS_PORTS"
+	ENV_PROJECT_STAGE      = "PROJECT_STAGE"
+	ENV_APP_NAME           = "APP_NAME"
 )
 
 var (
 	host_names            []string
 	host_names_dictionary map[string]bool = make(map[string]bool)
+	allowed_cors_ports    []string
 )
 
 // var (
@@ -92,6 +95,13 @@ func RetrieveCORSHosts() []string {
 	hostString := os.Getenv(ENV_HOSTS) // env.Get(ENV_HOSTS, "*")
 
 	return strings.Split(hostString, ",")
+}
+
+func RetrieveAllowedCORSPorts() []string {
+
+	str := env.Get(ENV_ALLOWED_CORS_PORTS, "")
+
+	return strings.Split(str, ",")
 }
 
 func ignorePanicWhenUnitTesting() {
