@@ -19,6 +19,7 @@ type (
 		RefreshLoginUseCase   usecasePort.IUseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
 		NavigateTenantUseCase usecasePort.IUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant]
 		LogoutUseCase         usecasePort.IUseCase[requestPresenter.Logout, responsePresenter.Logout]
+		CheckLoginUseCase     usecasePort.IUseCase[requestPresenter.CheckLogin, responsePresenter.CheckLogin]
 	}
 )
 
@@ -46,6 +47,13 @@ func (this *UserLoggingController) BeforeActivation(activator mvc.BeforeActivati
 		middleware.BindRequest[requestPresenter.Logout](
 			container,
 			middlewareHelper.UseTenantMapping,
+		),
+	)
+
+	activator.Handle(
+		"HEAD", "/login", "CheckLogin",
+		middleware.BindRequest[requestPresenter.CheckLogin](
+			container,
 		),
 	)
 }
@@ -92,5 +100,14 @@ func (this *UserLoggingController) Logout(
 
 	return this.ResultOf(
 		this.LogoutUseCase.Execute(input),
+	)
+}
+
+func (this *UserLoggingController) CheckLogin(
+	input *requestPresenter.CheckLogin,
+) (mvc.Result, error) {
+
+	return this.ResultOf(
+		this.CheckLoginUseCase.Execute(input),
 	)
 }

@@ -21,6 +21,7 @@ import (
 	addUserToCommandGroupDomain "app/domain/auth/addUserToCommandGroup"
 	checkAuthorityDomain "app/domain/auth/checkAuthority"
 	checkCommandGroupUserRolesDomain "app/domain/auth/checkCommandGroupUserRoles"
+	checkLoginDomain "app/domain/auth/checkLogin"
 	checkUserInCommandGroupDomain "app/domain/auth/checkUserInCommandGroup"
 	createCommandGroupDomain "app/domain/auth/createCommandGroup"
 	createUserDomain "app/domain/auth/createUser"
@@ -176,6 +177,10 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	](container, nil)
 	libConfig.BindDependency[
 		usecasePort.IMiddlewareUseCase, checkAuthorityDomain.CheckAuthorityUseCase,
+	](container, nil)
+	libConfig.BindDependency[
+		usecasePort.IUseCase[requestPresenter.CheckLogin, responsePresenter.CheckLogin],
+		checkLoginDomain.CheckLoginUseCase,
 	](container, nil)
 
 	container.Register(new(AuthBoundedContext)).Explicitly().EnableStructDependents()

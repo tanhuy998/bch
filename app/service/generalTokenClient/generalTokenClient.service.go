@@ -104,6 +104,16 @@ func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken g
 				irisContext.CookiePath("/auth/nav"),
 			)...,
 		)
+
+		c.SetCookieKV(
+			GENERAL_TOKEN,
+			gt,
+			append(
+				options,
+				irisContext.CookieDomain(hostname),
+				irisContext.CookiePath("/auth/login"),
+			)...,
+		)
 	}
 
 	return nil
@@ -137,6 +147,15 @@ func (this *GeneralTokenClientService) Remove(ctx context.Context) error {
 		c.RemoveCookie(
 			GENERAL_TOKEN,
 			irisContext.CookiePath("/auth/nav"),
+			irisContext.CookieHTTPOnly(true),
+			irisContext.CookieSameSite(http.SameSiteStrictMode),
+			irisContext.CookieDomain(hostname),
+			irisContext.CookieExpires(0),
+		)
+
+		c.RemoveCookie(
+			GENERAL_TOKEN,
+			irisContext.CookiePath("/auth/login"),
 			irisContext.CookieHTTPOnly(true),
 			irisContext.CookieSameSite(http.SameSiteStrictMode),
 			irisContext.CookieDomain(hostname),
