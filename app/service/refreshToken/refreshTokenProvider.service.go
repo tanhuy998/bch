@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	exp_duration = time.Hour * 2
+	default_exp_duration = time.Hour * 2
 )
 
 var (
@@ -71,7 +71,7 @@ func (this *RefreshTokenManipulatorService) makeFor(
 
 	if generalToken.GetExpiretime() != nil {
 
-		customClaims.ExpiresAt = jwt.NewNumericDate(*generalToken.GetExpiretime())
+		customClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(default_exp_duration))
 	}
 
 	token.Claims = customClaims
@@ -149,7 +149,7 @@ func (this *RefreshTokenManipulatorService) Read(str string) (IRefreshToken, err
 
 func (this *RefreshTokenManipulatorService) DefaultExpireDuration() time.Duration {
 
-	return exp_duration
+	return default_exp_duration
 }
 
 func (this *RefreshTokenManipulatorService) makeBase(refreshToken IRefreshToken) (IRefreshToken, error) {
@@ -195,51 +195,6 @@ func (this *RefreshTokenManipulatorService) Rotate(refreshToken IRefreshToken, c
 	case refreshToken.Expired():
 		return nil, refreshTokenServicePort.ERR_TOKEN_EXPIRE
 	}
-
-	// refreshTokenInBlackList, err := this.RefreshTokenBlackList.Has(refreshToken.GetTokenID(), ctx)
-
-	// switch {
-	// case err != nil:
-	// 	return nil, err
-	// case refreshTokenInBlackList:
-	// 	return nil, libError.NewInternal(fmt.Errorf("refresh token in black list"))
-	// }
-
-	// exp, err := refreshToken.GetExpireTime()
-
-	// if errors.Is(err, common.ERR_INTERNAL) {
-
-	// 	return nil, err
-	// }
-
-	// if err != nil {
-
-	// 	return nil, libError.NewInternal(err)
-	// }
-
-	// exp := refreshToken.GetExpireTime()
-
-	// generalID, _, err := this.RefreshTokenIDProvider.Extract(refreshToken.GetTokenID())
-
-	// if err != nil {
-
-	// 	return nil, err
-	// }
-
-	// if exp == nil {
-
-	// 	// return this.makeFor(refreshToken.GetTenantUUID(), generalID)
-	// 	return this.makeBase(refreshToken)
-	// }
-
-	// err = this.Revoke(refreshToken, ctx)
-
-	// if err != nil {
-
-	// 	return nil, err
-	// }
-
-	// return this.makeFor(refreshToken.GetUserUUID(), generalID, SetExpire(*exp))
 
 	return this.makeBase(refreshToken)
 }

@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	DEFAULT_EXPIRY_DURATION = 2 * time.Hour
+	default_exp_duration = 15 * time.Minute
 )
 
 type (
@@ -99,7 +99,7 @@ func (this *GeneralTokenManipulator) makeFor(userUUID uuid.UUID, ctx context.Con
 
 	if !this.IsNoExpire(ctx) {
 
-		customClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(DEFAULT_EXPIRY_DURATION))
+		customClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(default_exp_duration))
 	}
 
 	return newFromToken(token)
@@ -107,5 +107,5 @@ func (this *GeneralTokenManipulator) makeFor(userUUID uuid.UUID, ctx context.Con
 
 func (this *GeneralTokenManipulator) GetDefaultExpireDuration() time.Duration {
 
-	return DEFAULT_EXPIRY_DURATION
+	return default_exp_duration
 }
