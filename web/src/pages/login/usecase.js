@@ -46,7 +46,7 @@ export default class LoginUseCase extends EndpointFormDelegator {
 
     shouldNavigate() {
 
-        return "/auth/switch";
+        return "/auth/nav";
     }
 
     validateEveryInput() {

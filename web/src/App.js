@@ -39,8 +39,8 @@ import EditSingleCandidateUseCase from './domain/usecases/editSingleCandidate.us
 import EditSingleCampaignPage from './pages/editSingleCampaignPage';
 import EditSingleCampaignUseCase from './domain/usecases/editSingleCampaign.usecase';
 import LoginUseCase from './pages/login/usecase'
-import SwithcTenantPage from './pages/switchTenant/switchTenant.page';
-import SwitchTenantUseCase from './pages/switchTenant/usecase';
+import NavigateTenantPage from './pages/navigateTenant/navigateTenant.page';
+import SwitchTenantUseCase from './pages/navigateTenant/usecase';
 // import CandidateSigningPage from './pages/candidateSigning/candidateSinging.page';
 
 const campaignlistUseCase = new CampaignListUseCase()
@@ -75,7 +75,7 @@ function App() {
           </Route>
           <Route path='/login' element={<AnimatePage><Login usecase={loginUseCase}/></AnimatePage>} />
           <Route path="/auth">
-            <Route path="switch" element={<AnimatePage><SwithcTenantPage usecase={switchTenantUseCase}/></AnimatePage>} />
+            <Route path="nav" element={<AnimatePage><NavigateTenantPage usecase={switchTenantUseCase}/></AnimatePage>} />
           </Route>
           <Route path='/admin' element={<AdminTemplate />}>
             <Route index element={<AnimatePage><AdminDashboad /></AnimatePage>} />

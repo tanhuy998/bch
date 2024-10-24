@@ -39,7 +39,7 @@ export default class HttpEndpoint extends MockEndpoint{
         return this.#initUrl;
     }
 
-    constructor({ scheme, host, port, uri }) {
+    constructor({ scheme, host, port, uri } = {}) {
 
         super();
 

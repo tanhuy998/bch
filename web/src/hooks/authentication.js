@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ACCESS_TOKEN_KEY } from "../const"
 import HttpEndpoint from "../backend/endpoint"
 import { fetch_options } from "../domain/models/fetchOption.model"
 
@@ -9,6 +8,7 @@ const loginPath = "/login"
 const switchTenantPath = "/auth/switch"
 
 const endpoint = new HttpEndpoint({})
+const ACCESS_TOKEN_KEY = "at"
 
 export function useRedirectAdmin() {
 
@@ -20,15 +20,14 @@ export function useRedirectAdmin() {
 
             navigate(adminPath)
         }
-        
-    }, [])
+    })
 }
 
 /**
  * 
  * @returns {boolean|null}
  */
-export function useRedirectSwitchTenant() {
+export function useRedirectNavigateTenant() {
 
     const [isWaiting, setIsWaiting] = useState(true);
     const navigate = useNavigate();
@@ -69,13 +68,38 @@ export function useRedirectSwitchTenant() {
     return isWaiting;
 }
 
+/**
+ *  @returns {[function getAccessToken, function setAccessToken]}
+ */
+export function useAccessToken() {
+
+    const [state, setState] = useState()
+
+    /**
+     * 
+     * @returns {string|null}
+     */
+    function getAccessToken() {
+
+        return localStorage.getItem(ACCESS_TOKEN_KEY)
+    }
+    
+    function setAccessToken(accessToken) {
+
+        localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
+        setState(accessToken)
+    }
+
+    return [getAccessToken, setAccessToken]
+}
+
 export default function useAthentication() {
 
     const [state] = useState(null);
     const navigate = useNavigate();
 
     useRedirectAdmin();
-    const isWaiting =  useRedirectSwitchTenant();
+    const isWaiting =  useRedirectNavigateTenant();
 
     useEffect(() => {
         console.log("auth 3")

@@ -8,7 +8,7 @@ import FormInput from '../../components/formInput';
 import PromptFormInput from '../../components/promptFormInput';
 import LoginUseCase from './usecase';
 import { useNavigate } from 'react-router-dom';
-import { useRedirectAdmin, useRedirectSwitchTenant } from '../../hooks/authentication';
+import { useRedirectAdmin, useRedirectNavigateTenant } from '../../hooks/authentication';
 
 
 function required(val) {
@@ -41,7 +41,7 @@ export default function Login({usecase}) {
 
         if (isLoggedIn) {
 
-            navigate("/auth/switch")
+            navigate("/auth/nav")
         }
 
     }, [isLoggedIn]);
