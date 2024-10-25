@@ -4,7 +4,7 @@ import ErrorResponse from "../../backend/error/errorResponse";
 import { useNavigate } from "react-router-dom";
 import { useAccessToken, useRedirectAdmin, useRedirectLogin } from "../../hooks/authentication";
 import LoadingCircle from "../../components/loadingCircle";
-// import "./navigateTenant.module.css"
+
 
 /**
  * 
@@ -109,9 +109,10 @@ export default function NavigateTenantPage({ usecase }) {
                                 {
                                     /////////////////////////////////////////////////////////////////////////////
                                 }
+                                
                             </>
 
-                            <div id="accounts-display">
+                            <div id="t-tenant-display">
                                 <table>
                                     <thead>
                                         <tr>

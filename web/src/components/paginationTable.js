@@ -26,6 +26,18 @@ async function fetchData(setDataFunc, endpoint, query) {
 
 //export default memo(PaginationTable);
 
+/**
+ * 
+ * @param {Object} p
+ * @param {number} p.height
+ * @param {} p.columnTransform
+ * @param {TableRowManipulator} p.rowManipulator 
+ * @param {string} p.idField
+ * @param {HttpEndpoint} p.endpoint
+ * @param {}
+ *  
+ * @returns 
+ */
 export default function PaginationTable({ height, refresh, columnTransform, rowManipulator, idField, endpoint, exposedFields, headers, title }) {
 
     const context = useContext(PaginationTableContext);
