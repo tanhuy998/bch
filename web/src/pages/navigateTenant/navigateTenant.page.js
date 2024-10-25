@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import SwitchTenantUseCase from "./usecase";
 import ErrorResponse from "../../backend/error/errorResponse";
 import { useNavigate } from "react-router-dom";
-import { useAccessToken, useRedirectAdmin, useRedirectLogin } from "../../hooks/authentication";
+import { useAccessToken, useRedirectAdmin, useRedirectLogin, useUserInfo } from "../../hooks/authentication";
 import LoadingCircle from "../../components/loadingCircle";
 
 
@@ -17,8 +17,9 @@ export default function NavigateTenantPage({ usecase }) {
 
     const [tenantList, setTenantList] = useState(undefined);
     const [chosenTenantUUID, setChosenTenantUUID] = useState(undefined);
-    const [getAccessToken, setAccessToken] = useAccessToken()
-    const navigate = useNavigate()
+    const [getAccessToken, setAccessToken] = useAccessToken();
+    const [getUserInfo, setUserInfo] = useUserInfo();
+    const navigate = useNavigate();
 
     if (!(usecase instanceof SwitchTenantUseCase)) {
 
@@ -78,6 +79,7 @@ export default function NavigateTenantPage({ usecase }) {
                         return
                     }
 
+                    setUserInfo(data?.data?.user)
                     setAccessToken(data?.data?.accessToken)
             })
             .catch((err) => {
