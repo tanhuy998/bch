@@ -9,6 +9,7 @@ const DEFAULT_PORT = 8000;
 
 const REGEX_DOUBLE_SLASH = /\/\//
 
+
 export default class HttpEndpoint extends MockEndpoint{
 
     static #mock = false;
@@ -16,6 +17,14 @@ export default class HttpEndpoint extends MockEndpoint{
     static useMock() {
 
         this.#mock = true;
+    }
+
+    /**
+     * @return {string}
+     */
+    static get baseURL() {
+        
+        return `${DEFAULT_SCHEME}://${DEFAULT_HOST}${typeof DEFAULT_PORT === 'number' ? ":" + DEFAULT_PORT : ""}`
     }
 
     /**@type {String} */
@@ -37,6 +46,11 @@ export default class HttpEndpoint extends MockEndpoint{
     get url() {
 
         return this.#initUrl;
+    }
+
+    get baseURL() {
+
+        return `${this.#scheme}://${this.#host}${typeof this.#port === 'number' ? ":" + this.#port : ""}`
     }
 
     constructor({ scheme, host, port, uri } = {}) {

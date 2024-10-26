@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import SwitchTenantUseCase from "./usecase";
 import ErrorResponse from "../../backend/error/errorResponse";
 import { useNavigate } from "react-router-dom";
-import { useAccessToken, useRedirectAdmin, useRedirectLogin, useUserInfo } from "../../hooks/authentication";
+import { useAccessToken, useRedirectAdmin } from "../../hooks/authentication";
 import LoadingCircle from "../../components/loadingCircle";
+import { setAccessToken, setUserInfo } from "../../lib/authSignature.lib";
 
 
 /**
@@ -13,12 +14,11 @@ import LoadingCircle from "../../components/loadingCircle";
  */
 export default function NavigateTenantPage({ usecase }) {
 
-    useRedirectAdmin()
+    const isRotatingToken = useRedirectAdmin();
 
     const [tenantList, setTenantList] = useState(undefined);
     const [chosenTenantUUID, setChosenTenantUUID] = useState(undefined);
-    const [getAccessToken, setAccessToken] = useAccessToken();
-    const [getUserInfo, setUserInfo] = useUserInfo();
+
     const navigate = useNavigate();
 
     if (!(usecase instanceof SwitchTenantUseCase)) {
@@ -27,6 +27,11 @@ export default function NavigateTenantPage({ usecase }) {
     }
 
     useEffect(() => {
+
+        if (isRotatingToken) {
+
+            return;
+        }
 
         usecase.fetchUserTenants()
             .then((val) => {
@@ -38,28 +43,28 @@ export default function NavigateTenantPage({ usecase }) {
                 if (err instanceof ErrorResponse) {
 
                     navigate("/login")
-                    return
+                    return;
                 }
 
-                alert(err?.message)
+                alert(err?.message);
             });
 
-    }, [])
+    }, [isRotatingToken]);
 
     useEffect(() => {
 
         if (tenantList == undefined) {
 
-            return
+            return;
         }
 
         if (!Array.isArray(tenantList) || tenantList?.length == 0) {
 
-            navigate('/login')
-            return
+            navigate('/login');
+            return;
         }
 
-    }, [tenantList])
+    }, [tenantList]);
 
     useEffect(() => {
 
@@ -76,16 +81,17 @@ export default function NavigateTenantPage({ usecase }) {
 
                     if (data.status === 401) {
 
-                        return
+                        return;
                     }
-
+                    
                     setUserInfo(data?.data?.user)
                     setAccessToken(data?.data?.accessToken)
+                    setTenantList(undefined);
             })
             .catch((err) => {
 
-                setChosenTenantUUID(undefined)
-                alert(err)
+                setChosenTenantUUID(undefined);
+                alert(err);
             });
 
     }, [chosenTenantUUID])
@@ -111,7 +117,6 @@ export default function NavigateTenantPage({ usecase }) {
                                 {
                                     /////////////////////////////////////////////////////////////////////////////
                                 }
-                                
                             </>
 
                             <div id="t-tenant-display">
@@ -135,9 +140,7 @@ export default function NavigateTenantPage({ usecase }) {
                                                 (tenant) => {
                                                     return (
                                                         <>
-                                                            {/* <div className="mb-3">
-                                                <button class="btn btn-outline-primary shadow-2 mb-4">{tenant?.name}</button>
-                                            </div> */}
+
                                                             <tr>
                                                                 <td>{tenant?.name}</td>
                                                                 <td>{tenant?.isTenantAgent ? 'Tenant agent' : 'Member'}</td>

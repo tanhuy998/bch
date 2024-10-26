@@ -10,14 +10,23 @@ import NavBar from "../components/navbar";
 import { Link, Outlet, useLocation, useNavigate, useOutlet } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { AnimatePresence } from 'framer-motion';
+import useAthentication from '../hooks/authentication';
 
 
 export default function AdminTemplate(props) {
+
+    const isWaitingAuthentication = useAthentication();
 
     const [sideBarActive, setSideBarActive] = useState("");
     const location = useLocation();
     const element = useOutlet();
     const navigate = useNavigate();
+
+
+    if (isWaitingAuthentication) {
+
+        return <></>
+    }
 
     return (
         <div class="wrapper">

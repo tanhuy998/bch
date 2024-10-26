@@ -18,7 +18,7 @@ function required(val) {
 
 export default function Login({usecase}) {
  
-    useRedirectAdmin()
+    const isRotatingToken = useRedirectAdmin();
 
     const [isLoggedIn, setIsLoggedIn] = useState(null);
     const navigate = useNavigate();
@@ -30,12 +30,18 @@ export default function Login({usecase}) {
 
     useEffect(() => {
 
-        usecase.endpoint.isLoggedIn()
-        .then((state) => {
+        if (isRotatingToken) {
 
-            setIsLoggedIn(state)
-        })
-    }, []);
+            return;
+        }
+
+        usecase.endpoint.isLoggedIn()
+            .then((state) => {
+
+                setIsLoggedIn(state)
+            });
+
+    }, [isRotatingToken])
 
     useEffect(() => {
 
