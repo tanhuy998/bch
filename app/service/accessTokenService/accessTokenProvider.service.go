@@ -23,10 +23,10 @@ import (
 )
 
 const (
-	exp_duration   = time.Minute * 5
-	claim_subject  = "sub"
-	claim_audience = "aud"
-	claim_expire   = "exp"
+	default_exp_duration = time.Minute * 15
+	claim_subject        = "sub"
+	claim_audience       = "aud"
+	claim_expire         = "exp"
 
 	//key_no_expire = "NO_EXPIRE_TOKEN"
 )
@@ -110,16 +110,22 @@ func (this *JWTAccessTokenManipulatorService) makeFor(
 		TokenID:    "",
 		TenantUUID: libCommon.PointerPrimitive(tenantUUID),
 		AuthData:   nil,
+		ExpireAt:   jwt.NewNumericDate(time.Now().Add(default_exp_duration)),
 	}
 
-	if !this.WithoutExpire && !this.IsNoExpire(ctx) {
+	// if !this.WithoutExpire && !this.IsNoExpire(ctx) {
 
-		switch {
-		case this.ExpDuration > 0:
-			customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(this.ExpDuration))
-		case this.ExpDuration <= 0:
-			customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(exp_duration))
-		}
+	// 	switch {
+	// 	case this.ExpDuration > 0:
+	// 		customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(this.ExpDuration))
+	// 	case this.ExpDuration <= 0:
+	// 		customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(default_exp_duration))
+	// 	}
+	// }
+
+	if this.WithoutExpire || this.IsNoExpire(ctx) {
+
+		customeClaims.ExpireAt = nil
 	}
 
 	if os.Getenv("TEST-LOGIN") == "1" {
@@ -151,7 +157,7 @@ func (this *JWTAccessTokenManipulatorService) SignString(accessToken IAccessToke
 
 func (this *JWTAccessTokenManipulatorService) DefaultExpireDuration() time.Duration {
 
-	return exp_duration
+	return default_exp_duration
 }
 
 func (this *JWTAccessTokenManipulatorService) GenerateFor(

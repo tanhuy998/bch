@@ -3,6 +3,7 @@ package switchTenantDomain
 import (
 	"app/internal/common"
 	accessTokenServicePort "app/port/accessToken"
+	authServicePort "app/port/auth"
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	refreshTokenClientPort "app/port/refreshTokenClient"
@@ -13,7 +14,6 @@ import (
 	responsePresenter "app/presenter/response"
 	"context"
 	"errors"
-	"fmt"
 )
 
 type (
@@ -24,13 +24,14 @@ type (
 		AccessTokenManipulator    accessTokenServicePort.IAccessTokenManipulator
 		RefreshTokenClientService refreshTokenClientPort.IRefreshTokenClient
 		RefreshTokenIDProvider    refreshTokenIdServicePort.IRefreshTokenIDProvider
+		GetSingleUserService      authServicePort.IGetSingleUser
 		usecasePort.UseCase[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant]
 	}
 )
 
 func (this *SwitchTenantUseCase) Execute(
 	input *requestPresenter.SwitchTenant,
-) (*responsePresenter.SwitchTenant, error) {
+) (output *responsePresenter.SwitchTenant, err error) {
 
 	generalToken, err := this.GeneralTokenClientService.Read(input.GetContext())
 
@@ -44,108 +45,28 @@ func (this *SwitchTenantUseCase) Execute(
 		return nil, common.ERR_UNAUTHORIZED
 	}
 
-	// session, err := this.MongoClient.StartSession()
+	defer func() {
 
-	// if err != nil {
+		if err != nil {
 
-	// 	return nil, this.ErrorWithContext(
-	// 		input, libError.NewInternal(err),
-	// 	)
-	// }
+			return
+		}
 
-	// defer session.EndSession(input.GetContext())
+		if output == nil {
 
-	// unknown, err := session.WithTransaction(
-	// 	input.GetContext(),
-	// 	func(sesstionCtx mongo.SessionContext) (ret interface{}, err error) {
+			return
+		}
 
-	// 		at, rt, err := this.SwitchTenantService.Serve(*input.TenantUUID, generalToken, sesstionCtx)
-	// 		fmt.Println(1)
+		output.Data.User, _ = this.GetSingleUserService.Serve(
+			generalToken.GetUserUUID(), input.GetContext(),
+		)
+	}()
 
-	// 		if errors.Is(err, common.ERR_UNAUTHORIZED) {
-
-	// 			e := this.RefreshTokenClientService.Remove(input.GetContext())
-
-	// 			if e != nil {
-
-	// 				return nil, e
-	// 			}
-
-	// 			return nil, err
-	// 		}
-
-	// 		if err != nil {
-
-	// 			return nil, err
-	// 		}
-
-	// 		defer func() {
-
-	// 			if err != nil {
-
-	// 				ret = nil
-	// 				return
-	// 			}
-
-	// 			err = this.GeneralTokenClientService.Remove(input.GetContext())
-
-	// 			if err != nil {
-
-	// 				ret = nil
-	// 				return //nil, err
-	// 			}
-
-	// 			err = this.RefreshTokenClientService.Write(input.GetContext(), rt)
-	// 			fmt.Println(2)
-	// 			if err != nil {
-
-	// 				ret = nil
-	// 				return //nil, err
-	// 			}
-	// 		}()
-
-	// 		at_str, err := this.AccessTokenManipulator.SignString(at)
-	// 		fmt.Println(3)
-	// 		if err != nil {
-
-	// 			return nil, err
-	// 		}
-	// 		fmt.Println(4)
-
-	// 		err = this.manageSessions(generalToken, sesstionCtx)
-
-	// 		if err != nil {
-
-	// 			return nil, err
-	// 		}
-
-	// 		output := this.GenerateOutput()
-	// 		output.Data.AccessToken = at_str
-
-	// 		return output, nil
-	// 	},
-	// )
-
-	// if err != nil {
-
-	// 	return nil, this.ErrorWithContext(
-	// 		input, err,
-	// 	)
-	// }
-
-	// output, ok := unknown.(*responsePresenter.SwitchTenant)
-
-	// if !ok {
-
-	// 	return nil, libError.NewInternal(fmt.Errorf("unknown error"))
-	// }
-
-	output, err := this.ModifyUserSession(
+	output, err = this.ModifyUserSession(
 		input.GetContext(),
 		func(sesstionCtx context.Context) (ret *responsePresenter.SwitchTenant, err error) {
 
 			at, rt, err := this.SwitchTenantService.Serve(*input.TenantUUID, generalToken, sesstionCtx)
-			fmt.Println(1)
 
 			if errors.Is(err, common.ERR_UNAUTHORIZED) {
 
@@ -181,7 +102,7 @@ func (this *SwitchTenantUseCase) Execute(
 				}
 
 				err = this.RefreshTokenClientService.Write(input.GetContext(), rt)
-				fmt.Println(2)
+
 				if err != nil {
 
 					ret = nil
@@ -190,12 +111,11 @@ func (this *SwitchTenantUseCase) Execute(
 			}()
 
 			at_str, err := this.AccessTokenManipulator.SignString(at)
-			fmt.Println(3)
+
 			if err != nil {
 
 				return nil, err
 			}
-			fmt.Println(4)
 
 			err = this.manageSessions(generalToken, sesstionCtx)
 

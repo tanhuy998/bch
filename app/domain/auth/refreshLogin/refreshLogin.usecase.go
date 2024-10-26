@@ -42,6 +42,7 @@ type (
 	RefreshLoginUseCase struct {
 		usecasePort.MongoUserSessionCacheUseCase[responsePresenter.RefreshLoginResponse]
 		usecasePort.UseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
+		GetSingleUserService   authServicePort.IGetSingleUser
 		RefreshTokenIDProvider refreshTokenIdServicePort.IRefreshTokenIDProvider
 		RefreshLoginService    authServicePort.IRefreshLogin
 		AccessTokenManipulator accessTokenServicePort.IAccessTokenManipulator
@@ -125,9 +126,14 @@ func (this *RefreshLoginUseCase) Execute(
 		return nil, err
 	}
 
+	user, _ := this.GetSingleUserService.Serve(
+		newAccessToken.GetUserUUID(), input.GetContext(),
+	)
+
 	output.Message = "success"
 	output.Data = &responsePresenter.RefreshLoginData{
-		at,
+		AccessToken: at,
+		User:        user,
 	}
 
 	return output, nil

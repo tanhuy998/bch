@@ -1,8 +1,11 @@
 package responsePresenter
 
+import "app/model"
+
 type (
 	RefreshLoginData struct {
-		AccessToken string `json:"accessToken"`
+		AccessToken string      `json:"accessToken"`
+		User        *model.User `json:"user,omitempty"`
 	}
 
 	RefreshLoginResponse struct {
