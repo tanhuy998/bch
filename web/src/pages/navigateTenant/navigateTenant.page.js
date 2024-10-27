@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import SwitchTenantUseCase from "./usecase";
 import ErrorResponse from "../../backend/error/errorResponse";
 import { useNavigate } from "react-router-dom";
-import { useAccessToken, useRedirectAdmin } from "../../hooks/authentication";
+import { useRedirectAuthReferer } from "../../hooks/authentication";
 import LoadingCircle from "../../components/loadingCircle";
 import { setAccessToken, setUserInfo } from "../../lib/authSignature.lib";
 
@@ -13,8 +13,8 @@ import { setAccessToken, setUserInfo } from "../../lib/authSignature.lib";
  * @returns 
  */
 export default function NavigateTenantPage({ usecase }) {
-
-    const isRotatingToken = useRedirectAdmin();
+    
+    const isRotatingToken = useRedirectAuthReferer();
 
     const [tenantList, setTenantList] = useState(undefined);
     const [chosenTenantUUID, setChosenTenantUUID] = useState(undefined);
@@ -29,6 +29,11 @@ export default function NavigateTenantPage({ usecase }) {
     useEffect(() => {
 
         if (isRotatingToken) {
+
+            return;
+        }
+
+        if (Array.isArray(tenantList)) {
 
             return;
         }
@@ -48,7 +53,7 @@ export default function NavigateTenantPage({ usecase }) {
 
                 alert(err?.message);
             });
-
+        
     }, [isRotatingToken]);
 
     useEffect(() => {
@@ -76,23 +81,47 @@ export default function NavigateTenantPage({ usecase }) {
             return;
         }
 
-        usecase.switchToTenant(chosenTenantUUID)
-            .then( data => {
+        (async () => {
 
-                    if (data.status === 401) {
+            try {
 
-                        return;
-                    }
+                const body = await usecase.switchToTenant(chosenTenantUUID);
+
+                // if (data.status === 401) {
+
+                //     return;
+                // }
+
+                setUserInfo(body?.data?.user);
+                setAccessToken(body?.data?.accessToken);
+            }
+            catch (e) {
+
+                alert(e?.message || e);
+            }
+            finally {
+
+                setTenantList(undefined);
+            }
+        })()
+
+        // usecase.switchToTenant(chosenTenantUUID)
+        //     .then( data => {
+
+        //             if (data.status === 401) {
+
+        //                 return;
+        //             }
                     
-                    setUserInfo(data?.data?.user)
-                    setAccessToken(data?.data?.accessToken)
-                    setTenantList(undefined);
-            })
-            .catch((err) => {
+        //             setUserInfo(data?.data?.user)
+        //             setAccessToken(data?.data?.accessToken)
+        //             setTenantList(undefined);
+        //     })
+        //     .catch((err) => {
 
-                setChosenTenantUUID(undefined);
-                alert(err);
-            });
+        //         setChosenTenantUUID(undefined);
+        //         alert(err);
+        //     });
 
     }, [chosenTenantUUID])
 
@@ -149,7 +178,7 @@ export default function NavigateTenantPage({ usecase }) {
                                                                         <td>
                                                                             <button className="btn btn-outline-primary" onClick={
                                                                                 () => {
-                                                                                    console.log(tenant?.name)
+                                                                                    
                                                                                     setChosenTenantUUID(tenant?.uuid)
                                                                                 }
                                                                             }>

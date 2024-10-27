@@ -8,7 +8,7 @@ import FormInput from '../../components/formInput';
 import PromptFormInput from '../../components/promptFormInput';
 import LoginUseCase from './usecase';
 import { useNavigate } from 'react-router-dom';
-import { useRedirectAdmin, useRedirectNavigateTenant } from '../../hooks/authentication';
+import { useRedirectAuthReferer } from '../../hooks/authentication';
 
 
 function required(val) {
@@ -18,9 +18,10 @@ function required(val) {
 
 export default function Login({usecase}) {
  
-    const isRotatingToken = useRedirectAdmin();
+    const isRotatingToken = useRedirectAuthReferer();
 
     const [isLoggedIn, setIsLoggedIn] = useState(null);
+    const [isPending, setIsPending] = useState(false);
     const navigate = useNavigate();
 
     if (!(usecase instanceof LoginUseCase)) {
@@ -35,13 +36,18 @@ export default function Login({usecase}) {
             return;
         }
 
-        usecase.endpoint.isLoggedIn()
-            .then((state) => {
+        if (isLoggedIn === null && isPending === false) {
 
-                setIsLoggedIn(state)
-            });
+            usecase.endpoint.isLoggedIn()
+                .then((state) => {
 
-    }, [isRotatingToken])
+                    setIsLoggedIn(state)
+                });
+
+            setIsPending(true);
+        }
+
+    }, [isRotatingToken, isPending])
 
     useEffect(() => {
 

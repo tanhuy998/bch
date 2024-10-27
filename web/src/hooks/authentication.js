@@ -1,17 +1,13 @@
 import { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
-import HttpEndpoint from "../backend/endpoint"
-import { fetch_options } from "../domain/models/fetchOption.model"
 import { getAccessToken, getAccessTokenExp, removeAccessToken, setAccessToken, setUserInfo } from "../lib/authSignature.lib";
 import AuthEndpoint from "../backend/autEndpoint";
 import UserSessionExpireError from "../backend/error/userSessionExpireError";
 
-const adminPath = "/admin";
-const loginPath = "/login";
-const switchTenantPath = "/auth/switch";
+const admin_path = "/admin";
+const login_path = "/login";
 
-const endpoint = new HttpEndpoint({});
-
+let referer_path;
 
 /**
  * @returns {boolean}
@@ -31,12 +27,12 @@ export function hasToken() {
     return typeof getAccessToken() === "string";
 }
 
-export function useRedirectAdmin() {
+export function useRedirectAuthReferer() {
 
     const isRotating = useAccessToken();
     const navigate = useNavigate();
 
-    useEffect(() => { 
+    useEffect(() => {
 
         if (isRotating) {
 
@@ -47,66 +43,16 @@ export function useRedirectAdmin() {
         const isExpire = isTokenExpires();
 
         if (hasToken && !isExpire) {
-
-            navigate(adminPath);
+            
+            navigate(
+                typeof referer_path === 'string' ? referer_path || admin_path : admin_path,
+            );
             return;
         }
-
-    }, [isRotating])
+    })
 
     return isRotating;
 }
-
-// /**
-//  * 
-//  * @param {boolean} waitForAnotherHook
-//  * @returns {boolean|null}
-//  */
-// export function useRedirectNavigateTenant(waitForAnotherHook) {
-
-//     const [isWaiting, setIsWaiting] = useState(true);
-//     const navigate = useNavigate();
-
-//     useEffect(() => {
-
-//         if (waitForAnotherHook === true) {
-
-//             return
-//         }
-
-//         const opts = new fetch_options;
-//         opts.method = 'HEAD';
-
-//         endpoint.fetchRaw(
-//             opts,
-//             undefined,
-//             '/auth/login',
-//         ).then((res) => {
-
-//             switch (res.status) {
-//                 case 204:
-//                     //setIsWaiting(false);
-//                     navigate('/auth/nav');
-//                 case 401:
-//                     setIsWaiting(false);
-//             }
-//         }).catch(err => {
-
-//             alert(err?.message);
-//         })
-
-//     }, [waitForAnotherHook]);
-
-//     return isWaiting;
-// }
-
-// /**
-//  *  @returns {[getUserInfo, setUserInfo]}
-//  */
-// export function useUserInfo() {
-
-//     return [useUserInfo, setUserInfo];
-// }
 
 /**
  * 
@@ -117,6 +63,7 @@ export default function useAuthentication() {
     const location = useLocation();
     const navigate = useNavigate();
     const isRotatingToken = useAccessToken()
+    referer_path = undefined;
 
     useEffect(() => {
 
@@ -129,26 +76,38 @@ export default function useAuthentication() {
 
             return
         }
-
-        if (location.pathname == loginPath) {
-
-            return;
-        }
         
-        navigate(loginPath);
+        referer_path = location.pathname;
+        navigate(login_path);
 
     }, [isRotatingToken]);
 
     return isRotatingToken;
 }
 
+/**
+ * 
+ * @param {boolean} waitForAnotherHook 
+ * @returns {boolean}
+ */
 export function useAccessToken(waitForAnotherHook) {
 
-    const [isPending, setIsPending] = useState(true);
+    const [isPending, setIsPending] = useState(!waitForAnotherHook);
 
     useEffect(() => {
 
         if (waitForAnotherHook) {
+
+            return;
+        }
+
+        setIsPending(true);
+
+    }, [waitForAnotherHook]);
+
+    useEffect(() => {
+
+        if (!isPending) {
 
             return;
         }
@@ -164,7 +123,7 @@ export function useAccessToken(waitForAnotherHook) {
 
         if (hasToken && !isExpire) {
 
-            setIsPending(false);            
+            setIsPending(false);
             return;
         }
 
@@ -172,7 +131,7 @@ export function useAccessToken(waitForAnotherHook) {
 
             try {
 
-                AuthEndpoint.rotateSignatures()                
+                await AuthEndpoint.rotateSignatures()
             }
             catch (e) {
 
@@ -189,27 +148,9 @@ export function useAccessToken(waitForAnotherHook) {
 
                 setIsPending(false);
             }
-        })();
+        })();     
 
-        // AuthEndpoint.rotateSignatures()
-        //     .then(() => {
+    }, [isPending]);
 
-        //         setIsPending(false);
-        //     })
-        //     .catch((e) => {
-
-        //         if (e instanceof UserSessionExpireError) {
-
-        //             removeAccessToken();
-        //             setIsPending(false);
-        //             return;
-        //         }
-
-        //         setIsPending(false);
-        //         alert(e?.message ?? e);
-        //     });
-
-    }, [waitForAnotherHook]);
-
-    return isPending;
+    return waitForAnotherHook || isPending;
 }

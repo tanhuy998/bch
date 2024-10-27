@@ -3,7 +3,8 @@ import { jwtDecode } from "jwt-decode";
 const ACCESS_TOKEN_KEY = "at";
 const USER_INFO_KEY = "ui";
 const ACCESS_TOKEN_EXP_KEY = "at-exp";
-let userInfo;
+let is_tenant_agent;
+let user_info;
 
 let AT;
 
@@ -31,7 +32,6 @@ export function setAccessToken(accessToken) {
     });
     
     const numericExp = payload.exp;
-    console.log(numericExp, payload)
 
     if (!numericExp || typeof numericExp != "number") {
 
@@ -79,7 +79,7 @@ export function getAccessTokenExp() {
  */
 export function getUserInfo() {
 
-    return userInfo;
+    return user_info;
 }
 
 /**
@@ -89,5 +89,5 @@ export function getUserInfo() {
  */
 export function setUserInfo(data) {
 
-    userInfo = data;
+    user_info = data;
 }
