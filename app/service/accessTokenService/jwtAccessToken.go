@@ -1,10 +1,13 @@
 package accessTokenService
 
 import (
+	"app/internal/common"
 	libError "app/internal/lib/error"
 	accessTokenServicePort "app/port/accessToken"
 	"app/valueObject"
+	jwtClaim "app/valueObject/jwt"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -12,38 +15,28 @@ import (
 )
 
 var (
-	ERR_INVALID_TOKEN = errors.New("invalid jwt token")
-	ERR_NIL_TOKEN     = errors.New("nil token")
+	ERR_INVALID_TOKEN = fmt.Errorf("invalid jwt token")
+	ERR_NIL_TOKEN     = fmt.Errorf("nil token")
 )
 
 type (
 	IAccessToken         = accessTokenServicePort.IAccessToken
 	IAccessTokenAuthData = accessTokenServicePort.IAccessTokenAuthData
 
-	// IAccessTokenAuthData interface {
-	// 	accessTokenServicePort.IAccessTokenAuthData
-	// }
-
 	jwt_access_token_custom_claims struct {
-		// Sub *uuid.UUID `json:"sub"`
-		// Aud []string   `json:"aud,omitempty"`
-		// Exp time.Time  `json:"exp"`
 		jwt.RegisteredClaims
-		Issuer     string                `json:"iss"`
-		TokenID    string                `json:"jti"`
-		IssuedAt   *jwt.NumericDate      `json:"iat"`
-		ExpireAt   *jwt.NumericDate      `json:"exp"`
-		TenantUUID *uuid.UUID            `json:"sub"`
-		AuthData   *valueObject.AuthData `json:"aut"`
+		Issuer  string `json:"iss,omitempty"`
+		TokenID string `json:"jti,omitempty"`
+		jwtClaim.PrivateClaims
+		IssuedAt   *jwt.NumericDate      `json:"iat,omitempty"`
+		ExpireAt   *jwt.NumericDate      `json:"exp,omitempty"`
+		TenantUUID *uuid.UUID            `json:"sub,omitempty"`
+		AuthData   *valueObject.AuthData `json:"aut,omitempty"`
 	}
 
 	jwt_access_token struct {
 		jwt_token    *jwt.Token
 		customClaims *jwt_access_token_custom_claims
-		// userUUID     *uuid.UUID
-		//authData  *AccessTokenAuthData
-		//expired bool
-		// audience  *accessTokenServicePort.AccessTokenAudience
 	}
 )
 
@@ -68,39 +61,26 @@ func newFromToken(token *jwt.Token) (*jwt_access_token, error) {
 		return nil, ERR_INVALID_TOKEN
 	}
 
-	// subClaim, err := token.Claims.GetSubject()
+	claims := ret.customClaims
 
-	// if err != nil {
-
-	// 	return nil, errors.Join(
-	// 		common.ERR_INTERNAL,
-	// 		err,
-	// 	)
-	// }
-
-	// userUUID, err := uuid.Parse(subClaim)
-
-	// if err != nil {
-
-	// 	return nil, errors.Join(
-	// 		common.ERR_INTERNAL,
-	// 		err,
-	// 	)
-	// }
-
-	// ret.userUUID = libCommon.PointerPrimitive(userUUID)
-
-	// exp, err := token.Claims.GetExpirationTime()
-
-	// if err != nil {
-
-	// 	return nil, err
-	// }
-
-	// if exp == nil {
-
-	// 	return nil, ERR_INVALID_TOKEN
-	// }
+	switch {
+	case claims.TokenType != jwtClaim.ACCESS_TOKEN:
+		return nil, errors.Join(
+			common.ERR_UNAUTHORIZED, fmt.Errorf("the given token is not access token"),
+		)
+	case claims.TenantUUID == nil || *claims.TenantUUID == uuid.Nil:
+		return nil, errors.Join(
+			common.ERR_UNAUTHORIZED, fmt.Errorf("the given token has no subject"),
+		)
+	case claims.AuthData == nil:
+		return nil, errors.Join(
+			common.ERR_UNAUTHORIZED, fmt.Errorf("the given token has no authority"),
+		)
+	case ret.GetUserUUID() == uuid.Nil:
+		return nil, errors.Join(
+			common.ERR_UNAUTHORIZED, fmt.Errorf("the given token has no user"),
+		)
+	}
 
 	return ret, nil
 }

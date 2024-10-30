@@ -3,6 +3,7 @@ package refreshTokenService
 import (
 	libError "app/internal/lib/error"
 	refreshTokenIdServicePort "app/port/refreshTokenID"
+	jwtClaim "app/valueObject/jwt"
 	"errors"
 	"fmt"
 	"time"
@@ -18,11 +19,12 @@ var (
 type (
 	jwt_refresh_token_custom_claims struct {
 		jwt.RegisteredClaims
-		Issuer         string           `json:"iss"`
-		RefreshTokenID string           `json:"jti"`
-		TenantUUID     *uuid.UUID       `json:"sub"`
-		IssuedAt       *jwt.NumericDate `json:"iat"`
-		ExpiresAt      *jwt.NumericDate `json:"exp"`
+		Issuer         string `json:"iss"`
+		RefreshTokenID string `json:"jti"`
+		jwtClaim.PrivateClaims
+		TenantUUID *uuid.UUID       `json:"sub"`
+		IssuedAt   *jwt.NumericDate `json:"iat"`
+		ExpiresAt  *jwt.NumericDate `json:"exp"`
 	}
 
 	jwt_refresh_token struct {
@@ -53,6 +55,11 @@ func newFromToken(
 	}
 
 	claims := ret.claims
+
+	if claims.TokenType != jwtClaim.REFRESH_TOKEN {
+
+		return nil, libError.NewInternal(fmt.Errorf("the given token is not refresh token"))
+	}
 
 	if claims.TenantUUID == nil ||
 		*claims.TenantUUID == uuid.Nil {

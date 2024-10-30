@@ -11,11 +11,12 @@ import (
 	jwtTokenServicePort "app/port/jwtTokenService"
 	"app/repository"
 	"app/service/noExpireTokenProvider"
-	"app/valueObject"
+	jwtClaim "app/valueObject/jwt"
 	"context"
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -79,61 +80,56 @@ func (this *JWTAccessTokenManipulatorService) GenerateBased(
 	accessToken IAccessToken, ctx context.Context,
 ) (IAccessToken, error) {
 
-	newAt, err := this.makeFor(accessToken.GetTenantUUID(), ctx)
+	newAt, err := this.makeFor(accessToken.GetTenantUUID(), accessToken.GetUserUUID(), ctx)
 
 	if err != nil {
 
 		return nil, err
 	}
 
-	if v, ok := (accessToken.GetAuthData()).(*valueObject.AuthData); ok {
-
-		newAt.customClaims.AuthData = v
-
-	} else {
-
-		return nil, libError.NewInternal(ERR_INVALID_TOKEN)
-	}
-
 	return newAt, nil
 }
 
 func (this *JWTAccessTokenManipulatorService) makeFor(
-	tenantUUID uuid.UUID, ctx context.Context,
+	tenantUUID, userUUID uuid.UUID, ctx context.Context,
 ) (*jwt_access_token, error) {
+
+	authData, err := this.GetUserAuthority.Serve(tenantUUID, userUUID, ctx)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	if authData == nil {
+
+		return nil, common.ERR_UNAUTHORIZED
+	}
 
 	token := this.JWTTokenManipulatorService.GenerateToken()
 
-	customeClaims := &jwt_access_token_custom_claims{
+	customClaims := &jwt_access_token_custom_claims{
 		Issuer:     bootstrap.GetAppName(),
 		IssuedAt:   jwt.NewNumericDate(time.Now()),
 		TokenID:    "",
 		TenantUUID: libCommon.PointerPrimitive(tenantUUID),
-		AuthData:   nil,
+		AuthData:   authData,
 		ExpireAt:   jwt.NewNumericDate(time.Now().Add(default_exp_duration)),
 	}
 
-	// if !this.WithoutExpire && !this.IsNoExpire(ctx) {
-
-	// 	switch {
-	// 	case this.ExpDuration > 0:
-	// 		customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(this.ExpDuration))
-	// 	case this.ExpDuration <= 0:
-	// 		customeClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(default_exp_duration))
-	// 	}
-	// }
+	jwtClaim.SetupAccessToken(&customClaims.PrivateClaims)
 
 	if this.WithoutExpire || this.IsNoExpire(ctx) {
 
-		customeClaims.ExpireAt = nil
+		customClaims.ExpireAt = nil
 	}
 
 	if os.Getenv("TEST-LOGIN") == "1" {
 
-		customeClaims.ExpireAt = jwt.NewNumericDate(time.Now())
+		customClaims.ExpireAt = jwt.NewNumericDate(time.Now())
 	}
 
-	token.Claims = customeClaims
+	token.Claims = customClaims
 
 	accesstoken, err := newFromToken(token)
 
@@ -164,28 +160,24 @@ func (this *JWTAccessTokenManipulatorService) GenerateFor(
 	tenantUUID uuid.UUID, generalToken IGeneralToken, tokenID string, ctx context.Context,
 ) (accessTokenServicePort.IAccessToken, error) {
 
-	authData, err := this.GetUserAuthority.Serve(tenantUUID, generalToken.GetUserUUID(), ctx)
+	at, err := this.makeFor(tenantUUID, generalToken.GetUserUUID(), ctx)
 
 	if err != nil {
 
 		return nil, err
 	}
 
-	if authData == nil {
+	fmt.Println(at.customClaims.AuthData)
 
-		return nil, common.ERR_UNAUTHORIZED
-	}
-
-	at, err := this.makeFor(tenantUUID, ctx)
-
-	if err != nil {
-
-		return nil, err
+	switch policies := generalToken.GetPolicies(); {
+	case policies == nil:
+	case slices.Contains(policies, jwtClaim.POLICY_AT_NO_EXPIRE):
+		at.customClaims.ExpireAt = nil
 	}
 
 	at.SetTokenID(tokenID)
-	at.customClaims.AuthData = authData
+	// at.customClaims.AuthData = authData
 
-	fmt.Println(authData.TenantAgentData)
+	// fmt.Println(authData.TenantAgentData)
 	return at, nil
 }

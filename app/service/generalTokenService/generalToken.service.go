@@ -6,6 +6,8 @@ import (
 	libError "app/internal/lib/error"
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenIDServicePort "app/port/generalTokenID"
+	jwtClaim "app/valueObject/jwt"
+	"slices"
 
 	jwtTokenServicePort "app/port/jwtTokenService"
 	"app/service/noExpireTokenProvider"
@@ -96,12 +98,23 @@ func (this *GeneralTokenManipulator) makeFor(userUUID uuid.UUID, ctx context.Con
 		GeneralTokenID: libCommon.PointerPrimitive(generalToken),
 		ExpireAt:       jwt.NewNumericDate(time.Now().Add(default_exp_duration)),
 	}
+
+	jwtClaim.SetupGeneralToken(&customClaims.PrivateClaims)
+
 	token.Claims = customClaims
 
-	// if !this.IsNoExpire(ctx) {
+	if this.IsNoExpire(ctx) {
 
-	// 	customClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(default_exp_duration))
-	// }
+		if customClaims.Policies == nil {
+
+			customClaims.Policies = make([]jwtClaim.GenTokenPolicyEnum, 1)
+			customClaims.Policies[0] = jwtClaim.POLICY_AT_NO_EXPIRE
+
+		} else if !slices.Contains(customClaims.Policies, jwtClaim.POLICY_AT_NO_EXPIRE) {
+
+			customClaims.Policies = append(customClaims.Policies, jwtClaim.POLICY_AT_NO_EXPIRE)
+		}
+	}
 
 	return newFromToken(token)
 }

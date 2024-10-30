@@ -10,6 +10,7 @@ import (
 	jwtTokenServicePort "app/port/jwtTokenService"
 	refreshTokenServicePort "app/port/refreshToken"
 	refreshTokenIDService "app/port/refreshTokenID"
+	jwtClaim "app/valueObject/jwt"
 	"context"
 	"errors"
 	"time"
@@ -68,6 +69,8 @@ func (this *RefreshTokenManipulatorService) makeFor(
 		RefreshTokenID: refreshTokenID,
 		TenantUUID:     libCommon.PointerPrimitive(tenantUUID),
 	}
+
+	jwtClaim.SetupRefreshToken(&customClaims.PrivateClaims)
 
 	if generalToken.GetExpiretime() != nil {
 
@@ -177,6 +180,8 @@ func (this *RefreshTokenManipulatorService) makeBase(refreshToken IRefreshToken)
 		RefreshTokenID: newRefreshTokenID,
 		TenantUUID:     libCommon.PointerPrimitive(refreshToken.GetTenantUUID()),
 	}
+
+	jwtClaim.SetupRefreshToken(&customClaims.PrivateClaims)
 
 	if refreshToken.GetExpireTime() != nil {
 		customClaims.ExpiresAt = jwt.NewNumericDate(*refreshToken.GetExpireTime())

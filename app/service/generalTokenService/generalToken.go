@@ -3,6 +3,7 @@ package generalTokenService
 import (
 	"app/internal/generalToken"
 	libError "app/internal/lib/error"
+	jwtClaim "app/valueObject/jwt"
 	"fmt"
 
 	"time"
@@ -14,6 +15,8 @@ import (
 type (
 	custom_claims struct {
 		jwt.RegisteredClaims
+		jwtClaim.PrivateClaims
+		jwtClaim.GenTokenPolicyClaim
 		IssuedAt       *jwt.NumericDate             `json:"iat"`
 		ExpireAt       *jwt.NumericDate             `json:"exp"`
 		GeneralTokenID *generalToken.GeneralTokenID `json:"jti"`
@@ -45,6 +48,11 @@ func newFromToken(token *jwt.Token) (*jwt_general_token, error) {
 	ret := &jwt_general_token{
 		jwt_token: token,
 		claims:    custom_claims,
+	}
+
+	if custom_claims.TokenType != jwtClaim.GEN_TOKEN {
+
+		return nil, libError.NewInternal(fmt.Errorf("the given token is not general token"))
 	}
 
 	if custom_claims.UserUUID == nil ||
@@ -109,4 +117,9 @@ func (this *jwt_general_token) Expire() bool {
 	}
 
 	return time.Now().After(*exp)
+}
+
+func (this *jwt_general_token) GetPolicies() []jwtClaim.GenTokenPolicyEnum {
+
+	return this.claims.Policies
 }

@@ -3,6 +3,7 @@ package generalTokenServicePort
 import (
 	"app/internal/generalToken"
 	noExpireTokenServicePort "app/port/noExpireToken"
+	jwtClaim "app/valueObject/jwt"
 	"context"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 
 type (
 	IGeneralToken interface {
+		GetPolicies() []jwtClaim.GenTokenPolicyEnum
 		GetUserUUID() uuid.UUID
 		GetExpiretime() *time.Time
 		GetTokenID() generalToken.GeneralTokenID
