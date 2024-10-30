@@ -2,6 +2,7 @@ package model
 
 import (
 	"app/internal/generalToken"
+	libMongo "app/internal/lib/mongo"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,6 +10,7 @@ import (
 
 type (
 	User struct {
+		libMongo.BsonDocument
 		*CommandGroup `bson:"groups,omitempty"`
 		UUID          *uuid.UUID `json:"uuid" bson:"uuid,omitempty"`
 		TenantUUID    *uuid.UUID `json:"tenantUUID" bson:"tenantUUID" validate:"required"`

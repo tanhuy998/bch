@@ -15,9 +15,10 @@ import (
 type (
 	AuthUserManipulationController struct {
 		common.Controller
-		CreateUserUsecase   usecasePort.IUseCase[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter] // usecase.ICreateUser
-		GetGroupUserUsecase usecasePort.IUseCase[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse]     // usecase.IGetGroupUsers
-		ModifyUserUsecase   usecasePort.IUseCase[requestPresenter.ModifyUserRequest, responsePresenter.ModifyUserResponse]           // usecase.IModifyUser
+		CreateUserUsecase     usecasePort.IUseCase[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter] // usecase.ICreateUser
+		GetGroupUserUsecase   usecasePort.IUseCase[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse]     // usecase.IGetGroupUsers
+		ModifyUserUsecase     usecasePort.IUseCase[requestPresenter.ModifyUserRequest, responsePresenter.ModifyUserResponse]           // usecase.IModifyUser
+		GetTenantUsersUseCase usecasePort.IUseCase[requestPresenter.GetTenantUsers, responsePresenter.GetTenantUsers]
 	}
 )
 
@@ -33,6 +34,10 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 
 	activator.Handle(
 		"POST", "/", "CreateUser",
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequireTenantAgent,
+		),
 		middleware.BindRequest[requestPresenter.CreateUserRequestPresenter](
 			container,
 			middlewareHelper.UseAuthority,
@@ -42,6 +47,10 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 
 	activator.Handle(
 		"GET", "/group/{groupUUID:uuid}", "GetGroupUsers",
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequiredTenantAgentExceptMeetRoles("COMMANDER"),
+		),
 		middleware.BindRequest[requestPresenter.GetGroupUsersRequest](
 			container,
 			middlewareHelper.UseAuthority,
@@ -50,7 +59,24 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 	)
 
 	activator.Handle(
+		"GET", "/", "GetTenantUsers",
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequireTenantAgent,
+		),
+		middleware.BindPresenters[requestPresenter.GetTenantUsers, responsePresenter.GetTenantUsers](
+			container,
+			middlewareHelper.UseTenantMapping,
+			middlewareHelper.UseAuthority,
+		),
+	)
+
+	activator.Handle(
 		"PATCH", "/{userUUID:uuid}", "ModifyUser",
+		middleware.Auth(
+			container,
+			middlewareHelper.AuthRequireTenantAgent,
+		),
 		middleware.BindRequest[requestPresenter.ModifyUserRequest](
 			container,
 			middlewareHelper.UseAuthority,
@@ -101,5 +127,14 @@ func (this *AuthUserManipulationController) ModifyUser(
 
 	return this.ResultOf(
 		this.ModifyUserUsecase.Execute(input),
+	)
+}
+
+func (this *AuthUserManipulationController) GetTenantUsers(
+	input *requestPresenter.GetTenantUsers,
+) (mvc.Result, error) {
+
+	return this.ResultOf(
+		this.GetTenantUsersUseCase.Execute(input),
 	)
 }
