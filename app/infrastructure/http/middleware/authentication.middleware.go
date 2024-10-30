@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"app/infrastructure/http/common"
+	libAuth "app/infrastructure/http/common/auth/lib"
 	"app/infrastructure/http/middleware/middlewareHelper"
 	internalCommon "app/internal/common"
 	accessTokenServicePort "app/port/accessToken"
@@ -41,16 +42,27 @@ func Auth(
 		accessToken := common.GetAccessToken(ctx)
 
 		if accessToken == nil {
-
+			// do dependencies injection
 			container.Handler(authentication_func)(ctx)
+
+		}
+
+		if ctx.IsStopped() {
+			/**
+			authentication will stop the excution of the handler chain when
+			the request context doesn't match the route's requirements
+			*/
+			return
 		}
 
 		accessToken = common.GetAccessToken(ctx)
 
-		// ctx.Err() check whether the parent context of iris.Context was done
-		// when the authorization progress failed
 		if accessToken == nil {
-
+			/*
+				No access token but but the reqeust context was not stopped
+				means the current request context's path is auth excluded
+			*/
+			ctx.Next()
 			return
 		}
 
@@ -60,8 +72,6 @@ func Auth(
 			return
 		}
 
-		//container.Handler(authorization_func)(ctx)
-
 		if !validateAuthority(accessToken, constraints) {
 
 			common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusForbidden, "forbiden authority")
@@ -70,6 +80,25 @@ func Auth(
 
 		ctx.Next()
 	}
+}
+
+/*
+Check whether the the request path is excluded from auth
+
+example: path /api needs authentication but it's child path /api/login doesn't need auth
+*/
+func isAuthExcludedPath(ctx iris.Context) bool {
+
+	return libAuth.CheckAuthExCludedPath(
+		ctx.Method() + ctx.Path(),
+	)
+}
+
+func isAnonymousPath(ctx iris.Context) bool {
+
+	return libAuth.CheckAuthAnonymouse(
+		ctx.Method() + ctx.Path(),
+	)
 }
 
 func validateAuthority(accessToken accessTokenServicePort.IAccessToken, constraints []middlewareHelper.AuthorityConstraint) bool {
@@ -91,20 +120,27 @@ func validateAuthority(accessToken accessTokenServicePort.IAccessToken, constrai
 }
 
 /*
+This function parsed request's access token and checks whether
++ if there is no access token: check if the request's is anonymous route or auth exluded route.
++ if there is valid access token: check if the user session is known by the server.
++ otherwise: the request context will be abort and error code will be sent as response.
+
 This func argument is injected by the dependency injection container
 */
 func authentication_func(
 	ctx iris.Context,
 	accessTokenClient accessTokenClientPort.IAccessTokenClient,
-	checkAuthorityUseCase usecasePort.IMiddlewareUseCase,
+	checkAuthoritySessionUseCase usecasePort.IMiddlewareUseCase,
 ) {
 
 	accessToken, err := accessTokenClient.Read(ctx)
 
-	switch err {
-	case nil:
+	switch {
+	case err == nil:
 	// case jwtTokenServicePort.ERR_SIGNING_METHOD_MISMATCH:
 	// 	common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, err.Error())
+	case errors.Is(err, internalCommon.ERR_INTERNAL):
+		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, "internal error")
 	default:
 		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusUnauthorized, "(Authentication middleware error) unauthorized")
 	}
@@ -114,9 +150,31 @@ func authentication_func(
 		return
 	}
 
-	ctx.Values().Set(common.CTX_ACCESS_TOKEN_KEY, accessToken)
+	isExcludedPath := isAuthExcludedPath(ctx)
+	isAnonymousPath := isAnonymousPath(ctx)
 
-	err = checkAuthorityUseCase.Execute(ctx)
+	if accessToken != nil {
+
+		ctx.Values().Set(common.CTX_ACCESS_TOKEN_KEY, accessToken)
+	}
+
+	if isExcludedPath && accessToken != nil {
+
+		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusBadRequest, "bad request")
+		return
+	}
+
+	if isAnonymousPath {
+
+		return
+	}
+
+	if accessToken == nil {
+
+		return
+	}
+
+	err = checkAuthoritySessionUseCase.Execute(ctx)
 
 	if err != nil {
 
@@ -132,31 +190,3 @@ func authentication_func(
 		return
 	}
 }
-
-// func validateAccessToken(
-// 	accessToken accessTokenServicePort.IAccessToken, blackList *usecasePort.RefreshTokenBlackList, ctx context.Context,
-// ) (errorCode int, err error) {
-
-// 	switch {
-// 	case accessToken == nil:
-// 		return http.StatusUnauthorized, fmt.Errorf("unauthorized")
-// 	case accessToken.Expired():
-// 		return http.StatusUnauthorized, ERR_ACCESS_TOKEN_EXPIRED
-
-// 	}
-
-// 	inBlackList, err := blackList.Has(accessToken.GetTokenID(), ctx)
-
-// 	if err != nil {
-
-// 		return http.StatusInternalServerError, fmt.Errorf("error while checking access token in black list")
-
-// 	}
-
-// 	if inBlackList {
-
-// 		return http.StatusUnauthorized, fmt.Errorf("unauthorized")
-// 	}
-
-// 	return 0, nil
-// }

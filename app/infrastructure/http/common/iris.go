@@ -14,11 +14,14 @@ type (
 
 func SendDefaulJsonBodyAndEndRequest(ctx iris.Context, statusCode int, message string) {
 
-	ctx.StatusCode(statusCode)
-	ctx.JSON(reponse_body{
+	//ctx.StatusCode(statusCode)
+	ctx.StopWithJSON(statusCode, reponse_body{
 		Message: message,
 	})
-	ctx.EndRequest()
+	// ctx.JSON(reponse_body{
+	// 	Message: message,
+	// })
+	//ctx.EndRequest()
 }
 
 func GetAccessToken(ctx iris.Context) accessTokenServicePort.IAccessToken {
