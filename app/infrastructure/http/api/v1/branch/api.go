@@ -28,6 +28,6 @@ func Init(app *iris.Application) {
 	//initCampaignGroupApi(app).EnableStructDependents()
 	//initCandidateGroupApi(app).EnableStructDependents()
 	initAssignmentApi(app).EnableStructDependents()
-	initInternalAPI(app)
+	//initInternalAPI(app)
 	initAuthApi(app)
 }

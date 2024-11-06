@@ -2,7 +2,7 @@ package navigateTenantDomain
 
 import (
 	"app/internal/common"
-	authServicePort "app/port/auth"
+	authGenServicePort "app/port/authGenService"
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
@@ -15,7 +15,7 @@ type (
 	NavigateTenantUseCase struct {
 		usecasePort.UseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant]
 		GeneralTokenClient    generalTokenClientServicePort.IGeneralTokenClient
-		NavigateTenantService authServicePort.INavigateTenant
+		NavigateTenantService authGenServicePort.INavigateTenant
 	}
 )
 

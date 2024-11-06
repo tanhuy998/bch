@@ -1,4 +1,4 @@
-package loginDomain
+package authenticateCredentialsDomain
 
 import (
 	"app/internal/common"
@@ -13,23 +13,19 @@ import (
 )
 
 var (
-	ERR_LOGIN_USER_NOT_FOUND = errors.New("loginService error: wrong username or password")
+	ERR_LOGIN_USER_NOT_FOUND = errors.New("AuthenticateCredentialsService error: wrong username or password")
 )
 
 type (
-	//ILogIn = authServiceAdapter.ILogIn
-
-	LogInService struct {
-		PasswordService passwordServicePort.IPassword
-		UserRepo        repository.IUser
-		GetSingleUser   authServicePort.IGetSingleUser
-		//RefreshTokenManipulator    refreshTokenServicePort.IRefreshTokenManipulator
-		//AuthSignatureTokenProvider authSignatureTokenPort.IAuthSignatureProvider
+	AuthenticateCredentialsService struct {
+		PasswordService     passwordServicePort.IPassword
+		UserRepo            repository.IUser
+		GetSingleUser       authServicePort.IGetSingleUser
 		GeneralTokenService generalTokenServicePort.IGeneralTokenManipulator
 	}
 )
 
-func (this *LogInService) Serve(
+func (this *AuthenticateCredentialsService) Serve(
 	username string, password string, ctx context.Context,
 ) (gt generalTokenServicePort.IGeneralToken, err error) {
 
@@ -42,7 +38,7 @@ func (this *LogInService) Serve(
 		err = errors.Join(
 			common.ERR_NOT_FOUND,
 			errors.New("user not found"),
-		) // ERR_LOGIN_USER_NOT_FOUND
+		)
 		return
 	}
 

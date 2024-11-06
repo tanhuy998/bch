@@ -1,4 +1,4 @@
-package tenantServicePort
+package authSignaturesServicePort
 
 import (
 	accessTokenServicePort "app/port/accessToken"

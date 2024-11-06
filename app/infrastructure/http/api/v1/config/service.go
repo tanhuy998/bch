@@ -283,6 +283,15 @@ func RegisterAuthDependencies(container *hero.Container) {
 	// libConfig.BindDependency[refreshTokenClientPort.IRefreshTokenClient, refreshTokenClientService.RefreshTokenClientService](container, nil)
 	// libConfig.BindDependency[authSignatureTokenPort.IAuthSignatureProvider, authSignatureToken.AuthSignatureTokenService](container, nil)
 
+	// libConfig.BindDependency[accessTokenServicePort.IAccessTokenManipulator, accessTokenService.JWTAccessTokenManipulatorService](container, nil)
+	// libConfig.BindDependency[accessTokenClientPort.IAccessTokenClient, accessTokenClientService.BearerAccessTokenClientService](container, nil)
+
+	// //refreshTokenService := new(refreshTokenService.RefreshTokenManipulatorService)
+	// libConfig.BindDependency[refreshTokenServicePort.IRefreshTokenManipulator, refreshTokenService.RefreshTokenManipulatorService](container, nil)
+
+	// libConfig.BindDependency[refreshTokenClientPort.IRefreshTokenClient, refreshTokenClientService.RefreshTokenClientService](container, nil)
+	// libConfig.BindDependency[authSignatureTokenPort.IAuthSignatureProvider, authSignatureToken.AuthSignatureTokenService](container, nil)
+
 	fmt.Println("Auth service initialized.")
 }
 
@@ -297,6 +306,8 @@ func RegisterServices(app router.Party) {
 	RegisterAuthDependencies(container)
 	boundedContext.RegisterAuthBoundedContext(container)
 	boundedContext.RegisterTenantBoundedContext(container)
+	boundedContext.RegisterAuthGenBoundedContext(container)
+	boundedContext.RegisterAuthSignaturesBoundedContext(container)
 	boundedContext.RegisterAssignmentBoundedContext(container)
 	// RegisterTenantDependencies(container)
 	// RegisterAuthEndpointServiceDependencies(container)

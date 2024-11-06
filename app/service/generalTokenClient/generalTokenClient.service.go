@@ -89,22 +89,33 @@ func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken g
 			GENERAL_TOKEN,
 			gt,
 			irisContext.CookieDomain(domain),
-			irisContext.CookiePath("/tenants/switch"),
+			//irisContext.CookiePath("/tenants/switch"),
+			irisContext.CookiePath("/auth/gen"),
+			irisContext.CookieSameSite(http.SameSiteStrictMode),
 		)
 
 		c.SetCookieKV(
 			GENERAL_TOKEN,
 			gt,
 			irisContext.CookieDomain(domain),
-			irisContext.CookiePath("/auth/nav"),
+			//irisContext.CookiePath("/tenants/switch"),
+			irisContext.CookiePath("/auth/signatures/tenant"),
+			irisContext.CookieSameSite(http.SameSiteStrictMode),
 		)
 
-		c.SetCookieKV(
-			GENERAL_TOKEN,
-			gt,
-			irisContext.CookieDomain(domain),
-			irisContext.CookiePath("/auth/login"),
-		)
+		// c.SetCookieKV(
+		// 	GENERAL_TOKEN,
+		// 	gt,
+		// 	irisContext.CookieDomain(domain),
+		// 	irisContext.CookiePath("/auth/nav"),
+		// )
+
+		// c.SetCookieKV(
+		// 	GENERAL_TOKEN,
+		// 	gt,
+		// 	irisContext.CookieDomain(domain),
+		// 	irisContext.CookiePath("/auth/login"),
+		// )
 	}
 
 	return nil
@@ -133,21 +144,22 @@ func (this *GeneralTokenClientService) Remove(ctx context.Context) error {
 
 		c.RemoveCookie(
 			GENERAL_TOKEN,
-			irisContext.CookiePath("/tenants/switch"),
+			//irisContext.CookiePath("/tenants/switch"),
+			irisContext.CookiePath("/auth/gen"),
 			irisContext.CookieDomain(domain),
 		)
 
-		c.RemoveCookie(
-			GENERAL_TOKEN,
-			irisContext.CookiePath("/auth/nav"),
-			irisContext.CookieDomain(domain),
-		)
+		// c.RemoveCookie(
+		// 	GENERAL_TOKEN,
+		// 	irisContext.CookiePath("/auth/nav"),
+		// 	irisContext.CookieDomain(domain),
+		// )
 
-		c.RemoveCookie(
-			GENERAL_TOKEN,
-			irisContext.CookiePath("/auth/login"),
-			irisContext.CookieDomain(domain),
-		)
+		// c.RemoveCookie(
+		// 	GENERAL_TOKEN,
+		// 	irisContext.CookiePath("/auth/login"),
+		// 	irisContext.CookieDomain(domain),
+		// )
 	}
 
 	return nil

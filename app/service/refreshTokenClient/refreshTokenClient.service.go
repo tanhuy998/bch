@@ -4,6 +4,7 @@ import (
 	"app/internal/bootstrap"
 	libError "app/internal/lib/error"
 	refreshTokenServicePort "app/port/refreshToken"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -33,8 +34,12 @@ func (this *RefreshTokenClientService) Read(ctx context.Context) (refreshTokenSe
 		return nil, libError.NewInternal(fmt.Errorf("RefreshTokenClientService error: invalid context given (not type of iris.Context)"))
 	}
 
-	str := c.GetCookie(key)
+	b, _ := json.Marshal(c.Request().Header)
 
+	fmt.Println(string(b))
+
+	str := c.GetCookie(key)
+	fmt.Println(c.Request().Cookies())
 	if str == "" {
 
 		return nil, nil
@@ -90,20 +95,24 @@ func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken r
 		c.SetCookieKV(
 			key, rt,
 			irisContext.CookieDomain(domain),
-			irisContext.CookiePath("/auth/refresh"),
+			//irisContext.CookiePath("/auth/refresh"),
+			irisContext.CookiePath("/auth/signatures"),
+			irisContext.CookieSameSite(http.SameSiteStrictMode),
 		)
 
-		c.SetCookieKV(
-			key, rt,
-			irisContext.CookieDomain(domain),
-			irisContext.CookiePath("/tenants/switch"),
-		)
+		// c.SetCookieKV(
+		// 	key, rt,
+		// 	irisContext.CookieDomain(domain),
+		// 	//irisContext.CookiePath("/tenants/switch"),
+		// 	irisContext.CookiePath("/auth/signatures/tenant/"),
+		// )
 
-		c.SetCookieKV(
-			key, rt,
-			irisContext.CookieDomain(domain),
-			irisContext.CookiePath("/auth/logout"),
-		)
+		// c.SetCookieKV(
+		// 	key, rt,
+		// 	irisContext.CookieDomain(domain),
+		// 	irisContext.CookiePath("/auth/logout"),
+		// )
+
 	}
 
 	return nil
@@ -132,21 +141,22 @@ func (this *RefreshTokenClientService) Remove(ctx context.Context) error {
 
 		c.RemoveCookie(
 			key,
-			irisContext.CookiePath("/auth/refresh"),
+			//irisContext.CookiePath("/auth/refresh"),
+			irisContext.CookiePath("/auth/signatures"),
 			irisContext.CookieDomain(domain),
 		)
 
-		c.RemoveCookie(
-			key,
-			irisContext.CookiePath("/tenants/switch"),
-			irisContext.CookieDomain(domain),
-		)
+		// c.RemoveCookie(
+		// 	key,
+		// 	irisContext.CookiePath("/tenants/switch"),
+		// 	irisContext.CookieDomain(domain),
+		// )
 
-		c.RemoveCookie(
-			key,
-			irisContext.CookiePath("/auth/logout"),
-			irisContext.CookieDomain(domain),
-		)
+		// c.RemoveCookie(
+		// 	key,
+		// 	irisContext.CookiePath("/auth/logout"),
+		// 	irisContext.CookieDomain(domain),
+		// )
 	}
 
 	return nil

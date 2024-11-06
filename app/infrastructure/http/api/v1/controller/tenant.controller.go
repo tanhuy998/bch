@@ -23,7 +23,6 @@ type (
 		TenantAccessTokenManipulaotr  generalTokenServicePort.IGeneralTokenManipulator
 		CreateTenantUseCase           usecasePort.IUseCase[requestPresenter.CreateTenantRequest, responsePresenter.CreateTenantResponse]
 		GrantUserAsTenantAgentUseCase usecasePort.IUseCase[requestPresenter.GrantUserAsTenantAgent, responsePresenter.GrantUserAsTenantAgent]
-		SwitchTenantUseCase           usecasePort.IUseCase[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant]
 	}
 )
 
@@ -50,13 +49,6 @@ func (this *TenantController) BeforeActivation(activator mvc.BeforeActivation) {
 			container,
 			middlewareHelper.UseAuthority,
 			middlewareHelper.UseTenantMapping,
-		),
-	)
-
-	activator.Handle(
-		"GET", "/switch/{tenantUUID:uuid}", "SwitchTenant",
-		middleware.BindRequest[requestPresenter.SwitchTenant](
-			container,
 		),
 	)
 }
@@ -89,14 +81,5 @@ func (this *TenantController) GrantUserAsTenantAgent(
 
 	return this.Controller.ResultOf(
 		this.GrantUserAsTenantAgentUseCase.Execute(input),
-	)
-}
-
-func (this *TenantController) SwitchTenant(
-	input *requestPresenter.SwitchTenant,
-) (mvc.Result, error) {
-
-	return this.Controller.ResultOf(
-		this.SwitchTenantUseCase.Execute(input),
 	)
 }

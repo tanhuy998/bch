@@ -8,7 +8,7 @@ type (
 	RefreshLoginRequest struct {
 		requestInput.ContextInput
 		Data struct {
-			AccessToken string `json:"accessToken"`
+			AccessToken string `json:"accessToken" validate:"required"`
 		} `json:"data"`
 	}
 )

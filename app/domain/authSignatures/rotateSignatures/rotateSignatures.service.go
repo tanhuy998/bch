@@ -1,4 +1,4 @@
-package refreshLoginDomain
+package rotateSignaturesDomain
 
 import (
 	"app/internal/common"
@@ -19,7 +19,7 @@ const (
 )
 
 type (
-	RefreshLoginService struct {
+	RotateSignaturesService struct {
 		//RefreshTokenBlackList      refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator
 		RefreshTokenManipulator    refreshTokenServicePort.IRefreshTokenManipulator
 		AccessTokenManipulator     accessTokenServicePort.IAccessTokenManipulator
@@ -27,7 +27,7 @@ type (
 	}
 )
 
-func (this *RefreshLoginService) Serve(
+func (this *RotateSignaturesService) Serve(
 	accessToken accessTokenServicePort.IAccessToken, refreshToken refreshTokenServicePort.IRefreshToken, reqCtx context.Context,
 ) (at accessTokenServicePort.IAccessToken, rt refreshTokenServicePort.IRefreshToken, err error) {
 

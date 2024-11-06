@@ -1,9 +1,10 @@
 package api
 
 import (
+	"app/infrastructure/http/api/v1/branch/auth/authGenApi"
 	authManipulationApi "app/infrastructure/http/api/v1/branch/auth/manipulation"
 	authReportApi "app/infrastructure/http/api/v1/branch/auth/report"
-	"app/infrastructure/http/api/v1/branch/auth/userLogging"
+	authSignaturesApi "app/infrastructure/http/api/v1/branch/auth/signatures"
 
 	"github.com/kataras/iris/v12/core/router"
 )
@@ -12,7 +13,8 @@ func initAuthApi(app router.Party) {
 
 	genericRouter := app.Party("/auth")
 
-	userLogging.RegisterUserLoggingApi(genericRouter).EnableStructDependents()
+	authGenApi.RegisterGenAPI(genericRouter).EnableStructDependents()
+	authSignaturesApi.RegisterSignaturesApi(genericRouter).EnableStructDependents()
 
 	reportRouter := genericRouter.Party("/report")
 	authReportApi.RegisterAuthReportApi(reportRouter).EnableStructDependents()

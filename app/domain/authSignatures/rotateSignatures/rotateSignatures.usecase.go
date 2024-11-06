@@ -1,4 +1,4 @@
-package refreshLoginDomain
+package rotateSignaturesDomain
 
 import (
 	"app/internal/bootstrap"
@@ -8,6 +8,7 @@ import (
 	libError "app/internal/lib/error"
 	accessTokenServicePort "app/port/accessToken"
 	authServicePort "app/port/auth"
+	authSignaturesServicePort "app/port/authSignatures"
 	refreshTokenServicePort "app/port/refreshToken"
 	refreshTokenClientPort "app/port/refreshTokenClient"
 	refreshTokenIdServicePort "app/port/refreshTokenID"
@@ -18,7 +19,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kataras/iris/v12/mvc"
+	"github.com/kataras/iris/v12"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -32,25 +33,18 @@ type (
 )
 
 type (
-	IRefreshLogin interface {
-		Execute(
-			input *requestPresenter.RefreshLoginRequest,
-			output *responsePresenter.RefreshLoginResponse,
-		) (mvc.Result, error)
-	}
-
-	RefreshLoginUseCase struct {
+	RotateSignaturesUseCase struct {
 		usecasePort.MongoUserSessionCacheUseCase[responsePresenter.RefreshLoginResponse]
 		usecasePort.UseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
 		GetSingleUserService   authServicePort.IGetSingleUser
 		RefreshTokenIDProvider refreshTokenIdServicePort.IRefreshTokenIDProvider
-		RefreshLoginService    authServicePort.IRefreshLogin
+		RefreshLoginService    authSignaturesServicePort.IRotateSignatures
 		AccessTokenManipulator accessTokenServicePort.IAccessTokenManipulator
 		RefreshTokenClient     refreshTokenClientPort.IRefreshTokenClient
 	}
 )
 
-func (this *RefreshLoginUseCase) Execute(
+func (this *RotateSignaturesUseCase) Execute(
 	input *requestPresenter.RefreshLoginRequest,
 ) (output *responsePresenter.RefreshLoginResponse, err error) {
 
@@ -61,6 +55,13 @@ func (this *RefreshLoginUseCase) Execute(
 		return nil, this.ErrorWithContext(
 			input, libError.NewInternal(fmt.Errorf("refreshLoginUseCase: nil context given")),
 		)
+	}
+
+	if v, ok := reqCtx.(iris.Context); ok {
+
+		b, _ := v.GetBody()
+
+		fmt.Println(string(b))
 	}
 
 	oldRefreshToken, err := this.RefreshTokenClient.Read(reqCtx)
@@ -139,7 +140,7 @@ func (this *RefreshLoginUseCase) Execute(
 	return output, nil
 }
 
-func (this *RefreshLoginUseCase) checkUserSession(input *requestPresenter.RefreshLoginRequest, refreshToken refreshTokenServicePort.IRefreshToken) error {
+func (this *RotateSignaturesUseCase) checkUserSession(input *requestPresenter.RefreshLoginRequest, refreshToken refreshTokenServicePort.IRefreshToken) error {
 
 	if refreshToken == nil || refreshToken.Expired() {
 
@@ -171,6 +172,7 @@ func (this *RefreshLoginUseCase) checkUserSession(input *requestPresenter.Refres
 		bson.D{
 			{"userUUID", generalTokenID.GetUserUUID()},
 			{"tenantUUID", refreshToken.GetTenantUUID()},
+			{"sessionID", generalTokenID},
 		},
 		input.GetContext(),
 	)
@@ -188,7 +190,7 @@ func (this *RefreshLoginUseCase) checkUserSession(input *requestPresenter.Refres
 	return nil
 }
 
-func (this *RefreshLoginUseCase) revokeRefreshToken(
+func (this *RotateSignaturesUseCase) revokeRefreshToken(
 	refreshToken refreshTokenServicePort.IRefreshToken, ctx context.Context,
 ) error {
 
@@ -198,7 +200,7 @@ func (this *RefreshLoginUseCase) revokeRefreshToken(
 			common.ERR_UNAUTHORIZED, fmt.Errorf("missing refresh token"),
 		)
 	}
-
+	fmt.Println(this.RefreshTokenBlackList, refreshToken.GetExpireTime())
 	err := this.RefreshTokenBlackList.SetWithExpire(
 		refreshToken.GetTokenID(), struct{}{}, *refreshToken.GetExpireTime(), ctx,
 	)

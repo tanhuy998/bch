@@ -1,8 +1,8 @@
-package loginDomain
+package authenticateCredentialsDomain
 
 import (
 	libError "app/internal/lib/error"
-	authServicePort "app/port/auth"
+	authGenServicePort "app/port/authGenService"
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
@@ -16,19 +16,14 @@ var (
 )
 
 type (
-	// ILogIn interface {
-	// 	Execute(*requestPresenter.LoginRequest, *responsePresenter.LoginResponse) (mvc.Result, error)
-	// }
-
-	LogInUseCase struct {
+	AuthenticateCredentialsUseCase struct {
 		usecasePort.UseCase[requestPresenter.LoginRequest, responsePresenter.LoginResponse]
-		LogInService              authServicePort.ILogIn
+		LogInService              authGenServicePort.IAuthenticateCrdentials
 		GeneralTokenClientService generalTokenClientServicePort.IGeneralTokenClient
-		//RefreshTokenClient refreshTokenClientPort.IRefreshTokenClient
 	}
 )
 
-func (this *LogInUseCase) Execute(
+func (this *AuthenticateCredentialsUseCase) Execute(
 	input *requestPresenter.LoginRequest,
 ) (*responsePresenter.LoginResponse, error) {
 
@@ -37,7 +32,7 @@ func (this *LogInUseCase) Execute(
 	if reqContext == nil {
 
 		return nil, this.ErrorWithContext(
-			input, libError.NewInternal(fmt.Errorf("loginUseCase: nil context given to usecase")),
+			input, libError.NewInternal(fmt.Errorf("AuthenticateCredentialsUseCase: nil context given to usecase")),
 		)
 	}
 
@@ -57,7 +52,6 @@ func (this *LogInUseCase) Execute(
 
 	output := this.GenerateOutput()
 
-	//output.Data.AccessToken = generalToken
 	output.Message = "success"
 	return output, nil
 }

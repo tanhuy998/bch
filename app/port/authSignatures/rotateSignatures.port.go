@@ -1,4 +1,4 @@
-package authServicePort
+package authSignaturesServicePort
 
 import (
 	accessTokenServicePort "app/port/accessToken"
@@ -14,7 +14,7 @@ var (
 )
 
 type (
-	IRefreshLogin interface {
+	IRotateSignatures interface {
 		Serve(
 			inputAT accessTokenServicePort.IAccessToken, inputRT refreshTokenServicePort.IRefreshToken, reqCtx context.Context,
 		) (at accessTokenServicePort.IAccessToken, rt refreshTokenServicePort.IRefreshToken, err error)

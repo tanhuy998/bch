@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"os"
 	"sync"
 	"time"
 )
@@ -35,6 +37,7 @@ type (
 	cache_unit[Key_T, Value_T comparable] struct {
 		sync.Map
 		topic string
+		*log.Logger
 		//cleanupFunc CacheUnitCleanupFunction[Key_T, Value_T]
 	}
 
@@ -51,51 +54,19 @@ type (
 	CommitFunctionOptionActivator[Value_T any] func(cache *cache_value[Value_T], oldVal Value_T, newVal Value_T)
 )
 
-func newCacheUnit[Key_T, Value_T comparable]() *cache_unit[Key_T, Value_T] {
+func newCacheUnit[Key_T, Value_T comparable](topic string) *cache_unit[Key_T, Value_T] {
 
 	cacheUnit := new(cache_unit[Key_T, Value_T])
 
-	// cacheUnit.cleanupFunc = func(key interface{}, value interface{}) bool {
-
-	// 	var (
-	// 		actualKey  Key_T
-	// 		cacheValue *cache_value[Value_T]
-	// 	)
-
-	// 	if v, ok := key.(Key_T); ok {
-
-	// 		actualKey = v
-	// 	} else {
-
-	// 		return true
-	// 	}
-
-	// 	if v, ok := value.(*cache_value[Value_T]); ok {
-
-	// 		cacheValue = v
-	// 	} else {
-
-	// 		return true
-	// 	}
-
-	// 	if time.Now().Before(cacheValue.expireTime) ||
-	// 		cacheValue.expireTime.IsZero() {
-
-	// 		return true
-	// 	}
-
-	// 	cacheUnit.Delete(actualKey)
-
-	// 	return true
-	// }
+	cacheUnit.topic = topic
+	cacheUnit.Logger = log.New(
+		os.Stdout,
+		fmt.Sprintf("[ CACHE TOPIC %s ]", cacheUnit.topic),
+		0,
+	)
 
 	return cacheUnit
 }
-
-// func (this *cache_unit[Key_T, Value_T]) cleanup() {
-
-// 	this.Map.Range(this.cleanupFunc)
-// }
 
 /*
 Return the copy of the cached value
@@ -104,6 +75,25 @@ this method does not lock the cache value
 func (this *cache_unit[Key_T, Value_T]) Read(
 	ctx context.Context, key Key_T,
 ) (value Value_T, exists bool, err error) {
+
+	defer func() {
+
+		if os.Getenv("CACHE_LOG") != "1" {
+
+			return
+		}
+
+		go func() {
+			switch {
+			case err != nil:
+				this.Println("reading key", key, "caused error:", err)
+			case !exists:
+				this.Println("reading inexisting key", key)
+			default:
+				this.Println("read", key)
+			}
+		}()
+	}()
 
 	cache, exists, e := this.getCache(ctx, key)
 
@@ -120,14 +110,17 @@ func (this *cache_unit[Key_T, Value_T]) Read(
 
 	lockAccquired, release, err := libTryLock.AccquireReadLock(ctx, &cache.RWMutex)
 
+	defer func() {
+
+		if lockAccquired {
+
+			release()
+		}
+	}()
+
 	if err != nil {
 
 		return
-	}
-
-	if lockAccquired {
-
-		defer release()
 	}
 
 	if ctx.Err() != nil {
@@ -226,9 +219,30 @@ Instantly Create a room for the value that corresponding to the key
 if the cached key exists, the progress wiil lock for write operations.
 This method is an idempotent operation
 */
-func (this *cache_unit[Key_T, Value_T]) Set(ctx context.Context, key Key_T, value Value_T) (returnErr error) {
+func (this *cache_unit[Key_T, Value_T]) Set(ctx context.Context, key Key_T, value Value_T) (err error) {
 
 	cache, exists, err := this.getCache(ctx, key)
+
+	var oldVal Value_T
+
+	defer func() {
+
+		if os.Getenv("CACHE_LOG") != "1" {
+
+			return
+		}
+
+		go func() {
+			switch {
+			case err != nil:
+				this.Println("set key", key, "caused error:", err)
+			case !exists:
+				this.Println("key", key, "initiated by value", value)
+			default:
+				this.Println("key reassigned", key, "old value", oldVal, "new value", value)
+			}
+		}()
+	}()
 
 	if err != nil {
 
@@ -241,11 +255,14 @@ func (this *cache_unit[Key_T, Value_T]) Set(ctx context.Context, key Key_T, valu
 
 		defer func() {
 
-			if returnErr != nil {
+			if err != nil {
 
 				this.Map.Swap(key, cache)
 			}
 		}()
+	} else {
+
+		oldVal = cache.value
 	}
 
 	err = this.set(ctx, cache, value)
@@ -311,6 +328,27 @@ func (this *cache_unit[Key_T, Value_T]) SetWithExpire(
 
 	currentCache, exists, err := this.getCache(ctx, key)
 
+	var oldVal Value_T
+
+	defer func() {
+
+		if os.Getenv("CACHE_LOG") != "1" {
+
+			return
+		}
+
+		go func() {
+			switch {
+			case err != nil:
+				this.Println("set expiry key", key, "caused error:", err)
+			case !exists:
+				this.Println("key", key, "initiated by value", value, "until", moment)
+			default:
+				this.Println("key reassigned", key, "old value", oldVal, "new value", value, "until", moment)
+			}
+		}()
+	}()
+
 	if err != nil {
 
 		return err
@@ -320,6 +358,10 @@ func (this *cache_unit[Key_T, Value_T]) SetWithExpire(
 
 		currentCache = new(cache_value[Value_T])
 		this.Map.Store(key, currentCache)
+
+	} else {
+
+		oldVal = currentCache.value
 	}
 
 	_, command, err := this.startModify(ctx, currentCache)
@@ -338,10 +380,17 @@ func (this *cache_unit[Key_T, Value_T]) SetWithExpire(
 		return
 	}
 
+	if currentCache.expireTimer != nil {
+
+		currentCache.expireTimer.Stop()
+		currentCache.expireTimer = nil
+	}
+
 	cleanupTime := time.AfterFunc(duration, func() {
 
 		deactivateCacheValue(currentCache)
 		this.Delete(ctx, key)
+		this.Println("key", key, "expired")
 	})
 
 	currentCache.expireTimer = cleanupTime
@@ -357,6 +406,25 @@ The delete progress locks on both read and write operations
 func (this *cache_unit[Key_T, Value_T]) Delete(ctx context.Context, key Key_T) (deleted bool, err error) {
 
 	cache, exists, err := this.getCache(ctx, key)
+
+	defer func() {
+
+		if os.Getenv("CACHE_LOG") != "1" {
+
+			return
+		}
+
+		go func() {
+			switch {
+			case err != nil:
+				this.Println("set key", key, "caused error:", err)
+			case !exists:
+				this.Println("deleting inexisting key", key)
+			default:
+				this.Println("key deleted", key, "old value", cache.value)
+			}
+		}()
+	}()
 
 	if err != nil {
 
@@ -429,13 +497,6 @@ func (this *cache_unit[Key_T, Value_T]) startModify(
 		return
 	}
 
-	readLockAcquired, releaseRead, err := libTryLock.AccquireReadLock(ctx, cache)
-
-	if err != nil {
-
-		return
-	}
-
 	writeLockAcquired, releaseWrite, err := libTryLock.AcquireLock(ctx, cache)
 
 	if err != nil {
@@ -443,21 +504,35 @@ func (this *cache_unit[Key_T, Value_T]) startModify(
 		return
 	}
 
-	if readLockAcquired && writeLockAcquired {
+	// readLockAcquired, releaseRead, err := libTryLock.AccquireReadLock(ctx, cache)
+
+	// if err != nil {
+
+	// 	return
+	// }
+
+	defer func() {
+
+		if err != nil {
+
+			releaseWrite()
+		}
+	}()
+
+	if writeLockAcquired {
 
 		updateCommand = func() (commit CommitFunction[Value_T], abort RevokeUpdateFunction) {
 
 			commit = func(val Value_T) {
 
 				cache.value = val
-				releaseRead()
+				//releaseRead()
 				releaseWrite()
 			}
 
 			abort = func() {
 
-				cache.Unlock()
-				releaseRead()
+				//releaseRead()
 				releaseWrite()
 			}
 
@@ -467,13 +542,13 @@ func (this *cache_unit[Key_T, Value_T]) startModify(
 		return cache.value, updateCommand, nil
 	}
 
-	if readLockAcquired {
-		releaseRead()
-	}
+	// if readLockAcquired {
+	// 	releaseRead()
+	// }
 
-	if writeLockAcquired {
-		releaseWrite()
-	}
+	// if writeLockAcquired {
+	// 	releaseWrite()
+	// }
 
 	err = ERR_OUT_OF_CONTEXT
 	return

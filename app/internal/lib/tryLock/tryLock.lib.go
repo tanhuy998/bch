@@ -40,7 +40,7 @@ const (
 )
 
 var (
-	ERR_OUT_OF_CONTEXT = errors.New("polling: context done before lock acquired")
+	errOutOfContext = errors.New("libTryLock polling error: context done before lock acquired")
 )
 
 func tryRWMutexRLock(mutex ITryReadLockMutex) bool {
@@ -55,15 +55,17 @@ func tryRWMutexLock(mutex ITryLockMutex) bool {
 
 func waitLock[MutexMode_T any](
 	ctx context.Context, mutex MutexMode_T, tryLockFunc TryRWLockFunction[MutexMode_T],
-) {
+) (lockAccqured bool) {
 
 	for ctx.Err() == nil {
 
 		if tryLockFunc(mutex) {
 
-			break
+			return true
 		}
 	}
+
+	return false
 }
 
 func pollRWMutex[MutexMode_T any](
@@ -85,16 +87,24 @@ func pollRWMutex[MutexMode_T any](
 		panic("polling internal error: try lock function is nil")
 	}
 
-	waitLock(ctx, mutex, tryFunc)
+	defer func() {
+
+		if lockAcquired && err != nil {
+
+			lockAcquired = false
+			locker.Unlock()
+		}
+	}()
+
+	lockAcquired = waitLock(ctx, mutex, tryFunc)
 
 	if ctx.Err() != nil {
 
-		locker.Unlock()
-		err = ERR_OUT_OF_CONTEXT
-		return
+		//locker.Unlock()
+
+		return false, errOutOfContext
 	}
 
-	lockAcquired = true
 	return
 }
 
@@ -104,8 +114,11 @@ func AcquireLock(
 
 	lockAcquired, err = pollRWMutex[ITryLockMutex](ctx, mutex, tryRWMutexLock, mutex)
 
-	if err != nil {
-
+	switch {
+	case errors.Is(err, errOutOfContext):
+		err = errors.Join(errors.New("(write lock)"), err)
+		return
+	case err != nil:
 		return
 	}
 
@@ -119,8 +132,11 @@ func AccquireReadLock(
 
 	lockAcquired, err = pollRWMutex[ITryReadLockMutex](ctx, mutex, tryRWMutexRLock, mutex.RLocker())
 
-	if err != nil {
-
+	switch {
+	case errors.Is(err, errOutOfContext):
+		err = errors.Join(errors.New("(read lock)"), err)
+		return
+	case err != nil:
 		return
 	}
 

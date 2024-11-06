@@ -1,4 +1,4 @@
-package authServicePort
+package authSignaturesServicePort
 
 import (
 	accessTokenServicePort "app/port/accessToken"
@@ -7,7 +7,7 @@ import (
 )
 
 type (
-	ILogout interface {
+	IRevokeSignatures interface {
 		Serve(
 			refreshToken refreshTokenServicePort.IRefreshToken, accessToken accessTokenServicePort.IAccessToken, ctx context.Context,
 		) error

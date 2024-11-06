@@ -58,7 +58,13 @@ func init() {
 
 	defer ignorePanicWhenUnitTesting()
 
-	godotenv.Load()
+	err := godotenv.Load()
+
+	if err != nil {
+
+		panic("error while loading env: " + err.Error())
+	}
+
 	host_names = RetrieveCORSHosts()
 
 	for _, val := range host_names {

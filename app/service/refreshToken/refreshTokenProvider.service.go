@@ -68,14 +68,10 @@ func (this *RefreshTokenManipulatorService) makeFor(
 		IssuedAt:       jwt.NewNumericDate(time.Now()),
 		RefreshTokenID: refreshTokenID,
 		TenantUUID:     libCommon.PointerPrimitive(tenantUUID),
+		ExpiresAt:      jwt.NewNumericDate(time.Now().Add(default_exp_duration)),
 	}
 
 	jwtClaim.SetupRefreshToken(&customClaims.PrivateClaims)
-
-	if generalToken.GetExpiretime() != nil {
-
-		customClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(default_exp_duration))
-	}
 
 	token.Claims = customClaims
 

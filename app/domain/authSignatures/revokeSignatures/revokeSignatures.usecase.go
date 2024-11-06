@@ -1,10 +1,10 @@
-package logoutDomain
+package revokeSignaturesDomain
 
 import (
 	"app/internal/common"
 	libError "app/internal/lib/error"
 	accessTokenClientPort "app/port/accessTokenClient"
-	authServicePort "app/port/auth"
+	authSignaturesServicePort "app/port/authSignatures"
 	refreshTokenServicePort "app/port/refreshToken"
 	refreshTokenClientPort "app/port/refreshTokenClient"
 	refreshTokenIdServicePort "app/port/refreshTokenID"
@@ -18,17 +18,17 @@ import (
 )
 
 type (
-	LogoutUseCase struct {
+	RevokeSignaturesUseCase struct {
 		usecasePort.MongoUserSessionCacheUseCase[responsePresenter.Logout]
 		usecasePort.UseCase[requestPresenter.Logout, responsePresenter.Logout]
 		AccessTokenClientService  accessTokenClientPort.IAccessTokenClient
 		RefreshTokenClientService refreshTokenClientPort.IRefreshTokenClient
 		RefreshTokenIDProvider    refreshTokenIdServicePort.IRefreshTokenIDProvider
-		LogoutService             authServicePort.ILogout
+		LogoutService             authSignaturesServicePort.IRevokeSignatures
 	}
 )
 
-func (this *LogoutUseCase) Execute(
+func (this *RevokeSignaturesUseCase) Execute(
 	input *requestPresenter.Logout,
 ) (output *responsePresenter.Logout, err error) {
 
@@ -114,7 +114,7 @@ func (this *LogoutUseCase) Execute(
 	return output, nil
 }
 
-func (this *LogoutUseCase) markRefreshToken(refreshToken refreshTokenServicePort.IRefreshToken, ctx context.Context) error {
+func (this *RevokeSignaturesUseCase) markRefreshToken(refreshToken refreshTokenServicePort.IRefreshToken, ctx context.Context) error {
 
 	expireTime := refreshToken.GetExpireTime()
 

@@ -1,6 +1,8 @@
 package passwordService
 
 import (
+	"app/internal/common"
+	libError "app/internal/lib/error"
 	passwordServicePort "app/port/passwordService"
 	"errors"
 
@@ -47,7 +49,16 @@ func (this *PasswordService) Compare(model passwordServicePort.IPasswordDispatch
 		return err
 	}
 
-	return bcrypt.CompareHashAndPassword(secret, pw_token)
+	switch err := bcrypt.CompareHashAndPassword(secret, pw_token); {
+	case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
+		return errors.Join(
+			common.ERR_UNAUTHORIZED, errors.New("invalid username or password"),
+		)
+	case err != nil:
+		return libError.NewInternal(err)
+	default:
+		return nil
+	}
 }
 
 func (this *PasswordService) Resolve(model passwordServicePort.IPasswordDispatcher) error {

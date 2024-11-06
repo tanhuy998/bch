@@ -3,6 +3,7 @@ package getTenantUsersDomain
 import (
 	"app/internal/common"
 	libCommon "app/internal/lib/common"
+	"app/model"
 	authServicePort "app/port/auth"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
@@ -15,14 +16,14 @@ import (
 
 type (
 	GetTenantUserUseCase struct {
-		usecasePort.UseCase[requestPresenter.GetTenantUsers, responsePresenter.GetTenantUsers]
-		GetTenantUsersService authServicePort.IGetTenantUsers
+		usecasePort.UseCase[requestPresenter.GetTenantUsers, responsePresenter.GetTenantUsers[model.User]]
+		GetTenantUsersService authServicePort.IGetTenantUsers[model.User]
 	}
 )
 
 func (this *GetTenantUserUseCase) Execute(
 	input *requestPresenter.GetTenantUsers,
-) (output *responsePresenter.GetTenantUsers, err error) {
+) (output *responsePresenter.GetTenantUsers[model.User], err error) {
 
 	if !input.IsValidTenantUUID() {
 

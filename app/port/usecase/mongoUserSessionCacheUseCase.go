@@ -6,6 +6,7 @@ import (
 	"app/internal/generalToken"
 	"app/repository"
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -98,6 +99,7 @@ func (this *MongoUserSessionCacheUseCase[Output_T]) RemoveUserSession(
 			// Delete caches of current user sessions
 			// ctx of this funciton is a transaction context, therefore fetched data from
 			// db have not committed until the whole transaction committed
+			fmt.Println("existing session", *v.SessionID)
 			_, err = this.GeneralTokenWhiteList.Delete(*v.SessionID, ctx)
 
 			if err != nil {

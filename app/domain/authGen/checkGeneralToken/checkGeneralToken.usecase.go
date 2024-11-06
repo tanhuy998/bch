@@ -1,4 +1,4 @@
-package checkLoginDomain
+package checkGeneralTokenDomain
 
 import (
 	"app/internal/common"
@@ -9,13 +9,13 @@ import (
 )
 
 type (
-	CheckLoginUseCase struct {
+	CheckGeneralTokenUseCase struct {
 		usecasePort.UseCase[requestPresenter.CheckLogin, responsePresenter.CheckLogin]
 		GeneralTokenClient generalTokenClientServicePort.IGeneralTokenClient
 	}
 )
 
-func (this *CheckLoginUseCase) Execute(
+func (this *CheckGeneralTokenUseCase) Execute(
 	input *requestPresenter.CheckLogin,
 ) (*responsePresenter.CheckLogin, error) {
 

@@ -1,11 +1,12 @@
 package responsePresenter
 
 import (
-	"app/model"
+	"app/internal/responseOutput"
 )
 
 type (
-	GetTenantUsers struct {
-		Data []model.User `json:"data"`
+	GetTenantUsers[Data_T any] struct {
+		//Data []model.User `json:"data"`
+		responseOutput.ResponseDataList[Data_T]
 	}
 )

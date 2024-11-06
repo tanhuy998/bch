@@ -1,4 +1,4 @@
-package authServicePort
+package authGenServicePort
 
 import (
 	"app/model"

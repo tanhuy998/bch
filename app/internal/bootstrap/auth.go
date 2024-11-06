@@ -35,6 +35,8 @@ func initializeAuthEncryptionData() {
 		panic("could not retrieve working directory for reading auth keys")
 	}
 
+	__dir = ""
+
 	var buffer []byte
 
 	buffer, err = os.ReadFile(path.Join(__dir, os.Getenv(ENV_AUTH_JWT_PRIVATE_KEY_DIR)))

@@ -4,6 +4,7 @@ import (
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
 	"app/infrastructure/http/middleware/middlewareHelper"
+	"app/model"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -18,7 +19,7 @@ type (
 		CreateUserUsecase     usecasePort.IUseCase[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter] // usecase.ICreateUser
 		GetGroupUserUsecase   usecasePort.IUseCase[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse]     // usecase.IGetGroupUsers
 		ModifyUserUsecase     usecasePort.IUseCase[requestPresenter.ModifyUserRequest, responsePresenter.ModifyUserResponse]           // usecase.IModifyUser
-		GetTenantUsersUseCase usecasePort.IUseCase[requestPresenter.GetTenantUsers, responsePresenter.GetTenantUsers]
+		GetTenantUsersUseCase usecasePort.IUseCase[requestPresenter.GetTenantUsers, responsePresenter.GetTenantUsers[model.User]]
 	}
 )
 
@@ -64,7 +65,7 @@ func (this *AuthUserManipulationController) BeforeActivation(activator mvc.Befor
 			container,
 			middlewareHelper.AuthRequireTenantAgent,
 		),
-		middleware.BindPresenters[requestPresenter.GetTenantUsers, responsePresenter.GetTenantUsers](
+		middleware.BindPresenters[requestPresenter.GetTenantUsers, responsePresenter.GetTenantUsers[model.User]](
 			container,
 			middlewareHelper.UseTenantMapping,
 			middlewareHelper.UseAuthority,

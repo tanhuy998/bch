@@ -5,16 +5,13 @@ import (
 	"app/infrastructure/http/api/v1/config"
 	"app/internal/bootstrap"
 	"app/internal/db"
-	"app/internal/memoryCache"
-	"fmt"
-	"net/http"
+	"log"
 
 	"os"
 	"path"
 
 	"github.com/gofor-little/env"
 	socketio "github.com/googollee/go-socket.io"
-	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
 )
 
@@ -28,7 +25,7 @@ var (
 		"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH",
 	}
 	cors_allowed_headers []string = []string{
-		"Authorization",
+		"Authorization", "X-Forwarded-For", "X-Forwarded-Proto", "X-Real-Ip",
 	}
 	server_ssl_cert string
 	server_ssl_key  string
@@ -81,59 +78,54 @@ func main() {
 
 	defer config.ConfigureLogger(app).Close()
 
-	app.UseRouter(
-		cors.New(cors.Options{
-			AllowedOrigins:   bootstrap.GetAllowedOrigins(),
-			AllowedMethods:   cors_allowed_methods,
-			AllowedHeaders:   cors_allowed_headers,
-			AllowCredentials: true,
-		}),
-	)
+	// app.UseRouter(
+	// 	cors.New(cors.Options{
+	// 		AllowedOrigins:   bootstrap.GetAllowedOrigins(),
+	// 		AllowedMethods:   cors_allowed_methods,
+	// 		AllowedHeaders:   cors_allowed_headers,
+	// 		AllowCredentials: true,
+	// 	}),
+	// )
 
 	v1.Initialize(app)
 
-	err := app.Listen(
-		env.Get("HTTP_PORT", ":80"),
-		iris.WithoutBodyConsumptionOnUnmarshal,
-		iris.WithOptimizations,
+	log.Fatal(
+		app.Listen(
+			env.Get("HTTP_PORT", ":80"),
+			iris.WithoutBodyConsumptionOnUnmarshal,
+			iris.WithOptimizations,
+		),
 	)
-
-	if err != nil {
-
-		panic(err)
-	}
-
-	//initWebsocket()
 }
 
 func initWebsocket() {
 
-	socketServer := socketio.NewServer(nil)
+	// socketServer := socketio.NewServer(nil)
 
-	socketServer.OnConnect("/monitor/cache", func(c socketio.Conn) error {
+	// socketServer.OnConnect("/monitor/cache", func(c socketio.Conn) error {
 
-		fmt.Printf("new cache monitor %s", c.ID())
-		memoryCache.AddLogListener(c.ID(), &cache_log_t{c})
+	// 	fmt.Printf("new cache monitor %s", c.ID())
+	// 	memoryCache.AddLogListener(c.ID(), &cache_log_t{c})
 
-		return nil
-	})
+	// 	return nil
+	// })
 
-	socketServer.OnDisconnect("/monitor/cache", func(c socketio.Conn, s string) {
+	// socketServer.OnDisconnect("/monitor/cache", func(c socketio.Conn, s string) {
 
-		fmt.Printf("cache monitor %s exit", c.ID())
-		memoryCache.RemoveListener(c.ID())
-	})
+	// 	fmt.Printf("cache monitor %s exit", c.ID())
+	// 	memoryCache.RemoveListener(c.ID())
+	// })
 
-	socketServer.Serve()
+	// func() {
 
-	defer socketServer.Close()
+	// 	srv := &http.Server{
+	// 		Addr:    ":4000",
+	// 		Handler: socketServer,
+	// 	}
 
-	go func() {
+	// 	go log.Fatal(srv.ListenAndServe())
 
-		err := http.ListenAndServe(":3000", socketServer)
-
-		fmt.Println(err)
-	}()
+	// }()
 	//http.Handle("/monitor/cache", socketServer)
 }
 

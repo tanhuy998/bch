@@ -1,4 +1,4 @@
-package logoutDomain
+package revokeSignaturesDomain
 
 import (
 	libError "app/internal/lib/error"
@@ -11,13 +11,13 @@ import (
 )
 
 type (
-	LogoutService struct {
+	RevokeSignaturesService struct {
 		UserSessionRepo     repository.IUserSession
 		RemoveDBUserSession authServicePort.IRemoveDBUserSession
 	}
 )
 
-func (this *LogoutService) Serve(
+func (this *RevokeSignaturesService) Serve(
 	refreshToken refreshTokenServicePort.IRefreshToken, accessToken accessTokenServicePort.IAccessToken, ctx context.Context,
 ) (err error) {
 

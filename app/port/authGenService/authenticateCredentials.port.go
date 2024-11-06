@@ -1,4 +1,4 @@
-package authServicePort
+package authGenServicePort
 
 import (
 	generalTokenServicePort "app/port/generalToken"
@@ -6,7 +6,7 @@ import (
 )
 
 type (
-	ILogIn interface {
+	IAuthenticateCrdentials interface {
 		Serve(username string, password string, ctx context.Context) (generalToken generalTokenServicePort.IGeneralToken, err error)
 	}
 )

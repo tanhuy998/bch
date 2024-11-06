@@ -2,7 +2,7 @@ package requestPresenter
 
 import (
 	refreshTokenServicePort "app/port/refreshToken"
-	"context"
+	"app/valueObject/requestInput"
 )
 
 type (
@@ -16,20 +16,21 @@ type (
 	}
 
 	LoginRequest struct {
-		Data         LoginInputUser `json:"data"`
-		ctx          context.Context
+		requestInput.ContextInput
+		Data LoginInputUser `json:"data"`
+		//ctx          context.Context
 		refreshToken refreshTokenServicePort.IRefreshToken
 	}
 )
 
-func (this *LoginRequest) ReceiveContext(ctx context.Context) {
+// func (this *LoginRequest) ReceiveContext(ctx context.Context) {
 
-	this.ctx = ctx
-}
-func (this *LoginRequest) GetContext() context.Context {
+// 	this.ctx = ctx
+// }
+// func (this *LoginRequest) GetContext() context.Context {
 
-	return this.ctx
-}
+// 	return this.ctx
+// }
 
 func (this *LoginRequest) ReceiveRefreshToken(token refreshTokenServicePort.IRefreshToken) {
 

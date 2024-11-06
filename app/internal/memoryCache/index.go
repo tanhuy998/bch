@@ -95,7 +95,7 @@ func NewTopic[Key_T, Value_T comparable](topic string) error {
 		return ERR_TOPIC_EXIST
 	}
 
-	newCacheUnit := newCacheUnit[Key_T, Value_T]() // new(cache_unit[Key_T, cache_value[Value_T]])
+	newCacheUnit := newCacheUnit[Key_T, Value_T](topic)
 	newCacheUnit.topic = topic
 
 	cache_topics.Store(topic, newCacheUnit)

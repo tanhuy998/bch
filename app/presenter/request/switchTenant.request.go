@@ -1,7 +1,7 @@
 package requestPresenter
 
 import (
-	"context"
+	"app/valueObject/requestInput"
 
 	"github.com/google/uuid"
 )
@@ -9,16 +9,17 @@ import (
 type (
 	SwitchTenant struct {
 		TenantUUID *uuid.UUID `param:"tenantUUID" validate:"required"`
-		ctx        context.Context
+		//ctx        context.Context
+		requestInput.ContextInput
 	}
 )
 
-func (this *SwitchTenant) ReceiveContext(ctx context.Context) {
+// func (this *SwitchTenant) ReceiveContext(ctx context.Context) {
 
-	this.ctx = ctx
-}
+// 	this.ctx = ctx
+// }
 
-func (this *SwitchTenant) GetContext() context.Context {
+// func (this *SwitchTenant) GetContext() context.Context {
 
-	return this.ctx
-}
+// 	return this.ctx
+// }

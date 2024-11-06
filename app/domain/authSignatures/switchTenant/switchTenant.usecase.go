@@ -4,11 +4,11 @@ import (
 	"app/internal/common"
 	accessTokenServicePort "app/port/accessToken"
 	authServicePort "app/port/auth"
+	authSignaturesServicePort "app/port/authSignatures"
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	refreshTokenClientPort "app/port/refreshTokenClient"
 	refreshTokenIdServicePort "app/port/refreshTokenID"
-	tenantServicePort "app/port/tenant"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -20,7 +20,7 @@ type (
 	SwitchTenantUseCase struct {
 		usecasePort.MongoUserSessionCacheUseCase[responsePresenter.SwitchTenant]
 		GeneralTokenClientService generalTokenClientServicePort.IGeneralTokenClient
-		SwitchTenantService       tenantServicePort.ISwitchTenant
+		SwitchTenantService       authSignaturesServicePort.ISwitchTenant
 		AccessTokenManipulator    accessTokenServicePort.IAccessTokenManipulator
 		RefreshTokenClientService refreshTokenClientPort.IRefreshTokenClient
 		RefreshTokenIDProvider    refreshTokenIdServicePort.IRefreshTokenIDProvider
