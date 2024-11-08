@@ -11,12 +11,11 @@ import (
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type (
 	RepoPaginateFunc[T libMongo.IBsonDocument] func(
-		collection *mongo.Collection, dataModel T, size uint64, ctx context.Context, filters ...primitive.E,
+		collection repository.IMongoRepositoryOperator, dataModel T, size uint64, ctx context.Context, filters ...primitive.E,
 	) ([]T, error)
 )
 

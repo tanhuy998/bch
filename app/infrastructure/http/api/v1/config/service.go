@@ -2,10 +2,10 @@ package config
 
 import (
 	"app/boundedContext"
-	"app/infrastructure/http/common"
 	"app/internal/bootstrap"
 	"app/internal/db"
 	libConfig "app/internal/lib/config"
+	accessLogServicePort "app/port/accessLog"
 	actionResultServicePort "app/port/actionResult"
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
@@ -22,7 +22,9 @@ import (
 	generalTokenClientService "app/service/generalTokenClient"
 	generalTokenIDService "app/service/generalTokenID"
 	"app/service/generalTokenService"
+	irisAccessLoggerService "app/service/irisAccessLogger"
 	jwtTokenService "app/service/jwtToken"
+	"app/service/mongoDBTracerService"
 	passwordService "app/service/password"
 	refreshTokenIDService "app/service/refreshTokenID"
 	"app/service/responsePresetService"
@@ -44,6 +46,10 @@ const (
 	DBMS_CLIENT  = "dbms_client"
 	DB           = "db_instancce"
 	REQUEST_BODY = "request_body"
+)
+
+type (
+	AccessLogger = accessLogServicePort.IAccessLogger[mongoDBTracerService.MongoDBTracerMonitor]
 )
 
 func InitializeDatabase(app router.Party) {
@@ -69,52 +75,64 @@ func InitializeDatabase(app router.Party) {
 	})
 	fmt.Println("DBMS client initialized.")
 
+	/*
+		access logger must be initialized before repositories in order to trace db query
+	*/
+	libConfig.BindDependency[
+		AccessLogger,
+		irisAccessLoggerService.IrisAccessLoggerService[mongoDBTracerService.MongoDBTracerMonitor],
+	](container, nil)
+
+	libConfig.BindDependency[
+		repository.IQueryTracer, mongoDBTracerService.DBQueryTracerService,
+	](container, nil)
+
 	fmt.Println("Initialize Repositories...")
 	libConfig.BindDependency[repository.ITenant](
 		container, new(repository.TenantRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.ITenantAgent](
 		container, new(repository.TenantAgentRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.IUser](
 		container, new(repository.UserRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.ICommandGroup](
 		container, new(repository.CommandGroupRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.ICommandGroupUser](
 		container, new(repository.CommandGroupUserRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.ICommandGroupUserRole](
 		container, new(repository.CommandGroupUserRoleRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.IRole](
 		container, new(repository.RoleRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.ICampaignRepository](
 		container, new(repository.CampaignRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.ICandidateRepository](
 		container, new(repository.CandidateRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.ICandidateSigningCommit](
 		container, new(repository.CandidateSingingCommitRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.ICandidateSigningInfo](
 		container, new(repository.CandidateSigningInfoRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.IAssignment](
 		container, new(repository.AssignmentRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.IAssignmentGroup](
 		container, new(repository.AssignmentGroupRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.IAssignmentGroupMember](
 		container, new(repository.AssignmentGroupMemberRepository).Init(db),
-	)
+	).EnableStructDependents()
 	libConfig.BindDependency[repository.IUserSession](
 		container, new(repository.UserSessionRepository).Init(db),
-	)
+	).EnableStructDependents()
 	fmt.Println("Repositories Initialized.")
 }
 
@@ -198,7 +216,7 @@ func RegisterUtilServices(container *hero.Container) {
 	libConfig.BindDependency[responsePresetPort.IResponsePreset, responsePresetService.ResponsePresetService](container, nil)
 	libConfig.BindDependency[passwordServicePort.IPassword, passwordService.PasswordService](container, nil)
 
-	container.Register(new(common.Controller)).Explicitly().EnableStructDependents()
+	// container.Register(new(common.Controller)).Explicitly().EnableStructDependents()
 }
 
 func RegisterAuthDependencies(container *hero.Container) {

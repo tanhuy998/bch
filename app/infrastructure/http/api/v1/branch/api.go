@@ -1,6 +1,8 @@
 package api
 
 import (
+	"app/infrastructure/http/middleware"
+
 	"github.com/kataras/iris/v12"
 )
 
@@ -19,6 +21,10 @@ import (
 // }
 
 func Init(app *iris.Application) {
+
+	container := app.ConfigureContainer().Container
+
+	app.Use(middleware.InternalAccessLog(container))
 
 	initTenantApi(app).EnableStructDependents()
 

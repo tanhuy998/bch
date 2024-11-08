@@ -52,7 +52,7 @@ var (
 
 func insertMany[T any](
 	models []*T,
-	collection *mongo.Collection,
+	collection IMongoRepositoryOperator,
 	ctx context.Context,
 ) (*mongo.InsertManyResult, error) {
 
@@ -82,7 +82,7 @@ func insertMany[T any](
 
 func findManyDocuments[T any](
 	query bson.D,
-	collection *mongo.Collection,
+	collection IMongoRepositoryOperator,
 	ctx context.Context,
 	projections ...bson.E,
 ) ([]*T, error) {
@@ -201,7 +201,7 @@ func ParseCursorOne[T any](cursor *mongo.Cursor, ctx context.Context) (*T, error
 
 func findOneDocument[T any](
 	query bson.D,
-	collection *mongo.Collection,
+	collection IMongoRepositoryOperator,
 	ctx context.Context,
 	projections ...bson.E,
 ) (*T, error) {
@@ -241,7 +241,7 @@ func findOneDocument[T any](
 
 func getDocuments[T any](
 	page int64,
-	collection *mongo.Collection,
+	collection IMongoRepositoryOperator,
 	ctx context.Context,
 	filters ...interface{},
 ) ([]*T, error) {
@@ -269,7 +269,7 @@ func getDocumentsPageByID[Model_Type any](
 	pageLimit int64,
 	isPrevDir bool,
 	projection *bson.D,
-	collection *mongo.Collection,
+	collection IMongoRepositoryOperator,
 	ctx context.Context,
 	extraFilters ...bson.E,
 ) (*PaginationPack[Model_Type], error) {
@@ -443,7 +443,7 @@ func PrepareAggregatePaginationQuery(paginationPivotField string, pivotValue int
 	}, extraFilters...)
 }
 
-func findDocumentByUUID[T any](uuid uuid.UUID, collection *mongo.Collection, ctx context.Context, projections ...bson.E) (*T, error) {
+func findDocumentByUUID[T any](uuid uuid.UUID, collection IMongoRepositoryOperator, ctx context.Context, projections ...bson.E) (*T, error) {
 
 	if ctx == nil {
 
@@ -477,7 +477,7 @@ func findDocumentByUUID[T any](uuid uuid.UUID, collection *mongo.Collection, ctx
 	return camp, nil
 }
 
-func createDocument[T any](model *T, collection *mongo.Collection, ctx context.Context) error {
+func createDocument[T any](model *T, collection IMongoRepositoryOperator, ctx context.Context) error {
 
 	//(*model).UUID = uuid.New()
 
@@ -496,7 +496,7 @@ func createDocument[T any](model *T, collection *mongo.Collection, ctx context.C
 	return nil
 }
 
-func updateDocument[T any](uuid *uuid.UUID, model *T, collection *mongo.Collection, ctx context.Context, extraFilters ...bson.E) (*mongo.UpdateResult, error) {
+func updateDocument[T any](uuid *uuid.UUID, model *T, collection IMongoRepositoryOperator, ctx context.Context, extraFilters ...bson.E) (*mongo.UpdateResult, error) {
 
 	if ctx == nil {
 
@@ -520,12 +520,12 @@ func updateDocument[T any](uuid *uuid.UUID, model *T, collection *mongo.Collecti
 	return result, nil
 }
 
-func UpdateOneByUUID[T any](uuid *uuid.UUID, model *T, collection *mongo.Collection, ctx context.Context, extraFilters ...bson.E) (*mongo.UpdateResult, error) {
+func UpdateOneByUUID[T any](uuid *uuid.UUID, model *T, collection IMongoRepositoryOperator, ctx context.Context, extraFilters ...bson.E) (*mongo.UpdateResult, error) {
 
 	return updateDocument(uuid, model, collection, ctx, extraFilters...)
 }
 
-func deleteDocument(uuid uuid.UUID, collection *mongo.Collection, ctx context.Context) error {
+func deleteDocument(uuid uuid.UUID, collection IMongoRepositoryOperator, ctx context.Context) error {
 
 	if ctx == nil {
 
@@ -542,7 +542,7 @@ func deleteDocument(uuid uuid.UUID, collection *mongo.Collection, ctx context.Co
 	return nil
 }
 
-func count(collection *mongo.Collection, ctx context.Context, filter ...bson.E) (int64, error) {
+func count(collection IMongoRepositoryOperator, ctx context.Context, filter ...bson.E) (int64, error) {
 
 	if ctx == nil {
 
@@ -553,7 +553,7 @@ func count(collection *mongo.Collection, ctx context.Context, filter ...bson.E) 
 }
 
 func Aggregate[Model_T any](
-	collection *mongo.Collection, pipeline mongo.Pipeline, ctx context.Context, options ...*options.AggregateOptions,
+	collection IMongoRepositoryOperator, pipeline mongo.Pipeline, ctx context.Context, options ...*options.AggregateOptions,
 ) ([]*Model_T, error) {
 
 	if ctx == nil {
@@ -575,7 +575,7 @@ func Aggregate[Model_T any](
 return the first document of the aggregated result
 */
 func AggregateOne[Model_T any](
-	collection *mongo.Collection, pipeline mongo.Pipeline, ctx context.Context, options ...*options.AggregateOptions,
+	collection IMongoRepositoryOperator, pipeline mongo.Pipeline, ctx context.Context, options ...*options.AggregateOptions,
 ) (*Model_T, error) {
 
 	if ctx == nil {
@@ -594,13 +594,13 @@ func AggregateOne[Model_T any](
 }
 
 // func AgggregateCursor[Model_T any]([]Model_T, error) (
-// 	collection *mongo.Collection,
+// 	collection IMongoRepositoryOperator,
 // ) {
 
 // }
 
 func AggregateByPage[Model_T any](
-	collection *mongo.Collection,
+	collection IMongoRepositoryOperator,
 	pipeline mongo.Pipeline,
 	paginationPivotField string,
 	pivotValue interface{},
@@ -680,7 +680,7 @@ func prepareAggregationPaginationStages(
 }
 
 func FindNext[Model_T libMongo.IBsonDocument](
-	collection *mongo.Collection, dataModel Model_T, size uint64, ctx context.Context, filters ...bson.E,
+	collection IMongoRepositoryOperator, dataModel Model_T, size uint64, ctx context.Context, filters ...bson.E,
 ) ([]Model_T, error) {
 
 	if size == 0 {
@@ -721,7 +721,7 @@ func FindNext[Model_T libMongo.IBsonDocument](
 }
 
 func FindPrevious[Model_T libMongo.IBsonDocument](
-	collection *mongo.Collection, dataModel Model_T, size uint64, ctx context.Context, filters ...bson.E,
+	collection IMongoRepositoryOperator, dataModel Model_T, size uint64, ctx context.Context, filters ...bson.E,
 ) ([]Model_T, error) {
 
 	if size == 0 {

@@ -41,7 +41,8 @@ type (
 	}
 
 	crud_mongo_repository[Model_T any] struct {
-		collection *mongo.Collection
+		MongoDBQueryMonitorCollection
+		//collection *mongo.Collection
 	}
 )
 
@@ -52,12 +53,12 @@ func (this *crud_mongo_repository[Model_T]) InitCollection(col *mongo.Collection
 
 func (this *crud_mongo_repository[Model_T]) Create(model *Model_T, ctx context.Context) error {
 
-	return createDocument[Model_T](model, this.collection, ctx)
+	return createDocument[Model_T](model, &this.MongoDBQueryMonitorCollection, ctx)
 }
 
 func (this *crud_mongo_repository[Model_T]) Find(query bson.D, ctx context.Context) (*Model_T, error) {
 
-	ret, err := findOneDocument[Model_T](query, this.collection, ctx)
+	ret, err := findOneDocument[Model_T](query, &this.MongoDBQueryMonitorCollection, ctx)
 
 	if errors.Is(err, mongo.ErrNoDocuments) {
 
@@ -74,7 +75,7 @@ func (this *crud_mongo_repository[Model_T]) Find(query bson.D, ctx context.Conte
 
 func (this *crud_mongo_repository[Model_T]) FindMany(query bson.D, ctx context.Context, projections ...bson.E) ([]*Model_T, error) {
 
-	ret, err := findManyDocuments[Model_T](query, this.collection, ctx, projections...)
+	ret, err := findManyDocuments[Model_T](query, &this.MongoDBQueryMonitorCollection, ctx, projections...)
 
 	if errors.Is(err, mongo.ErrNoDocuments) {
 
@@ -91,7 +92,7 @@ func (this *crud_mongo_repository[Model_T]) FindMany(query bson.D, ctx context.C
 
 func (this *crud_mongo_repository[Model_T]) FindOneByUUID(uuid uuid.UUID, ctx context.Context) (*Model_T, error) {
 
-	ret, err := findDocumentByUUID[Model_T](uuid, this.collection, ctx)
+	ret, err := findDocumentByUUID[Model_T](uuid, &this.MongoDBQueryMonitorCollection, ctx)
 
 	if errors.Is(err, mongo.ErrNoDocuments) {
 
@@ -150,7 +151,7 @@ func (this *crud_mongo_repository[Model_T]) FindOffset(
 
 func (this *crud_mongo_repository[Model_T]) UpdateOneByUUID(uuid uuid.UUID, model *Model_T, ctx context.Context) error {
 
-	res, err := updateDocument[Model_T](libCommon.PointerPrimitive(uuid), model, this.collection, ctx)
+	res, err := updateDocument[Model_T](libCommon.PointerPrimitive(uuid), model, &this.MongoDBQueryMonitorCollection, ctx)
 
 	if err != nil {
 
@@ -162,7 +163,7 @@ func (this *crud_mongo_repository[Model_T]) UpdateOneByUUID(uuid uuid.UUID, mode
 
 func (this *crud_mongo_repository[Model_T]) UpdateManyByFilter(filter bson.D, update bson.D, ctx context.Context) error {
 
-	res, err := this.collection.UpdateMany(ctx, filter, bson.D{{"$set", update}})
+	res, err := this.MongoDBQueryMonitorCollection.UpdateMany(ctx, filter, bson.D{{"$set", update}})
 
 	if err != nil {
 
@@ -176,7 +177,7 @@ func (this *crud_mongo_repository[Model_T]) UpsertManyByFilter(filter bson.D, up
 
 	opts := options.Update().SetUpsert(true)
 
-	_, err := this.collection.UpdateMany(ctx, filter, bson.D{{"$set", update}}, opts)
+	_, err := this.MongoDBQueryMonitorCollection.UpdateMany(ctx, filter, bson.D{{"$set", update}}, opts)
 
 	if err != nil {
 
@@ -188,7 +189,7 @@ func (this *crud_mongo_repository[Model_T]) UpsertManyByFilter(filter bson.D, up
 
 func (this *crud_mongo_repository[Model_T]) DeleteMany(model *Model_T, ctx context.Context) error {
 
-	_, err := this.collection.DeleteMany(ctx, model)
+	_, err := this.MongoDBQueryMonitorCollection.DeleteMany(ctx, model)
 
 	if err != nil {
 
@@ -200,7 +201,7 @@ func (this *crud_mongo_repository[Model_T]) DeleteMany(model *Model_T, ctx conte
 
 func (this *crud_mongo_repository[Model_T]) DeleteManyByFilter(filter bson.D, ctx context.Context) error {
 
-	_, err := this.collection.DeleteMany(ctx, filter)
+	_, err := this.MongoDBQueryMonitorCollection.DeleteMany(ctx, filter)
 
 	if err != nil {
 
@@ -212,7 +213,7 @@ func (this *crud_mongo_repository[Model_T]) DeleteManyByFilter(filter bson.D, ct
 
 func (this *crud_mongo_repository[Model_T]) CreateMany(models []*Model_T, ctx context.Context) error {
 
-	_, err := insertMany(models, this.collection, context.TODO())
+	_, err := insertMany(models, &this.MongoDBQueryMonitorCollection, context.TODO())
 
 	if err != nil {
 
