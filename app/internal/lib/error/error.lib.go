@@ -7,6 +7,22 @@ import (
 	"github.com/go-errors/errors"
 )
 
+type (
+	ICallStackError interface {
+		CallStack() []errors.StackFrame
+	}
+
+	InternalError struct {
+		error
+		callStack []errors.StackFrame
+	}
+)
+
+func (this *InternalError) Error() string {
+
+	return this.Error()
+}
+
 func IsAcceptable(target error, exceptions ...error) bool {
 
 	if target == nil {
@@ -32,6 +48,15 @@ func IsAcceptable(target error, exceptions ...error) bool {
 }
 
 func NewInternal(errList ...error) error {
+
+	// stack := errors.New("")
+
+	// errList = append([]error{common.ERR_INTERNAL}, errList...)
+
+	// return &InternalError{
+	// 	error:     errors.Join(errList...),
+	// 	callStack: stack.StackFrames(),
+	// }
 
 	stack := errors.New("")
 

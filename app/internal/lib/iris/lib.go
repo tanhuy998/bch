@@ -1,9 +1,13 @@
-package common
+package libIris
 
 import (
 	accessTokenServicePort "app/port/accessToken"
 
 	"github.com/kataras/iris/v12"
+)
+
+const (
+	CTX_ACCESS_TOKEN_KEY = "ctx_access_token"
 )
 
 type (

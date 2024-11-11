@@ -34,8 +34,7 @@ func BindDependency[AbstractType, ConcreteType any](
 	if concreteVal == nil {
 
 		autowireField = true
-		//concreteVal = new(ConcreteType)
-		concreteVal = resolve_concrete_instance[ConcreteType](container)
+		concreteVal = resolve_concrete_instance[ConcreteType]()
 	}
 
 	_checkImplementationOrPanic(abstractType, reflect.TypeOf(concreteVal))
@@ -74,7 +73,7 @@ func OverrideDependency[AbstractType, ConcreteType any](
 	BindDependency[AbstractType](container, concreateVal)
 }
 
-func resolve_concrete_instance[Concrete_T any](container *hero.Container) *Concrete_T {
+func resolve_concrete_instance[Concrete_T any]() *Concrete_T {
 
 	wrapType := libCommon.Wrap[Concrete_T]()
 
@@ -86,9 +85,9 @@ func resolve_concrete_instance[Concrete_T any](container *hero.Container) *Concr
 
 		concrete_pool[wrapType] = ret
 
-		dep := container.Register(ret)
-		dep.StructDependents = true
-		dep.Explicitly()
+		// dep := container.Register(ret)
+		// dep.StructDependents = true
+		// dep.Explicitly()
 
 		return ret
 	}

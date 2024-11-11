@@ -4,7 +4,7 @@ import (
 	"app/infrastructure/http/common"
 	libAuth "app/infrastructure/http/common/auth/lib"
 	"app/infrastructure/http/middleware/middlewareHelper"
-	internalCommon "app/internal/common"
+	libIris "app/internal/lib/iris"
 	accessTokenServicePort "app/port/accessToken"
 	accessTokenClientPort "app/port/accessTokenClient"
 	usecasePort "app/port/usecase"
@@ -37,49 +37,91 @@ func Auth(
 	constraints ...middlewareHelper.AuthorityConstraint,
 ) iris.Handler {
 
-	return func(ctx iris.Context) {
+	// authenticate := container.Handler(authentication_func)
 
-		accessToken := common.GetAccessToken(ctx)
+	// return func(ctx iris.Context) {
 
-		if accessToken == nil {
-			// do dependencies injection
-			container.Handler(authentication_func)(ctx)
+	// 	accessToken := libIris.GetAccessToken(ctx)
 
-		}
+	// 	if accessToken == nil {
+	// 		// do dependencies injection
+	// 		//container.Handler(authentication_func)(ctx)
+	// 		authenticate(ctx)
+	// 	}
 
-		if ctx.IsStopped() {
-			/**
-			authentication will stop the excution of the handler chain when
-			the request context doesn't match the route's requirements
-			*/
-			return
-		}
+	// 	if ctx.IsStopped() {
+	// 		/**
+	// 		authentication will stop the excution of the handler chain when
+	// 		the request context doesn't match the route's requirements
+	// 		*/
+	// 		return
+	// 	}
 
-		accessToken = common.GetAccessToken(ctx)
+	// 	accessToken = libIris.GetAccessToken(ctx)
 
-		if accessToken == nil {
-			/*
-				No access token but but the reqeust context was not stopped
-				means the current request context's path is auth excluded
-			*/
+	// 	if accessToken == nil {
+	// 		/*
+	// 			No access token but but the reqeust context was not stopped
+	// 			means the current request context's path is auth excluded
+	// 		*/
+	// 		ctx.Next()
+	// 		return
+	// 	}
+
+	// 	if len(constraints) == 0 {
+
+	// 		ctx.Next()
+	// 		return
+	// 	}
+
+	// 	if !validateAuthority(accessToken, constraints) {
+
+	// 		libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusForbidden, "forbiden authority")
+	// 		return
+	// 	}
+
+	// 	ctx.Next()
+	// }
+
+	return container.Handler(
+		func(
+			ctx iris.Context,
+			accessTokenClient accessTokenClientPort.IAccessTokenClient,
+			checkAuthoritySessionUseCase usecasePort.IMiddlewareUseCase,
+			errorHandler common.IMiddlewareErrorHandler,
+		) {
+
+			err := authenticate(ctx, accessTokenClient, checkAuthoritySessionUseCase)
+
+			if err != nil {
+
+				errorHandler.Handle(ctx, err)
+				return
+			}
+
+			accessToken := libIris.GetAccessToken(ctx)
+
+			if accessToken == nil {
+
+				ctx.Next()
+				return
+			}
+
+			if len(constraints) == 0 {
+
+				ctx.Next()
+				return
+			}
+
+			if !validateAuthority(accessToken, constraints) {
+
+				libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusForbidden, "forbiden authority")
+				return
+			}
+
 			ctx.Next()
-			return
-		}
-
-		if len(constraints) == 0 {
-
-			ctx.Next()
-			return
-		}
-
-		if !validateAuthority(accessToken, constraints) {
-
-			common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusForbidden, "forbiden authority")
-			return
-		}
-
-		ctx.Next()
-	}
+		},
+	)
 }
 
 /*
@@ -131,22 +173,29 @@ func authentication_func(
 	ctx iris.Context,
 	accessTokenClient accessTokenClientPort.IAccessTokenClient,
 	checkAuthoritySessionUseCase usecasePort.IMiddlewareUseCase,
+	errorHandler common.IMiddlewareErrorHandler,
 ) {
 
 	accessToken, err := accessTokenClient.Read(ctx)
 
-	switch {
-	case err == nil:
-	// case jwtTokenServicePort.ERR_SIGNING_METHOD_MISMATCH:
-	// 	common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, err.Error())
-	case errors.Is(err, internalCommon.ERR_INTERNAL):
-		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, "internal error")
-	default:
-		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusUnauthorized, "(Authentication middleware error) unauthorized")
-	}
+	// switch {
+	// case err == nil:
+	// // case jwtTokenServicePort.ERR_SIGNING_METHOD_MISMATCH:
+	// // 	common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, err.Error())
+	// case errors.Is(err, internalCommon.ERR_INTERNAL):
+	// 	libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, "internal error")
+	// default:
+	// 	libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusUnauthorized, "(Authentication middleware error) unauthorized")
+	// }
+
+	// if err != nil {
+
+	// 	return
+	// }
 
 	if err != nil {
 
+		errorHandler.Handle(ctx, err)
 		return
 	}
 
@@ -160,7 +209,8 @@ func authentication_func(
 
 	if isExcludedPath && accessToken != nil {
 
-		common.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusBadRequest, "bad request")
+		//libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusBadRequest, "bad request")
+		errorHandler.Handle(ctx, errors.New("bad request"))
 		return
 	}
 
@@ -180,13 +230,63 @@ func authentication_func(
 
 		ctx.Values().Remove(common.CTX_ACCESS_TOKEN_KEY)
 
-		if errors.Is(err, internalCommon.ERR_INTERNAL) {
+		// if errors.Is(err, internalCommon.ERR_INTERNAL) {
 
-			common.SendDefaulJsonBodyAndEndRequest(ctx, 500, err.Error())
-			return
-		}
+		// 	libIris.SendDefaulJsonBodyAndEndRequest(ctx, 500, err.Error())
+		// 	return
+		// }
 
-		common.SendDefaulJsonBodyAndEndRequest(ctx, 401, err.Error())
-		return
+		// libIris.SendDefaulJsonBodyAndEndRequest(ctx, 401, err.Error())
+		// return
+
+		errorHandler.Handle(ctx, err)
 	}
+}
+
+func authenticate(
+	ctx iris.Context,
+	accessTokenClient accessTokenClientPort.IAccessTokenClient,
+	checkAuthoritySessionUseCase usecasePort.IMiddlewareUseCase,
+) error {
+
+	accessToken, err := accessTokenClient.Read(ctx)
+
+	if err != nil {
+
+		return err
+	}
+
+	isExcludedPath := isAuthExcludedPath(ctx)
+	isAnonymousPath := isAnonymousPath(ctx)
+
+	if accessToken != nil {
+
+		ctx.Values().Set(common.CTX_ACCESS_TOKEN_KEY, accessToken)
+	}
+
+	if isExcludedPath && accessToken != nil {
+
+		return errors.New("bad request")
+	}
+
+	if isAnonymousPath {
+
+		return nil
+	}
+
+	if accessToken == nil {
+
+		return nil
+	}
+
+	err = checkAuthoritySessionUseCase.Execute(ctx)
+
+	if err != nil {
+
+		ctx.Values().Remove(common.CTX_ACCESS_TOKEN_KEY)
+
+		return err
+	}
+
+	return nil
 }

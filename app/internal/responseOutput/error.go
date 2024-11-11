@@ -1,5 +1,10 @@
 package responseOutput
 
+import (
+	"app/valueObject/requestInput"
+	"context"
+)
+
 type (
 	ErrorOutput[Input_T any] struct {
 		error
@@ -29,6 +34,16 @@ func NewErrorResult[Input_T, Output_T any](input *Input_T, output *Output_T, err
 		},
 		error: err,
 	}
+}
+
+func (this *ErrorOutput[Input_T]) GetContext() context.Context {
+
+	if v, ok := any(this.Input).(requestInput.ContextInput); ok {
+
+		return v.GetContext()
+	}
+
+	return nil
 }
 
 func (this *ErrorOutput[Input_T]) Unwrap() error {

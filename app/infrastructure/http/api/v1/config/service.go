@@ -2,14 +2,17 @@ package config
 
 import (
 	"app/boundedContext"
+	"app/infrastructure/http/common"
 	"app/internal/bootstrap"
 	"app/internal/db"
 	libConfig "app/internal/lib/config"
 	accessLogServicePort "app/port/accessLog"
 	actionResultServicePort "app/port/actionResult"
+	dbQueryTracerPort "app/port/dbQueryTracer"
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	generalTokenIDServicePort "app/port/generalTokenID"
+	"log"
 
 	jwtTokenServicePort "app/port/jwtTokenService"
 	passwordServicePort "app/port/passwordService"
@@ -33,11 +36,9 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/hero"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
@@ -49,42 +50,47 @@ const (
 )
 
 type (
-	AccessLogger = accessLogServicePort.IAccessLogger[mongoDBTracerService.MongoDBTracerMonitor]
+// AccessLogger = accessLogServicePort.IAccessLogger[mongoDBTracerService.MongoDBTracerMonitor]
 )
 
 func InitializeDatabase(app router.Party) {
 
-	var container *hero.Container = app.ConfigureContainer().Container
+	var container *hero.Container = app.ConfigureContainer().EnableStructDependents().Container
 
 	fmt.Println("Initialize DBMS client...")
 	client := db.GetClient()
 
 	db := db.GetDB()
 
-	container.Register(func(ctx iris.Context) *mongo.Client {
+	// container.Register(func(ctx iris.Context) *mongo.Client {
 
-		ctx.Values().Set(DBMS_CLIENT, client)
+	// 	ctx.Values().Set(DBMS_CLIENT, client)
 
-		return client
-	})
-	container.Register(func(ctx iris.Context) *mongo.Database {
+	// 	return client
+	// })
+	// container.Register(func(ctx iris.Context) *mongo.Database {
 
-		ctx.Values().Set(DB, db)
+	// 	ctx.Values().Set(DB, db)
 
-		return db
-	})
+	// 	return db
+	// })
+
+	container.Register(log.Default()).Explicitly()
+	container.Register(db).Explicitly()
+	container.Register(client).Explicitly()
+
 	fmt.Println("DBMS client initialized.")
 
 	/*
 		access logger must be initialized before repositories in order to trace db query
 	*/
 	libConfig.BindDependency[
-		AccessLogger,
-		irisAccessLoggerService.IrisAccessLoggerService[mongoDBTracerService.MongoDBTracerMonitor],
+		accessLogServicePort.IAccessLogger,
+		irisAccessLoggerService.IrisAccessLoggerService,
 	](container, nil)
 
 	libConfig.BindDependency[
-		repository.IQueryTracer, mongoDBTracerService.DBQueryTracerService,
+		dbQueryTracerPort.IDBQueryTracer, mongoDBTracerService.DBQueryTracerService,
 	](container, nil)
 
 	fmt.Println("Initialize Repositories...")
@@ -215,7 +221,7 @@ func RegisterUtilServices(container *hero.Container) {
 	libConfig.BindDependency[actionResultServicePort.IActionResult, actionResultService.ResponseResultService](container, nil)
 	libConfig.BindDependency[responsePresetPort.IResponsePreset, responsePresetService.ResponsePresetService](container, nil)
 	libConfig.BindDependency[passwordServicePort.IPassword, passwordService.PasswordService](container, nil)
-
+	libConfig.BindDependency[common.IMiddlewareErrorHandler, common.ErrorHandler](container, nil)
 	// container.Register(new(common.Controller)).Explicitly().EnableStructDependents()
 }
 

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	dbQueryTracerPort "app/port/dbQueryTracer"
 	"context"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,9 +15,19 @@ type (
 
 	MongoDBQueryMonitorCollection struct {
 		collection *mongo.Collection
-		Tracer     IQueryTracer
+		Tracer     dbQueryTracerPort.IDBQueryTracer
 	}
 )
+
+func (this *MongoDBQueryMonitorCollection) SetTracer(t dbQueryTracerPort.IDBQueryTracer) {
+
+	if t == nil {
+
+		panic("MongoDBQueryMonitorCollection error: tracer must not be nil")
+	}
+
+	this.Tracer = t
+}
 
 func (this *MongoDBQueryMonitorCollection) BulkWrite(
 	ctx context.Context,

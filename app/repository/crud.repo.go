@@ -25,6 +25,23 @@ type (
 		CreateMany(models []*Model_T, ctx context.Context) error
 	}
 
+	IFindByFilterRepository[Model_T any] interface {
+		Find(filter interface{}, ctx context.Context) (*Model_T, error)
+		FindOffset(
+			filter interface{}, offset uint64, size uint64, sort *bson.D, ctx context.Context, projection ...bson.E,
+		) ([]Model_T, error)
+		FindMany(filter interface{}, ctx context.Context, projection ...bson.E) ([]*Model_T, error)
+	}
+
+	IUpdateByFilterRepository[Model_T any] interface {
+		UpdateManyByFilter(filter interface{}, update bson.D, ctx context.Context) error
+		UpsertManyByFilter(filter interface{}, update bson.D, ctx context.Context) error
+	}
+
+	IDeleteByFilterRepository[Model_T any] interface {
+		DeleteManyByFilter(filter interface{}, ctx context.Context) error
+	}
+
 	ICRUDMongoRepository[Model_T any] interface {
 		Create(model *Model_T, ctx context.Context) error
 		FindMany(query bson.D, ctx context.Context, projection ...bson.E) ([]*Model_T, error)

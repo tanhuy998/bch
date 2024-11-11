@@ -24,7 +24,7 @@ func Init(app *iris.Application) {
 
 	container := app.ConfigureContainer().Container
 
-	app.Use(middleware.InternalAccessLog(container))
+	app.UseRouter(middleware.InternalAccessLog(container))
 
 	initTenantApi(app).EnableStructDependents()
 

@@ -1,10 +1,10 @@
 package irisAccessLoggerService
 
 import (
+	libCommon "app/internal/lib/common"
 	"app/valueObject/log"
 	"context"
 	"encoding/json"
-	"sync"
 
 	stdLog "log"
 
@@ -16,20 +16,12 @@ const (
 )
 
 type (
-	access_log_queue[DB_T any] struct {
-		sync.WaitGroup
-		sync.Mutex
-		logObj *log.HTTPLogLine[DB_T]
-	}
-)
-
-type (
-	IrisAccessLoggerService[DB_T any] struct {
+	IrisAccessLoggerService struct {
 		LogChannel *stdLog.Logger
 	}
 )
 
-func (this *IrisAccessLoggerService[DB_T]) resolveContext(ctx context.Context) iris.Context {
+func (this *IrisAccessLoggerService) resolveContext(ctx context.Context) iris.Context {
 
 	c, ok := ctx.(iris.Context)
 
@@ -41,7 +33,7 @@ func (this *IrisAccessLoggerService[DB_T]) resolveContext(ctx context.Context) i
 	return c
 }
 
-func (this *IrisAccessLoggerService[DB_T]) getQueue(ctx context.Context) *access_log_queue[DB_T] {
+func (this *IrisAccessLoggerService) getQueue(ctx context.Context) *access_log_queue {
 
 	c := this.resolveContext(ctx)
 
@@ -52,7 +44,7 @@ func (this *IrisAccessLoggerService[DB_T]) getQueue(ctx context.Context) *access
 		return nil
 	}
 
-	if ret, ok := accessLogObj.(*access_log_queue[DB_T]); ok {
+	if ret, ok := accessLogObj.(*access_log_queue); ok {
 
 		return ret
 	}
@@ -60,7 +52,7 @@ func (this *IrisAccessLoggerService[DB_T]) getQueue(ctx context.Context) *access
 	panic("IrisAccessLoggerService error: could not resolve access log queue from the context")
 }
 
-func (this *IrisAccessLoggerService[DB_T]) getLogObject(ctx context.Context) *log.HTTPLogLine[DB_T] {
+func (this *IrisAccessLoggerService) getLogObject(ctx context.Context) *log.HTTPLogLine {
 
 	c := this.resolveContext(ctx)
 
@@ -71,7 +63,7 @@ func (this *IrisAccessLoggerService[DB_T]) getLogObject(ctx context.Context) *lo
 		return nil
 	}
 
-	if ret, ok := accessLogObj.(*access_log_queue[DB_T]); ok {
+	if ret, ok := accessLogObj.(*access_log_queue); ok {
 
 		return ret.logObj
 	}
@@ -79,7 +71,7 @@ func (this *IrisAccessLoggerService[DB_T]) getLogObject(ctx context.Context) *lo
 	panic("IrisAccessLoggerService error: could not resolve access log object from the context")
 }
 
-func (this *IrisAccessLoggerService[DB_T]) Init(ctx context.Context) {
+func (this *IrisAccessLoggerService) Init(ctx context.Context) {
 
 	c := this.resolveContext(ctx)
 
@@ -90,123 +82,90 @@ func (this *IrisAccessLoggerService[DB_T]) Init(ctx context.Context) {
 		panic("IrisAccessLoggerService error: access logger initialzation at wrong place")
 	}
 
-	payload := access_log_queue[DB_T]{
-		logObj: log.NewHTTPLogLine[DB_T](),
+	logQueue := &access_log_queue{
+		logObj: log.NewHTTPLogLine(),
 	}
 
-	c.Values().Set(CTX_LOG_KEY, &payload)
+	c.Values().Set(CTX_LOG_KEY, logQueue)
+
+	logQueue.Start()
 }
 
-func (this *IrisAccessLoggerService[DB_T]) GetDBMonitor(ctx context.Context) *DB_T {
+func (this *IrisAccessLoggerService) PushTraceLogs(ctx context.Context, lines ...interface{}) {
 
-	logObj := this.getLogObject(ctx)
+	if !this.IsLogging(ctx) {
 
-	if logObj == nil {
-
-		this.Init(ctx)
-	}
-
-	logObj = this.getLogObject(ctx)
-
-	return logObj.DBMonitor
-}
-
-func (this *IrisAccessLoggerService[DB_T]) SetDBMonitor(monitor *DB_T, ctx context.Context) {
-
-	logObj := this.getLogObject(ctx)
-
-	if logObj == nil {
-
-		this.Init(ctx)
-	}
-
-	logObj = this.getLogObject(ctx)
-
-	logObj.DBMonitor = monitor
-}
-
-func (this *IrisAccessLoggerService[DB_T]) PushTraceLogs(ctx context.Context, lines ...interface{}) {
-
-	logObj := this.getLogObject(ctx)
-
-	if logObj == nil {
-
-		this.Init(ctx)
-	}
-
-	logObj = this.getLogObject(ctx)
-	queue := this.getQueue(ctx)
-
-	go func() {
-
-		queue.Lock()
-		queue.WaitGroup.Add(1)
-		defer queue.WaitGroup.Done()
-		defer queue.Unlock()
-
-		if logObj.TraceLogs == nil {
-
-			logObj.TraceLogs = lines
-
-			return
-		}
-
-		logObj.TraceLogs = append(logObj.TraceLogs, lines...)
-	}()
-}
-
-func (this *IrisAccessLoggerService[DB_T]) EndContext(ctx context.Context) {
-
-	if this.LogChannel == nil {
-
-		this.LogChannel = stdLog.Default()
+		return
 	}
 
 	queue := this.getQueue(ctx)
 
-	queue.Wait()
+	queue.Push(lines...)
+}
+
+func (this *IrisAccessLoggerService) EndContext(ctx context.Context) {
 
 	this.assignLogObject(ctx)
 
-	logObj := this.getLogObject(ctx)
+	go func() {
 
-	raw, _ := json.MarshalIndent(logObj, "", "\t")
+		queue := this.getQueue(ctx)
 
-	this.LogChannel.Println(string(raw))
+		queue.Stop()
+
+		logObj := queue.logObj
+
+		raw, _ := json.MarshalIndent(logObj, "", "\t")
+
+		this.LogChannel.Println(string(raw))
+	}()
 }
 
-func (this *IrisAccessLoggerService[DB_T]) assignLogObject(ctx context.Context) {
+func (this *IrisAccessLoggerService) assignLogObject(ctx context.Context) {
 
 	c := this.resolveContext(ctx)
-	logObj := this.getLogObject(ctx)
+	queue := this.getQueue(ctx)
+
+	logObj := queue.logObj
 
 	logObj.End()
 
-	logObj.HttpVerb = c.Method()
+	logObj.RequestExposedInfo = new(log.RequestExposedInfo)
+
+	logObj.RequestType = "rest"
+	logObj.IsSecure = c.IsSSL()
+	logObj.Protocol = libCommon.Ternary(c.IsHTTP2(), "http/2", "http/1")
+	logObj.Verb = c.Method()
 	logObj.Path = c.Path()
 	logObj.SourceIP = c.GetHeader("X-Real-IP")
 	logObj.UserAgent = c.Request().UserAgent()
 	logObj.ResponseStatus = c.GetStatusCode()
 }
+func (this *IrisAccessLoggerService) HasError(ctx context.Context) bool {
 
-func (this *IrisAccessLoggerService[DB_T]) AsyncTask(ctx context.Context, toDo func()) {
+	return this.GetError(ctx) != nil
+}
+
+func (this *IrisAccessLoggerService) GetError(ctx context.Context) error {
 
 	queue := this.getQueue(ctx)
 
-	if toDo == nil {
+	return queue.logObj.Err
+}
+
+func (this *IrisAccessLoggerService) PushError(ctx context.Context, err error) {
+
+	queue := this.getQueue(ctx)
+
+	if queue == nil {
 
 		return
 	}
 
-	queue.Add(1)
+	queue.logObj.Err = err
+}
 
-	go func() {
+func (this *IrisAccessLoggerService) IsLogging(ctx context.Context) bool {
 
-		queue.Lock()
-		defer queue.Unlock()
-
-		toDo()
-
-		queue.Done()
-	}()
+	return this.getQueue(ctx) != nil
 }

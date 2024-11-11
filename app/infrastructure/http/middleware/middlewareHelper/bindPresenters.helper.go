@@ -1,7 +1,7 @@
 package middlewareHelper
 
 import (
-	"app/infrastructure/http/common"
+	libIris "app/internal/lib/iris"
 	accessTokenClientPort "app/port/accessTokenClient"
 	"app/valueObject/requestInput"
 
@@ -24,13 +24,13 @@ func UseAuthority[Req_T requestInput.IAuthorityBringAlong, Res_T any](
 	container *hero.Container, ctx iris.Context, req Req_T, res Res_T,
 ) error {
 
-	accessToken := common.GetAccessToken(ctx)
+	accessToken := libIris.GetAccessToken(ctx)
 
 	if accessToken == nil {
 
 		container.Handler(readAccessToken)(ctx)
 
-		accessToken = common.GetAccessToken(ctx)
+		accessToken = libIris.GetAccessToken(ctx)
 	}
 
 	if accessToken == nil {
@@ -46,13 +46,13 @@ func UseTenantMapping[Req_T requestInput.ITenantMappingInput, Res_T any](
 	container *hero.Container, ctx iris.Context, req Req_T, res Res_T,
 ) error {
 
-	accessToken := common.GetAccessToken(ctx)
+	accessToken := libIris.GetAccessToken(ctx)
 
 	if accessToken == nil {
 
 		container.Handler(readAccessToken)(ctx)
 
-		accessToken = common.GetAccessToken(ctx)
+		accessToken = libIris.GetAccessToken(ctx)
 	}
 
 	if accessToken == nil {
@@ -75,7 +75,7 @@ func readAccessToken(
 		return err
 	}
 
-	common.SetAccessToken(ctx, at)
+	libIris.SetAccessToken(ctx, at)
 
 	return nil
 }
