@@ -34,6 +34,9 @@ type (
 
 func (this *Controller) ResultOf(output any, usecaseError error) (mvc.Result, error) {
 
+	defer this.logResult(output)
+	defer this.logError(usecaseError)
+
 	if usecaseError != nil {
 
 		return this.handleError(usecaseError)
@@ -91,6 +94,30 @@ func (this *Controller) ResultOf(output any, usecaseError error) (mvc.Result, er
 	}
 
 	return this.ActionResult.ServeResponse(output)
+}
+
+func (this *Controller) logResult(res any) {
+
+	if res == nil {
+
+		return
+	}
+
+	v, ok := res.(responseOutput.ILoggableResponse)
+
+	if !ok {
+
+		return
+	}
+
+	ctx := v.GetContext()
+
+	if ctx == nil {
+
+		return
+	}
+
+	this.AccessLogger.WriteMessage(ctx, v.GetMessage())
 }
 
 func (this *Controller) handleError(err error) (mvc.Result, error) {

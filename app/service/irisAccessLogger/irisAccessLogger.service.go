@@ -35,9 +35,14 @@ func (this *IrisAccessLoggerService) resolveContext(ctx context.Context) iris.Co
 
 func (this *IrisAccessLoggerService) getQueue(ctx context.Context) *access_log_queue {
 
-	c := this.resolveContext(ctx)
+	//c := this.resolveContext(ctx)
 
-	accessLogObj := c.Value(CTX_LOG_KEY)
+	if ctx == nil {
+
+		return nil
+	}
+
+	accessLogObj := ctx.Value(CTX_LOG_KEY)
 
 	if accessLogObj == nil {
 
@@ -54,9 +59,9 @@ func (this *IrisAccessLoggerService) getQueue(ctx context.Context) *access_log_q
 
 func (this *IrisAccessLoggerService) getLogObject(ctx context.Context) *log.HTTPLogLine {
 
-	c := this.resolveContext(ctx)
+	//c := this.resolveContext(ctx)
 
-	accessLogObj := c.Value(CTX_LOG_KEY)
+	accessLogObj := ctx.Value(CTX_LOG_KEY)
 
 	if accessLogObj == nil {
 
@@ -100,6 +105,11 @@ func (this *IrisAccessLoggerService) PushTraceLogs(ctx context.Context, lines ..
 
 	queue := this.getQueue(ctx)
 
+	if queue == nil {
+
+		return
+	}
+
 	queue.Push(lines...)
 }
 
@@ -110,6 +120,11 @@ func (this *IrisAccessLoggerService) EndContext(ctx context.Context) {
 	go func() {
 
 		queue := this.getQueue(ctx)
+
+		if queue == nil {
+
+			return
+		}
 
 		queue.Stop()
 
@@ -123,8 +138,21 @@ func (this *IrisAccessLoggerService) EndContext(ctx context.Context) {
 
 func (this *IrisAccessLoggerService) assignLogObject(ctx context.Context) {
 
-	c := this.resolveContext(ctx)
+	//c := this.resolveContext(ctx)
+
+	c, ok := ctx.(iris.Context)
+
+	if !ok {
+
+		return
+	}
+
 	queue := this.getQueue(ctx)
+
+	if queue == nil {
+
+		return
+	}
 
 	logObj := queue.logObj
 
@@ -150,6 +178,11 @@ func (this *IrisAccessLoggerService) GetError(ctx context.Context) error {
 
 	queue := this.getQueue(ctx)
 
+	if queue == nil {
+
+		return nil
+	}
+
 	return queue.logObj.Err
 }
 
@@ -168,4 +201,16 @@ func (this *IrisAccessLoggerService) PushError(ctx context.Context, err error) {
 func (this *IrisAccessLoggerService) IsLogging(ctx context.Context) bool {
 
 	return this.getQueue(ctx) != nil
+}
+
+func (this *IrisAccessLoggerService) WriteMessage(ctx context.Context, msg string) {
+
+	queue := this.getQueue(ctx)
+
+	if queue == nil {
+
+		return
+	}
+
+	queue.logObj.Message = msg
 }
