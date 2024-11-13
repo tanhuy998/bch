@@ -2,6 +2,7 @@ package usecasePort
 
 import (
 	"app/internal/responseOutput"
+	"app/unitOfWork"
 	"app/valueObject/requestInput"
 	"context"
 )
@@ -16,6 +17,7 @@ type (
 	}
 
 	UseCase[Input_T, Output_T any] struct {
+		unitOfWork.OperationLogger
 	}
 )
 

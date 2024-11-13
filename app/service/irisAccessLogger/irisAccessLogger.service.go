@@ -1,18 +1,25 @@
 package irisAccessLoggerService
 
 import (
+	"app/cli"
 	libCommon "app/internal/lib/common"
 	"app/valueObject/log"
 	"context"
 	"encoding/json"
+	"os"
 
 	stdLog "log"
 
 	"github.com/kataras/iris/v12"
 )
 
+var (
+	allow_trace_log bool
+)
+
 const (
-	CTX_LOG_KEY = "custom_access_log"
+	ENV_TRACE_LOG = "TRACE_LOG"
+	CTX_LOG_KEY   = "custom_access_log"
 )
 
 type (
@@ -98,19 +105,32 @@ func (this *IrisAccessLoggerService) Init(ctx context.Context) {
 
 func (this *IrisAccessLoggerService) PushTraceLogs(ctx context.Context, lines ...interface{}) {
 
-	if !this.IsLogging(ctx) {
+	if ctx == nil {
 
 		return
 	}
 
-	queue := this.getQueue(ctx)
-
-	if queue == nil {
+	if !cli.TraceLog() || os.Getenv(ENV_TRACE_LOG) != "true" {
 
 		return
 	}
 
-	queue.Push(lines...)
+	go func() {
+
+		if !this.IsLogging(ctx) {
+
+			return
+		}
+
+		queue := this.getQueue(ctx)
+
+		if queue == nil {
+
+			return
+		}
+
+		queue.Push(lines...)
+	}()
 }
 
 func (this *IrisAccessLoggerService) EndContext(ctx context.Context) {

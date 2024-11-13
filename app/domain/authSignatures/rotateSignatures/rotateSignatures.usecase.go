@@ -12,14 +12,13 @@ import (
 	refreshTokenServicePort "app/port/refreshToken"
 	refreshTokenClientPort "app/port/refreshTokenClient"
 	refreshTokenIdServicePort "app/port/refreshTokenID"
-	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
+	"app/unitOfWork"
 	"context"
 	"errors"
 	"fmt"
 
-	"github.com/kataras/iris/v12"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -34,8 +33,11 @@ type (
 
 type (
 	RotateSignaturesUseCase struct {
-		usecasePort.MongoUserSessionCacheUseCase[responsePresenter.RefreshLoginResponse]
-		usecasePort.UseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
+		//usecasePort.MongoUserSessionCacheUseCase[responsePresenter.RefreshLoginResponse]
+		//usecasePort.UseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
+		unitOfWork.GenericUseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
+		unitOfWork.MongoUserSessionCacheUseCase[responsePresenter.RefreshLoginResponse]
+		unitOfWork.OperationLogger
 		GetSingleUserService   authServicePort.IGetSingleUser
 		RefreshTokenIDProvider refreshTokenIdServicePort.IRefreshTokenIDProvider
 		RefreshLoginService    authSignaturesServicePort.IRotateSignatures
@@ -48,6 +50,8 @@ func (this *RotateSignaturesUseCase) Execute(
 	input *requestPresenter.RefreshLoginRequest,
 ) (output *responsePresenter.RefreshLoginResponse, err error) {
 
+	defer this.WrapResults(input, &output, &err)
+
 	reqCtx := input.GetContext()
 
 	if reqCtx == nil {
@@ -57,41 +61,44 @@ func (this *RotateSignaturesUseCase) Execute(
 		)
 	}
 
-	if v, ok := reqCtx.(iris.Context); ok {
-
-		b, _ := v.GetBody()
-
-		fmt.Println(string(b))
-	}
-
 	oldRefreshToken, err := this.RefreshTokenClient.Read(reqCtx)
+
+	this.PushTraceIfError(err, "read_refresh_token", "failed", input.GetContext())
 
 	if err != nil {
 
 		return nil, err
 	}
+
+	this.PushTrace("read_refresh_token", "", input.GetContext())
 
 	err = this.checkUserSession(input, oldRefreshToken)
 
 	if err != nil {
 
-		return nil, this.ErrorWithContext(
-			input, err,
-		)
+		// return nil, this.ErrorWithContext(
+		// 	input, err,
+		// )
+
+		return
 	}
 
 	accessToken, err := this.AccessTokenManipulator.Read(input.Data.AccessToken)
+	this.PushTraceIfError(err, "read_access_token", "failed", reqCtx)
 
 	if err != nil {
 
-		return nil, err
+		//return nil, err
+		return
 	}
 
 	newAccessToken, newRefreshToken, err := this.RefreshLoginService.Serve(accessToken, oldRefreshToken, reqCtx)
 
+	this.PushTraceIfError(err, "generat_new_signatures", "failed", reqCtx)
 	if err != nil {
 
-		return nil, this.ErrorWithContext(input, err)
+		//return nil, this.ErrorWithContext(input, err)
+		return
 	}
 
 	defer func() {
@@ -124,7 +131,8 @@ func (this *RotateSignaturesUseCase) Execute(
 
 	if err != nil {
 
-		return nil, err
+		//return nil, err
+		return
 	}
 
 	user, _ := this.GetSingleUserService.Serve(
@@ -140,7 +148,9 @@ func (this *RotateSignaturesUseCase) Execute(
 	return output, nil
 }
 
-func (this *RotateSignaturesUseCase) checkUserSession(input *requestPresenter.RefreshLoginRequest, refreshToken refreshTokenServicePort.IRefreshToken) error {
+func (this *RotateSignaturesUseCase) checkUserSession(
+	input *requestPresenter.RefreshLoginRequest, refreshToken refreshTokenServicePort.IRefreshToken,
+) error {
 
 	if refreshToken == nil || refreshToken.Expired() {
 
@@ -187,6 +197,40 @@ func (this *RotateSignaturesUseCase) checkUserSession(input *requestPresenter.Re
 		return common.ERR_UNAUTHORIZED
 	}
 
+	return this.resetCacheSession(input, refreshToken)
+}
+
+func (this *RotateSignaturesUseCase) resetCacheSession(
+	input *requestPresenter.RefreshLoginRequest, refreshToken refreshTokenServicePort.IRefreshToken,
+) error {
+
+	generalTokenID, _, err := this.RefreshTokenIDProvider.Extract(refreshToken.GetTokenID())
+
+	if err != nil {
+
+		return err
+	}
+
+	exp := refreshToken.GetExpireTime()
+
+	if exp == nil {
+
+		_, err = this.GeneralTokenWhiteList.Set(generalTokenID, struct{}{}, input.GetContext())
+
+	} else {
+
+		err = this.GeneralTokenWhiteList.SetWithExpire(generalTokenID, struct{}{}, *exp, input.GetContext())
+	}
+
+	switch {
+	case errors.Is(err, common.ERR_INTERNAL):
+		this.AccessLogger.PushError(input.GetContext(), err)
+	case err != nil:
+		this.PushTrace("reset_general_token_id_in_cache", err.Error(), input.GetContext())
+	default:
+		this.PushTrace("reset_general_token_id_in_cache", "success", input.GetContext())
+	}
+
 	return nil
 }
 
@@ -200,7 +244,7 @@ func (this *RotateSignaturesUseCase) revokeRefreshToken(
 			common.ERR_UNAUTHORIZED, fmt.Errorf("missing refresh token"),
 		)
 	}
-	fmt.Println(this.RefreshTokenBlackList, refreshToken.GetExpireTime())
+
 	err := this.RefreshTokenBlackList.SetWithExpire(
 		refreshToken.GetTokenID(), struct{}{}, *refreshToken.GetExpireTime(), ctx,
 	)

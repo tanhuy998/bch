@@ -5,9 +5,11 @@ import (
 	"app/infrastructure/http/common"
 	"app/internal/bootstrap"
 	"app/internal/db"
+	"app/internal/generalToken"
 	libConfig "app/internal/lib/config"
 	accessLogServicePort "app/port/accessLog"
 	actionResultServicePort "app/port/actionResult"
+	cacheListServicePort "app/port/cacheList"
 	dbQueryTracerPort "app/port/dbQueryTracer"
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
@@ -22,6 +24,7 @@ import (
 	"app/repository"
 	actionResultService "app/service/actionResult"
 	authService "app/service/auth"
+	cacheListService "app/service/cacheList"
 	generalTokenClientService "app/service/generalTokenClient"
 	generalTokenIDService "app/service/generalTokenID"
 	"app/service/generalTokenService"
@@ -47,10 +50,6 @@ const (
 	DBMS_CLIENT  = "dbms_client"
 	DB           = "db_instancce"
 	REQUEST_BODY = "request_body"
-)
-
-type (
-// AccessLogger = accessLogServicePort.IAccessLogger[mongoDBTracerService.MongoDBTracerMonitor]
 )
 
 func InitializeDatabase(app router.Party) {
@@ -225,6 +224,43 @@ func RegisterUtilServices(container *hero.Container) {
 	// container.Register(new(common.Controller)).Explicitly().EnableStructDependents()
 }
 
+func RegisterCaches(container *hero.Container) {
+
+	refreshTokenBlackListCacheClient, err := bootstrap.NewRefreshTokenBlackListClient()
+
+	if err != nil {
+
+		panic("error while inittiating refresh token blacklist cache client: " + err.Error())
+	}
+
+	container.Register(refreshTokenBlackListCacheClient)
+
+	generalTokenWhiteListCacheClient, err := bootstrap.NewGeneralTokenWhiteListClient()
+
+	if err != nil {
+
+		panic("error while inittiating general token whitelist cache client: " + err.Error())
+	}
+
+	container.Register(generalTokenWhiteListCacheClient)
+
+	libConfig.BindDependency[
+		cacheListServicePort.ICacheList[string, bootstrap.RefreshTokenBlackListCacheValue],
+		cacheListService.CacheListManipulator[string, bootstrap.RefreshTokenBlackListCacheValue],
+	](
+		container,
+		cacheListService.NewCacheListManipulator[string, bootstrap.RefreshTokenBlackListCacheValue]("refresh_token_black_list"),
+	)
+
+	libConfig.BindDependency[
+		cacheListServicePort.ICacheList[generalToken.GeneralTokenID, bootstrap.GeneralTokenWhiteListCacheValue],
+		cacheListService.CacheListManipulator[generalToken.GeneralTokenID, bootstrap.GeneralTokenWhiteListCacheValue],
+	](
+		container,
+		cacheListService.NewCacheListManipulator[generalToken.GeneralTokenID, bootstrap.GeneralTokenWhiteListCacheValue]("general_token_white_list"),
+	)
+}
+
 func RegisterAuthDependencies(container *hero.Container) {
 
 	fmt.Println("Initialize Auth service...")
@@ -238,26 +274,6 @@ func RegisterAuthDependencies(container *hero.Container) {
 	// })
 
 	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticationService](container, nil, AUTH)
-
-	refreshTokenBlackListCacheClient, err := bootstrap.NewRefreshTokenBlackListClient()
-
-	if err != nil {
-
-		panic("error while inittiating refresh token blacklist cache client: " + err.Error())
-	}
-
-	container.Register(refreshTokenBlackListCacheClient)
-	//libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenCacheClient](container, cacheClient)
-	//libConfig.BindDependency[refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator, refreshTokenBlackListService.RefreshTokenBlackListManipulatorService](container, nil)
-
-	generalTokenWhiteListCacheClient, err := bootstrap.NewGeneralTokenWhiteListClient()
-
-	if err != nil {
-
-		panic("error while inittiating general token whitelist cache client: " + err.Error())
-	}
-
-	container.Register(generalTokenWhiteListCacheClient)
 
 	asymmetricJWTService := jwtTokenService.NewECDSAService(
 		jwt.SigningMethodES256, *bootstrap.GetJWTAsymmetricEncryptionPrivateKey(), *bootstrap.GetJWTAsymmetricEncryptionPublicKey(),
@@ -327,6 +343,7 @@ func RegisterServices(app router.Party) {
 
 	RegisterUtilServices(container)
 	// RegisterAdapters(container)
+	RegisterCaches(container)
 	RegisterAuthDependencies(container)
 	boundedContext.RegisterAuthBoundedContext(container)
 	boundedContext.RegisterTenantBoundedContext(container)

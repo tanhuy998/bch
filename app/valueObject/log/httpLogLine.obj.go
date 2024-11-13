@@ -10,6 +10,7 @@ type (
 		*RequestExposedInfo
 		HiddenInfo
 		ResponseInfo
+		IdentityInfo
 		StartTime       time.Time     `json:"start_time"`
 		RequestTime     float64       `json:"request_duration_ms"`
 		DatabaseTime    float64       `json:"db_time_ms"`

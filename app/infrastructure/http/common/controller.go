@@ -1,14 +1,11 @@
 package common
 
 import (
-	"app/internal/common"
+	libError "app/internal/lib/error"
 	"app/internal/responseOutput"
 	actionResultServicePort "app/port/actionResult"
-	contextHolderPort "app/port/contextHolder"
 	loggerPort "app/port/logger"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/kataras/iris/v12/hero"
@@ -35,11 +32,11 @@ type (
 func (this *Controller) ResultOf(output any, usecaseError error) (mvc.Result, error) {
 
 	defer this.logResult(output)
-	defer this.logError(usecaseError)
+	//defer this.logError(usecaseError)
 
 	if usecaseError != nil {
 
-		return this.handleError(usecaseError)
+		return this.dispatchError(usecaseError)
 	}
 
 	if output == nil {
@@ -53,7 +50,7 @@ func (this *Controller) ResultOf(output any, usecaseError error) (mvc.Result, er
 
 		if err != nil {
 
-			return this.hanleInternalError(err)
+			return this.dispatchError(libError.NewInternal(err))
 		}
 
 		return this.ActionResult.Prepare().
@@ -75,7 +72,7 @@ func (this *Controller) ResultOf(output any, usecaseError error) (mvc.Result, er
 
 		if err != nil {
 
-			return this.hanleInternalError(err)
+			return this.dispatchError(libError.NewInternal(err))
 		}
 
 		return this.ActionResult.Prepare().SetCode(http.StatusCreated).SetContent(raw).Done()
@@ -87,7 +84,7 @@ func (this *Controller) ResultOf(output any, usecaseError error) (mvc.Result, er
 
 		if err != nil {
 
-			return this.hanleInternalError(err)
+			return this.dispatchError(libError.NewInternal(err))
 		}
 
 		return this.ActionResult.Prepare().SetCode(http.StatusAccepted).SetContent(raw).Done()
@@ -120,7 +117,7 @@ func (this *Controller) logResult(res any) {
 	this.AccessLogger.WriteMessage(ctx, v.GetMessage())
 }
 
-func (this *Controller) handleError(err error) (mvc.Result, error) {
+func (this *Controller) dispatchError(err error) (mvc.Result, error) {
 
 	// if errors.Is(err, common.ERR_INTERNAL) {
 
@@ -150,46 +147,41 @@ func (this *Controller) handleError(err error) (mvc.Result, error) {
 
 	// res.SetContent(raw)
 
-	res := this.HandleError(err)
-
-	if errors.Is(err, common.ERR_INTERNAL) {
-
-		this.logError(err)
-	}
+	res := this.ErrorHandler.HandleError(err, nil)
 
 	return res, nil
 }
 
-func (this *Controller) hanleInternalError(err error) (mvc.Result, error) {
+// func (this *Controller) hanleInternalError(err error) (mvc.Result, error) {
 
-	res := this.ActionResult.Prepare()
+// 	res := this.ActionResult.Prepare()
 
-	resObj := default_response{
-		Message: "internal error",
-	}
-	fmt.Println("handle error")
-	this.logError(err)
+// 	resObj := default_response{
+// 		Message: "internal error",
+// 	}
+// 	fmt.Println("handle error")
+// 	this.logError(err)
 
-	raw, _ := json.Marshal(resObj)
+// 	raw, _ := json.Marshal(resObj)
 
-	return res.SetCode(http.StatusInternalServerError).SetContent(raw).Done()
-}
+// 	return res.SetCode(http.StatusInternalServerError).SetContent(raw).Done()
+// }
 
-func (this *Controller) logError(err error) {
+// func (this *Controller) logError(err error) {
 
-	errOutput, ok := any(err).(contextHolderPort.IContextHolder)
+// 	errOutput, ok := any(err).(contextHolderPort.IContextHolder)
 
-	if !ok {
+// 	if !ok {
 
-		return
-	}
+// 		return
+// 	}
 
-	ctx := errOutput.GetContext()
+// 	ctx := errOutput.GetContext()
 
-	if ctx == nil {
+// 	if ctx == nil {
 
-		return
-	}
+// 		return
+// 	}
 
-	this.AccessLogger.PushError(ctx, err)
-}
+// 	this.AccessLogger.PushError(ctx, err)
+// }

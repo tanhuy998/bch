@@ -4,6 +4,8 @@ import (
 	"app/internal/common"
 	accessLogServicePort "app/port/accessLog"
 	actionResultServicePort "app/port/actionResult"
+	contextHolderPort "app/port/contextHolder"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -16,7 +18,7 @@ type ()
 
 type (
 	IMiddlewareErrorHandler interface {
-		Handle(iris.Context, error)
+		HandleContextError(iris.Context, error)
 	}
 
 	ErrorHandler struct {
@@ -25,9 +27,14 @@ type (
 	}
 )
 
-func (this *ErrorHandler) Handle(ctx iris.Context, err error) {
+func (this *ErrorHandler) HandleContextError(ctx iris.Context, err error) {
 
-	res := this.HandleError(err)
+	if err == nil {
+
+		return
+	}
+
+	res := this.HandleError(err, ctx)
 
 	if errors.Is(err, common.ERR_INTERNAL) {
 
@@ -37,9 +44,22 @@ func (this *ErrorHandler) Handle(ctx iris.Context, err error) {
 	res.Dispatch(ctx)
 }
 
-func (this *ErrorHandler) HandleError(err error) hero.Result {
+func (this *ErrorHandler) HandleError(err error, ctx context.Context) hero.Result {
+
+	defer func() {
+
+		if errors.Is(err, common.ERR_INTERNAL) {
+
+			this.logError(err, ctx)
+		}
+	}()
 
 	res := this.ActionResult.Prepare()
+
+	if err == nil {
+
+		return res
+	}
 
 	switch {
 	case errors.Is(err, common.ERR_INTERNAL):
@@ -56,19 +76,41 @@ func (this *ErrorHandler) HandleError(err error) hero.Result {
 		res.SetCode(http.StatusBadRequest) // 400
 	}
 
-	resObj := default_response{}
+	resBody := default_response{}
 
 	if errors.Is(err, common.ERR_INTERNAL) {
 
-		resObj.Message = "internal error"
+		resBody.Message = "internal error"
 	} else {
-
-		resObj.Message = err.Error()
+		//fmt.Println("-------------", err == nil)
+		resBody.Message = err.Error()
 	}
 
-	raw, _ := json.Marshal(resObj)
+	raw, _ := json.Marshal(resBody)
 
 	res.SetContent(raw)
 
 	return res
+}
+
+func (this *ErrorHandler) logError(err error, ctx context.Context) {
+
+	if ctx == nil {
+
+		errOutput, ok := any(err).(contextHolderPort.IContextHolder)
+
+		if !ok {
+
+			return
+		}
+
+		ctx = errOutput.GetContext()
+
+		if ctx == nil {
+
+			return
+		}
+	}
+
+	this.AccessLogger.PushError(ctx, err)
 }

@@ -20,7 +20,6 @@ const (
 
 type (
 	RotateSignaturesService struct {
-		//RefreshTokenBlackList      refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator
 		RefreshTokenManipulator    refreshTokenServicePort.IRefreshTokenManipulator
 		AccessTokenManipulator     accessTokenServicePort.IAccessTokenManipulator
 		AuthSignatureTokenProvider authSignatureTokenPort.IAuthSignatureProvider

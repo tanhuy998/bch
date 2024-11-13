@@ -95,7 +95,7 @@ func Auth(
 
 			if err != nil {
 
-				errorHandler.Handle(ctx, err)
+				errorHandler.HandleContextError(ctx, err)
 				return
 			}
 
@@ -195,7 +195,7 @@ func authentication_func(
 
 	if err != nil {
 
-		errorHandler.Handle(ctx, err)
+		errorHandler.HandleContextError(ctx, err)
 		return
 	}
 
@@ -210,7 +210,7 @@ func authentication_func(
 	if isExcludedPath && accessToken != nil {
 
 		//libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusBadRequest, "bad request")
-		errorHandler.Handle(ctx, errors.New("bad request"))
+		errorHandler.HandleContextError(ctx, errors.New("bad request"))
 		return
 	}
 
@@ -239,7 +239,7 @@ func authentication_func(
 		// libIris.SendDefaulJsonBodyAndEndRequest(ctx, 401, err.Error())
 		// return
 
-		errorHandler.Handle(ctx, err)
+		errorHandler.HandleContextError(ctx, err)
 	}
 }
 
