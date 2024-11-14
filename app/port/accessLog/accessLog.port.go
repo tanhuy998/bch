@@ -19,6 +19,7 @@ type (
 		IsLogging(ctx context.Context) bool
 		PushError(context.Context, error)
 		WriteMessage(ctx context.Context, msg string)
+		IsTraceLogging(ctx context.Context) bool
 		//AsyncTask(ctx context.Context, fn func())
 	}
 )

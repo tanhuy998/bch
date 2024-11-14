@@ -7,21 +7,22 @@ import (
 )
 
 const (
-	LOG_EVENT_THRESHOLD = 1
+	LOG_EVENT_THRESHOLD = 2
 )
 
 type (
 	access_log_queue struct {
 		sync.Mutex
-		events chan []interface{}
-		end    chan struct{}
-		logObj *log.HTTPLogLine
+		events       chan []interface{}
+		end          chan struct{}
+		logObj       *log.HTTPLogLine
+		traceEnabled bool
 	}
 )
 
 func (this *access_log_queue) Start() {
 
-	this.events = make(chan []interface{}, 2)
+	this.events = make(chan []interface{}, LOG_EVENT_THRESHOLD)
 	this.end = make(chan struct{})
 
 	go func() {

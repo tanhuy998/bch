@@ -12,8 +12,40 @@ const (
 	ENV_HOSTS              = "HOSTS"
 	ENV_ALLOWED_CORS_PORTS = "ALLOWED_CORS_PORTS"
 	ENV_PROJECT_STAGE      = "PROJECT_STAGE"
-	ENV_APP_NAME           = "APP_NAME"
+	ENV_HTTP_PORT          = "HTTP_PORT"
 	ENV_HTTPS              = "HTTPS"
+)
+
+const (
+	ENV_SSL_CERT_DIR             = "SSL_CERT_DIR"
+	ENV_SSL_KEY_DIR              = "SSL_KEY_DIR"
+	ENV_AUTH_JWT_PUBLIC_KEY_DIR  = "AUTH_JWT_PUBLIC_KEY_DIR"
+	ENV_AUTH_JWT_PRIVATE_KEY_DIR = "AUTH_JWT_PRIVATE_KEY_DIR"
+	ENV_HMAC_SECRET              = "HMAC_SECRET"
+)
+
+const (
+	ENV_APP_ID     = "APP_ID"
+	ENV_API_KEY    = "API_KEY"
+	ENV_APP_SECRET = "APP_SECRET"
+	ENV_APP_NAME   = "APP_NAME"
+)
+
+const (
+	ENV_TRACE_LOG         = "TRACE_LOG"
+	ENV_CACHE_LOG         = "CACHE_LOG"
+	ENV_OP_TRACE_DURATION = "OP_TRACE_DURATION"
+)
+
+const (
+	ENV_MONGOD_CONN_STR   = "MONGOD_CONN_STR"
+	ENV_MONGOD_CREDENTIAL = "MONGOD_CREDENTIAL"
+	ENV_MONGOD_DB_NAME    = "MONGOD_DB_NAME"
+)
+
+const (
+	ENV_AUTH_INTERNAL = "AUTH_INTERNAL"
+	ENV_AUTH_HEADER   = "AUTH_HEADER"
 )
 
 var (
@@ -21,11 +53,6 @@ var (
 	host_names_dictionary map[string]bool = make(map[string]bool)
 	allowed_cors_ports    []string
 )
-
-// var (
-// 	cwd, err      = os.Getwd()
-// 	isLoaded bool = false
-// )
 
 func GetDomainNames() []string {
 

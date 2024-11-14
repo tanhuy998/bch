@@ -2,6 +2,7 @@ package irisAccessLoggerService
 
 import (
 	"app/cli"
+	"app/internal/bootstrap"
 	libCommon "app/internal/lib/common"
 	"app/valueObject/log"
 	"context"
@@ -13,14 +14,20 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
-var (
-	allow_trace_log bool
-)
-
 const (
-	ENV_TRACE_LOG = "TRACE_LOG"
+	ENV_TRACE_LOG = bootstrap.ENV_TRACE_LOG
 	CTX_LOG_KEY   = "custom_access_log"
 )
+
+func init() {
+
+	os.Setenv(
+		ENV_TRACE_LOG,
+		libCommon.Ternary(
+			cli.TraceLog(), "true", os.Getenv(ENV_TRACE_LOG),
+		),
+	)
+}
 
 type (
 	IrisAccessLoggerService struct {
@@ -95,7 +102,8 @@ func (this *IrisAccessLoggerService) Init(ctx context.Context) {
 	}
 
 	logQueue := &access_log_queue{
-		logObj: log.NewHTTPLogLine(),
+		logObj:       log.NewHTTPLogLine(),
+		traceEnabled: os.Getenv(ENV_TRACE_LOG) == "true",
 	}
 
 	c.Values().Set(CTX_LOG_KEY, logQueue)
@@ -105,12 +113,7 @@ func (this *IrisAccessLoggerService) Init(ctx context.Context) {
 
 func (this *IrisAccessLoggerService) PushTraceLogs(ctx context.Context, lines ...interface{}) {
 
-	if ctx == nil {
-
-		return
-	}
-
-	if !cli.TraceLog() || os.Getenv(ENV_TRACE_LOG) != "true" {
+	if ctx == nil || !this.IsTraceLogging(ctx) {
 
 		return
 	}
@@ -221,6 +224,11 @@ func (this *IrisAccessLoggerService) PushError(ctx context.Context, err error) {
 func (this *IrisAccessLoggerService) IsLogging(ctx context.Context) bool {
 
 	return this.getQueue(ctx) != nil
+}
+
+func (this *IrisAccessLoggerService) IsTraceLogging(ctx context.Context) bool {
+
+	return this.getQueue(ctx).traceEnabled
 }
 
 func (this *IrisAccessLoggerService) WriteMessage(ctx context.Context, msg string) {

@@ -5,6 +5,8 @@ import (
 	"app/infrastructure/http/api/v1/config"
 	"app/internal/bootstrap"
 	"app/internal/db"
+	"app/internal/rpc"
+	"app/internal/watcher"
 	"log"
 
 	"os"
@@ -74,28 +76,48 @@ func init() {
 
 func main() {
 
-	var app *iris.Application = iris.New()
+	watcher.Watch(
+		func() {
 
-	defer config.ConfigureLogger(app).Close()
+			var app *iris.Application = iris.New()
 
-	// app.UseRouter(
-	// 	cors.New(cors.Options{
-	// 		AllowedOrigins:   bootstrap.GetAllowedOrigins(),
-	// 		AllowedMethods:   cors_allowed_methods,
-	// 		AllowedHeaders:   cors_allowed_headers,
-	// 		AllowCredentials: true,
-	// 	}),
+			defer config.ConfigureLogger(app).Close()
+
+			// app.UseRouter(
+			// 	cors.New(cors.Options{
+			// 		AllowedOrigins:   bootstrap.GetAllowedOrigins(),
+			// 		AllowedMethods:   cors_allowed_methods,
+			// 		AllowedHeaders:   cors_allowed_headers,
+			// 		AllowCredentials: true,
+			// 	}),
+			// )
+
+			v1.Initialize(app)
+
+			app.Listen(
+				env.Get("HTTP_PORT", ":80"),
+				iris.WithoutBodyConsumptionOnUnmarshal,
+				iris.WithOptimizations,
+			)
+
+			log.Default().Println("Http server closed.")
+		},
+		func() {
+
+			rpc.Listen()
+			log.Default().Println("Rpc server closed.")
+		},
+	)
+
+	// log.Fatal(
+	// 	app.Listen(
+	// 		env.Get("HTTP_PORT", ":80"),
+	// 		iris.WithoutBodyConsumptionOnUnmarshal,
+	// 		iris.WithOptimizations,
+	// 	),
 	// )
 
-	v1.Initialize(app)
-
-	log.Fatal(
-		app.Listen(
-			env.Get("HTTP_PORT", ":80"),
-			iris.WithoutBodyConsumptionOnUnmarshal,
-			iris.WithOptimizations,
-		),
-	)
+	watcher.Wait()
 }
 
 func initWebsocket() {

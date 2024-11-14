@@ -1,6 +1,7 @@
 package opLog
 
 import (
+	"app/internal/bootstrap"
 	libCommon "app/internal/lib/common"
 	accessLogServicePort "app/port/accessLog"
 	"context"
@@ -9,7 +10,7 @@ import (
 )
 
 const (
-	ENV_OP_TRACE_DURATION = "OP_TRACE_DURATION"
+	ENV_OP_TRACE_DURATION = bootstrap.ENV_OP_TRACE_DURATION
 )
 
 type (
@@ -29,9 +30,14 @@ type (
 	}
 )
 
+func (this *OperationLogger) CouldLog(ctx context.Context) bool {
+
+	return ctx != nil && this.AccessLogger.IsLogging(ctx) && this.AccessLogger.IsTraceLogging(ctx)
+}
+
 func (this *OperationLogger) Messure(op string, msg string, ctx context.Context) func(err error) {
 
-	if !this.AccessLogger.IsLogging(ctx) || ctx == nil {
+	if !this.CouldLog(ctx) {
 
 		return empty_trace_func
 	}
@@ -55,7 +61,7 @@ func (this *OperationLogger) Messure(op string, msg string, ctx context.Context)
 
 func (this *OperationLogger) PushTraceIfError(err error, op string, msg string, ctx context.Context) {
 
-	if err == nil || ctx == nil {
+	if err == nil || !this.CouldLog(ctx) {
 
 		return
 	}
@@ -72,7 +78,7 @@ func (this *OperationLogger) PushTraceIfError(err error, op string, msg string, 
 
 func (this *OperationLogger) PushTrace(op string, msg string, ctx context.Context) {
 
-	if !this.AccessLogger.IsLogging(ctx) || ctx == nil {
+	if !this.CouldLog(ctx) {
 
 		return
 	}
@@ -92,7 +98,7 @@ func (this *OperationLogger) PushTraceCond(
 
 	return func(err error, errMsg string) {
 
-		if ctx == nil {
+		if !this.CouldLog(ctx) {
 
 			return
 		}
@@ -103,7 +109,6 @@ func (this *OperationLogger) PushTraceCond(
 			return
 		}
 
-		//this.PushTraceIfError(err, op, errMsg, ctx)
 		this.PushTraceError(op, err, msgIfNoErr, ctx)
 	}
 }
@@ -116,7 +121,7 @@ func (this *OperationLogger) PushTraceCondWithMessurement(
 
 	return func(err error, msgIfErr string) {
 
-		if ctx == nil {
+		if !this.CouldLog(ctx) {
 
 			return
 		}
@@ -145,7 +150,7 @@ func (this *OperationLogger) PushTraceCondWithMessurement(
 
 func (this *OperationLogger) PushTraceError(op string, err error, defaultMsg string, ctx context.Context) {
 
-	if ctx == nil {
+	if !this.CouldLog(ctx) {
 
 		return
 	}
