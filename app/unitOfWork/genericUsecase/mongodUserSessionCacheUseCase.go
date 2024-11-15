@@ -15,9 +15,6 @@ import (
 )
 
 type (
-	// RefreshTokenBlackList = cacheList.CacheListManipulator[string, bootstrap.RefreshTokenBlackListCacheValue]
-	// GeneralTokenWhiteList = cacheList.CacheListManipulator[generalToken.GeneralTokenID, bootstrap.GeneralTokenWhiteListCacheValue]
-
 	RefreshTokenBlackList = cacheListServicePort.ICacheList[string, bootstrap.RefreshTokenBlackListCacheValue]
 	GeneralTokenWhiteList = cacheListServicePort.ICacheList[generalToken.GeneralTokenID, bootstrap.GeneralTokenWhiteListCacheValue]
 
@@ -76,7 +73,7 @@ func (this *MongoUserSessionCacheUseCase[Output_T]) ModifyUserSession(
 }
 
 func (this *MongoUserSessionCacheUseCase[Output_T]) RemoveUserSession(
-	ctx context.Context, userUUID uuid.UUID, beforeRemoveFns ...func() error,
+	ctx context.Context, userUUID uuid.UUID, //beforeRemoveFns ...func() error,
 ) (err error) {
 
 	userSessions, err := this.UserSessionRepo.FindMany(
@@ -112,15 +109,15 @@ func (this *MongoUserSessionCacheUseCase[Output_T]) RemoveUserSession(
 		}
 	}()
 
-	for _, fn := range beforeRemoveFns {
+	// for _, fn := range beforeRemoveFns {
 
-		err = fn()
+	// 	err = fn()
 
-		if err != nil {
+	// 	if err != nil {
 
-			return
-		}
-	}
+	// 		return
+	// 	}
+	// }
 
 	return nil
 }

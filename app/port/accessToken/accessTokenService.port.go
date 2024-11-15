@@ -84,7 +84,7 @@ type (
 		GetAudiences() []string
 		GetAuthData() IAccessTokenAuthData
 		Expired() bool
-		GetExpire() *time.Time
+		GetExpireTime() *time.Time
 		GetTokenID() string
 		SetTokenID(string)
 	}

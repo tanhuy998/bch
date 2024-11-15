@@ -5,6 +5,7 @@ import (
 	accessTokenServicePort "app/port/accessToken"
 	authSignatureTokenPort "app/port/authSignatureToken"
 	refreshTokenServicePort "app/port/refreshToken"
+	"app/unitOfWork"
 	"context"
 	"errors"
 	"fmt"
@@ -23,6 +24,7 @@ type (
 		RefreshTokenManipulator    refreshTokenServicePort.IRefreshTokenManipulator
 		AccessTokenManipulator     accessTokenServicePort.IAccessTokenManipulator
 		AuthSignatureTokenProvider authSignatureTokenPort.IAuthSignatureProvider
+		unitOfWork.OperationLogger
 	}
 )
 

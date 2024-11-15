@@ -1,7 +1,6 @@
 package irisAccessLoggerService
 
 import (
-	"app/cli"
 	"app/internal/bootstrap"
 	libCommon "app/internal/lib/common"
 	"app/valueObject/log"
@@ -18,16 +17,6 @@ const (
 	ENV_TRACE_LOG = bootstrap.ENV_TRACE_LOG
 	CTX_LOG_KEY   = "custom_access_log"
 )
-
-func init() {
-
-	os.Setenv(
-		ENV_TRACE_LOG,
-		libCommon.Ternary(
-			cli.TraceLog(), "true", os.Getenv(ENV_TRACE_LOG),
-		),
-	)
-}
 
 type (
 	IrisAccessLoggerService struct {
@@ -48,8 +37,6 @@ func (this *IrisAccessLoggerService) resolveContext(ctx context.Context) iris.Co
 }
 
 func (this *IrisAccessLoggerService) getQueue(ctx context.Context) *access_log_queue {
-
-	//c := this.resolveContext(ctx)
 
 	if ctx == nil {
 
@@ -72,8 +59,6 @@ func (this *IrisAccessLoggerService) getQueue(ctx context.Context) *access_log_q
 }
 
 func (this *IrisAccessLoggerService) getLogObject(ctx context.Context) *log.HTTPLogLine {
-
-	//c := this.resolveContext(ctx)
 
 	accessLogObj := ctx.Value(CTX_LOG_KEY)
 
@@ -160,8 +145,6 @@ func (this *IrisAccessLoggerService) EndContext(ctx context.Context) {
 }
 
 func (this *IrisAccessLoggerService) assignLogObject(ctx context.Context) {
-
-	//c := this.resolveContext(ctx)
 
 	c, ok := ctx.(iris.Context)
 

@@ -38,6 +38,8 @@ func (this *AuthSignatureTokenService) Generate(
 		return
 	}
 
+	at.SetTokenID(rt.GetTokenID())
+
 	return
 }
 
@@ -58,6 +60,8 @@ func (this *AuthSignatureTokenService) Rotate(
 
 		return
 	}
+
+	at.SetTokenID(rt.GetTokenID())
 
 	return
 }

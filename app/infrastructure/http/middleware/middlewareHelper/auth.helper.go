@@ -21,13 +21,13 @@ func beginCache() (markAsPass func(at AccessToken), markUnPass func(at AccessTok
 
 		cache[key] = true
 
-		if at.GetExpire() == nil {
+		if at.GetExpireTime() == nil {
 
 			return
 		}
 
 		time.AfterFunc(
-			time.Until(*at.GetExpire()),
+			time.Until(*at.GetExpireTime()),
 			func() {
 
 				delete(cache, key)
@@ -41,13 +41,13 @@ func beginCache() (markAsPass func(at AccessToken), markUnPass func(at AccessTok
 
 		cache[key] = false
 
-		if at.GetExpire() == nil {
+		if at.GetExpireTime() == nil {
 
 			return
 		}
 
 		time.AfterFunc(
-			time.Until(*at.GetExpire()),
+			time.Until(*at.GetExpireTime()),
 			func() {
 
 				delete(cache, key)

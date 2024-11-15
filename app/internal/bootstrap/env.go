@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"app/internal/cli"
 	"os"
 	"strings"
 
@@ -54,6 +55,32 @@ var (
 	allowed_cors_ports    []string
 )
 
+func init() {
+
+	defer ignorePanicWhenUnitTesting()
+
+	err := godotenv.Load()
+
+	if err != nil {
+
+		panic("error while loading env: " + err.Error())
+	}
+
+	host_names = RetrieveCORSHosts()
+
+	for _, val := range host_names {
+
+		host_names_dictionary[val] = true
+	}
+
+	initializeAuthEncryptionData()
+}
+
+func init() {
+
+	readCLIFlags()
+}
+
 func GetDomainNames() []string {
 
 	return host_names
@@ -81,56 +108,12 @@ func HasHostName(name string) bool {
 	return true
 }
 
-func init() {
-
-	defer ignorePanicWhenUnitTesting()
-
-	err := godotenv.Load()
-
-	if err != nil {
-
-		panic("error while loading env: " + err.Error())
-	}
-
-	host_names = RetrieveCORSHosts()
-
-	for _, val := range host_names {
-
-		host_names_dictionary[val] = true
-	}
-
-	initializeAuthEncryptionData()
-
-}
-
 func IsHTTPS() bool {
 
 	return env.Get(ENV_HTTPS, "false") == "true	"
 }
 
-// func InitEnv() error {
-
-// 	if isLoaded {
-
-// 		return nil
-// 	}
-
-// 	if err != nil {
-
-// 		return err
-// 	}
-
-// 	return env.Load(filepath.Join(cwd, ".env"))
-// }
-
 func RetrieveCORSHosts() []string {
-
-	// err := InitEnv()
-
-	// if err != nil {
-
-	// 	panic(err)
-	// }
 
 	hostString := os.Getenv(ENV_HOSTS) // env.Get(ENV_HOSTS, "*")
 
@@ -153,5 +136,13 @@ func ignorePanicWhenUnitTesting() {
 	case os.Getenv(ENV_PROJECT_STAGE) == "unit-testing":
 	default:
 		panic(r)
+	}
+}
+
+func readCLIFlags() {
+
+	if cli.TraceLog() {
+
+		os.Setenv(ENV_TRACE_LOG, "true")
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"app/internal/bootstrap"
 	libError "app/internal/lib/error"
 	refreshTokenServicePort "app/port/refreshToken"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -34,12 +33,8 @@ func (this *RefreshTokenClientService) Read(ctx context.Context) (refreshTokenSe
 		return nil, libError.NewInternal(fmt.Errorf("RefreshTokenClientService error: invalid context given (not type of iris.Context)"))
 	}
 
-	b, _ := json.Marshal(c.Request().Header)
-
-	fmt.Println(string(b))
-
 	str := c.GetCookie(key)
-	fmt.Println(c.Request().Cookies())
+
 	if str == "" {
 
 		return nil, nil

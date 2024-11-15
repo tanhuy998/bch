@@ -4,16 +4,17 @@ import (
 	"app/internal/common"
 	authGenServicePort "app/port/authGenService"
 	generalTokenClientServicePort "app/port/generalTokenClient"
-	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
+	"app/unitOfWork"
 	"errors"
 	"fmt"
 )
 
 type (
 	NavigateTenantUseCase struct {
-		usecasePort.UseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant]
+		unitOfWork.GenericUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant]
+		unitOfWork.UseCaseResultWrapper[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant]
 		GeneralTokenClient    generalTokenClientServicePort.IGeneralTokenClient
 		NavigateTenantService authGenServicePort.INavigateTenant
 	}
@@ -21,7 +22,9 @@ type (
 
 func (this *NavigateTenantUseCase) Execute(
 	input *requestPresenter.AuthNavigateTenant,
-) (*responsePresenter.AuthNavigateTenant, error) {
+) (output *responsePresenter.AuthNavigateTenant, err error) {
+
+	defer this.WrapResults(input, &output, &err)
 
 	generalToken, err := this.GeneralTokenClient.Read(input.GetContext())
 
@@ -29,10 +32,8 @@ func (this *NavigateTenantUseCase) Execute(
 	case err != nil:
 		return nil, err
 	case generalToken == nil:
-		fmt.Println(1)
 		return nil, errors.Join(common.ERR_UNAUTHORIZED, fmt.Errorf("login again"))
 	case generalToken.Expire():
-		fmt.Println(2)
 		return nil, errors.Join(common.ERR_UNAUTHORIZED, fmt.Errorf("login again"))
 	}
 
@@ -43,7 +44,7 @@ func (this *NavigateTenantUseCase) Execute(
 		return nil, err
 	}
 
-	output := this.GenerateOutput()
+	output = this.GenerateOutput()
 	output.Message = "success"
 	output.Data = data
 

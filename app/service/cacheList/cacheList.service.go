@@ -32,9 +32,11 @@ func NewCacheListManipulator[Key_T, Value_T comparable](name string) *CacheListM
 
 func (this *CacheListManipulator[Key_T, Value_T]) Has(tokenId Key_T, ctx context.Context) (res bool, err error) {
 
+	endLogFn := this.PushTraceCondWithMessurement("check_"+this.name+"_cache_key_exist", "true", ctx)
+
 	defer func() {
 
-		this.PushTraceCondWithMessurement("check_"+this.name+"_cache_key_exist", "exists", ctx)(err, "failed")
+		endLogFn(err, "false")
 	}()
 
 	_, exists, err := this.CacheClient.Read(ctx, tokenId)

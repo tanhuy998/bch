@@ -106,7 +106,7 @@ func (this *jwt_access_token) GetAudiences() []string {
 
 func (this *jwt_access_token) Expired() bool {
 
-	exp := this.GetExpire()
+	exp := this.GetExpireTime()
 
 	if exp == nil {
 
@@ -121,7 +121,7 @@ func (this *jwt_access_token) GetAuthData() IAccessTokenAuthData {
 	return this.customClaims.AuthData
 }
 
-func (this *jwt_access_token) GetExpire() *time.Time {
+func (this *jwt_access_token) GetExpireTime() *time.Time {
 
 	claims := this.customClaims
 

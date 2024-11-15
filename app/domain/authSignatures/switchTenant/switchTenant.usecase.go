@@ -9,29 +9,32 @@ import (
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	refreshTokenClientPort "app/port/refreshTokenClient"
 	refreshTokenIdServicePort "app/port/refreshTokenID"
-	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
+	"app/unitOfWork"
 	"context"
 	"errors"
 )
 
 type (
 	SwitchTenantUseCase struct {
-		usecasePort.MongoUserSessionCacheUseCase[responsePresenter.SwitchTenant]
+		unitOfWork.MongoUserSessionCacheUseCase[responsePresenter.SwitchTenant]
+		unitOfWork.GenericUseCase[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant]
+		unitOfWork.UseCaseResultWrapper[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant]
 		GeneralTokenClientService generalTokenClientServicePort.IGeneralTokenClient
 		SwitchTenantService       authSignaturesServicePort.ISwitchTenant
 		AccessTokenManipulator    accessTokenServicePort.IAccessTokenManipulator
 		RefreshTokenClientService refreshTokenClientPort.IRefreshTokenClient
 		RefreshTokenIDProvider    refreshTokenIdServicePort.IRefreshTokenIDProvider
 		GetSingleUserService      authServicePort.IGetSingleUser
-		usecasePort.UseCase[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant]
 	}
 )
 
 func (this *SwitchTenantUseCase) Execute(
 	input *requestPresenter.SwitchTenant,
 ) (output *responsePresenter.SwitchTenant, err error) {
+
+	defer this.WrapResults(input, &output, &err)
 
 	generalToken, err := this.GeneralTokenClientService.Read(input.GetContext())
 
@@ -145,84 +148,35 @@ func (this *SwitchTenantUseCase) manageSessions(
 	generalToken generalTokenServicePort.IGeneralToken, ctx context.Context,
 ) (err error) {
 
-	// userSessions, err := this.UserSessionRepo.FindMany(
-	// 	bson.D{
-	// 		{"userUUID", generalToken.GetUserUUID()},
-	// 	},
-	// 	ctx,
-	// )
-
-	// if err != nil {
-
-	// 	return err
-	// }
-
-	// defer func() {
-
-	// 	if err != nil {
-
-	// 		return
-	// 	}
-
-	// 	for _, v := range userSessions {
-	// 		// Delete caches of current user sessions
-	// 		// ctx of this funciton is a transaction context, therefore fetched data from
-	// 		// db have not committed until the whole transaction committed
-	// 		_, err = this.GeneralTokenWhiteList.Delete(*v.SessionID, ctx)
-
-	// 		if err != nil {
-
-	// 			return
-	// 		}
-	// 	}
-	// }()
-
-	// expire := generalToken.GetExpiretime()
-
-	// if expire != nil {
-
-	// 	err = this.GeneralTokenWhiteList.SetWithExpire(
-	// 		generalToken.GetTokenID(), struct{}{}, *expire, ctx,
-	// 	)
-	// } else {
-
-	// 	_, err = this.GeneralTokenWhiteList.Set(
-	// 		generalToken.GetTokenID(), struct{}{}, ctx,
-	// 	)
-	// }
-
-	// if err != nil {
-
-	// 	return err
-	// }
-
 	err = this.RemoveUserSession(
 		ctx,
 		generalToken.GetUserUUID(),
-		func() error {
-
-			expire := generalToken.GetExpiretime()
-
-			if expire != nil {
-
-				err = this.GeneralTokenWhiteList.SetWithExpire(
-					generalToken.GetTokenID(), struct{}{}, *expire, ctx,
-				)
-			} else {
-
-				_, err = this.GeneralTokenWhiteList.Set(
-					generalToken.GetTokenID(), struct{}{}, ctx,
-				)
-			}
-
-			if err != nil {
-
-				return err
-			}
-
-			return nil
-		},
 	)
 
+	if err != nil {
+
+		return
+	}
+
+	expire := generalToken.GetExpiretime()
+
+	if expire != nil {
+
+		err = this.GeneralTokenWhiteList.SetWithExpire(
+			generalToken.GetTokenID(), struct{}{}, *expire, ctx,
+		)
+	} else {
+
+		_, err = this.GeneralTokenWhiteList.Set(
+			generalToken.GetTokenID(), struct{}{}, ctx,
+		)
+	}
+
+	if err != nil {
+
+		return err
+	}
+
 	return nil
+
 }

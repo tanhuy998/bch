@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	default_exp_duration = time.Minute * 5
+	default_exp_duration = time.Minute * 1
 	claim_subject        = "sub"
 	claim_audience       = "aud"
 	claim_expire         = "exp"
