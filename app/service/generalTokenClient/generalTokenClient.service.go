@@ -2,8 +2,10 @@ package generalTokenClientService
 
 import (
 	"app/internal/bootstrap"
+	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	generalTokenServicePort "app/port/generalToken"
+	"app/unitOfWork"
 
 	"context"
 	"fmt"
@@ -20,11 +22,17 @@ const (
 
 type (
 	GeneralTokenClientService struct {
+		unitOfWork.OperationLogger
 		GeneralTokenManipulator generalTokenServicePort.IGeneralTokenManipulator
 	}
 )
 
-func (this *GeneralTokenClientService) Read(ctx context.Context) (generalTokenServicePort.IGeneralToken, error) {
+func (this *GeneralTokenClientService) Read(ctx context.Context) (ret generalTokenServicePort.IGeneralToken, err error) {
+
+	defer func() {
+
+		this.PushTraceCond("read_general_token_from_client", libCommon.Ternary(ret != nil, "exist", "absent"), ctx)(err, "")
+	}()
 
 	c, ok := ctx.(iris.Context)
 
@@ -40,7 +48,7 @@ func (this *GeneralTokenClientService) Read(ctx context.Context) (generalTokenSe
 		return nil, nil
 	}
 
-	ret, err := this.GeneralTokenManipulator.Read(str)
+	ret, err = this.GeneralTokenManipulator.Read(str)
 
 	if err != nil {
 
@@ -50,7 +58,12 @@ func (this *GeneralTokenClientService) Read(ctx context.Context) (generalTokenSe
 	return ret, nil
 }
 
-func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken generalTokenServicePort.IGeneralToken) error {
+func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken generalTokenServicePort.IGeneralToken) (err error) {
+
+	defer func() {
+
+		this.PushTraceCond("write_general_token_to_client", libCommon.Ternary(err == nil, "success", "failed"), ctx)(err, "")
+	}()
 
 	c, ok := ctx.(iris.Context)
 
@@ -121,7 +134,12 @@ func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken g
 	return nil
 }
 
-func (this *GeneralTokenClientService) Remove(ctx context.Context) error {
+func (this *GeneralTokenClientService) Remove(ctx context.Context) (err error) {
+
+	defer func() {
+
+		this.PushTraceCond("remove_general_token_from_client", libCommon.Ternary(err == nil, "success", "failed"), ctx)(err, "")
+	}()
 
 	c, ok := ctx.(iris.Context)
 

@@ -63,15 +63,15 @@ func (this *CacheListLogger) PushTraceCond(op string, msgIfNoErr string, ctx con
 }
 
 func (this *CacheListLogger) PushTraceCondWithMessurement(
-	op string, msgIfNoErr string, ctx context.Context,
-) func(err error, msgIfErr string) {
+	op string, ctx context.Context,
+) func(msgIfNoErr string, err error, msgIfErr string) {
 
 	if !this.IsCacheLogEnabled() {
 
 		ctx = nil
 	}
 
-	return this.OperationLogger.PushTraceCondWithMessurement(op, msgIfNoErr, ctx)
+	return this.OperationLogger.PushTraceCondWithMessurement(op, ctx)
 }
 
 func (this *CacheListLogger) PushTraceError(op string, err error, defaultMsg string, ctx context.Context) {

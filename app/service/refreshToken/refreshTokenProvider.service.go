@@ -21,6 +21,7 @@ import (
 
 var (
 	default_exp_duration = time.Hour * 2
+	test_exp_duration    = time.Minute * 5
 )
 
 var (
@@ -69,6 +70,11 @@ func (this *RefreshTokenManipulatorService) makeFor(
 		RefreshTokenID: refreshTokenID,
 		TenantUUID:     libCommon.PointerPrimitive(tenantUUID),
 		ExpiresAt:      jwt.NewNumericDate(time.Now().Add(default_exp_duration)),
+	}
+
+	if bootstrap.IsTestingRefreshToken() {
+
+		customClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(test_exp_duration))
 	}
 
 	jwtClaim.SetupRefreshToken(&customClaims.PrivateClaims)

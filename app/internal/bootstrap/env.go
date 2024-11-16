@@ -49,6 +49,11 @@ const (
 	ENV_AUTH_HEADER   = "AUTH_HEADER"
 )
 
+const (
+	ENV_TEST       = "TEST"
+	ENV_TEST_LOGIN = "TEST_LOGIN"
+)
+
 var (
 	host_names            []string
 	host_names_dictionary map[string]bool = make(map[string]bool)
@@ -79,6 +84,7 @@ func init() {
 func init() {
 
 	readCLIFlags()
+	parseTestLoginFlags()
 }
 
 func GetDomainNames() []string {

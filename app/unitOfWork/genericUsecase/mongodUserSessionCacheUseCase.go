@@ -4,6 +4,7 @@ import (
 	"app/internal/bootstrap"
 	"app/internal/generalToken"
 	cacheListServicePort "app/port/cacheList"
+	generalTokenServicePort "app/port/generalToken"
 	"app/repository"
 	"context"
 	"fmt"
@@ -120,4 +121,30 @@ func (this *MongoUserSessionCacheUseCase[Output_T]) RemoveUserSession(
 	// }
 
 	return nil
+}
+
+func (this *MongoUserSessionCacheUseCase[Output_T]) HasUserSession(
+	generalToken generalTokenServicePort.IGeneralToken, ctx context.Context,
+) (bool, error) {
+
+	switch generalTokenInWhiteList, err := this.GeneralTokenWhiteList.Has(generalToken.GetTokenID(), ctx); {
+	case err != nil:
+		return false, err
+	case generalTokenInWhiteList:
+		return true, nil
+	}
+
+	switch existingUserSession, err := this.UserSessionRepo.Find(
+		bson.D{
+			{"sessionID", generalToken.GetTokenID()},
+		},
+		ctx,
+	); {
+	case err != nil:
+		return false, err
+	case existingUserSession != nil:
+		return true, nil
+	default:
+		return false, nil
+	}
 }

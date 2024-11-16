@@ -15,7 +15,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"slices"
 	"time"
 
@@ -24,7 +23,8 @@ import (
 )
 
 const (
-	default_exp_duration = time.Minute * 1
+	default_exp_duration = time.Minute * 5
+	test_exp_duration    = time.Minute
 	claim_subject        = "sub"
 	claim_audience       = "aud"
 	claim_expire         = "exp"
@@ -124,9 +124,9 @@ func (this *JWTAccessTokenManipulatorService) makeFor(
 		customClaims.ExpireAt = nil
 	}
 
-	if os.Getenv("TEST-LOGIN") == "1" {
+	if bootstrap.IsTestingAccessToken() {
 
-		customClaims.ExpireAt = jwt.NewNumericDate(time.Now())
+		customClaims.ExpireAt = jwt.NewNumericDate(time.Now().Add(test_exp_duration))
 	}
 
 	token.Claims = customClaims

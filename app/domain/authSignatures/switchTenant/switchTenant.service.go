@@ -30,8 +30,22 @@ func (this *SwitchTenantService) Serve(
 	if generalToken.Expire() {
 
 		err = errors.Join(
-			common.ERR_UNAUTHORIZED, fmt.Errorf("session expires login again"),
+			common.ERR_UNAUTHORIZED, fmt.Errorf("general token expires login again"),
 		)
+		return
+	}
+
+	switch existingUserSession, e := this.UserSessionRepo.Find(
+		bson.D{
+			{"sessionID", generalToken.GetTokenID()},
+		},
+		ctx,
+	); {
+	case e != nil:
+		err = e
+		return
+	case existingUserSession != nil:
+		err = errGeneralTokenMustBeRemovedFromClient
 		return
 	}
 

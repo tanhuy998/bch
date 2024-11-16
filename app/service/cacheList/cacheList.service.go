@@ -32,11 +32,11 @@ func NewCacheListManipulator[Key_T, Value_T comparable](name string) *CacheListM
 
 func (this *CacheListManipulator[Key_T, Value_T]) Has(tokenId Key_T, ctx context.Context) (res bool, err error) {
 
-	endLogFn := this.PushTraceCondWithMessurement("check_"+this.name+"_cache_key_exist", "true", ctx)
+	endLogFn := this.PushTraceCondWithMessurement("check_"+this.name+"_cache_key_exist", ctx)
 
 	defer func() {
 
-		endLogFn(err, "false")
+		endLogFn(libCommon.Ternary(res, "true", "false"), err, "")
 	}()
 
 	_, exists, err := this.CacheClient.Read(ctx, tokenId)
@@ -51,17 +51,11 @@ func (this *CacheListManipulator[Key_T, Value_T]) Has(tokenId Key_T, ctx context
 
 func (this *CacheListManipulator[Key_T, Value_T]) Get(tokenID Key_T, ctx context.Context) (retVal Value_T, exists bool, err error) {
 
-	endLogFn := this.PushTraceCondWithMessurement("get_"+this.name+"_cache_key", libCommon.Ternary(exists, "exists", "absent"), ctx)
+	endLogFn := this.PushTraceCondWithMessurement("get_"+this.name+"_cache_key", ctx)
 
 	defer func() {
 
-		if err != nil {
-
-			endLogFn(err, err.Error())
-			return
-		}
-
-		endLogFn(err, "")
+		endLogFn(libCommon.Ternary(exists, "exists", "absent"), err, "")
 	}()
 
 	val, exists, err := this.CacheClient.Read(ctx, tokenID)
@@ -80,17 +74,11 @@ func (this *CacheListManipulator[Key_T, Value_T]) Read(
 	ctx context.Context,
 ) (err error) {
 
-	endLogFn := this.PushTraceCondWithMessurement("read_"+this.name+"_cache_key", "success", ctx)
+	endLogFn := this.PushTraceCondWithMessurement("read_"+this.name+"_cache_key", ctx)
 
 	defer func() {
 
-		if err != nil {
-
-			endLogFn(err, err.Error())
-			return
-		}
-
-		endLogFn(err, "")
+		endLogFn("success", err, "")
 	}()
 
 	err = this.CacheClient.Hold(ctx, tokenID, readFunc)
@@ -114,17 +102,11 @@ func (this *CacheListManipulator[Key_T, Value_T]) Update(
 	ctx context.Context,
 ) (err error) {
 
-	endLogFn := this.PushTraceCondWithMessurement("update_"+this.name+"_cache_key", "success", ctx)
+	endLogFn := this.PushTraceCondWithMessurement("update_"+this.name+"_cache_key", ctx)
 
 	defer func() {
 
-		if err != nil {
-
-			endLogFn(err, err.Error())
-			return
-		}
-
-		endLogFn(err, "")
+		endLogFn("success", err, "")
 	}()
 
 	err = this.CacheClient.Update(ctx, tokenId, updatefunc)
@@ -148,17 +130,11 @@ func (this *CacheListManipulator[Key_T, Value_T]) Set(
 	ctx context.Context,
 ) (success bool, err error) {
 
-	endLogFn := this.PushTraceCondWithMessurement("set_"+this.name+"_cache_key", libCommon.Ternary(success, "success", "failed"), ctx)
+	endLogFn := this.PushTraceCondWithMessurement("set_"+this.name+"_cache_key", ctx)
 
 	defer func() {
 
-		if err != nil {
-
-			endLogFn(err, err.Error())
-			return
-		}
-
-		endLogFn(err, "")
+		endLogFn(libCommon.Ternary(success, "success", "failed"), err, "")
 	}()
 
 	err = this.CacheClient.Set(ctx, tokenId, value)
@@ -175,17 +151,11 @@ func (this *CacheListManipulator[Key_T, Value_T]) SetWithExpire(
 	tokenID Key_T, value Value_T, expire time.Time, ctx context.Context,
 ) (err error) {
 
-	endLogFn := this.PushTraceCondWithMessurement("set_"+this.name+"_cache_key_with_expire_time"+expire.String(), "success", ctx)
+	endLogFn := this.PushTraceCondWithMessurement("set_"+this.name+"_cache_key_with_expire_time", ctx)
 
 	defer func() {
 
-		if err != nil {
-
-			endLogFn(err, err.Error())
-			return
-		}
-
-		endLogFn(err, "")
+		endLogFn("expire time "+expire.String(), err, "")
 	}()
 
 	err = this.CacheClient.SetWithExpire(ctx, tokenID, value, expire)
@@ -200,17 +170,11 @@ func (this *CacheListManipulator[Key_T, Value_T]) SetWithExpire(
 
 func (this *CacheListManipulator[Key_T, Value_T]) Delete(key Key_T, ctx context.Context) (isDeleted bool, err error) {
 
-	endLogFn := this.PushTraceCondWithMessurement("delete_"+this.name+"_cache_key", libCommon.Ternary(isDeleted, "success", "failed"), ctx)
+	endLogFn := this.PushTraceCondWithMessurement("delete_"+this.name+"_cache_key", ctx)
 
 	defer func() {
 
-		if err != nil {
-
-			endLogFn(err, err.Error())
-			return
-		}
-
-		endLogFn(err, "")
+		endLogFn(libCommon.Ternary(isDeleted, "success", "failed"), err, "")
 	}()
 
 	isDeleted, err = this.CacheClient.Delete(ctx, key)

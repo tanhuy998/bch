@@ -12,7 +12,8 @@ import (
 
 type (
 	NavigateTenantService struct {
-		TenantRepo repository.ITenant
+		TenantRepo      repository.ITenant
+		UserSessionRepo repository.IUserSession
 	}
 )
 

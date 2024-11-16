@@ -114,12 +114,12 @@ func (this *OperationLogger) PushTraceCond(
 }
 
 func (this *OperationLogger) PushTraceCondWithMessurement(
-	op string, msgIfNoErr string, ctx context.Context,
-) func(err error, msgIfErr string) {
+	op string, ctx context.Context,
+) func(msgIfNoErr string, err error, msgIfErr string) {
 
 	start := time.Now()
 
-	return func(err error, msgIfErr string) {
+	return func(msgIfNoErr string, err error, msgIfErr string) {
 
 		if !this.CouldLog(ctx) {
 

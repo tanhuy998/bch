@@ -2,6 +2,7 @@ package switchTenantDomain
 
 import (
 	"app/internal/common"
+	libCommon "app/internal/lib/common"
 	accessTokenServicePort "app/port/accessToken"
 	authServicePort "app/port/auth"
 	authSignaturesServicePort "app/port/authSignatures"
@@ -14,6 +15,11 @@ import (
 	"app/unitOfWork"
 	"context"
 	"errors"
+	"fmt"
+)
+
+var (
+	errGeneralTokenMustBeRemovedFromClient = fmt.Errorf("general token must be removed from client")
 )
 
 type (
@@ -48,10 +54,21 @@ func (this *SwitchTenantUseCase) Execute(
 		return nil, common.ERR_UNAUTHORIZED
 	}
 
+	switch generalTokenIdInCache, err := this.GeneralTokenWhiteList.Has(generalToken.GetTokenID(), input.GetContext()); {
+	case err != nil:
+		return nil, err
+	case generalToken.Expire() || generalTokenIdInCache:
+		return nil, errGeneralTokenMustBeRemovedFromClient
+	}
+
 	defer func() {
 
-		if err != nil {
-
+		switch {
+		case errors.Is(err, errGeneralTokenMustBeRemovedFromClient):
+			err = this.GeneralTokenClientService.Remove(input.GetContext())
+			err = libCommon.Ternary(err == nil, common.ERR_UNAUTHORIZED, err)
+			return
+		case err != nil:
 			return
 		}
 

@@ -2,8 +2,10 @@ package refreshTokenClientService
 
 import (
 	"app/internal/bootstrap"
+	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	refreshTokenServicePort "app/port/refreshToken"
+	"app/unitOfWork"
 	"fmt"
 	"net/http"
 	"time"
@@ -20,11 +22,16 @@ const (
 
 type (
 	RefreshTokenClientService struct {
+		unitOfWork.OperationLogger
 		RefreshTokenManipulator refreshTokenServicePort.IRefreshTokenManipulator
 	}
 )
 
-func (this *RefreshTokenClientService) Read(ctx context.Context) (refreshTokenServicePort.IRefreshToken, error) {
+func (this *RefreshTokenClientService) Read(ctx context.Context) (ret refreshTokenServicePort.IRefreshToken, err error) {
+
+	defer func() {
+		this.PushTraceCond("read_refresh_token_from_client", libCommon.Ternary(ret != nil, "exist", "absent"), ctx)(err, "")
+	}()
 
 	c, ok := ctx.(iris.Context)
 
@@ -50,7 +57,11 @@ func (this *RefreshTokenClientService) Read(ctx context.Context) (refreshTokenSe
 	return rt, nil
 }
 
-func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken refreshTokenServicePort.IRefreshToken) error {
+func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken refreshTokenServicePort.IRefreshToken) (err error) {
+
+	defer func() {
+		this.PushTraceCond("write_refresh_token_to_client", libCommon.Ternary(err == nil, "sucess", "failed"), ctx)(err, "")
+	}()
 
 	c, ok := ctx.(iris.Context)
 
@@ -113,7 +124,11 @@ func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken r
 	return nil
 }
 
-func (this *RefreshTokenClientService) Remove(ctx context.Context) error {
+func (this *RefreshTokenClientService) Remove(ctx context.Context) (err error) {
+
+	defer func() {
+		this.PushTraceCond("read_refresh_token_from_client", libCommon.Ternary(err == nil, "success", "failed"), ctx)(err, "")
+	}()
 
 	c, ok := ctx.(iris.Context)
 
