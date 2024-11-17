@@ -19,6 +19,14 @@ var (
 	ERR_LOCKING_SAME_KEY     = errors.New("cache err: locking the same key")
 )
 
+var (
+	noLogContext = &struct {
+		context.Context
+	}{
+		Context: context.TODO(),
+	}
+)
+
 type (
 	ICacheUnit[Key_T, Value_T comparable] interface {
 		ReadInstanctly(ctx context.Context, key Key_T) (value Value_T, exists bool)
@@ -60,12 +68,23 @@ func newCacheUnit[Key_T, Value_T comparable](topic string) *cache_unit[Key_T, Va
 
 	cacheUnit.topic = topic
 	cacheUnit.Logger = log.New(
-		os.Stdout,
-		fmt.Sprintf("[ CACHE TOPIC %s ]", cacheUnit.topic),
-		0,
+		//logPipeWrite,
+		log_mgr,
+		fmt.Sprintf("[CACHE TOPIC][%s]", cacheUnit.topic),
+		log.LstdFlags,
 	)
 
 	return cacheUnit
+}
+
+func (this *cache_unit[Key_T, Value_T]) CouldLog(ctx context.Context) bool {
+
+	switch {
+	case os.Getenv("CACHE_LOG") != "1", ctx == noLogContext:
+		return false
+	default:
+		return true
+	}
 }
 
 /*
@@ -78,20 +97,27 @@ func (this *cache_unit[Key_T, Value_T]) Read(
 
 	defer func() {
 
-		if os.Getenv("CACHE_LOG") != "1" {
+		if !this.CouldLog(ctx) {
 
 			return
 		}
 
 		go func() {
+
+			var msg string
+
 			switch {
 			case err != nil:
-				this.Println("reading key", key, "caused error:", err)
+				//this.Println("reading key", key, "caused error:", err)
+				msg = "caused error " + err.Error()
 			case !exists:
-				this.Println("reading inexisting key", key)
+				//his.Println("reading inexisting key", key)
+				msg = "absent"
 			default:
-				this.Println("read", key)
+				msg = "success"
 			}
+
+			this.Println(formatLogContent(key, "read", msg))
 		}()
 	}()
 
@@ -223,24 +249,32 @@ func (this *cache_unit[Key_T, Value_T]) Set(ctx context.Context, key Key_T, valu
 
 	cache, exists, err := this.getCache(ctx, key)
 
-	var oldVal Value_T
+	//var oldVal Value_T
 
 	defer func() {
 
-		if os.Getenv("CACHE_LOG") != "1" {
+		if !this.CouldLog(ctx) {
 
 			return
 		}
 
 		go func() {
+
+			var msg string
+
 			switch {
 			case err != nil:
-				this.Println("set key", key, "caused error:", err)
+				//this.Println("set key", key, "caused error:", err)
+				msg = "caused err " + err.Error()
 			case !exists:
-				this.Println("key", key, "initiated by value", value)
+				//this.Println("key", key, "initiated by value", value)
+				msg = "key initiated"
 			default:
-				this.Println("key reassigned", key, "old value", oldVal, "new value", value)
+				//this.Println("key reassigned", key, "old value", oldVal, "new value", value)
+				msg = "reseted "
 			}
+
+			this.Println(key, "set", msg)
 		}()
 	}()
 
@@ -260,10 +294,11 @@ func (this *cache_unit[Key_T, Value_T]) Set(ctx context.Context, key Key_T, valu
 				this.Map.Swap(key, cache)
 			}
 		}()
-	} else {
-
-		oldVal = cache.value
 	}
+	// else {
+
+	// 	oldVal = cache.value
+	// }
 
 	err = this.set(ctx, cache, value)
 
@@ -328,24 +363,32 @@ func (this *cache_unit[Key_T, Value_T]) SetWithExpire(
 
 	currentCache, exists, err := this.getCache(ctx, key)
 
-	var oldVal Value_T
+	//var oldVal Value_T
 
 	defer func() {
 
-		if os.Getenv("CACHE_LOG") != "1" {
+		if !this.CouldLog(ctx) {
 
 			return
 		}
 
 		go func() {
+
+			var msg string
+
 			switch {
 			case err != nil:
-				this.Println("set expiry key", key, "caused error:", err)
+				// this.Println("set expiry key", key, "caused error:", err)
+				msg = "caused error " + err.Error()
 			case !exists:
-				this.Println("key", key, "initiated by value", value, "until", moment)
+				//this.Println("key", key, "initiated by value", value, "until", moment)
+				msg = "initiated new key"
 			default:
-				this.Println("key reassigned", key, "old value", oldVal, "new value", value, "until", moment)
+				//this.Println("key reassigned", key, "old value", oldVal, "new value", value, "until", moment)
+				msg = "reseted"
 			}
+
+			this.Println(formatLogContent(key, "setWithExpire", fmt.Sprintf(`[until %v] %s`, moment, msg)))
 		}()
 	}()
 
@@ -359,10 +402,12 @@ func (this *cache_unit[Key_T, Value_T]) SetWithExpire(
 		currentCache = new(cache_value[Value_T])
 		this.Map.Store(key, currentCache)
 
-	} else {
-
-		oldVal = currentCache.value
 	}
+
+	// else {
+
+	// 	oldVal = currentCache.value
+	// }
 
 	_, command, err := this.startModify(ctx, currentCache)
 
@@ -389,7 +434,7 @@ func (this *cache_unit[Key_T, Value_T]) SetWithExpire(
 	cleanupTime := time.AfterFunc(duration, func() {
 
 		deactivateCacheValue(currentCache)
-		this.Delete(ctx, key)
+		this.Delete(noLogContext, key)
 		this.Println("key", key, "expired")
 	})
 
@@ -409,20 +454,28 @@ func (this *cache_unit[Key_T, Value_T]) Delete(ctx context.Context, key Key_T) (
 
 	defer func() {
 
-		if os.Getenv("CACHE_LOG") != "1" {
+		if !this.CouldLog(ctx) {
 
 			return
 		}
 
 		go func() {
+
+			var msg string
+
 			switch {
 			case err != nil:
-				this.Println("set key", key, "caused error:", err)
+				// this.Println("set key", key, "caused error:", err)
+				msg = "caused error " + err.Error()
 			case !exists:
-				this.Println("deleting inexisting key", key)
+				// this.Println("deleting inexisting key", key)
+				msg = "absent"
 			default:
-				this.Println("key deleted", key, "old value", cache.value)
+				// this.Println("key deleted", key, "old value", cache.value)
+				msg = "success"
 			}
+
+			this.Println(key, "Delete", msg)
 		}()
 	}()
 
@@ -437,12 +490,13 @@ func (this *cache_unit[Key_T, Value_T]) Delete(ctx context.Context, key Key_T) (
 	}
 
 	_, revoke, err := this.startModify(ctx, cache)
-	defer revoke()
 
 	if err != nil {
 
 		return
 	}
+
+	defer revoke()
 
 	cache.deactivated = false
 

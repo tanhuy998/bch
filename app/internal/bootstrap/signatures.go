@@ -32,6 +32,11 @@ func parseTestLoginFlags() {
 
 	test_env := os.Getenv(ENV_TEST_LOGIN)
 
+	if test_env == "" {
+
+		return
+	}
+
 	flags, err := strconv.Atoi(test_env)
 
 	if err != nil {

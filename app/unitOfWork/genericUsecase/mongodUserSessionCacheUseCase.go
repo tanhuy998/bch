@@ -6,6 +6,7 @@ import (
 	cacheListServicePort "app/port/cacheList"
 	generalTokenServicePort "app/port/generalToken"
 	"app/repository"
+	opLog "app/unitOfWork/operationLog"
 	"context"
 	"fmt"
 	"time"
@@ -34,6 +35,7 @@ type (
 
 	MongoUserSessionCacheUseCase[Output_T any] struct {
 		UserSessionCacheUseCase
+		opLog.OperationLogger
 		UserSessionRepo repository.IUserSession
 		MongoClient     *mongo.Client
 	}
@@ -88,6 +90,8 @@ func (this *MongoUserSessionCacheUseCase[Output_T]) RemoveUserSession(
 
 		return err
 	}
+
+	this.AccessLogger.PushTraceLogs(ctx, userSessions)
 
 	defer func() {
 

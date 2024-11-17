@@ -56,48 +56,35 @@ func (this *RotateSignaturesUseCase) Execute(
 
 	if reqCtx == nil {
 
-		return nil, this.ErrorWithContext(
-			input, libError.NewInternal(fmt.Errorf("refreshLoginUseCase: nil context given")),
-		)
+		err = libError.NewInternal(fmt.Errorf("refreshLoginUseCase: nil context given"))
+		return
 	}
 
 	oldRefreshToken, err := this.RefreshTokenClient.Read(reqCtx)
-
-	this.PushTraceIfError(err, "read_refresh_token", "failed", input.GetContext())
 
 	if err != nil {
 
 		return nil, err
 	}
 
-	this.PushTrace("read_refresh_token", "", input.GetContext())
-
 	err = this.checkUserSession(input, oldRefreshToken)
 
 	if err != nil {
-
-		// return nil, this.ErrorWithContext(
-		// 	input, err,
-		// )
 
 		return
 	}
 
 	accessToken, err := this.AccessTokenManipulator.Read(input.Data.AccessToken)
-	this.PushTraceIfError(err, "read_access_token", "failed", reqCtx)
 
 	if err != nil {
 
-		//return nil, err
 		return
 	}
 
 	newAccessToken, newRefreshToken, err := this.RefreshLoginService.Serve(accessToken, oldRefreshToken, reqCtx)
 
-	this.PushTraceIfError(err, "generat_new_signatures", "failed", reqCtx)
 	if err != nil {
 
-		//return nil, this.ErrorWithContext(input, err)
 		return
 	}
 

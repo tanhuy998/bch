@@ -96,3 +96,11 @@ func MeassureTime(content string) func() {
 		fmt.Println(content, time.Since(start))
 	}
 }
+
+func Flush(b []byte) {
+
+	for i := range b {
+
+		b[i] = 0
+	}
+}

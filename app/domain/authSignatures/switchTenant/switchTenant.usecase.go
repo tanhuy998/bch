@@ -2,12 +2,13 @@ package switchTenantDomain
 
 import (
 	"app/internal/common"
+	"app/internal/generalToken"
 	libCommon "app/internal/lib/common"
 	accessTokenServicePort "app/port/accessToken"
 	authServicePort "app/port/auth"
 	authSignaturesServicePort "app/port/authSignatures"
-	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
+	refreshTokenServicePort "app/port/refreshToken"
 	refreshTokenClientPort "app/port/refreshTokenClient"
 	refreshTokenIdServicePort "app/port/refreshTokenID"
 	requestPresenter "app/presenter/request"
@@ -54,13 +55,6 @@ func (this *SwitchTenantUseCase) Execute(
 		return nil, common.ERR_UNAUTHORIZED
 	}
 
-	switch generalTokenIdInCache, err := this.GeneralTokenWhiteList.Has(generalToken.GetTokenID(), input.GetContext()); {
-	case err != nil:
-		return nil, err
-	case generalToken.Expire() || generalTokenIdInCache:
-		return nil, errGeneralTokenMustBeRemovedFromClient
-	}
-
 	defer func() {
 
 		switch {
@@ -81,6 +75,13 @@ func (this *SwitchTenantUseCase) Execute(
 			generalToken.GetUserUUID(), input.GetContext(),
 		)
 	}()
+
+	switch generalTokenIdInCache, err := this.GeneralTokenWhiteList.Has(generalToken.GetTokenID(), input.GetContext()); {
+	case err != nil:
+		return nil, err
+	case generalToken.Expire() || generalTokenIdInCache:
+		return nil, errGeneralTokenMustBeRemovedFromClient
+	}
 
 	output, err = this.ModifyUserSession(
 		input.GetContext(),
@@ -137,7 +138,7 @@ func (this *SwitchTenantUseCase) Execute(
 				return nil, err
 			}
 
-			err = this.manageSessions(generalToken, sesstionCtx)
+			err = this.manageSessions(generalToken.GetTokenID(), rt, sesstionCtx)
 
 			if err != nil {
 
@@ -162,12 +163,13 @@ func (this *SwitchTenantUseCase) Execute(
 }
 
 func (this *SwitchTenantUseCase) manageSessions(
-	generalToken generalTokenServicePort.IGeneralToken, ctx context.Context,
+	generalTokenID generalToken.GeneralTokenID, newRefreshToken refreshTokenServicePort.IRefreshToken, ctx context.Context,
 ) (err error) {
 
 	err = this.RemoveUserSession(
 		ctx,
-		generalToken.GetUserUUID(),
+		//generalToken.GetUserUUID(),
+		newRefreshToken.GetUserUUID(),
 	)
 
 	if err != nil {
@@ -175,17 +177,17 @@ func (this *SwitchTenantUseCase) manageSessions(
 		return
 	}
 
-	expire := generalToken.GetExpiretime()
+	expire := newRefreshToken.GetExpireTime()
 
 	if expire != nil {
 
 		err = this.GeneralTokenWhiteList.SetWithExpire(
-			generalToken.GetTokenID(), struct{}{}, *expire, ctx,
+			generalTokenID, struct{}{}, *expire, ctx,
 		)
 	} else {
 
 		_, err = this.GeneralTokenWhiteList.Set(
-			generalToken.GetTokenID(), struct{}{}, ctx,
+			generalTokenID, struct{}{}, ctx,
 		)
 	}
 

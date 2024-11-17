@@ -1,13 +1,17 @@
 package memoryCache
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"os"
 	"sync"
 )
 
 var (
-	log_mgr = new(log_manager)
+	log_mgr = &log_manager{
+		writers: make(map[string]io.Writer),
+	}
 )
 
 type (
@@ -16,6 +20,11 @@ type (
 		writers map[string]io.Writer
 	}
 )
+
+func init() {
+
+	log_mgr.AddListener("stdout", os.Stdout)
+}
 
 func (this *log_manager) AddListener(key string, writter io.Writer) {
 
@@ -33,10 +42,7 @@ func (this *log_manager) RemoveListener(key string) {
 	delete(this.writers, key)
 }
 
-func (this *log_manager) Write(msg string) {
-
-	// log_mgr.RLock()
-	// defer log_mgr.RUnlock()
+func (this *log_manager) Write(b []byte) (int, error) {
 
 	for key, w := range this.writers {
 
@@ -50,8 +56,16 @@ func (this *log_manager) Write(msg string) {
 			continue
 		}
 
-		w.Write([]byte(fmt.Sprintf("%s\n", msg)))
+		_, err := w.Write(b)
+
+		switch {
+		case errors.Is(err, io.EOF):
+			this.RemoveListener(key)
+			continue
+		}
 	}
+
+	return len(b), nil
 }
 
 func AddLogListener(key string, writter io.Writer) {
@@ -64,7 +78,7 @@ func RemoveListener(key string) {
 	log_mgr.RemoveListener(key)
 }
 
-func writeLog(msg string) {
+func formatLogContent[Key_T any](key Key_T, op string, msg string) string {
 
-	log_mgr.Write(msg)
+	return fmt.Sprintf(`-key[%v]|operation(%s) %s`, key, op, msg)
 }

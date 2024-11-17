@@ -5,6 +5,7 @@ import (
 	"app/internal/memoryCache"
 	"errors"
 	"fmt"
+	"os"
 )
 
 const (
@@ -50,4 +51,9 @@ func NewRefreshTokenBlackListClient() (*memoryCache.CacheClient[string, RefreshT
 	return memoryCache.NewClient[string, RefreshTokenBlackListCacheValue](
 		REFRESH_TOKE_BLACK_LIST_TOPIC,
 	)
+}
+
+func CacheLog() bool {
+
+	return os.Getenv(ENV_CACHE_LOG) == "true"
 }
