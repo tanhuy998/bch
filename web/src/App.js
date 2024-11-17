@@ -41,6 +41,7 @@ import EditSingleCampaignUseCase from './domain/usecases/editSingleCampaign.usec
 import LoginUseCase from './pages/login/usecase'
 import NavigateTenantPage from './pages/navigateTenant/navigateTenant.page';
 import SwitchTenantUseCase from './pages/navigateTenant/usecase';
+import TenantMainPage from './pages/tenantMainPage.js/tenantMainPage.page';
 // import CandidateSigningPage from './pages/candidateSigning/candidateSinging.page';
 
 const campaignlistUseCase = new CampaignListUseCase()
@@ -79,6 +80,7 @@ function App() {
           </Route>
           <Route path='/admin' element={<AdminTemplate />}>
             <Route index element={<AnimatePage><AdminDashboad /></AnimatePage>} />
+            <Route path="tenant" element={<AnimatePage><TenantMainPage/></AnimatePage>} />
             {/* <Route path="campaigns" element={<PaginationTable idField={"uuid"} endpoint={campaignlistUseCase} exposedFields={['title', 'issueTime', 'expire']} headers={['Campaign Name', 'Issue Time', 'Expires']} title="Campaigns" />} /> */}
             <Route path="campaigns" element={<AnimatePage><CampaignListPage usecase={campaignlistUseCase} /></AnimatePage>} />
             <Route path="campaign/:uuid" element={<AnimatePage><SingleCampaignPage usecase={singleCampaignUseCase} /></AnimatePage>} />

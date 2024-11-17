@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import SwitchTenantUseCase from "./usecase";
 import ErrorResponse from "../../backend/error/errorResponse";
 import { useNavigate } from "react-router-dom";
-import { useRedirectAuthReferer } from "../../hooks/authentication";
 import LoadingCircle from "../../components/loadingCircle";
 import { setAccessToken, setUserInfo } from "../../lib/authSignature.lib";
-
+import { useRedirectAdmin } from '../../hooks/authentication';
 
 /**
  * 
@@ -14,7 +13,7 @@ import { setAccessToken, setUserInfo } from "../../lib/authSignature.lib";
  */
 export default function NavigateTenantPage({ usecase }) {
     
-    const isRotatingToken = useRedirectAuthReferer();
+    const isRotatingToken = useRedirectAdmin();
 
     const [tenantList, setTenantList] = useState(undefined);
     const [chosenTenantUUID, setChosenTenantUUID] = useState(undefined);

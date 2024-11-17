@@ -8,7 +8,7 @@ import FormInput from '../../components/formInput';
 import PromptFormInput from '../../components/promptFormInput';
 import LoginUseCase from './usecase';
 import { useNavigate } from 'react-router-dom';
-import { useRedirectAuthReferer } from '../../hooks/authentication';
+import { useRedirectAdmin } from '../../hooks/authentication';
 
 
 function required(val) {
@@ -18,7 +18,7 @@ function required(val) {
 
 export default function Login({usecase}) {
  
-    const isRotatingToken = useRedirectAuthReferer();
+    const isRotatingToken = useRedirectAdmin();
 
     const [isLoggedIn, setIsLoggedIn] = useState(null);
     const [isPending, setIsPending] = useState(false);

@@ -4,7 +4,7 @@ import MockEndpoint from "./mockEndpoint";
 
 const DEFAULT_HOST = 'localhost';
 const DEFAULT_SCHEME = 'http';
-const DEFAULT_URI = '';
+const BACKEND_URI = '/api';
 const DEFAULT_PORT = 8000;
 
 const REGEX_DOUBLE_SLASH = /\/\//
@@ -24,7 +24,7 @@ export default class HttpEndpoint extends MockEndpoint{
      */
     static get baseURL() {
         
-        return `${DEFAULT_SCHEME}://${DEFAULT_HOST}${typeof DEFAULT_PORT === 'number' ? ":" + DEFAULT_PORT : ""}`
+        return BACKEND_URI;//`${DEFAULT_SCHEME}://${DEFAULT_HOST}${typeof DEFAULT_PORT === 'number' ? ":" + DEFAULT_PORT : ""}`
     }
 
     /**@type {String} */
@@ -33,7 +33,7 @@ export default class HttpEndpoint extends MockEndpoint{
     #uri;
     #port;
 
-    #initUrl;
+    #initPath;
 
     #defaultRequestOptions = {
         mode: 'cors',
@@ -41,16 +41,17 @@ export default class HttpEndpoint extends MockEndpoint{
 
     #defaultRequestHeaders = {
         //"Content-Type": "application/json;charset=UTF-8",
-    }
+    }   
 
     get url() {
 
-        return this.#initUrl;
+        return this.#initPath;
     }
 
     get baseURL() {
 
-        return `${this.#scheme}://${this.#host}${typeof this.#port === 'number' ? ":" + this.#port : ""}`
+        //return `${this.#scheme}://${this.#host}${typeof this.#port === 'number' ? ":" + this.#port : ""}`
+        return this.#initPath || HttpEndpoint.baseURL;
     }
 
     constructor({ scheme, host, port, uri } = {}) {
@@ -60,9 +61,9 @@ export default class HttpEndpoint extends MockEndpoint{
         this.#port = port || DEFAULT_PORT;
         this.#host = host || DEFAULT_HOST;
         this.#scheme = scheme || DEFAULT_SCHEME;
-        this.#uri = uri || DEFAULT_URI;
+        this.#uri = BACKEND_URI + (typeof uri === "string" ? uri : "");
 
-        this.#initUrl = `${this.#scheme}://${this.#host}${typeof this.#port === 'number' ? ":" + this.#port : ""}${this.#uri}`;
+        this.#initPath = this.#uri;
     }
 
     prepareOptions() {
@@ -71,25 +72,6 @@ export default class HttpEndpoint extends MockEndpoint{
     }
 
     async fetch(options = {}, query, extraURI) {
-
-        // options.mode = 'cors';
-
-        // extraURI = typeof extraURI === 'string' && extraURI !== '' ? extraURI : '';
-
-        // const queryStr = typeof query === 'object' ? '?' + new URLSearchParams(query) : '';
-
-
-        // const res = await fetch(
-        //     this.#initUrl + extraURI + queryStr,
-        //     {
-        //         ...this.#defaultRequestOptions,
-        //         ...options,
-        //         headers: {
-        //             ...this.#defaultRequestHeaders,
-        //             ...options.headers,
-        //         }
-        //     }
-        // )
 
         const res = await this.fetchRaw(options, query, extraURI);
 
@@ -116,7 +98,7 @@ export default class HttpEndpoint extends MockEndpoint{
 
 
         return fetch(
-            this.#initUrl + extraURI + queryStr,
+            this.#initPath + extraURI + queryStr,
             {
                 ...this.#defaultRequestOptions,
                 ...options,
@@ -127,6 +109,16 @@ export default class HttpEndpoint extends MockEndpoint{
                 credentials: 'include',
             }
         )
+    }
+
+    /**
+     * 
+     * @param {Response} res 
+     * @return {Object|any}
+     */
+    #handleResponse(res) {
+
+
     }
 
     #fetchMock() {

@@ -8,7 +8,7 @@ export default class LoginEndpoint extends HttpEndpoint {
     constructor() {
 
         super({
-            uri: "/auth/login"
+            uri: "/auth/gen"
         })
     }
 
@@ -23,8 +23,8 @@ export default class LoginEndpoint extends HttpEndpoint {
         options.method = "POST";
 
         return super.fetch(
-            options,
-        )
+            options, undefined, "/credentials"
+        );
     }
 
     /**
@@ -37,13 +37,13 @@ export default class LoginEndpoint extends HttpEndpoint {
 
         try {
 
-            const res = await super.fetch(options) 
+            const res = await super.fetch(options);
 
-            return true
+            return true;
         }
         catch (e) {
 
-            return false
+            return false;
         }
     }
 }

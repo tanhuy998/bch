@@ -26,7 +26,7 @@ export default class SwitchTenantUseCase extends HttpEndpoint {
         return super.fetch(
             options,
             undefined,
-            '/auth/nav'
+            '/auth/gen/nav'
         )
     }
 
@@ -39,7 +39,7 @@ export default class SwitchTenantUseCase extends HttpEndpoint {
         return super.fetch(
             undefined,
             undefined,
-            `/tenants/switch/${tenantUUID}`
+            `/auth/signatures/tenant/${tenantUUID}`
         )
     }
 }

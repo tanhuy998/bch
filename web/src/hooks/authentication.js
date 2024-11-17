@@ -6,6 +6,7 @@ import UserSessionExpireError from "../backend/error/userSessionExpireError";
 
 const admin_path = "/admin";
 const login_path = "/login";
+const regex_admin_path = /^\/admin(\/(.)+)*/
 
 let referer_path;
 
@@ -27,7 +28,14 @@ export function hasToken() {
     return typeof getAccessToken() === "string";
 }
 
-export function useRedirectAuthReferer() {
+/**
+ * redirect to the last page that used authentication,
+ * if there is no access token, redirect back to login page.
+ * 
+ * 
+ * @returns 
+ */
+export function useRedirectAdmin() {
 
     const isRotating = useAccessToken();
     const navigate = useNavigate();
@@ -44,9 +52,7 @@ export function useRedirectAuthReferer() {
 
         if (hasToken && !isExpire) {
             
-            navigate(
-                typeof referer_path === 'string' ? referer_path || admin_path : admin_path,
-            );
+            navigate(admin_path);
             return;
         }
     })
@@ -55,11 +61,14 @@ export function useRedirectAuthReferer() {
 }
 
 /**
+ *  read current access token, if no access token, redirect to login page
+ *  and vice versa if the whole user session expired.
+ *  If access token expired, rotate the signatures.
  * 
  * @returns {boolean}
  */
 export default function useAuthentication() {
-
+    
     const location = useLocation();
     const navigate = useNavigate();
     const isRotatingToken = useAccessToken()
@@ -73,11 +82,15 @@ export default function useAuthentication() {
         }
 
         if (hasToken()) {
-
+            
             return
         }
-        
-        referer_path = location.pathname;
+
+        if (location.pathname === login_path) {
+
+            return;
+        }
+
         navigate(login_path);
 
     }, [isRotatingToken]);

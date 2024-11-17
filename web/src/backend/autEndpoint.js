@@ -5,17 +5,24 @@ import UserSessionExpireError from "./error/userSessionExpireError";
 
 export default class AuthEndpoint extends HttpEndpoint {
 
+    static get baseURL() {
+
+        return HttpEndpoint.baseURL + "/auth/signatures"
+    }
+
     static async rotateSignatures() {
 
         const accessToken = getAccessToken();
 
         const res = await fetch(
-            `${AuthEndpoint.baseURL}/auth/refresh`,
+            AuthEndpoint.baseURL,
             {
                 method: "POST",
                 body: JSON.stringify(
                     {
-                        data: accessToken,
+                        data: {
+                            ['accessToken']: accessToken
+                        },
                     }
                 ),
             },
@@ -25,8 +32,8 @@ export default class AuthEndpoint extends HttpEndpoint {
 
         if (status === 200) {
 
-            const obj = res.json();
-
+            const obj = await res.json();
+            console.log(obj);
             setAccessToken(obj.data.accessToken);
             setUserInfo(obj.data.user);
             return;
@@ -91,5 +98,14 @@ export default class AuthEndpoint extends HttpEndpoint {
         options.headers['Authorization'] = `bearer ${getAccessToken() ?? ''}`;
 
         return super.fetchRaw(options, query, extraURI);        
+    }
+
+    /**
+     * 
+     * @param {string} username 
+     * @param {string} password 
+     */
+    async login(username, password) {
+
     }
 }
