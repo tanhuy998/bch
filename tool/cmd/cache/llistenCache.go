@@ -1,11 +1,12 @@
-package cmd
+package cache
 
 import (
+	"bch-tool/lib"
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"os"
-	"os/signal"
 
 	"github.com/spf13/cobra"
 )
@@ -14,16 +15,19 @@ const (
 	CACHE_LOG_PORT = 3358
 )
 
-var (
-	conn net.Conn
-)
-
 var listenCachCmd = &cobra.Command{
-	Use: "cache",
+	Use:   "listen",
+	Short: "Listen to host log events",
+	Long:  `Listen to host log events.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		ListenCache()
 	},
+}
+
+func init() {
+
+	CacheBaseCommand.AddCommand(listenCachCmd)
 }
 
 func ListenCache() {
@@ -35,7 +39,10 @@ func ListenCache() {
 		return
 	}
 
-	go listenSIGINT()
+	go lib.ListenSIGINT(func() {
+
+		conn.Close()
+	})
 
 	buffer := make([]byte, 30)
 
@@ -43,8 +50,10 @@ func ListenCache() {
 
 		_, err := conn.Read(buffer)
 
-		if err != nil {
-
+		switch {
+		case errors.Is(err, net.ErrClosed):
+			return
+		case err != nil:
 			conn.Close()
 			panic(err)
 		}
@@ -53,28 +62,6 @@ func ListenCache() {
 
 		flush(buffer)
 	}
-}
-
-func listenSIGINT() {
-
-	c := make(chan os.Signal, 1)
-
-	signal.Notify(c, os.Interrupt)
-
-	for range c {
-
-		if conn == nil {
-
-			return
-		}
-
-		conn.Close()
-	}
-}
-
-func init() {
-
-	rootCmd.AddCommand(listenCachCmd)
 }
 
 func flush(b []byte) {

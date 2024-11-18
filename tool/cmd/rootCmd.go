@@ -1,12 +1,13 @@
 package cmd
 
 import (
-	"log"
+	"bch-tool/cmd/cache"
+	"bch-tool/cmd/logCmd"
 
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "",
 	Short: "",
 	Long:  "",
@@ -15,8 +16,14 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+func init() {
+
+	RootCmd.AddCommand(cache.CacheBaseCommand)
+	RootCmd.AddCommand(logCmd.LogBaseCmd)
+}
+
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err)
+	if err := RootCmd.Execute(); err != nil {
+
 	}
 }
