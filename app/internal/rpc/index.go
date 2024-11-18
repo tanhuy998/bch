@@ -50,7 +50,7 @@ func init() {
 
 func Listen() {
 
-	err := rpc.RegisterName("ToggleTraceLog", new(RpcServer))
+	err := rpc.RegisterName("LogTools", new(LogTools))
 
 	if err != nil {
 

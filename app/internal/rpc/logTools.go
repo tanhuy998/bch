@@ -8,11 +8,11 @@ import (
 )
 
 type (
-	RpcServer struct {
+	LogTools struct {
 	}
 )
 
-func (this *RpcServer) ToggleTraceLog(request string, reply *string) error {
+func (this *LogTools) ToggleTraceLog(request string, reply *string) error {
 
 	if request != "on" && request != "off" {
 
@@ -34,7 +34,7 @@ func (this *RpcServer) ToggleTraceLog(request string, reply *string) error {
 	return nil
 }
 
-func (this *RpcServer) MemCacheStat(request string, reply *string) error {
+func (this *LogTools) MemCacheStat(request string, reply *string) error {
 
 	return nil
 }
