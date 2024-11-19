@@ -1,7 +1,6 @@
 package opLog
 
 import (
-	"app/internal/bootstrap"
 	libCommon "app/internal/lib/common"
 	accessLogServicePort "app/port/accessLog"
 	"context"
@@ -9,33 +8,18 @@ import (
 	"time"
 )
 
-const (
-	ENV_OP_TRACE_DURATION = bootstrap.ENV_OP_TRACE_DURATION
-)
-
 type (
-	IOperationLogger interface {
-		Messure(op string, msg string, ctx context.Context) func(err error)
-		PushTraceIfError(err error, op string, msg string, ctx context.Context)
-		PushTrace(op string, msg string, ctx context.Context)
-		PushTraceCond(op string, msgIfNoErr string, ctx context.Context) (logErrFunc func(err error, msgIfErr string))
-		PushTraceCondWithMessurement(
-			op string, msgIfNoErr string, ctx context.Context,
-		) func(err error, msgIfErr string)
-		PushTraceError(op string, err error, defaultMsg string, ctx context.Context)
-	}
-
-	OperationLogger struct {
+	TraceLogger struct {
 		AccessLogger accessLogServicePort.IAccessLogger
 	}
 )
 
-func (this *OperationLogger) CouldLog(ctx context.Context) bool {
+func (this *TraceLogger) CouldLog(ctx context.Context) bool {
 
 	return ctx != nil && this.AccessLogger.IsLogging(ctx) && this.AccessLogger.IsTraceLogging(ctx)
 }
 
-func (this *OperationLogger) Messure(op string, msg string, ctx context.Context) func(err error) {
+func (this *TraceLogger) Messure(op string, msg string, ctx context.Context) func(err error) {
 
 	if !this.CouldLog(ctx) {
 
@@ -59,7 +43,7 @@ func (this *OperationLogger) Messure(op string, msg string, ctx context.Context)
 	}
 }
 
-func (this *OperationLogger) PushTraceIfError(err error, op string, msg string, ctx context.Context) {
+func (this *TraceLogger) PushTraceIfError(err error, op string, msg string, ctx context.Context) {
 
 	if err == nil || !this.CouldLog(ctx) {
 
@@ -76,7 +60,7 @@ func (this *OperationLogger) PushTraceIfError(err error, op string, msg string, 
 	)
 }
 
-func (this *OperationLogger) PushTrace(op string, msg string, ctx context.Context) {
+func (this *TraceLogger) PushTrace(op string, msg string, ctx context.Context) {
 
 	if !this.CouldLog(ctx) {
 
@@ -92,7 +76,7 @@ func (this *OperationLogger) PushTrace(op string, msg string, ctx context.Contex
 	)
 }
 
-func (this *OperationLogger) PushTraceCond(
+func (this *TraceLogger) PushTraceCond(
 	op string, msgIfNoErr string, ctx context.Context,
 ) func(err error, msgIfErr string) {
 
@@ -113,7 +97,7 @@ func (this *OperationLogger) PushTraceCond(
 	}
 }
 
-func (this *OperationLogger) PushTraceCondWithMessurement(
+func (this *TraceLogger) PushTraceCondWithMessurement(
 	op string, ctx context.Context,
 ) func(msgIfNoErr string, err error, msgIfErr string) {
 
@@ -148,7 +132,7 @@ func (this *OperationLogger) PushTraceCondWithMessurement(
 	}
 }
 
-func (this *OperationLogger) PushTraceError(op string, err error, defaultMsg string, ctx context.Context) {
+func (this *TraceLogger) PushTraceError(op string, err error, defaultMsg string, ctx context.Context) {
 
 	if !this.CouldLog(ctx) {
 
@@ -162,8 +146,4 @@ func (this *OperationLogger) PushTraceError(op string, err error, defaultMsg str
 			Message:   libCommon.Ternary(defaultMsg == "", err.Error(), defaultMsg),
 		},
 	)
-}
-
-func empty_trace_func(err error) {
-
 }

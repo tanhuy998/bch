@@ -33,6 +33,7 @@ const (
 )
 
 const (
+	ENV_DEBUG_LOG         = "DEBUG_LOG"
 	ENV_TRACE_LOG         = "TRACE_LOG"
 	ENV_CACHE_LOG         = "CACHE_LOG"
 	ENV_OP_TRACE_DURATION = "OP_TRACE_DURATION"

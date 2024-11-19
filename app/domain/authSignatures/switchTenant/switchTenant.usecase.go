@@ -17,6 +17,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var (
@@ -28,6 +30,7 @@ type (
 		unitOfWork.MongoUserSessionCacheUseCase[responsePresenter.SwitchTenant]
 		unitOfWork.GenericUseCase[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant]
 		unitOfWork.UseCaseResultWrapper[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant]
+		unitOfWork.OperationLogger
 		GeneralTokenClientService generalTokenClientServicePort.IGeneralTokenClient
 		SwitchTenantService       authSignaturesServicePort.ISwitchTenant
 		AccessTokenManipulator    accessTokenServicePort.IAccessTokenManipulator
@@ -54,6 +57,10 @@ func (this *SwitchTenantUseCase) Execute(
 
 		return nil, common.ERR_UNAUTHORIZED
 	}
+
+	this.DebugLogger.Push(
+		"show_general_token_id", generalToken.GetTokenID().String(), input.GetContext(),
+	)
 
 	defer func() {
 
@@ -86,6 +93,11 @@ func (this *SwitchTenantUseCase) Execute(
 	output, err = this.ModifyUserSession(
 		input.GetContext(),
 		func(sesstionCtx context.Context) (ret *responsePresenter.SwitchTenant, err error) {
+
+			if _, ok := sesstionCtx.(mongo.SessionContext); ok {
+
+				this.DebugLogger.Push("check_session_context", "true", input.GetContext())
+			}
 
 			at, rt, err := this.SwitchTenantService.Serve(*input.TenantUUID, generalToken, sesstionCtx)
 
