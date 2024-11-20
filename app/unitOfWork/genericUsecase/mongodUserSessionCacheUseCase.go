@@ -76,12 +76,17 @@ func (this *MongoUserSessionCacheUseCase[Output_T]) ModifyUserSession(
 }
 
 func (this *MongoUserSessionCacheUseCase[Output_T]) RemoveUserSession(
-	ctx context.Context, userUUID uuid.UUID, //beforeRemoveFns ...func() error,
+	ctx context.Context, genToken generalTokenServicePort.IGeneralToken,
 ) (err error) {
 
 	userSessions, err := this.UserSessionRepo.FindMany(
 		bson.D{
-			{"userUUID", userUUID},
+			{"userUUID", genToken.GetUserUUID()},
+			{
+				"sessionID", bson.D{
+					{"$ne", genToken.GetTokenID()},
+				},
+			},
 		},
 		ctx,
 	)
@@ -113,16 +118,6 @@ func (this *MongoUserSessionCacheUseCase[Output_T]) RemoveUserSession(
 			}
 		}
 	}()
-
-	// for _, fn := range beforeRemoveFns {
-
-	// 	err = fn()
-
-	// 	if err != nil {
-
-	// 		return
-	// 	}
-	// }
 
 	return nil
 }

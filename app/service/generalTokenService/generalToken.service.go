@@ -6,6 +6,7 @@ import (
 	libError "app/internal/lib/error"
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenIDServicePort "app/port/generalTokenID"
+	"app/unitOfWork"
 	jwtClaim "app/valueObject/jwt"
 	"slices"
 
@@ -27,6 +28,7 @@ var (
 type (
 	IGeneralToken           = generalTokenServicePort.IGeneralToken
 	GeneralTokenManipulator struct {
+		unitOfWork.OperationLogger
 		GeneralTokenIDProvider           generalTokenIDServicePort.IGeneralTokenIDProvider
 		SymmetricTokenManipulatorService jwtTokenServicePort.ISymmetricJWTTokenManipulator
 		noExpireTokenProvider.NoExpireTokenProvider
@@ -76,7 +78,9 @@ func (this *GeneralTokenManipulator) SignString(at generalTokenServicePort.IGene
 	return "", libError.NewInternal(fmt.Errorf("TenantAccessTokenManipulatorService error: invalid tenant access token sign"))
 }
 
-func (this *GeneralTokenManipulator) makeFor(userUUID uuid.UUID, ctx context.Context) (IGeneralToken, error) {
+func (this *GeneralTokenManipulator) makeFor(userUUID uuid.UUID, ctx context.Context) (ret IGeneralToken, err error) {
+
+	defer this.OperationLogger.PushTraceCondWithMessurement("generate_general_token", ctx)("success", err, "")
 
 	if userUUID == uuid.Nil {
 

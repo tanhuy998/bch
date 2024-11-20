@@ -25,7 +25,6 @@ type (
 
 	IRefreshTokenProvider interface {
 		Generate(tenantUUID uuid.UUID, generalTokenID generalTokenServicePort.IGeneralToken, ctx context.Context) (IRefreshToken, error)
-		Revoke(refreshToken IRefreshToken, ctx context.Context) error
 		DefaultExpireDuration() time.Duration
 	}
 

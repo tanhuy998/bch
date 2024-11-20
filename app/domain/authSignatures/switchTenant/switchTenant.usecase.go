@@ -2,13 +2,12 @@ package switchTenantDomain
 
 import (
 	"app/internal/common"
-	"app/internal/generalToken"
 	libCommon "app/internal/lib/common"
 	accessTokenServicePort "app/port/accessToken"
 	authServicePort "app/port/auth"
 	authSignaturesServicePort "app/port/authSignatures"
+	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
-	refreshTokenServicePort "app/port/refreshToken"
 	refreshTokenClientPort "app/port/refreshTokenClient"
 	refreshTokenIdServicePort "app/port/refreshTokenID"
 	requestPresenter "app/presenter/request"
@@ -17,6 +16,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -131,7 +131,7 @@ func (this *SwitchTenantUseCase) Execute(
 				if err != nil {
 
 					ret = nil
-					return //nil, err
+					return
 				}
 
 				err = this.RefreshTokenClientService.Write(input.GetContext(), rt)
@@ -139,7 +139,7 @@ func (this *SwitchTenantUseCase) Execute(
 				if err != nil {
 
 					ret = nil
-					return //nil, err
+					return
 				}
 			}()
 
@@ -150,7 +150,7 @@ func (this *SwitchTenantUseCase) Execute(
 				return nil, err
 			}
 
-			err = this.manageSessions(generalToken.GetTokenID(), rt, sesstionCtx)
+			err = this.manageSessions(generalToken, rt.GetExpireTime(), sesstionCtx)
 
 			if err != nil {
 
@@ -175,13 +175,12 @@ func (this *SwitchTenantUseCase) Execute(
 }
 
 func (this *SwitchTenantUseCase) manageSessions(
-	generalTokenID generalToken.GeneralTokenID, newRefreshToken refreshTokenServicePort.IRefreshToken, ctx context.Context,
+	generalToken generalTokenServicePort.IGeneralToken, sessionExpiry *time.Time, ctx context.Context,
 ) (err error) {
 
 	err = this.RemoveUserSession(
 		ctx,
-		//generalToken.GetUserUUID(),
-		newRefreshToken.GetUserUUID(),
+		generalToken,
 	)
 
 	if err != nil {
@@ -189,17 +188,15 @@ func (this *SwitchTenantUseCase) manageSessions(
 		return
 	}
 
-	expire := newRefreshToken.GetExpireTime()
-
-	if expire != nil {
+	if sessionExpiry != nil {
 
 		err = this.GeneralTokenWhiteList.SetWithExpire(
-			generalTokenID, struct{}{}, *expire, ctx,
+			generalToken.GetTokenID(), struct{}{}, *sessionExpiry, ctx,
 		)
 	} else {
 
 		_, err = this.GeneralTokenWhiteList.Set(
-			generalTokenID, struct{}{}, ctx,
+			generalToken.GetTokenID(), struct{}{}, ctx,
 		)
 	}
 

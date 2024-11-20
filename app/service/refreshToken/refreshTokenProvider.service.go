@@ -10,6 +10,7 @@ import (
 	jwtTokenServicePort "app/port/jwtTokenService"
 	refreshTokenServicePort "app/port/refreshToken"
 	refreshTokenIDService "app/port/refreshTokenID"
+	"app/unitOfWork"
 	jwtClaim "app/valueObject/jwt"
 	"context"
 	"errors"
@@ -37,10 +38,10 @@ type (
 	ClaimsOption = func(claims *jwt.RegisteredClaims)
 
 	RefreshTokenManipulatorService struct {
-		AudienceList           accessTokenServicePort.AccessTokenAudienceList
+		AudienceList accessTokenServicePort.AccessTokenAudienceList
+		unitOfWork.OperationLogger
 		RefreshTokenIDProvider refreshTokenIDService.IRefreshTokenIDProvider
 		JWTTokenService        jwtTokenServicePort.ISymmetricJWTTokenManipulator
-		//RefreshTokenBlackList  refreshTokenBlackListServicePort.IRefreshTokenBlackListManipulator
 	}
 )
 
@@ -48,16 +49,18 @@ func (this *RefreshTokenManipulatorService) Generate(
 	tenantUUID uuid.UUID, generalToken GeneralToken, ctx context.Context,
 ) (refreshTokenServicePort.IRefreshToken, error) {
 
-	return this.makeFor(tenantUUID, generalToken)
+	return this.makeFor(tenantUUID, generalToken.GetTokenID(), ctx)
 }
 
 func (this *RefreshTokenManipulatorService) makeFor(
-	tenantUUID uuid.UUID, generalToken GeneralToken, claimOption ...ClaimsOption,
-) (refreshTokenServicePort.IRefreshToken, error) {
+	tenantUUID uuid.UUID, generalTokenID generalToken.GeneralTokenID, ctx context.Context, claimOption ...ClaimsOption,
+) (ret *jwt_refresh_token, err error) {
+
+	defer this.OperationLogger.PushTraceCondWithMessurement("generate_refresh_token", ctx)("success", err, "")
 
 	token := this.JWTTokenService.GenerateToken()
 
-	refreshTokenID, err := this.RefreshTokenIDProvider.Generate(generalToken.GetTokenID())
+	refreshTokenID, err := this.RefreshTokenIDProvider.Generate(generalTokenID)
 
 	if err != nil {
 
@@ -98,38 +101,6 @@ func (this *RefreshTokenManipulatorService) makeFor(
 	return rt, nil
 }
 
-func (this *RefreshTokenManipulatorService) Revoke(refreshToken refreshTokenServicePort.IRefreshToken, ctx context.Context) error {
-
-	// refreshTokenID := refreshToken.GetTokenID()
-
-	// payload := &valueObject.RefreshTokenBlackListPayload{
-	// 	UserUUID: libCommon.PointerPrimitive(refreshToken.GetUserUUID()),
-	// }
-
-	// exp, err := refreshToken.GetExpireTime()
-
-	// if errors.Is(err, common.ERR_INTERNAL) {
-
-	// 	return err
-	// }
-
-	// if err != nil {
-
-	// 	return libError.NewInternal(err)
-	// }
-
-	// exp := refreshToken.GetExpireTime()
-
-	// err := this.RefreshTokenBlackList.SetWithExpire(refreshTokenID, payload, *exp, ctx)
-
-	// if err != nil {
-
-	// 	return err
-	// }
-
-	return nil
-}
-
 func (this *RefreshTokenManipulatorService) SignString(refreshToken IRefreshToken) (string, error) {
 
 	if v, ok := any(refreshToken).(*jwt_refresh_token); ok {
@@ -157,9 +128,7 @@ func (this *RefreshTokenManipulatorService) DefaultExpireDuration() time.Duratio
 	return default_exp_duration
 }
 
-func (this *RefreshTokenManipulatorService) makeBase(refreshToken IRefreshToken) (IRefreshToken, error) {
-
-	token := this.JWTTokenService.GenerateToken()
+func (this *RefreshTokenManipulatorService) makeBase(refreshToken IRefreshToken, ctx context.Context) (*jwt_refresh_token, error) {
 
 	generalTokenID, _, err := this.RefreshTokenIDProvider.Extract(refreshToken.GetTokenID())
 
@@ -168,30 +137,7 @@ func (this *RefreshTokenManipulatorService) makeBase(refreshToken IRefreshToken)
 		return nil, libError.NewInternal(err)
 	}
 
-	newRefreshTokenID, err := this.RefreshTokenIDProvider.Generate(generalTokenID)
-
-	if err != nil {
-
-		return nil, libError.NewInternal(err)
-	}
-
-	customClaims := &jwt_refresh_token_custom_claims{
-		Issuer:   bootstrap.GetAppName(),
-		IssuedAt: jwt.NewNumericDate(time.Now()),
-
-		RefreshTokenID: newRefreshTokenID,
-		TenantUUID:     libCommon.PointerPrimitive(refreshToken.GetTenantUUID()),
-	}
-
-	jwtClaim.SetupRefreshToken(&customClaims.PrivateClaims)
-
-	if refreshToken.GetExpireTime() != nil {
-		customClaims.ExpiresAt = jwt.NewNumericDate(*refreshToken.GetExpireTime())
-	}
-
-	token.Claims = customClaims
-
-	return newFromToken(token, this.RefreshTokenIDProvider)
+	return this.makeFor(refreshToken.GetTenantUUID(), generalTokenID, ctx)
 }
 
 func (this *RefreshTokenManipulatorService) Rotate(refreshToken IRefreshToken, ctx context.Context) (IRefreshToken, error) {
@@ -203,5 +149,5 @@ func (this *RefreshTokenManipulatorService) Rotate(refreshToken IRefreshToken, c
 		return nil, refreshTokenServicePort.ERR_TOKEN_EXPIRE
 	}
 
-	return this.makeBase(refreshToken)
+	return this.makeBase(refreshToken, ctx)
 }

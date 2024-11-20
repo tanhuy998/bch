@@ -6,6 +6,7 @@ import (
 	authSignatureTokenPort "app/port/authSignatureToken"
 	generalTokenServicePort "app/port/generalToken"
 	"app/repository"
+	"app/unitOfWork"
 	"errors"
 	"fmt"
 
@@ -18,6 +19,7 @@ import (
 
 type (
 	SwitchTenantService struct {
+		unitOfWork.OperationLogger
 		AuthSignatureTokenProvider authSignatureTokenPort.IAuthSignatureProvider
 		UserSessionRepo            repository.IUserSession
 	}

@@ -11,6 +11,7 @@ import (
 	jwtTokenServicePort "app/port/jwtTokenService"
 	"app/repository"
 	"app/service/noExpireTokenProvider"
+	"app/unitOfWork"
 	jwtClaim "app/valueObject/jwt"
 	"context"
 	"errors"
@@ -42,7 +43,8 @@ type (
 	IGeneralToken       = generalTokenServicePort.IGeneralToken
 
 	JWTAccessTokenManipulatorService struct {
-		AudienceList               accessTokenServicePort.AccessTokenAudienceList
+		AudienceList accessTokenServicePort.AccessTokenAudienceList
+		unitOfWork.OperationLogger
 		JWTTokenManipulatorService jwtTokenServicePort.IAsymmetricJWTTokenManipulator
 		GetUserAuthority           authServicePort.IGetUserAuthorityServicePort
 		UserRepo                   repository.IUser
@@ -92,7 +94,9 @@ func (this *JWTAccessTokenManipulatorService) GenerateBased(
 
 func (this *JWTAccessTokenManipulatorService) makeFor(
 	tenantUUID, userUUID uuid.UUID, ctx context.Context,
-) (*jwt_access_token, error) {
+) (ret *jwt_access_token, err error) {
+
+	defer this.OperationLogger.PushTraceCondWithMessurement("generate_access_token", ctx)("success", err, "")
 
 	authData, err := this.GetUserAuthority.Serve(tenantUUID, userUUID, ctx)
 
@@ -176,8 +180,6 @@ func (this *JWTAccessTokenManipulatorService) GenerateFor(
 	}
 
 	at.SetTokenID(tokenID)
-	// at.customClaims.AuthData = authData
 
-	// fmt.Println(authData.TenantAgentData)
 	return at, nil
 }
