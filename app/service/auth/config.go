@@ -11,12 +11,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Initialize(db *mongo.Database) {
+// func Initialize(db *mongo.Database) {
 
-	roleRepo := new(repository.RoleRepository).Init(db)
+// 	roleRepo := new(repository.RoleRepository).Init(db)
 
-	InitializeRoles(roleRepo)
-}
+// 	InitializeRoles(roleRepo)
+// }
 
 func InitializeRoles(roleRepository repository.IRole) {
 

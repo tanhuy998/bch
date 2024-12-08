@@ -1,6 +1,7 @@
-package repository
+package mongoRepository
 
 import (
+	"app/internal"
 	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	"context"
@@ -80,7 +81,7 @@ func insertMany[T any](
 }
 
 func findManyDocuments[T any](
-	query bson.D,
+	query interface{},
 	collection IMongoRepositoryOperator,
 	ctx context.Context,
 	projections ...bson.E,
@@ -199,7 +200,7 @@ func ParseCursorOne[T any](cursor *mongo.Cursor, ctx context.Context) (*T, error
 }
 
 func findOneDocument[T any](
-	query bson.D,
+	query interface{},
 	collection IMongoRepositoryOperator,
 	ctx context.Context,
 	projections ...bson.E,
@@ -270,7 +271,7 @@ func getDocumentsPageByID[Model_Type any](
 	projection *bson.D,
 	collection IMongoRepositoryOperator,
 	ctx context.Context,
-	extraFilters ...bson.E,
+	extraFilters ...interface{},
 ) (*PaginationPack[Model_Type], error) {
 
 	if collection == nil {
@@ -294,7 +295,7 @@ func getDocumentsPageByID[Model_Type any](
 		ctx,
 		func(mongo.SessionContext) (interface{}, error) {
 
-			var paginationQuery bson.D = PrepareObjIDFilterPaginationQuery(_id, isPrevDir, extraFilters)
+			var paginationQuery interface{} = PrepareObjIDFilterPaginationQuery(_id, isPrevDir, extraFilters)
 			var sortOrder MongoDBCursorSortOrder = SORT_DESC
 
 			if isPrevDir {
@@ -326,7 +327,7 @@ func getDocumentsPageByID[Model_Type any](
 				return nil, err
 			}
 
-			var filters bson.D
+			var filters interface{}
 
 			if len(extraFilters) == 0 {
 
@@ -383,7 +384,7 @@ func initDBTransaction(client *mongo.Client) (*mongo.Session, error) {
 	return &session, nil
 }
 
-func PrepareObjIDFilterPaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters []bson.E) bson.D {
+func PrepareObjIDFilterPaginationQuery(_id primitive.ObjectID, isPrevDir bool, extraFilters []interface{}) interface{} {
 
 	var dir_op string
 
@@ -404,19 +405,27 @@ func PrepareObjIDFilterPaginationQuery(_id primitive.ObjectID, isPrevDir bool, e
 			return empty_bson
 		}
 
-		return bson.D(extraFilters)
+		return []interface{}{extraFilters} //bson.D(extraFilters)
 	}
 
-	return append(bson.D{
-		{
+	return append([]interface{}{
+		bson.E{
 			"_id", bson.D{
 				{dir_op, _id},
 			},
 		},
 	}, extraFilters...)
+
+	// return append(bson.D{
+	// 	{
+	// 		"_id", bson.D{
+	// 			{dir_op, _id},
+	// 		},
+	// 	},
+	// }, extraFilters...)
 }
 
-func PrepareAggregatePaginationQuery(paginationPivotField string, pivotValue interface{}, isPrevDir bool, extraFilters []bson.E) bson.D {
+func PrepareAggregatePaginationQuery(paginationPivotField string, pivotValue interface{}, isPrevDir bool, extraFilters []interface{}) interface{} {
 
 	var dir_op string
 
@@ -433,13 +442,24 @@ func PrepareAggregatePaginationQuery(paginationPivotField string, pivotValue int
 		dir_op = OP_GTE
 	}
 
-	return append(bson.D{
-		{
-			paginationPivotField, bson.D{
-				{dir_op, pivotValue},
+	return append(
+		[]interface{}{
+			bson.E{
+				paginationPivotField, bson.D{
+					{dir_op, pivotValue},
+				},
 			},
 		},
-	}, extraFilters...)
+		extraFilters...,
+	)
+
+	// return append(bson.D{
+	// 	{
+	// 		paginationPivotField, bson.D{
+	// 			{dir_op, pivotValue},
+	// 		},
+	// 	},
+	// }, extraFilters...)
 }
 
 func findDocumentByUUID[T any](uuid uuid.UUID, collection IMongoRepositoryOperator, ctx context.Context, projections ...bson.E) (*T, error) {
@@ -769,19 +789,24 @@ func prepareAggregationPaginationStages(
 // 	return ret, nil
 // }
 
-func FindNext[Entity_T any, Cursor_T comparable](
-	collection IMongoRepositoryOperator, cursor Cursor_T, size uint64, ctx context.Context, filters ...bson.E,
+func FindNext[Entity_T any, Cursor_T comparable, Filter_T any](
+	collection IMongoRepositoryOperator, cursorField string, cursor Cursor_T, size uint64, ctx context.Context, filters []Filter_T, projection interface{},
 ) ([]Entity_T, error) {
+
+	if cursorField == "" {
+
+		cursorField = internal.PAGINATION_CURSOR_FIELD
+	}
 
 	if size == 0 {
 
 		size = DEFAULT_PAGINATION_SIZE
 	}
 
-	query := make(bson.D, len(filters)+1)
+	query := make([]interface{}, len(filters)+1)
 
 	query[0] = bson.E{
-		"_id", bson.D{
+		cursorField, bson.D{
 			{"$lt", cursor},
 		},
 	}
@@ -798,7 +823,8 @@ func FindNext[Entity_T any, Cursor_T comparable](
 
 	findOption := options.Find()
 	findOption.Limit = libCommon.PointerPrimitive(int64(size))
-	findOption.Sort = bson.D{{"_id", SORT_DESC}}
+	findOption.Sort = bson.D{{cursorField, SORT_DESC}}
+	findOption.Projection = projection
 
 	c, err := collection.Find(ctx, query, findOption)
 
@@ -810,19 +836,24 @@ func FindNext[Entity_T any, Cursor_T comparable](
 	return ParseValCursor[Entity_T](c, ctx)
 }
 
-func FindPrevious[Entity_T any, Cursor_T comparable](
-	collection IMongoRepositoryOperator, cursor Cursor_T, size uint64, ctx context.Context, filters ...bson.E,
+func FindPrevious[Entity_T any, Cursor_T comparable, Filter_T any](
+	collection IMongoRepositoryOperator, cursorField string, cursor Cursor_T, size uint64, ctx context.Context, filters []Filter_T, projection interface{},
 ) ([]Entity_T, error) {
+
+	if cursorField == "" {
+
+		cursorField = internal.PAGINATION_CURSOR_FIELD
+	}
 
 	if size == 0 {
 
 		size = DEFAULT_PAGINATION_SIZE
 	}
 
-	query := make(bson.D, len(filters)+1)
+	query := make([]interface{}, len(filters)+1)
 
 	query[0] = bson.E{
-		"_id", bson.D{
+		cursorField, bson.D{
 			{"$gt", cursor},
 		},
 	}
@@ -839,7 +870,8 @@ func FindPrevious[Entity_T any, Cursor_T comparable](
 
 	findOption := options.Find()
 	findOption.Limit = libCommon.PointerPrimitive(int64(size))
-	findOption.Sort = bson.D{{"_id", SORT_ASC}}
+	findOption.Sort = bson.D{{cursorField, SORT_ASC}}
+	findOption.Projection = projection
 
 	c, err := collection.Find(ctx, query, findOption)
 

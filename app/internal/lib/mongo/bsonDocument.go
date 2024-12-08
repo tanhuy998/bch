@@ -1,6 +1,10 @@
 package libMongo
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	libCommon "app/internal/lib/common"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type (
 	BsonDocument struct {
@@ -8,7 +12,12 @@ type (
 	}
 )
 
-func (this BsonDocument) GetObjectID() primitive.ObjectID {
+func (this *BsonDocument) GetObjectID() primitive.ObjectID {
 
 	return *this.ObjectID
+}
+
+func (this *BsonDocument) SetObjectID(id primitive.ObjectID) {
+
+	this.ObjectID = libCommon.PointerPrimitive(id)
 }

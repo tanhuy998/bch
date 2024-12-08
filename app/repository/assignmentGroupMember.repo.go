@@ -11,12 +11,14 @@ const (
 )
 
 type (
-	IAssignmentGroupMember interface {
-		IMongoDBRepository
-		ICRUDMongoRepository[model.AssignmentGroupMember]
-		//CreateMany(models []*model.AssignmentGroupMember, ctx context.Context) error
-		ICreateMany[model.AssignmentGroupMember]
-	}
+	// IAssignmentGroupMember interface {
+	// 	IMongoDBRepository
+	// 	ICRUDMongoRepository[model.AssignmentGroupMember]
+	// 	//CreateMany(models []*model.AssignmentGroupMember, ctx context.Context) error
+	// 	ICreateMany[model.AssignmentGroupMember]
+	// }
+
+	IAssignmentGroupMember = IRepository[model.AssignmentGroupMember]
 
 	AssignmentGroupMemberRepository struct {
 		AbstractMongoRepository
@@ -26,22 +28,24 @@ type (
 
 func (this *AssignmentGroupMemberRepository) Init(db *mongo.Database) *AssignmentGroupMemberRepository {
 
-	this.AbstractMongoRepository.Init(db, ASSIGNMENT_GROUP_MEMBER_COLLECTION_NAME)
+	// this.AbstractMongoRepository.Init(db, ASSIGNMENT_GROUP_MEMBER_COLLECTION_NAME)
 
-	this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
+	// this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
+
+	this.crud_mongo_repository.Init(db, ASSIGNMENT_GROUP_MEMBER_COLLECTION_NAME)
 
 	return this
 }
 
-func (this *AssignmentGroupMemberRepository) GetCollection() *mongo.Collection {
+// func (this *AssignmentGroupMemberRepository) GetCollection() *mongo.Collection {
 
-	return this.AbstractMongoRepository.collection
-}
+// 	return this.AbstractMongoRepository.collection
+// }
 
-func (this *AssignmentGroupMemberRepository) GetDBClient() *mongo.Client {
+// func (this *AssignmentGroupMemberRepository) GetDBClient() *mongo.Client {
 
-	return this.GetCollection().Database().Client()
-}
+// 	return this.GetCollection().Database().Client()
+// }
 
 // func (this *AssignmentGroupMemberRepository) Create(model *model.AssignmentGroupMember, ctx context.Context) error {
 

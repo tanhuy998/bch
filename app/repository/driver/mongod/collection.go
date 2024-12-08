@@ -1,4 +1,4 @@
-package repository
+package mongoRepository
 
 import (
 	dbQueryTracerPort "app/port/dbQueryTracer"

@@ -1,4 +1,4 @@
-package repository
+package mongoRepository
 
 import (
 	libCommon "app/internal/lib/common"

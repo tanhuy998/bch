@@ -11,35 +11,39 @@ const (
 )
 
 type (
-	ICommandGroupUser interface {
-		IMongoDBRepository
-		ICRUDMongoRepository[model.CommandGroupUser]
-	}
+	// ICommandGroupUser interface {
+	// 	IMongoDBRepository
+	// 	ICRUDMongoRepository[model.CommandGroupUser]
+	// }
+
+	ICommandGroupUser = IRepository[model.CommandGroupUser]
 
 	CommandGroupUserRepository struct {
-		AbstractMongoRepository
+		//AbstractMongoRepository
 		crud_mongo_repository[model.CommandGroupUser]
 	}
 )
 
 func (this *CommandGroupUserRepository) Init(db *mongo.Database) *CommandGroupUserRepository {
 
-	this.AbstractMongoRepository.Init(db, COMMAND_GROUP_USER_COLLECTION_NAME)
+	// this.AbstractMongoRepository.Init(db, COMMAND_GROUP_USER_COLLECTION_NAME)
 
-	this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
+	// this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
+
+	this.crud_mongo_repository.Init(db, COMMAND_GROUP_USER_COLLECTION_NAME)
 
 	return this
 }
 
-func (this *CommandGroupUserRepository) GetCollection() *mongo.Collection {
+// func (this *CommandGroupUserRepository) GetCollection() *mongo.Collection {
 
-	return this.AbstractMongoRepository.collection
-}
+// 	return this.AbstractMongoRepository.collection
+// }
 
-func (this *CommandGroupUserRepository) GetDBClient() *mongo.Client {
+// func (this *CommandGroupUserRepository) GetDBClient() *mongo.Client {
 
-	return this.GetCollection().Database().Client()
-}
+// 	return this.GetCollection().Database().Client()
+// }
 
 // func (this *CommandGroupUserRepository) Create(model *model.CommandGroupUser, ctx context.Context) error {
 

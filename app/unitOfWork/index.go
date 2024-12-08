@@ -1,14 +1,21 @@
 package unitOfWork
 
 import (
+	"app/repository"
 	genericUseCase "app/unitOfWork/genericUsecase"
 	opLog "app/unitOfWork/operationLog"
 	"app/valueObject/requestInput"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
 	OperationLogger  = opLog.OperationLogger
 	IOperationLogger = opLog.IOperationLogger
+
+	PaginateUseCase[Entity_T any, Cursor_T comparable, Repository_T repository.IPaginateRepository[bson.E, Entity_T, Cursor_T]] struct {
+		genericUseCase.PaginateUseCase[Entity_T, Cursor_T, Repository_T]
+	}
 
 	UseCaseResultWrapper[Input_T, Output_T any] struct {
 		genericUseCase.UseCaseResultWrapper[Input_T, Output_T]

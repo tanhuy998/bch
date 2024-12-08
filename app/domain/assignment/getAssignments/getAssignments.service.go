@@ -2,15 +2,16 @@ package getAssignmentsDomain
 
 import (
 	"app/domain"
-	libCommon "app/internal/lib/common"
 	"app/model"
 	assignmentServicePort "app/port/assignment"
 	"app/repository"
+	"app/unitOfWork"
 	"context"
 	"time"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
@@ -20,7 +21,8 @@ const (
 type (
 	GetAssignmentsService struct {
 		domain.ContextualDomainService[domain_context]
-		AssignmentRepo repository.IAssignment
+		unitOfWork.PaginateUseCase[model.Assignment, primitive.ObjectID, repository.IAssignment]
+		// AssignmentRepo repository.IAssignment
 	}
 )
 
@@ -57,19 +59,23 @@ func (this *GetAssignmentsService) Serve(
 		}
 	}
 
-	if !filter.HasCursor() {
-		return this.AssignmentRepo.FindOffset(
-			query, pageNumber, size, nil, ctx,
-		)
-	}
+	// if !filter.HasCursor() {
+	// 	return this.AssignmentRepo.FindOffset(
+	// 		query, pageNumber, size, nil, ctx,
+	// 	)
+	// }
 
-	model := model.Assignment{}
-	model.ObjectID = libCommon.PointerPrimitive(filter.GetCursor())
+	// model := model.Assignment{}
+	// model.ObjectID = libCommon.PointerPrimitive(filter.GetCursor())
 
-	switch filter.IsPrevious() {
-	case true:
-		return repository.FindPrevious(this.AssignmentRepo.GetCollection(), model, size, ctx, query...)
-	default:
-		return repository.FindNext(this.AssignmentRepo.GetCollection(), model, size, ctx, query...)
-	}
+	// switch filter.IsPrevious() {
+	// case true:
+	// 	return repository.FindPrevious(this.AssignmentRepo.GetCollection(), model, size, ctx, query...)
+	// default:
+	// 	return repository.FindNext(this.AssignmentRepo.GetCollection(), model, size, ctx, query...)
+	// }
+
+	return this.Paginate(
+		TenantUUID, pageNumber, size, nil, false, ctx, query...,
+	)
 }

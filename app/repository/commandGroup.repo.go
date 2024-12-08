@@ -11,32 +11,36 @@ const (
 )
 
 type (
-	ICommandGroup interface {
-		IMongoDBRepository
-		ICRUDMongoRepository[model.CommandGroup]
-	}
+	// ICommandGroup interface {
+	// 	IMongoDBRepository
+	// 	ICRUDMongoRepository[model.CommandGroup]
+	// }
+
+	ICommandGroup = IRepository[model.CommandGroup]
 
 	CommandGroupRepository struct {
-		AbstractMongoRepository
+		//AbstractMongoRepository
 		crud_mongo_repository[model.CommandGroup]
 	}
 )
 
 func (this *CommandGroupRepository) Init(db *mongo.Database) *CommandGroupRepository {
 
-	this.AbstractMongoRepository.Init(db, COMMAND_GROUP_COLLECTION_NAME)
+	// this.AbstractMongoRepository.Init(db, COMMAND_GROUP_COLLECTION_NAME)
 
-	this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
+	// this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
+
+	this.crud_mongo_repository.Init(db, COMMAND_GROUP_COLLECTION_NAME)
 
 	return this
 }
 
-func (this *CommandGroupRepository) GetCollection() *mongo.Collection {
+// func (this *CommandGroupRepository) GetCollection() *mongo.Collection {
 
-	return this.AbstractMongoRepository.collection
-}
+// 	return this.AbstractMongoRepository.collection
+// }
 
-func (this *CommandGroupRepository) GetDBClient() *mongo.Client {
+// func (this *CommandGroupRepository) GetDBClient() *mongo.Client {
 
-	return this.GetCollection().Database().Client()
-}
+// 	return this.GetCollection().Database().Client()
+// }

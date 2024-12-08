@@ -36,6 +36,7 @@ type (
 	// }
 
 	CommandGroup struct {
+		libMongo.BsonDocument
 		UUID        *uuid.UUID `json:"uuid,omitempty" bson:"uuid,omitempty"`
 		TenantUUID  *uuid.UUID `json:"tenantUUID" bson:"tenantUUID"`
 		CreatedBy   *uuid.UUID `json:"createdBy" bson:"createdBy,omitempty"`

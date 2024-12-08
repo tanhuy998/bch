@@ -4,6 +4,7 @@ import (
 	libConfig "app/internal/lib/config"
 	"app/model"
 	authServicePort "app/port/auth"
+	paginateServicePort "app/port/paginate"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -21,6 +22,7 @@ import (
 	"app/domain/auth/getSingleCommandGroupDomain"
 	getSingleUserDomain "app/domain/auth/getSingleUser"
 	getTenantAllGroupsDomain "app/domain/auth/getTenantAllGroups"
+	getTenantCommandGroupDomain "app/domain/auth/getTenantCommandGroups"
 	getTenantUsersDomain "app/domain/auth/getTenantUsers"
 	getUserAuthorityDomain "app/domain/auth/getUserAuthority"
 	getUserParticipatedCommandGroupsDomain "app/domain/auth/getUserParticipatedCommandGroups"
@@ -31,6 +33,7 @@ import (
 	modifyUserDomain "app/domain/auth/modifyUser"
 
 	"github.com/kataras/iris/v12/hero"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
@@ -55,6 +58,11 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[authServicePort.IRemoveDBUserSession, removeDBUserSessionDomain.RemoveDBUserSessionService](container, nil)
 	libConfig.BindDependency[authServicePort.ICheckUserInCommandGroup, checkUserInCommandGroupDomain.CheckUserInCommandGroupService](container, nil)
 	libConfig.BindDependency[authServicePort.ICheckCommandGroupUserRole, checkCommandGroupUserRolesDomain.CheckCommandGroupUserRoleService](container, nil)
+
+	libConfig.BindDependency[
+		paginateServicePort.IPaginate[model.CommandGroup, primitive.ObjectID],
+		getTenantCommandGroupDomain.GetTenantCommandGroupService,
+	](container, nil)
 
 	libConfig.BindDependency[authServicePort.IGetAssignmentGroupUnAssignedCommandGroupUsers, getAssignmentGroupUnAssignedCommandGroupUsersDomain.GetAssignmentGroupUnAssignedCommandGroupUserService](container, nil)
 	libConfig.BindDependency[authServicePort.IGetUserAuthorityServicePort, getUserAuthorityDomain.GetUsertAuthorityService](container, nil)

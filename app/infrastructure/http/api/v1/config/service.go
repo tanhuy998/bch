@@ -61,22 +61,11 @@ func InitializeDatabase(app router.Party) {
 
 	db := db.GetDB()
 
-	// container.Register(func(ctx iris.Context) *mongo.Client {
-
-	// 	ctx.Values().Set(DBMS_CLIENT, client)
-
-	// 	return client
-	// })
-	// container.Register(func(ctx iris.Context) *mongo.Database {
-
-	// 	ctx.Values().Set(DB, db)
-
-	// 	return db
-	// })
-
 	container.Register(log.Default()).Explicitly()
 	container.Register(db).Explicitly()
 	container.Register(client).Explicitly()
+
+	libConfig.BindDependency[repository.ITransactionDBClient, repository.MongoDBClient](container, nil)
 
 	fmt.Println("DBMS client initialized.")
 
@@ -114,18 +103,18 @@ func InitializeDatabase(app router.Party) {
 	libConfig.BindDependency[repository.IRole](
 		container, new(repository.RoleRepository).Init(db),
 	).EnableStructDependents()
-	libConfig.BindDependency[repository.ICampaignRepository](
-		container, new(repository.CampaignRepository).Init(db),
-	).EnableStructDependents()
-	libConfig.BindDependency[repository.ICandidateRepository](
-		container, new(repository.CandidateRepository).Init(db),
-	).EnableStructDependents()
-	libConfig.BindDependency[repository.ICandidateSigningCommit](
-		container, new(repository.CandidateSingingCommitRepository).Init(db),
-	).EnableStructDependents()
-	libConfig.BindDependency[repository.ICandidateSigningInfo](
-		container, new(repository.CandidateSigningInfoRepository).Init(db),
-	).EnableStructDependents()
+	// libConfig.BindDependency[repository.ICampaignRepository](
+	// 	container, new(repository.CampaignRepository).Init(db),
+	// ).EnableStructDependents()
+	// libConfig.BindDependency[repository.ICandidateRepository](
+	// 	container, new(repository.CandidateRepository).Init(db),
+	// ).EnableStructDependents()
+	// libConfig.BindDependency[repository.ICandidateSigningCommit](
+	// 	container, new(repository.CandidateSingingCommitRepository).Init(db),
+	// ).EnableStructDependents()
+	// libConfig.BindDependency[repository.ICandidateSigningInfo](
+	// 	container, new(repository.CandidateSigningInfoRepository).Init(db),
+	// ).EnableStructDependents()
 	libConfig.BindDependency[repository.IAssignment](
 		container, new(repository.AssignmentRepository).Init(db),
 	).EnableStructDependents()

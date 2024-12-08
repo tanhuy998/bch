@@ -2,7 +2,6 @@ package getTenantUsersDomain
 
 import (
 	libCommon "app/internal/lib/common"
-	libMongo "app/internal/lib/mongo"
 	"app/model"
 	"app/repository"
 	"context"
@@ -14,9 +13,9 @@ import (
 )
 
 type (
-	RepoPaginateFunc[T libMongo.IBsonDocument] func(
-		collection repository.IMongoRepositoryOperator, dataModel T, size uint64, ctx context.Context, filters ...primitive.E,
-	) ([]T, error)
+	RepoPaginateFunc[Entity_T any, Cursor_T comparable] func(
+		collection repository.IMongoRepositoryOperator, cursor Cursor_T, size uint64, ctx context.Context, filters ...primitive.E,
+	) ([]Entity_T, error)
 )
 
 type (
@@ -47,10 +46,10 @@ func (this *GetTenantUsersService) Serve(
 		)
 	}
 	fmt.Println(2)
-	dataModel := model.User{}
-	dataModel.ObjectID = cursor
+	// dataModel := model.User{}
+	// dataModel.ObjectID = cursor
 
-	fn := libCommon.Ternary[RepoPaginateFunc[model.User]](
+	fn := libCommon.Ternary[RepoPaginateFunc[model.User, primitive.ObjectID]](
 		isPrev,
 		repository.FindPrevious,
 		repository.FindNext,
@@ -58,7 +57,7 @@ func (this *GetTenantUsersService) Serve(
 
 	return fn(
 		this.UserRepo.GetCollection(),
-		dataModel,
+		*cursor,
 		size,
 		ctx,
 		bson.E{"tenantUUID", tenantUUID},

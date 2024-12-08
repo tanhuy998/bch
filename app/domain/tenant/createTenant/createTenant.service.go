@@ -7,11 +7,11 @@ import (
 	"app/model"
 	tenantServicePort "app/port/tenant"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
 	"errors"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readconcern"
@@ -130,12 +130,18 @@ func (this *CreateTenantService) Serve(
 
 func (this *CreateTenantService) validateTenant(name string, ctx context.Context) error {
 
-	tenant, err := this.TenantRepo.Find(
-		bson.D{
-			{"name", name},
+	// tenant, err := this.TenantRepo.Find(
+	// 	bson.D{
+	// 		{"name", name},
+	// 	},
+	// 	ctx,
+	// )
+
+	tenant, err := this.TenantRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+			filter.Field("name").Equal(name)
 		},
-		ctx,
-	)
+	).Find(ctx)
 
 	if err != nil {
 

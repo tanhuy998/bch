@@ -11,34 +11,38 @@ const (
 )
 
 type (
-	IAssignment interface {
-		IMongoDBRepository
-		ICRUDMongoRepository[model.Assignment]
-		//CreateMany(models []*model.Assignment, ctx context.Context) error
-		ICreateMany[model.Assignment]
-	}
+	// IAssignment interface {
+	// 	IMongoDBRepository
+	// 	ICRUDMongoRepository[model.Assignment]
+	// 	//CreateMany(models []*model.Assignment, ctx context.Context) error
+	// 	ICreateMany[model.Assignment]
+	// }
+
+	IAssignment = IRepository[model.Assignment]
 
 	AssignmentRepository struct {
-		AbstractMongoRepository
+		//AbstractMongoRepository
 		crud_mongo_repository[model.Assignment]
 	}
 )
 
 func (this *AssignmentRepository) Init(db *mongo.Database) *AssignmentRepository {
 
-	this.AbstractMongoRepository.Init(db, ASSIGNMENT_COLLECTION_NAME)
+	// this.AbstractMongoRepository.Init(db, ASSIGNMENT_COLLECTION_NAME)
 
-	this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
+	// this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
+
+	this.crud_mongo_repository.Init(db, ASSIGNMENT_COLLECTION_NAME)
 
 	return this
 }
 
-func (this *AssignmentRepository) GetCollection() *mongo.Collection {
+// func (this *AssignmentRepository) GetCollection() *mongo.Collection {
 
-	return this.AbstractMongoRepository.collection
-}
+// 	return this.AbstractMongoRepository.collection
+// }
 
-func (this *AssignmentRepository) GetDBClient() *mongo.Client {
+// func (this *AssignmentRepository) GetDBClient() *mongo.Client {
 
-	return this.GetCollection().Database().Client()
-}
+// 	return this.GetCollection().Database().Client()
+// }
