@@ -1,28 +1,22 @@
 package mongoRepository
 
 import (
-	libCommon "app/internal/lib/common"
 	repositoryAPI "app/repository/api"
 	"context"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type (
 	mongo_read_projection[Model_T any] struct {
-		mongo_filter[Model_T]
+		//mongo_filter[Model_T]
+		mongo_repository[Model_T]
 	}
 )
 
 func (this *mongo_read_projection[Model_T]) InitCollection(col *mongo.Collection) {
 
 	this.collection = col
-}
-
-func (this *mongo_read_projection[Model_T]) clone() *mongo_read_projection[Model_T] {
-
-	return libCommon.PointerPrimitive(*this)
 }
 
 func (this *mongo_read_projection[Model_T]) Select(fields ...string) (ret repositoryAPI.IRepositoryProjectableOperator[Model_T]) {
@@ -38,7 +32,7 @@ func (this *mongo_read_projection[Model_T]) Select(fields ...string) (ret reposi
 			continue
 		}
 
-		this.projection[v] = true
+		this.projection[v] = 1
 	}
 
 	return
@@ -57,7 +51,7 @@ func (this *mongo_read_projection[Model_T]) ExcludeFields(fields ...string) (ret
 			continue
 		}
 
-		this.projection[v] = false
+		this.projection[v] = 0
 	}
 
 	return
@@ -70,51 +64,42 @@ func (this *mongo_read_projection[Model_T]) initProjection() {
 		return
 	}
 
-	this.projection = make(map[string]bool)
-}
-
-func (this *mongo_read_projection[Model_T]) prepareProjection() bson.D {
-
-	ret := make(bson.D, len(this.projection))
-
-	i := 0
-
-	for field, val := range this.projection {
-
-		ret[i].Key = field
-		ret[i].Value = libCommon.Ternary(val, 1, 0)
-	}
-
-	return ret
+	this.projection = make(map[string]uint)
 }
 
 func (this *mongo_read_projection[Model_T]) Find(ctx context.Context) ([]*Model_T, error) {
 
-	projection := this.prepareProjection()
-
-	return findManyDocuments[Model_T](this.filter, &this.MongoDBQueryMonitorCollection, ctx, projection...)
+	return findManyDocuments[Model_T](this.prepareFilter(), &this.MongoDBQueryMonitorCollection, ctx, this.prepareSorter(), this.projection)
 }
 
 func (this *mongo_read_projection[Model_T]) FindOne(ctx context.Context) (*Model_T, error) {
 
-	projection := this.prepareProjection()
-
-	return findOneDocument[Model_T](this.filter, &this.MongoDBQueryMonitorCollection, ctx, projection...)
+	return findOneDocument[Model_T](this.prepareFilter(), &this.MongoDBQueryMonitorCollection, ctx, this.projection)
 }
 
-func (this *mongo_read_projection[Model_T]) Filter(
-	fn repositoryAPI.FilterFunc,
-) repositoryAPI.IRepositoryFilterableOperator[Model_T] {
+func (this *mongo_read_projection[Model_T]) FindNext(
+	cursorField string, cursor interface{}, size uint64, ctx context.Context,
+) ([]Model_T, error) {
 
-	fn(&this.filter)
-
-	return this
+	return this._FindNext(
+		cursorField, cursor, size, ctx,
+	)
 }
 
-// override filter_repository
-// func (this *mongo_read_projection[Model_T]) Filter(filter interface{}) repositoryAPI.IRepositoryFilterableOperator[Model_T] {
+func (this *mongo_read_projection[Model_T]) FindPrevious(
+	cursorField string, cursor interface{}, size uint64, ctx context.Context,
+) ([]Model_T, error) {
 
-// 	this.filter = filter
+	return this._FindPrevious(
+		cursorField, cursor, size, ctx,
+	)
+}
 
-// 	return this
-// }
+func (this *mongo_read_projection[Model_T]) FindOffset(
+	offset uint64, size uint64, ctx context.Context,
+) ([]Model_T, error) {
+
+	return this.mongo_repository._FindOffset(
+		offset, size, ctx,
+	)
+}

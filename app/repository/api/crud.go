@@ -37,12 +37,12 @@ type (
 		DeleteManyByFilter(filter interface{}, ctx context.Context) error
 	}
 
-	IPaginateRepository[Filter_T, Projection_T, Model_T any, Cursor_T comparable] interface {
-		IRepositoryReadOperator[Model_T]
-		IFindByOffsetRepository[Filter_T, Projection_T, Model_T]
-		FindNext(cursor Cursor_T, size uint64, ctx context.Context, filters Filter_T) ([]Model_T, error)
-		FindPrevious(cursor Cursor_T, size uint64, ctx context.Context, filters Filter_T) ([]Model_T, error)
-	}
+	// IPaginateRepository[Filter_T, Projection_T, Model_T any, Cursor_T comparable] interface {
+	// 	IRepositoryReadOperator[Model_T]
+	// 	IFindByOffsetRepository[Filter_T, Projection_T, Model_T]
+	// 	FindNext(cursor Cursor_T, size uint64, ctx context.Context, filters Filter_T) ([]Model_T, error)
+	// 	FindPrevious(cursor Cursor_T, size uint64, ctx context.Context, filters Filter_T) ([]Model_T, error)
+	// }
 
 	ICRUDRepository[Model_T any] interface {
 		ICreateMany[Model_T]

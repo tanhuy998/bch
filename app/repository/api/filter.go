@@ -5,9 +5,9 @@ import (
 )
 
 type (
-	IFilterRepository[Model_T any] interface {
-		Filter(filter interface{}) ICRUDRepository[Model_T]
-	}
+	// IFilterRepository[Model_T any] interface {
+	// 	Filter(filter interface{}) ICRUDRepository[Model_T]
+	// }
 
 	IRepositoryFilterableOperator[Model_T any] interface {
 		//IRepositoryReadOperator[Model_T]
@@ -37,12 +37,12 @@ type (
 	}
 
 	IFilterExpressionOperator interface {
-		IAtomicConditionOperator
-		Not() IFilterExpressionOperator
+		IComaparisonOperator
+		Not() IComaparisonOperator
 	}
 
-	IAtomicConditionOperator interface {
-		IFilterLogicalOperator
+	IComaparisonOperator interface {
+		//IFilterLogicalOperator
 		Equal(val interface{})
 		GreaterThan(val interface{})
 		GreaterOrEqual(val interface{})

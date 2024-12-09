@@ -5,6 +5,7 @@ import (
 	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	mongoRepositoryFilter "app/repository/driver/mongod/filter"
+	mongoRepositorySorter "app/repository/driver/mongod/sort"
 	"context"
 	"errors"
 
@@ -19,7 +20,8 @@ type (
 	mongo_repository[Model_T any] struct {
 		MongoDBQueryMonitorCollection
 		filter     mongoRepositoryFilter.MongoRepositoryFilterGenerator
-		projection map[string]bool
+		sort       mongoRepositorySorter.MongoSorterGenerator
+		projection map[string]uint
 		//filter     []interface{}
 	}
 )
@@ -103,9 +105,9 @@ func (this *mongo_repository[Model_T]) CreateMany(models []*Model_T, ctx context
 	return nil
 }
 
-func (this *mongo_repository[Model_T]) Find(query bson.D, ctx context.Context) (*Model_T, error) {
+func (this *mongo_repository[Model_T]) FindByFilter(query bson.D, ctx context.Context) (*Model_T, error) {
 
-	ret, err := findOneDocument[Model_T](query, &this.MongoDBQueryMonitorCollection, ctx)
+	ret, err := findOneDocument[Model_T](query, &this.MongoDBQueryMonitorCollection, ctx, this.projection)
 
 	if errors.Is(err, mongo.ErrNoDocuments) {
 
@@ -120,9 +122,11 @@ func (this *mongo_repository[Model_T]) Find(query bson.D, ctx context.Context) (
 	return ret, nil
 }
 
-func (this *mongo_repository[Model_T]) FindMany(query bson.D, ctx context.Context) ([]*Model_T, error) {
+func (this *mongo_repository[Model_T]) FindManyByFilter(query bson.D, ctx context.Context) ([]*Model_T, error) {
 
-	ret, err := findManyDocuments[Model_T](query, &this.MongoDBQueryMonitorCollection, ctx)
+	ret, err := findManyDocuments[Model_T](
+		query, &this.MongoDBQueryMonitorCollection, ctx, this.sort.Get(), this.projection,
+	)
 
 	if errors.Is(err, mongo.ErrNoDocuments) {
 
@@ -145,6 +149,42 @@ func (this *mongo_repository[Model_T]) FindOneByUUID(uuid uuid.UUID, ctx context
 
 		return nil, nil
 	}
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return ret, nil
+}
+
+func (this *mongo_repository[Model_T]) _FindOffset(
+	offset uint64, size uint64, ctx context.Context,
+) ([]Model_T, error) {
+
+	findOption := options.Find()
+	findOption.Limit = libCommon.PointerPrimitive(int64(size))
+	findOption.Sort = this.prepareSorter()
+	findOption.Projection = this.projection
+
+	if offset > 1 {
+
+		findOption.Skip = libCommon.PointerPrimitive(int64(offset))
+	}
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	cursor, err := this.collection.Find(ctx, this.prepareFilter(), findOption)
+
+	if err != nil {
+
+		return nil, libError.NewInternal(err)
+	}
+
+	ret, err := ParseValCursor[Model_T](cursor, ctx)
 
 	if err != nil {
 
@@ -201,12 +241,17 @@ func (this *mongo_repository[Model_T]) prepareFilter() []interface{} {
 	return this.filter.Get()
 }
 
+func (this *mongo_repository[Model_T]) prepareSorter() interface{} {
+
+	return this.sort.Get()
+}
+
 func (this *mongo_repository[Model_T]) FindNext(
 	cursor primitive.ObjectID, size uint64, ctx context.Context,
 ) ([]Model_T, error) {
 
 	return FindNext[Model_T](
-		this.GetCollection(), internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx, this.prepareFilter(), this.projection,
+		this.GetCollection(), internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
 	)
 }
 
@@ -215,7 +260,7 @@ func (this *mongo_repository[Model_T]) FindPrevious(
 ) ([]Model_T, error) {
 
 	return FindPrevious[Model_T](
-		this.GetCollection(), internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx, this.prepareFilter(), this.projection,
+		this.GetCollection(), internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
 	)
 }
 
@@ -224,7 +269,7 @@ func (this *mongo_repository[Model_T]) _FindNext(
 ) ([]Model_T, error) {
 
 	return FindNext[Model_T](
-		this.GetCollection(), cursorField, cursor, size, ctx, this.prepareFilter(), this.projection,
+		this.GetCollection(), cursorField, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
 	)
 }
 
@@ -233,6 +278,6 @@ func (this *mongo_repository[Model_T]) _FindPrevious(
 ) ([]Model_T, error) {
 
 	return FindPrevious[Model_T](
-		this.GetCollection(), cursorField, cursor, size, ctx, this.prepareFilter(), this.projection,
+		this.GetCollection(), cursorField, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
 	)
 }

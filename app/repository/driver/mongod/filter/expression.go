@@ -2,6 +2,7 @@ package mongoRepositoryFilter
 
 import (
 	libCommon "app/internal/lib/common"
+
 	repositoryAPI "app/repository/api"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -110,19 +111,20 @@ func (this *mongo_filter_expr) LessThanOrEqual(val interface{}) {
 	)
 }
 
-func (this *mongo_filter_expr) Or(fn repositoryAPI.FilterLogicalGroupFunc) {
+func (this *mongo_filter_expr) In(vals ...interface{}) {
 
-	f :=
+	op := libCommon.Ternary(this.is_antonym, "$nin", "$in")
 
-		fn()
+	this.ref.Add(
+		bson.E{
+			this.lhs, bson.E{
+				op, vals,
+			},
+		},
+	)
 }
 
-func (f *mongo_filter_expr) And(fn repositoryAPI.FilterLogicalGroupFunc) {
-
-	fn()
-}
-
-func (this *mongo_filter_expr) Not() repositoryAPI.IFilterExpressionOperator {
+func (this *mongo_filter_expr) Not() repositoryAPI.IComaparisonOperator {
 
 	this.is_antonym = true
 

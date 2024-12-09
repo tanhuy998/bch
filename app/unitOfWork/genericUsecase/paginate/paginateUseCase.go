@@ -1,14 +1,16 @@
-package genericUseCase
+package paginateUseCase
 
 import (
 	"app/repository"
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+type ()
 
 type (
 	RepoPaginateFunc[Entity_T any, Cursor_T comparable] func(
@@ -17,18 +19,14 @@ type (
 )
 
 type (
-	PaginateUseCase[
-		Entity_T any,
-		Cursor_T comparable,
-		Filter_T, Projection_T any,
-		Repository_T repository.IPaginateRepository[Filter_T, Projection_T, Entity_T, Cursor_T],
-	] struct {
-		Repo Repository_T
+	PaginateUseCase[Entity_T any] struct {
+		//Repo repositoryAPI.IPaginationRepository[Entity_T]
+		repo[Entity_T]
 	}
 )
 
-func (this *PaginateUseCase[Entity_T, Cursor_T, Filter_T, Projection_T, Repository_T]) Paginate(
-	tenantUUID uuid.UUID, page uint64, size uint64, cursor *Cursor_T, isPrev bool, ctx context.Context, filters Filter_T,
+func (this *PaginateUseCase[Entity_T]) Paginate(
+	tenantUUID uuid.UUID, page uint64, size uint64, cursor interface{}, isPrev bool, ctx context.Context,
 ) ([]Entity_T, error) {
 
 	if tenantUUID == uuid.Nil {

@@ -84,7 +84,9 @@ func findManyDocuments[T any](
 	query interface{},
 	collection IMongoRepositoryOperator,
 	ctx context.Context,
-	projections ...bson.E,
+	sort interface{},
+	//projections ...bson.E,
+	projection interface{},
 ) ([]*T, error) {
 
 	if ctx == nil {
@@ -94,10 +96,13 @@ func findManyDocuments[T any](
 
 	var opts *options.FindOptions
 
-	if len(projections) > 0 {
+	// if len(projections) > 0 {
 
-		opts = options.Find().SetProjection(projections)
-	}
+	// 	opts = options.Find().SetProjection(projections)
+	// }
+
+	opts.Projection = projection
+	opts.Sort = sort
 
 	cur, err := collection.Find(ctx, query, opts)
 
@@ -203,7 +208,8 @@ func findOneDocument[T any](
 	query interface{},
 	collection IMongoRepositoryOperator,
 	ctx context.Context,
-	projections ...bson.E,
+	//projections ...bson.E,
+	projection interface{},
 ) (*T, error) {
 
 	if ctx == nil {
@@ -215,10 +221,12 @@ func findOneDocument[T any](
 
 	opts := options.FindOne()
 
-	if len(projections) > 0 {
+	// if len(projections) > 0 {
 
-		opts.Projection = projections
-	}
+	// 	opts.Projection = projections
+	// }
+
+	opts.Projection = projection
 
 	res := collection.FindOne(ctx, query, opts)
 
@@ -790,7 +798,7 @@ func prepareAggregationPaginationStages(
 // }
 
 func FindNext[Entity_T any, Cursor_T comparable, Filter_T any](
-	collection IMongoRepositoryOperator, cursorField string, cursor Cursor_T, size uint64, ctx context.Context, filters []Filter_T, projection interface{},
+	collection IMongoRepositoryOperator, cursorField string, cursor Cursor_T, size uint64, ctx context.Context, filters []Filter_T, sort interface{}, projection interface{},
 ) ([]Entity_T, error) {
 
 	if cursorField == "" {
@@ -837,7 +845,7 @@ func FindNext[Entity_T any, Cursor_T comparable, Filter_T any](
 }
 
 func FindPrevious[Entity_T any, Cursor_T comparable, Filter_T any](
-	collection IMongoRepositoryOperator, cursorField string, cursor Cursor_T, size uint64, ctx context.Context, filters []Filter_T, projection interface{},
+	collection IMongoRepositoryOperator, cursorField string, cursor Cursor_T, size uint64, ctx context.Context, filters []Filter_T, sort interface{}, projection interface{},
 ) ([]Entity_T, error) {
 
 	if cursorField == "" {
