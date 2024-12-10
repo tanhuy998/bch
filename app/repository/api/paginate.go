@@ -20,10 +20,15 @@ type (
 		) ([]Model_T, error)
 	}
 
+	IClonableRepository[Model_T any] interface {
+		Clone() IPaginationRepository[Model_T]
+	}
+
 	IPaginationRepository[Model_T any] interface {
 		IFilterMethods[Model_T]
 		IProjectionMethods[Model_T]
 		ICursorPaginationRepository[Model_T]
 		IOffsetPaginationRepository[Model_T]
+		IClonableRepository[Model_T]
 	}
 )

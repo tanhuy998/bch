@@ -18,7 +18,7 @@ type (
 	// 	ICRUDMongoRepository[model.Tenant]
 	// }
 
-	ITenant = repositoryAPI.ICRUDRepository[model.Tenant]
+	ITenant = repositoryAPI.ICRUDMongoRepository[model.Tenant]
 
 	TenantRepository struct {
 		//AbstractMongoRepository
@@ -26,11 +26,11 @@ type (
 	}
 )
 
+var (
+	t repositoryAPI.ICRUDMongoRepository[model.Tenant] = new(TenantRepository)
+)
+
 func (this *TenantRepository) Init(db *mongo.Database) *TenantRepository {
-
-	// this.AbstractMongoRepository.Init(db, TENANT_COLLECTION_NAME)
-
-	// this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
 
 	this.MongoCRUDRepository.Init(db, TENANT_COLLECTION_NAME)
 

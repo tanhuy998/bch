@@ -2,6 +2,7 @@ package mongoRepository
 
 import (
 	dbQueryTracerPort "app/port/dbQueryTracer"
+	repositoryAPI "app/repository/api"
 	"context"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,7 +21,7 @@ type (
 	}
 )
 
-func (this *MongoDBQueryMonitorCollection) GetCollection() IMongoRepositoryOperator {
+func (this *MongoDBQueryMonitorCollection) GetCollection() repositoryAPI.IMongoRepositoryOperator {
 
 	return this
 }

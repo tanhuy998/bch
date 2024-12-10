@@ -22,7 +22,6 @@ type (
 		filter     mongoRepositoryFilter.MongoRepositoryFilterGenerator
 		sort       mongoRepositorySorter.MongoSorterGenerator
 		projection map[string]uint
-		//filter     []interface{}
 	}
 )
 
@@ -211,7 +210,9 @@ func (this *mongo_repository[Model_T]) FindOffset(
 
 	if offset > 1 {
 
-		findOption.Skip = libCommon.PointerPrimitive(int64(offset))
+		findOption.Skip = libCommon.PointerPrimitive(
+			int64((offset - 1) * size),
+		)
 	}
 
 	if ctx == nil {
@@ -279,5 +280,14 @@ func (this *mongo_repository[Model_T]) _FindPrevious(
 
 	return FindPrevious[Model_T](
 		this.GetCollection(), cursorField, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
+	)
+}
+
+func (this *mongo_repository[Model_T]) FindMany(
+	query bson.D, ctx context.Context,
+) ([]*Model_T, error) {
+
+	return findManyDocuments[Model_T](
+		query, &this.MongoDBQueryMonitorCollection, ctx, this.sort.Get(), this.projection,
 	)
 }

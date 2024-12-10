@@ -3,7 +3,7 @@ package repositoryAPI
 import (
 	"context"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -55,12 +55,17 @@ type (
 		// FindOffset(
 		// 	query interface{}, offset uint64, size uint64, sort *bson.D, ctx context.Context, projection ...bson.E,
 		// ) ([]Model_T, error)
-		reate(model *Model_T, ctx context.Context) error
+		//reate(model *Model_T, ctx context.Context) error
 
 		// FindOffset(
 		// 	query interface{}, offset uint64, size uint64, sort *bson.D, ctx context.Context, projection ...bson.E,
 		// ) ([]Model_T, error)
 		UpdateOneByUUID(uuid uuid.UUID, model *Model_T, ctx context.Context) error
 		DeleteMany(model *Model_T, ctx context.Context) error
+	}
+
+	ICRUDMongoRepository[Model_T any] interface {
+		ICRUDRepository[Model_T]
+		IMongoDBRepository
 	}
 )

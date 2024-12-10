@@ -1,7 +1,6 @@
 package mongoRepository
 
 import (
-	"app/internal"
 	"app/internal/common"
 	repositoryAPI "app/repository/api"
 	"context"
@@ -83,15 +82,15 @@ func (this *mongo_filter[Model_T]) Upsert(entity Model_T, ctx context.Context) e
 	return this.UpsertManyByFilter(this.filter, entity, ctx)
 }
 
-func (this *mongo_filter[Model_T]) FindNext(cursor interface{}, size uint64, ctx context.Context) ([]Model_T, error) {
+// func (this *mongo_filter[Model_T]) FindNext(cursor interface{}, size uint64, ctx context.Context) ([]Model_T, error) {
 
-	return this._FindNext(internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx)
-}
+// 	return this._FindNext(internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx)
+// }
 
-func (this *mongo_filter[Model_T]) FindPrevious(cursor interface{}, size uint64, ctx context.Context) ([]Model_T, error) {
+// func (this *mongo_filter[Model_T]) FindPrevious(cursor interface{}, size uint64, ctx context.Context) ([]Model_T, error) {
 
-	return this._FindPrevious(internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx)
-}
+// 	return this._FindPrevious(internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx)
+// }
 
 func (this *mongo_filter[Model_T]) Filter(
 	fn repositoryAPI.FilterFunc,

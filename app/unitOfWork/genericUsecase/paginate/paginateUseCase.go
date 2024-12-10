@@ -2,15 +2,17 @@ package paginateUseCase
 
 import (
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
 	"fmt"
 
-	"github.com/gofrs/uuid"
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type ()
+type (
+	PaginationOption func(paginator IPaginatorInitializer)
+)
 
 type (
 	RepoPaginateFunc[Entity_T any, Cursor_T comparable] func(
@@ -20,13 +22,12 @@ type (
 
 type (
 	PaginateUseCase[Entity_T any] struct {
-		//Repo repositoryAPI.IPaginationRepository[Entity_T]
-		repo[Entity_T]
+		Repo repositoryAPI.IPaginationRepository[Entity_T]
 	}
 )
 
 func (this *PaginateUseCase[Entity_T]) Paginate(
-	tenantUUID uuid.UUID, page uint64, size uint64, cursor interface{}, isPrev bool, ctx context.Context,
+	tenantUUID uuid.UUID, ctx context.Context, options ...PaginationOption,
 ) ([]Entity_T, error) {
 
 	if tenantUUID == uuid.Nil {
@@ -34,34 +35,35 @@ func (this *PaginateUseCase[Entity_T]) Paginate(
 		return nil, fmt.Errorf("invalid tenant uuid, nil value given")
 	}
 
-	var f bson.D = bson.D{
-		{"tenantUUID", tenantUUID},
+	paginator := NewPaginator(this.Repo)
+
+	for _, fn := range options {
+
+		fn(paginator)
 	}
 
-	if len(filters) > 0 {
+	paginator.IPaginationRepository.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
 
-		f = append(f, filters...)
-	}
+			filter.Field("tenantUUID").Equal(tenantUUID)
+		},
+	)
 
-	if cursor == nil {
+	if paginator.Cursor == nil {
 
-		return this.Repo.FindOffset(
-			f,
-			page,
-			size,
-			nil,
-			ctx,
+		return paginator.FindOffset(
+			paginator.Skip, paginator.Size, ctx,
 		)
 	}
 
-	if isPrev {
+	if paginator.IsPrev {
 
-		return this.Repo.FindPrevious(
-			*cursor, size, ctx, f,
+		return paginator.FindPrevious(
+			"_id", paginator.Cursor, paginator.Size, ctx,
 		)
 	}
 
-	return this.Repo.FindNext(
-		*cursor, size, ctx, f,
+	return paginator.FindNext(
+		"_id", paginator.Cursor, paginator.Size, ctx,
 	)
 }

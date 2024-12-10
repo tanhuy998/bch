@@ -2,8 +2,8 @@ package getTenantCommandGroupDomain
 
 import (
 	"app/model"
-	"app/repository"
 	"app/unitOfWork"
+	paginateUseCaseOption "app/unitOfWork/genericUsecase/paginate/option"
 
 	"context"
 
@@ -13,7 +13,7 @@ import (
 
 type (
 	GetTenantCommandGroupService struct {
-		unitOfWork.PaginateUseCase[model.CommandGroup, primitive.ObjectID, repository.ICommandGroup]
+		unitOfWork.PaginateUseCase[model.CommandGroup]
 	}
 )
 
@@ -22,6 +22,8 @@ func (this *GetTenantCommandGroupService) Paginate(
 ) ([]model.CommandGroup, error) {
 
 	return this.PaginateUseCase.Paginate(
-		tenantUUID, page, size, cursor, isPrev, ctx,
+		tenantUUID, ctx,
+		paginateUseCaseOption.ByCursor(cursor),
+		paginateUseCaseOption.ByOffsetWhenNoCursor(page, size),
 	)
 }

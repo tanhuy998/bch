@@ -170,7 +170,7 @@ type (
 
 type (
 	ITransactionDBClient interface {
-		WithTransaction(func(ctx context.Context) (interface{}, error)) (interface{}, error)
+		WithTransaction(ctx context.Context, fn func(ctx context.Context) (interface{}, error)) (interface{}, error)
 	}
 
 	MongoDBClient struct {
