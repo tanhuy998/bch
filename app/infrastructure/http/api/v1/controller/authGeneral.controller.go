@@ -27,6 +27,7 @@ func (this *AuthGeneralController) BeforeActivation(activator mvc.BeforeActivati
 	routeAuth.Exclude(
 		activator.Handle(
 			"POST", "/credentials", "AuthenticateCredentials",
+			middleware.AuthPolicies(container),
 			middleware.BindRequest[requestPresenter.LoginRequest](container),
 		),
 	)
