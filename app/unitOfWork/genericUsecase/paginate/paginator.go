@@ -1,12 +1,16 @@
 package paginateUseCase
 
-import repositoryAPI "app/repository/api"
+import (
+	paginateServicePort "app/port/paginate"
+	repositoryAPI "app/repository/api"
+)
 
 type (
 	IPaginationFilter repositoryAPI.FilterFunc
 
 	ICursorPaginator interface {
 		SetCursor(c interface{})
+		SetCursorDirection(paginateServicePort.CursorDirection)
 		CursorFirst()
 	}
 
@@ -15,13 +19,10 @@ type (
 		SetSize(size uint64)
 	}
 
-	IPagaintorProjection interface {
-		Select(fields ...string)
-		ExcludeField(fields ...string)
-	}
+	IPagaintorProjection = paginateServicePort.IPaginateProjector
 
 	IPaginatorFilter interface {
-		Filter(fn repositoryAPI.FilterFunc)
+		ApplyFilter(fn repositoryAPI.FilterFunc)
 	}
 
 	IPaginatorInitializer interface {
@@ -35,16 +36,17 @@ type (
 type (
 	paginator[Entity_T any] struct {
 		repositoryAPI.IPaginationRepository[Entity_T]
-		Skip          uint64
+		Offset        uint64
 		Size          uint64
 		Cursor        interface{}
+		CursorNilVal  interface{}
 		IsPrev        bool
 		isCursorFirst bool
 	}
 )
 
 func NewPaginator[Entity_T any](
-	repo repositoryAPI.IPaginationRepository[Entity_T],
+	repo repositoryAPI.IPaginateClonableRepository[Entity_T],
 ) *paginator[Entity_T] {
 
 	if repo == nil {
@@ -64,15 +66,15 @@ func (this *paginator[Entity_T]) SetCursor(c interface{}) {
 
 func (this *paginator[Entity_T]) SetOffset(offset uint64) {
 
-	this.Skip = offset
+	this.Offset = offset
 }
 
 func (this *paginator[Entity_T]) SetSize(size uint64) {
 
-	this.Skip = size
+	this.Size = size
 }
 
-func (this *paginator[Entity_T]) Filter(fn repositoryAPI.FilterFunc) {
+func (this *paginator[Entity_T]) ApplyFilter(fn repositoryAPI.FilterFunc) {
 
 	this.IPaginationRepository.Filter(fn)
 }
@@ -90,4 +92,12 @@ func (this *paginator[Entity_T]) ExcludeField(fields ...string) {
 func (this *paginator[Entity_T]) CursorFirst() {
 
 	this.isCursorFirst = true
+}
+
+func (this *paginator[Entity_T]) SetCursorDirection(dir paginateServicePort.CursorDirection) {
+
+	if dir == paginateServicePort.CURSOR_DIRECTION_PREVIOUS {
+
+		this.IsPrev = true
+	}
 }

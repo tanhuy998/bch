@@ -60,7 +60,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[authServicePort.ICheckCommandGroupUserRole, checkCommandGroupUserRolesDomain.CheckCommandGroupUserRoleService](container, nil)
 
 	libConfig.BindDependency[
-		paginateServicePort.IPaginate[model.CommandGroup, primitive.ObjectID],
+		paginateServicePort.IPaginateService[model.CommandGroup, primitive.ObjectID],
 		getTenantCommandGroupDomain.GetTenantCommandGroupService,
 	](container, nil)
 

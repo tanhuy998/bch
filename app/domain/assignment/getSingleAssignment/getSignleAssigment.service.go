@@ -5,6 +5,7 @@ import (
 	libError "app/internal/lib/error"
 	"app/model"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
 	"errors"
 	"fmt"
@@ -97,13 +98,20 @@ func (this *GetSingleAssignmentService) Search(
 	model *model.Assignment, ctx context.Context,
 ) (*model.Assignment, error) {
 
-	ret, err := this.AssignmentRepo.Find(
-		bson.D{
-			{"title", model.Title},
-			{"tenantUUID", model.TenantUUID},
+	// ret, err := this.AssignmentRepo.Find(
+	// 	bson.D{
+	// 		{"title", model.Title},
+	// 		{"tenantUUID", model.TenantUUID},
+	// 	},
+	// 	ctx,
+	// )
+
+	ret, err := this.AssignmentRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+			filter.Field("tenantUUID").Equal(model.TenantUUID)
+			filter.Field("title").Equal(model.Title)
 		},
-		ctx,
-	)
+	).FindOne(ctx)
 
 	if err != nil {
 

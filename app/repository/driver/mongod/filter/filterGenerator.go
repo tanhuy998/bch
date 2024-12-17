@@ -2,10 +2,12 @@ package mongoRepositoryFilter
 
 import (
 	repositoryAPI "app/repository/api"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
-	MongoRepositoryFilterGenerator []interface{}
+	MongoRepositoryFilterGenerator bson.D
 )
 
 func (this *MongoRepositoryFilterGenerator) reset() {
@@ -16,11 +18,11 @@ func (this *MongoRepositoryFilterGenerator) init() {
 
 	if *this == nil {
 
-		*this = make([]interface{}, 0)
+		*this = MongoRepositoryFilterGenerator(bson.D{})
 	}
 }
 
-func (this *MongoRepositoryFilterGenerator) Add(exprs ...interface{}) repositoryAPI.IFilterGenerator {
+func (this *MongoRepositoryFilterGenerator) Add(exprs ...bson.E) repositoryAPI.IFilterGenerator {
 
 	this.init()
 
@@ -29,15 +31,15 @@ func (this *MongoRepositoryFilterGenerator) Add(exprs ...interface{}) repository
 	return this
 }
 
-func (this *MongoRepositoryFilterGenerator) Get() []interface{} {
+func (this *MongoRepositoryFilterGenerator) Get() bson.D {
 
-	return *this
+	return bson.D(*this)
 }
 
 func (this *MongoRepositoryFilterGenerator) Field(name string) repositoryAPI.IFilterExpressionOperator {
 
 	return &mongo_filter_expr{
-		ref: *this,
+		ref: this,
 		lhs: name,
 	}
 }

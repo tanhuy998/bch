@@ -1,6 +1,7 @@
 package paginateUseCaseOption
 
 import (
+	paginateServicePort "app/port/paginate"
 	repositoryAPI "app/repository/api"
 	paginateUseCase "app/unitOfWork/genericUsecase/paginate"
 )
@@ -10,6 +11,14 @@ func ByCursor(c interface{}) paginateUseCase.PaginationOption {
 	return func(paginator paginateUseCase.IPaginatorInitializer) {
 
 		paginator.SetCursor(c)
+	}
+}
+
+func CursorDirection(dir paginateServicePort.CursorDirection) paginateUseCase.PaginationOption {
+
+	return func(paginator paginateUseCase.IPaginatorInitializer) {
+
+		paginator.SetCursorDirection(dir)
 	}
 }
 
@@ -49,7 +58,7 @@ func Filter(fn repositoryAPI.FilterFunc) paginateUseCase.PaginationOption {
 
 	return func(paginator paginateUseCase.IPaginatorInitializer) {
 
-		paginator.Filter(fn)
+		paginator.ApplyFilter(fn)
 	}
 }
 

@@ -12,7 +12,7 @@ type (
 	IRepositoryFilterableOperator[Model_T any] interface {
 		//IRepositoryReadOperator[Model_T]
 		IRepositoryProjectableOperator[Model_T]
-		IProjectionMethods[Model_T]
+		IProjector[Model_T]
 		Find(ctx context.Context) ([]*Model_T, error)
 		FindOne(ctx context.Context) (*Model_T, error)
 		Update(updateEntity Model_T, ctx context.Context) error
@@ -23,7 +23,7 @@ type (
 	}
 
 	IFilterGenerator interface {
-		Add(...interface{}) IFilterGenerator
+		//Add(...interface{}) IFilterGenerator
 		IFilterExpression
 	}
 

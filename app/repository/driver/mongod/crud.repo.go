@@ -21,7 +21,7 @@ type (
 	}
 )
 
-func (this *MongoCRUDRepository[Model_T]) Clone() *mongo_filter[Model_T] {
+func (this *MongoCRUDRepository[Model_T]) Clone() repositoryAPI.IPaginationRepository[Model_T] {
 
 	return libCommon.PointerPrimitive(
 		this.mongo_filter,

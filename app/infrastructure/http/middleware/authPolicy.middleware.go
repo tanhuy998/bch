@@ -34,12 +34,6 @@ var (
 	)
 )
 
-func init() {
-
-	log.Default().Println(regexp_sep_auth_policy.String())
-	log.Default().Println(escaped_app_secret)
-}
-
 func AuthPolicies(container *hero.Container) iris.Handler {
 
 	return container.Handler(

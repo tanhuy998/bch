@@ -18,6 +18,7 @@ import (
 	modifyAssignmentDomain "app/domain/assignment/modifyAssignment"
 
 	"github.com/kataras/iris/v12/hero"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
@@ -31,7 +32,7 @@ type (
 
 func RegisterAssignmentBoundedContext(container *hero.Container) {
 
-	libConfig.BindDependency[assignmentServicePort.IGetAssignments, getAssignmentsDomain.GetAssignmentsService](container, nil)
+	libConfig.BindDependency[assignmentServicePort.IGetAssignments[primitive.ObjectID], getAssignmentsDomain.GetAssignmentsService](container, nil)
 	libConfig.BindDependency[assignmentServicePort.IGetAssignmentGroups, getAssignmentGroupsDomain.GetAssignmentGroupsService](container, nil)
 	libConfig.BindDependency[assignmentServicePort.IGetSingleAssignnment, getSingleAssignmentDomain.GetSingleAssignmentService](container, nil)
 	libConfig.BindDependency[assignmentServicePort.IGetSingleAssignmentGroup, getSingleAssignmentGroupDomain.GetSingleAssignmentGroupService](container, nil)

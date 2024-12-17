@@ -4,13 +4,11 @@ import (
 	"app/domain"
 	"app/model"
 	assignmentServicePort "app/port/assignment"
-	repositoryAPI "app/repository/api"
 	"app/unitOfWork"
-	paginateUseCaseOption "app/unitOfWork/genericUsecase/paginate/option"
 	"context"
-	"time"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
@@ -20,31 +18,35 @@ const (
 type (
 	GetAssignmentsService struct {
 		domain.ContextualDomainService[domain_context]
-		unitOfWork.PaginateUseCase[model.Assignment]
+		unitOfWork.PaginateUseCase[model.Assignment, primitive.ObjectID]
 	}
 )
 
 func (this *GetAssignmentsService) Serve(
-	tenantUUID uuid.UUID, filter assignmentServicePort.IGetAssignmentPaginate, ctx context.Context,
+	tenantUUID uuid.UUID, filter assignmentServicePort.IGetAssignmentPaginate[primitive.ObjectID], ctx context.Context,
 ) ([]model.Assignment, error) {
 
-	var (
-		expired = filter.GetExpiredFilter()
-	)
+	// var (
+	// 	retrieveOnlyExpiredAssignments = filter.GetExpiredFilter()
+	// )
 
-	return this.Paginate(
-		tenantUUID,
-		ctx,
-		paginateUseCaseOption.ByCursor(filter.GetCursor()),
-		paginateUseCaseOption.ByOffsetWhenNoCursor(filter.GetPageNumber(), filter.GetPageSize()),
-		paginateUseCaseOption.Filter(
-			func(filter repositoryAPI.IFilterGenerator) {
+	// return this.Paginate(
+	// 	tenantUUID,
+	// 	ctx,
+	// 	paginateUseCaseOption.ByCursor(filter.GetCursor()),
+	// 	paginateUseCaseOption.ByOffsetWhenNoCursor(filter.GetPageNumber(), filter.GetPageSize()),
+	// 	paginateUseCaseOption.Filter(
+	// 		func(filter repositoryAPI.IFilterGenerator) {
 
-				if expired {
+	// 			if retrieveOnlyExpiredAssignments {
 
-					filter.Field("deadline").LessThan(time.Now())
-				}
-			},
-		),
+	// 				filter.Field("deadline").LessThan(time.Now())
+	// 			}
+	// 		},
+	// 	),
+	// )
+
+	return this.UseCustomPaginator(
+		tenantUUID, filter, ctx,
 	)
 }

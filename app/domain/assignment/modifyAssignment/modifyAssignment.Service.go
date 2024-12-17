@@ -6,13 +6,13 @@ import (
 	"app/model"
 	assignmentServicePort "app/port/assignment"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
@@ -37,13 +37,26 @@ func (this *ModifyAssignmentService) Serve(
 		return errors.Join(common.ERR_FORBIDEN, fmt.Errorf("assignment not in tenant"))
 	}
 
-	similarQuery := bson.D{
-		{"title", dataModel.Title},
-		{"tenantUUID", tenantUUID},
-		{"assignmentUUID", assignmentUUID},
-	}
+	// similarQuery := bson.D{
+	// 	{"title", dataModel.Title},
+	// 	{"tenantUUID", tenantUUID},
+	// 	{"assignmentUUID", assignmentUUID},
+	// }
 
-	switch existingAssignment, err := this.AssignmentRepo.Find(similarQuery, ctx); {
+	// switch existingAssignment, err := this.AssignmentRepo.Find(similarQuery, ctx); {
+	// case err != nil:
+	// 	return err
+	// case existingAssignment != nil:
+	// 	return errors.Join(common.ERR_CONFLICT, fmt.Errorf("modified assignment conflict with existing assignment"))
+	// }
+
+	switch existingAssignment, err := this.AssignmentRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+			filter.Field("tenantUUID").Equal(tenantUUID)
+			filter.Field("title").Equal(dataModel.Title)
+			filter.Field("assignmentUUID").Equal(assignmentUUID)
+		},
+	).FindOne(ctx); {
 	case err != nil:
 		return err
 	case existingAssignment != nil:

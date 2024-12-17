@@ -49,7 +49,7 @@ type (
 		IRepositoryReadOperator[Model_T]
 		IRepositoryFilterableOperator[Model_T]
 		IFilterMethods[Model_T]
-		IProjectionMethods[Model_T]
+		IProjector[Model_T]
 		Create(model *Model_T, ctx context.Context) error
 
 		// FindOffset(

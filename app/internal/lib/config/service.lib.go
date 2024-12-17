@@ -21,11 +21,37 @@ func RegisterObject(container *hero.Container, obj any) {
 	dep.Explicitly()
 }
 
+func BindAs[ConcreteType any](
+	container *hero.Container, concreateObj *ConcreteType, abstractTypes []reflect.Type, options ...DependencyOptionFunc,
+) {
+
+	switch {
+	case container == nil:
+		panic("nil container passed to libConfig.BindAs()")
+	case len(abstractTypes) == 0:
+		panic("empty abstract type passed to libConfig.BindAs()")
+	}
+
+	for _, abstract := range abstractTypes {
+
+		dep := _bindDependency(container, abstract, concreateObj)
+
+		for _, optionFn := range options {
+			optionFn(dep)
+		}
+	}
+}
+
 func BindDependency[AbstractType, ConcreteType any](
 	container *hero.Container, concreteVal *ConcreteType,
 ) *hero.Dependency {
 
 	abstractType := libCommon.Wrap[AbstractType]()
+
+	return _bindDependency(container, abstractType, concreteVal)
+}
+
+func _bindDependency[ConcreteType any](container *hero.Container, abstractType reflect.Type, concreteVal *ConcreteType) *hero.Dependency {
 
 	checkInterfaceOrPanic(abstractType)
 

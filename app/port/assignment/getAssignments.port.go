@@ -2,7 +2,7 @@ package assignmentServicePort
 
 import (
 	"app/model"
-	"app/valueObject/requestInput"
+	paginateServicePort "app/port/paginate"
 	"context"
 
 	"github.com/google/uuid"
@@ -10,9 +10,10 @@ import (
 )
 
 type (
-	IGetAssignmentPaginate interface {
-		requestInput.IPaginationInput
-		requestInput.IMongoCursorPaginationInput
+	IGetAssignmentPaginate[Cursor_T comparable] interface {
+		// requestInput.IPaginationInput
+		// requestInput.IMongoCursorPaginationInput
+		paginateServicePort.IPaginator[Cursor_T]
 		GetExpiredFilter() bool
 	}
 
@@ -23,7 +24,7 @@ type (
 		Expired    bool
 	}
 
-	IGetAssignments interface {
-		Serve(TenantUUID uuid.UUID, filter IGetAssignmentPaginate, ctx context.Context) ([]model.Assignment, error)
+	IGetAssignments[Cursor_T comparable] interface {
+		Serve(TenantUUID uuid.UUID, filter IGetAssignmentPaginate[Cursor_T], ctx context.Context) ([]model.Assignment, error)
 	}
 )

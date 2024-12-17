@@ -2,7 +2,6 @@ package getTenantUsersDomain
 
 import (
 	"app/internal/common"
-	libCommon "app/internal/lib/common"
 	"app/model"
 	authServicePort "app/port/auth"
 	usecasePort "app/port/usecase"
@@ -10,8 +9,6 @@ import (
 	responsePresenter "app/presenter/response"
 	"errors"
 	"fmt"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
@@ -37,14 +34,15 @@ func (this *GetTenantUserUseCase) Execute(
 
 	output = this.GenerateOutput()
 	output.Data, err = this.GetTenantUsersService.Serve(
-		input.GetTenantUUID(),
-		input.PageNumber,
-		input.PageSize,
-		libCommon.Ternary[*primitive.ObjectID](
-			input.HasCursor(), libCommon.PointerPrimitive(input.GetCursor()), nil,
-		),
-		input.IsPrevious(),
-		input.GetContext(),
+		// input.GetTenantUUID(),
+		// input.PageNumber,
+		// input.PageSize,
+		// libCommon.Ternary[*primitive.ObjectID](
+		// 	input.HasCursor(), libCommon.PointerPrimitive(input.GetCursor()), nil,
+		// ),
+		// input.IsPrevious(),
+		// input.GetContext(),
+		input.GetTenantUUID(), input, input.GetContext(),
 	)
 
 	if err != nil {

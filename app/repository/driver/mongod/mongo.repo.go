@@ -237,9 +237,16 @@ func (this *mongo_repository[Model_T]) FindOffset(
 	return ret, nil
 }
 
-func (this *mongo_repository[Model_T]) prepareFilter() []interface{} {
+func (this *mongo_repository[Model_T]) prepareFilter() bson.D {
 
-	return this.filter.Get()
+	ret := this.filter.Get()
+
+	if len(ret) == 0 {
+
+		return bson.D{{}}
+	}
+
+	return ret
 }
 
 func (this *mongo_repository[Model_T]) prepareSorter() interface{} {

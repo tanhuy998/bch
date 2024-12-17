@@ -7,6 +7,7 @@ import (
 	"app/internal/db"
 	"app/internal/generalToken"
 	libConfig "app/internal/lib/config"
+	"app/model"
 	accessLogServicePort "app/port/accessLog"
 	actionResultServicePort "app/port/actionResult"
 	cacheListServicePort "app/port/cacheList"
@@ -14,7 +15,9 @@ import (
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	generalTokenIDServicePort "app/port/generalTokenID"
+	repositoryAPI "app/repository/api"
 	"log"
+	"reflect"
 
 	jwtTokenServicePort "app/port/jwtTokenService"
 	passwordServicePort "app/port/passwordService"
@@ -115,9 +118,19 @@ func InitializeDatabase(app router.Party) {
 	// libConfig.BindDependency[repository.ICandidateSigningInfo](
 	// 	container, new(repository.CandidateSigningInfoRepository).Init(db),
 	// ).EnableStructDependents()
-	libConfig.BindDependency[repository.IAssignment](
+	// libConfig.BindDependency[repository.IAssignment](
+	// 	container, new(repository.AssignmentRepository).Init(db),
+	// ).EnableStructDependents()
+
+	libConfig.BindAs(
 		container, new(repository.AssignmentRepository).Init(db),
-	).EnableStructDependents()
+		[]reflect.Type{
+			reflect.TypeFor[repository.IAssignment](),
+			reflect.TypeFor[repositoryAPI.IPaginateClonableRepository[model.Assignment]](),
+		},
+		libConfig.StructDependents(true),
+	)
+
 	libConfig.BindDependency[repository.IAssignmentGroup](
 		container, new(repository.AssignmentGroupRepository).Init(db),
 	).EnableStructDependents()

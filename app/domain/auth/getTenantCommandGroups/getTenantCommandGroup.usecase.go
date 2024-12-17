@@ -2,16 +2,13 @@ package getTenantCommandGroupDomain
 
 import (
 	"app/internal/common"
-	libCommon "app/internal/lib/common"
 	"app/model"
-	paginateServicePort "app/port/paginate"
+	authServicePort "app/port/auth"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
 	"app/unitOfWork"
 	"errors"
 	"fmt"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
@@ -19,7 +16,7 @@ type (
 
 	GetTenantCommandGroupsUseCase struct {
 		unitOfWork.GenericUseCase[requestPresenter.GetTenantCommandGroups, GetTenantCommandGroupResponse]
-		GetTenantCommandGroupService paginateServicePort.IPaginate[model.CommandGroup, primitive.ObjectID] // authServicePort.IGetTenantCommandGroup[model.CommandGroup]
+		GetTenantCommandGroupService authServicePort.IGetTenantCommandGroups[model.CommandGroup] //paginateServicePort.IPaginate[model.CommandGroup, primitive.ObjectID] // authServicePort.IGetTenantCommandGroup[model.CommandGroup]
 	}
 )
 
@@ -37,8 +34,9 @@ func (this *GetTenantCommandGroupsUseCase) Execute(
 		return
 	}
 
-	data, err := this.GetTenantCommandGroupService.Paginate(
-		input.GetTenantUUID(), input.PageNumber, input.PageSize, libCommon.PointerPrimitive(input.GetCursor()), input.IsPrev, input.GetContext(),
+	data, err := this.GetTenantCommandGroupService.Serve(
+		//input.GetTenantUUID(), input.PageNumber, input.PageSize, libCommon.PointerPrimitive(input.GetCursor()), input.IsPrev, input.GetContext(),
+		input.GetTenantUUID(), input, input.GetContext(),
 	)
 
 	if err != nil {

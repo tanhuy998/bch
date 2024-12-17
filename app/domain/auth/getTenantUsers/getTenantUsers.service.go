@@ -2,8 +2,8 @@ package getTenantUsersDomain
 
 import (
 	"app/model"
+	paginateServicePort "app/port/paginate"
 	"app/unitOfWork"
-	paginateUseCaseOption "app/unitOfWork/genericUsecase/paginate/option"
 	"context"
 	"fmt"
 
@@ -13,12 +13,13 @@ import (
 
 type (
 	GetTenantUsersService struct {
-		unitOfWork.PaginateUseCase[model.User]
+		unitOfWork.PaginateUseCase[model.User, primitive.ObjectID]
 	}
 )
 
 func (this *GetTenantUsersService) Serve(
-	tenantUUID uuid.UUID, page uint64, size uint64, cursor *primitive.ObjectID, isPrev bool, ctx context.Context,
+	// tenantUUID uuid.UUID, page uint64, size uint64, cursor *primitive.ObjectID, isPrev bool, ctx context.Context,
+	tenantUUID uuid.UUID, paginator paginateServicePort.IPaginator[primitive.ObjectID], ctx context.Context,
 ) ([]model.User, error) {
 
 	if tenantUUID == uuid.Nil {
@@ -26,9 +27,13 @@ func (this *GetTenantUsersService) Serve(
 		return nil, fmt.Errorf("invalid tenant uuid, nil value given")
 	}
 
-	return this.Paginate(
-		tenantUUID, ctx,
-		paginateUseCaseOption.ByCursor(cursor),
-		paginateUseCaseOption.ByOffsetWhenNoCursor(page, size),
+	// return this.Paginate(
+	// 	tenantUUID, ctx,
+	// 	paginateUseCaseOption.ByCursor(cursor),
+	// 	paginateUseCaseOption.ByOffsetWhenNoCursor(page, size),
+	// )
+
+	return this.PaginateUseCase.UseCustomPaginator(
+		tenantUUID, paginator, ctx,
 	)
 }

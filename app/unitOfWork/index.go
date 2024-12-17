@@ -11,8 +11,8 @@ type (
 	OperationLogger  = opLog.OperationLogger
 	IOperationLogger = opLog.IOperationLogger
 
-	PaginateUseCase[Entity_T any] struct {
-		paginateUseCase.PaginateUseCase[Entity_T]
+	PaginateUseCase[Entity_T any, Cursor_T comparable] struct {
+		paginateUseCase.PaginateUseCase[Entity_T, Cursor_T]
 	}
 
 	UseCaseResultWrapper[Input_T, Output_T any] struct {

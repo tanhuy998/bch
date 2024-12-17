@@ -8,7 +8,7 @@ type (
 		FindOne(ctx context.Context) (*Model_T, error)
 	}
 
-	IProjectionMethods[Model_T any] interface {
+	IProjector[Model_T any] interface {
 		Select(fields ...string) IRepositoryProjectableOperator[Model_T]
 		ExcludeFields(fields ...string) IRepositoryProjectableOperator[Model_T]
 	}

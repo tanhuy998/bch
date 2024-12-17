@@ -10,7 +10,7 @@ import (
 
 type (
 	mongo_filter_expr struct {
-		ref        MongoRepositoryFilterGenerator
+		ref        *MongoRepositoryFilterGenerator
 		lhs        string
 		rhs        interface{}
 		is_antonym bool

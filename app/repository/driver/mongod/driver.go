@@ -94,12 +94,17 @@ func findManyDocuments[T any](
 		ctx = context.TODO()
 	}
 
-	var opts *options.FindOptions
+	var opts *options.FindOptions = options.Find()
 
 	// if len(projections) > 0 {
 
 	// 	opts = options.Find().SetProjection(projections)
 	// }
+
+	if query == nil {
+
+		query = empty_bson
+	}
 
 	opts.Projection = projection
 	opts.Sort = sort
@@ -797,8 +802,15 @@ func prepareAggregationPaginationStages(
 // 	return ret, nil
 // }
 
-func FindNext[Entity_T any, Cursor_T comparable, Filter_T any](
-	collection IMongoRepositoryOperator, cursorField string, cursor Cursor_T, size uint64, ctx context.Context, filters []Filter_T, sort interface{}, projection interface{},
+func FindNext[Entity_T any, Cursor_T comparable](
+	collection IMongoRepositoryOperator,
+	cursorField string,
+	cursor Cursor_T,
+	size uint64,
+	ctx context.Context,
+	filter interface{},
+	sort interface{},
+	projection interface{},
 ) ([]Entity_T, error) {
 
 	if cursorField == "" {
@@ -811,17 +823,57 @@ func FindNext[Entity_T any, Cursor_T comparable, Filter_T any](
 		size = DEFAULT_PAGINATION_SIZE
 	}
 
-	query := make([]interface{}, len(filters)+1)
+	// query := make([]interface{}, len(filters)+1)
 
-	query[0] = bson.E{
-		cursorField, bson.D{
-			{"$lt", cursor},
-		},
-	}
+	// query[0] = bson.E{
+	// 	cursorField, bson.D{
+	// 		{"$lt", cursor},
+	// 	},
+	// }
 
-	for i, f := range filters {
+	// for i, f := range filters {
 
-		query[i+1] = f
+	// 	query[i+1] = f
+	// }
+
+	// query := append(
+	// 	bson.D{
+	// 		{
+	// 			cursorField, bson.D{
+	// 				{"$lt", cursor},
+	// 			},
+	// 		},
+	// 	},
+	// 	filters...,
+	// )
+
+	var query bson.D
+
+	if filter != nil {
+
+		query = bson.D{
+			{
+				"$and", bson.A{
+					bson.D{
+						{
+							cursorField, bson.D{
+								{"$lt", cursor},
+							},
+						},
+					},
+					filter,
+				},
+			},
+		}
+	} else {
+
+		query = bson.D{
+			{
+				cursorField, bson.D{
+					{"$lt", cursor},
+				},
+			},
+		}
 	}
 
 	if ctx == nil {
@@ -844,8 +896,15 @@ func FindNext[Entity_T any, Cursor_T comparable, Filter_T any](
 	return ParseValCursor[Entity_T](c, ctx)
 }
 
-func FindPrevious[Entity_T any, Cursor_T comparable, Filter_T any](
-	collection IMongoRepositoryOperator, cursorField string, cursor Cursor_T, size uint64, ctx context.Context, filters []Filter_T, sort interface{}, projection interface{},
+func FindPrevious[Entity_T any, Cursor_T comparable](
+	collection IMongoRepositoryOperator,
+	cursorField string,
+	cursor Cursor_T,
+	size uint64,
+	ctx context.Context,
+	filter interface{},
+	sort interface{},
+	projection interface{},
 ) ([]Entity_T, error) {
 
 	if cursorField == "" {
@@ -858,17 +917,57 @@ func FindPrevious[Entity_T any, Cursor_T comparable, Filter_T any](
 		size = DEFAULT_PAGINATION_SIZE
 	}
 
-	query := make([]interface{}, len(filters)+1)
+	// query := make([]interface{}, len(filters)+1)
 
-	query[0] = bson.E{
-		cursorField, bson.D{
-			{"$gt", cursor},
-		},
-	}
+	// query[0] = bson.E{
+	// 	cursorField, bson.D{
+	// 		{"$gt", cursor},
+	// 	},
+	// }
 
-	for i, f := range filters {
+	// for i, f := range filters {
 
-		query[i+1] = f
+	// 	query[i+1] = f
+	// }
+
+	// query := append(
+	// 	bson.D{
+	// 		{
+	// 			cursorField, bson.D{
+	// 				{"$gt", cursor},
+	// 			},
+	// 		},
+	// 	},
+	// 	filters...,
+	// )
+
+	var query bson.D
+
+	if filter != nil {
+
+		query = bson.D{
+			{
+				"$and", bson.A{
+					bson.D{
+						{
+							cursorField, bson.D{
+								{"$gt", cursor},
+							},
+						},
+					},
+					filter,
+				},
+			},
+		}
+	} else {
+
+		query = bson.D{
+			{
+				cursorField, bson.D{
+					{"$gt", cursor},
+				},
+			},
+		}
 	}
 
 	if ctx == nil {

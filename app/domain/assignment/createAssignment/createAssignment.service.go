@@ -5,13 +5,13 @@ import (
 	libCommon "app/internal/lib/common"
 	"app/model"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 const (
@@ -43,20 +43,36 @@ func (this *CreateAssignmentService) Serve(
 		return nil, ERR_INVALID_DEADLINE
 	}
 
-	findSimilarQuery := bson.D{
-		{"tenantUUID", tenantUUID},
-		{"title", dataModel.Title},
-		{
-			"createdAt", bson.D{
-				{
-					// check if there is no similar assignment in the same year
-					"$gte", time.Date(dataModel.Deadline.Year(), 1, 0, 0, 0, 0, 0, time.UTC),
-				},
-			},
-		},
-	}
+	// findSimilarQuery := bson.D{
+	// 	{"tenantUUID", tenantUUID},
+	// 	{"title", dataModel.Title},
+	// 	{
+	// 		"createdAt", bson.D{
+	// 			{
+	// 				// check if there is no similar assignment in the same year
+	// 				"$gte", time.Date(dataModel.Deadline.Year(), 1, 0, 0, 0, 0, 0, time.UTC),
+	// 			},
+	// 		},
+	// 	},
+	// }
 
-	switch existSimilar, err := this.AssignmentRepo.Find(findSimilarQuery, ctx); {
+	// switch existSimilar, err := this.AssignmentRepo.Find(findSimilarQuery, ctx); {
+	// case err != nil:
+	// 	return nil, err
+	// case existSimilar != nil:
+	// 	return nil, errors.Join(common.ERR_CONFLICT, fmt.Errorf("there are similar assignment in this year"))
+	// }
+
+	switch existSimilar, err := this.AssignmentRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+
+			filter.Field("tenantUUID").Equal(tenantUUID)
+			filter.Field("title").Equal(dataModel.Title)
+			filter.Field("createdAt").GreaterThan(
+				time.Date(dataModel.Deadline.Year(), 1, 0, 0, 0, 0, 0, time.UTC),
+			)
+		},
+	).FindOne(ctx); { //Find(findSimilarQuery, ctx); {
 	case err != nil:
 		return nil, err
 	case existSimilar != nil:

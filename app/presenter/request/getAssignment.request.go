@@ -1,7 +1,9 @@
 package requestPresenter
 
 import (
+	repositoryAPI "app/repository/api"
 	"app/valueObject/requestInput"
+	"time"
 )
 
 type (
@@ -25,4 +27,12 @@ type (
 func (this GetAssignments) GetExpiredFilter() bool {
 
 	return this.Expired
+}
+
+func (this *GetAssignments) ApplyPaginateFilter(filter repositoryAPI.IFilterGenerator) {
+
+	if this.Expired {
+
+		filter.Field("deadline").LessThan(time.Now())
+	}
 }
