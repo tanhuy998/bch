@@ -9,6 +9,7 @@ import (
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
 	"errors"
 	"fmt"
@@ -18,10 +19,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type QeuryResult struct {
+	TenantUUID           uuid.UUID                 `bson:"tenantUUID"`
+	IsCommandGroupMember bool                      `bson:"isCommandGroupMember"`
+	Groups               []*model.CommandGroupUser `bson:"groups"`
+}
+
 type (
 	ReportParticipatedCommandGroupsUseCase struct {
 		usecasePort.UseCase[requestPresenter.ReportParticipatedGroups, responsePresenter.ReportParticipatedGroups]
-		UserReppo                       repository.IUser
+		UserReppo                       repositoryAPI.ICRUDMongoRepository[model.User] // repository.IUser
 		ReportParticipatedCommandGroups authServicePort.IReportParticipatedCommandGroups
 	}
 )
@@ -180,12 +187,6 @@ func (this *ReportParticipatedCommandGroupsUseCase) validateAuthority(
 				},
 			},
 		},
-	}
-
-	type QeuryResult struct {
-		TenantUUID           uuid.UUID                 `bson:"tenantUUID"`
-		IsCommandGroupMember bool                      `bson:"isCommandGroupMember"`
-		Groups               []*model.CommandGroupUser `bson:"groups"`
 	}
 
 	switch requestedUser, err := repository.AggregateOne[QeuryResult](this.UserReppo.GetCollection(), pipeline, input.GetContext()); {

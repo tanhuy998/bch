@@ -16,7 +16,7 @@ type (
 
 	GetTenantCommandGroupsUseCase struct {
 		unitOfWork.GenericUseCase[requestPresenter.GetTenantCommandGroups, GetTenantCommandGroupResponse]
-		GetTenantCommandGroupService authServicePort.IGetTenantCommandGroups[model.CommandGroup] //paginateServicePort.IPaginate[model.CommandGroup, primitive.ObjectID] // authServicePort.IGetTenantCommandGroup[model.CommandGroup]
+		GetTenantCommandGroupService authServicePort.IGetTenantCommandGroups[model.CommandGroup]
 	}
 )
 
@@ -35,7 +35,6 @@ func (this *GetTenantCommandGroupsUseCase) Execute(
 	}
 
 	data, err := this.GetTenantCommandGroupService.Serve(
-		//input.GetTenantUUID(), input.PageNumber, input.PageSize, libCommon.PointerPrimitive(input.GetCursor()), input.IsPrev, input.GetContext(),
 		input.GetTenantUUID(), input, input.GetContext(),
 	)
 
@@ -47,7 +46,7 @@ func (this *GetTenantCommandGroupsUseCase) Execute(
 	output = this.GenerateOutput()
 	output.Message = "success"
 	output.SetData(data)
-	output.ResolvePaginateNavigator(input.GetPageSize())
+	//output.ResolvePaginateNavigator(input.GetPageSize())
 
 	return
 }

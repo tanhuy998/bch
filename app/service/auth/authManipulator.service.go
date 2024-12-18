@@ -9,9 +9,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type (
@@ -137,71 +135,71 @@ func (this *AuthManipulator) GrantCommandGroupUserRole(
 	return this.CommandGroupUserRoleRepo.Create(model, context.TODO())
 }
 
-func (this *AuthManipulator) GetGroupMembers(
-	groupUUID uuid.UUID,
-	pivot primitive.ObjectID,
-	limit int,
-	isPrev bool,
-) (*repository.PaginationPack[authValueObject.CommandGroupUserEntity], error) {
+// func (this *AuthManipulator) GetGroupMembers(
+// 	groupUUID uuid.UUID,
+// 	pivot primitive.ObjectID,
+// 	limit int,
+// 	isPrev bool,
+// ) (*repository.PaginationPack[authValueObject.CommandGroupUserEntity], error) {
 
-	repository.Aggregate[authValueObject.CommandGroupUserEntity](
-		this.CommandGroupRepo.GetCollection(),
-		mongo.Pipeline{
-			bson.D{
-				{
-					"$match", bson.D{
-						{"$uuid", groupUUID},
-					},
-				},
-			},
-			bson.D{
-				{
-					"$lookup", bson.D{
-						{"from", repository.COMMAND_GROUP_USER_COLLECTION_NAME},
-						{"localField", "uuid"},
-						{"foreignField", "commandGroupUserUUID"},
-						{"as", "groupUsers"},
-					},
-				},
-			},
-			bson.D{
-				{"$unwind", "groupUsers"},
-			},
-			bson.D{
-				{
-					"$set", bson.D{
-						{"userUUID", "$groupUsers.userUUID"},
-					},
-				},
-			},
-			bson.D{
-				{
-					"$lookup", bson.D{
-						{"from", repository.USER_COLLECTION_NAME},
-						{"localField", "userUUID"},
-						{"foreignField", "uuid"},
-						{"as", "users"},
-					},
-				},
-			},
-			bson.D{
-				{
-					"$unwind", "users",
-				},
-			},
-			// bson.D{
-			// 	{
-			// 		"$project", bson.D{
-			// 			{""},
-			// 		},
-			// 	},
-			// },
-		},
-		context.TODO(),
-	)
+// 	repository.Aggregate[authValueObject.CommandGroupUserEntity](
+// 		this.CommandGroupRepo.GetCollection(),
+// 		mongo.Pipeline{
+// 			bson.D{
+// 				{
+// 					"$match", bson.D{
+// 						{"$uuid", groupUUID},
+// 					},
+// 				},
+// 			},
+// 			bson.D{
+// 				{
+// 					"$lookup", bson.D{
+// 						{"from", repository.COMMAND_GROUP_USER_COLLECTION_NAME},
+// 						{"localField", "uuid"},
+// 						{"foreignField", "commandGroupUserUUID"},
+// 						{"as", "groupUsers"},
+// 					},
+// 				},
+// 			},
+// 			bson.D{
+// 				{"$unwind", "groupUsers"},
+// 			},
+// 			bson.D{
+// 				{
+// 					"$set", bson.D{
+// 						{"userUUID", "$groupUsers.userUUID"},
+// 					},
+// 				},
+// 			},
+// 			bson.D{
+// 				{
+// 					"$lookup", bson.D{
+// 						{"from", repository.USER_COLLECTION_NAME},
+// 						{"localField", "userUUID"},
+// 						{"foreignField", "uuid"},
+// 						{"as", "users"},
+// 					},
+// 				},
+// 			},
+// 			bson.D{
+// 				{
+// 					"$unwind", "users",
+// 				},
+// 			},
+// 			// bson.D{
+// 			// 	{
+// 			// 		"$project", bson.D{
+// 			// 			{""},
+// 			// 		},
+// 			// 	},
+// 			// },
+// 		},
+// 		context.TODO(),
+// 	)
 
-	return nil, nil
-}
+// 	return nil, nil
+// }
 
 func (this *AuthManipulator) GetCommandeeCommandGroups(
 	userUUID uuid.UUID,

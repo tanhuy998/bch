@@ -3,19 +3,13 @@ package getSingleCommandGroupDomain
 import (
 	"app/model"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
-	// IGetSingleCommandGroup interface {
-	// 	Serve(uuid uuid.UUID, ctx context.Context) (*model.CommandGroup, error)
-	// 	SearchByName(groupName string, ctx context.Context) (*model.CommandGroup, error)
-	// 	CheckCommandGroupExistence(groupName string, ctx context.Context) (bool, error)
-	// }
-
 	GetSingleCommandGroupService struct {
 		CommandGroupRepo repository.ICommandGroup
 	}
@@ -28,12 +22,18 @@ func (this *GetSingleCommandGroupService) Serve(uuid uuid.UUID, ctx context.Cont
 
 func (this *GetSingleCommandGroupService) SearchByName(groupName string, ctx context.Context) (*model.CommandGroup, error) {
 
-	ret, err := this.CommandGroupRepo.Find(
-		bson.D{
-			{"name", groupName},
+	// ret, err := this.CommandGroupRepo.Find(
+	// 	bson.D{
+	// 		{"name", groupName},
+	// 	},
+	// 	ctx,
+	// )
+
+	ret, err := this.CommandGroupRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+			filter.Field("name").Equal(groupName)
 		},
-		ctx,
-	)
+	).FindOne(ctx)
 
 	if err != nil {
 
@@ -45,12 +45,19 @@ func (this *GetSingleCommandGroupService) SearchByName(groupName string, ctx con
 
 func (this *GetSingleCommandGroupService) CheckCommandGroupExistence(groupName string, ctx context.Context) (bool, error) {
 
-	res, err := this.CommandGroupRepo.Find(
-		bson.D{
-			{"name", groupName},
+	// res, err := this.CommandGroupRepo.Find(
+	// 	bson.D{
+	// 		{"name", groupName},
+	// 	},
+	// 	ctx,
+	// )
+
+	res, err := this.CommandGroupRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+
+			filter.Field("name").Equal(groupName)
 		},
-		ctx,
-	)
+	).FindOne(ctx)
 
 	if err != nil {
 

@@ -3,10 +3,10 @@ package getSingleUserDomain
 import (
 	"app/model"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
@@ -35,12 +35,18 @@ func (this *GetSingleUserService) Serve(userUUID uuid.UUID, ctx context.Context)
 
 func (this *GetSingleUserService) SearchByUsername(username string, ctx context.Context) (*model.User, error) {
 
-	ret, err := this.UserRepo.Find(
-		bson.D{
-			{"username", username},
+	// ret, err := this.UserRepo.Find(
+	// 	bson.D{
+	// 		{"username", username},
+	// 	},
+	// 	ctx,
+	// )
+
+	ret, err := this.UserRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+			filter.Field("username").Equal(username)
 		},
-		ctx,
-	)
+	).FindOne(ctx)
 
 	if err != nil {
 
@@ -52,12 +58,18 @@ func (this *GetSingleUserService) SearchByUsername(username string, ctx context.
 
 func (this *GetSingleUserService) CheckUsernameExistence(username string, ctx context.Context) (bool, error) {
 
-	ret, err := this.UserRepo.Find(
-		bson.D{
-			{"username", username},
+	// ret, err := this.UserRepo.Find(
+	// 	bson.D{
+	// 		{"username", username},
+	// 	},
+	// 	ctx,
+	// )
+
+	ret, err := this.UserRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+			filter.Field("username").Equal(username)
 		},
-		ctx,
-	)
+	).FindOne(ctx)
 
 	if err != nil {
 

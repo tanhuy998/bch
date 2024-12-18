@@ -91,9 +91,20 @@ func InitializeDatabase(app router.Party) {
 	libConfig.BindDependency[repository.ITenantAgent](
 		container, new(repository.TenantAgentRepository).Init(db),
 	).EnableStructDependents()
-	libConfig.BindDependency[repository.IUser](
+
+	// libConfig.BindDependency[repository.IUser](
+	// 	container, new(repository.UserRepository).Init(db),
+	// ).EnableStructDependents()
+
+	libConfig.BindAs(
 		container, new(repository.UserRepository).Init(db),
-	).EnableStructDependents()
+		[]reflect.Type{
+			reflect.TypeFor[repository.IUser](),
+			reflect.TypeFor[repositoryAPI.ICRUDMongoRepository[model.User]](),
+		},
+		libConfig.StructDependents(true),
+	)
+
 	libConfig.BindDependency[repository.ICommandGroup](
 		container, new(repository.CommandGroupRepository).Init(db),
 	).EnableStructDependents()

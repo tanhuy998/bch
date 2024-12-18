@@ -2,7 +2,9 @@ package getUserAuthorityDomain
 
 import (
 	"app/internal/common"
+	"app/model"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"app/valueObject"
 	"context"
 	"errors"
@@ -15,7 +17,7 @@ import (
 
 type (
 	GetUsertAuthorityService struct {
-		UserRepo repository.IUser
+		UserRepo repositoryAPI.ICRUDMongoRepository[model.User] //repository.IUser
 	}
 )
 

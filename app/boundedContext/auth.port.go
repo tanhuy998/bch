@@ -4,7 +4,6 @@ import (
 	libConfig "app/internal/lib/config"
 	"app/model"
 	authServicePort "app/port/auth"
-	paginateServicePort "app/port/paginate"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -33,7 +32,6 @@ import (
 	modifyUserDomain "app/domain/auth/modifyUser"
 
 	"github.com/kataras/iris/v12/hero"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
@@ -60,7 +58,8 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[authServicePort.ICheckCommandGroupUserRole, checkCommandGroupUserRolesDomain.CheckCommandGroupUserRoleService](container, nil)
 
 	libConfig.BindDependency[
-		paginateServicePort.IPaginateService[model.CommandGroup, primitive.ObjectID],
+		//paginateServicePort.IPaginateService[model.CommandGroup, primitive.ObjectID],
+		authServicePort.IGetTenantCommandGroups[model.CommandGroup],
 		getTenantCommandGroupDomain.GetTenantCommandGroupService,
 	](container, nil)
 
@@ -89,6 +88,11 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	libConfig.BindDependency[authServicePort.ICheckAuthority, checkAuthorityDomain.CheckAuthorityService](container, nil)
 
 	registerDomainSpecificUtils(container)
+
+	libConfig.BindDependency[
+		usecasePort.IUseCase[requestPresenter.GetTenantCommandGroups, responsePresenter.GetTenantCommandGroups[model.CommandGroup]],
+		getTenantCommandGroupDomain.GetTenantCommandGroupsUseCase,
+	](container, nil)
 
 	libConfig.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetTenantUsers, responsePresenter.GetTenantUsers[model.User]],

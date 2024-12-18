@@ -30,10 +30,13 @@ type (
 	}
 
 	ICursorPaginator[Cursor_T comparable] interface {
-		GetCursor() Cursor_T
+		GetCursor() *Cursor_T
 		IsPrevious() bool
-		CursorNilValue() Cursor_T
 		GetCursorDirection() CursorDirection
+	}
+
+	ICursorNillablePaginator[Cursor_T comparable] interface {
+		CursorNilValue() *Cursor_T
 	}
 
 	IFilterablePaginator interface {
@@ -51,6 +54,6 @@ type (
 
 	IPaginator[Cursor_T comparable] interface {
 		IOffsetPaginator
-		ICursorPaginator[Cursor_T]
+		//ICursorPaginator[Cursor_T]
 	}
 )

@@ -5,11 +5,11 @@ import (
 	libCommon "app/internal/lib/common"
 	"app/model"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
 	"errors"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 var (
@@ -40,13 +40,20 @@ func (this *CreateCommandGroupService) CreateByModel(
 		return nil, common.ERR_UNAUTHORIZED
 	}
 
-	groupExist, err := this.CommandGroupRepo.Find(
-		bson.D{
-			{"name", model.Name},
-			{"tenantUUID", tenantUUID},
+	// groupExist, err := this.CommandGroupRepo.Find(
+	// 	bson.D{
+	// 		{"name", model.Name},
+	// 		{"tenantUUID", tenantUUID},
+	// 	},
+	// 	ctx,
+	// )
+
+	groupExist, err := this.CommandGroupRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+			filter.Field("name").Equal(model.Name)
+			filter.Field("tenantUUID").Equal(tenantUUID)
 		},
-		ctx,
-	)
+	).Find(ctx)
 
 	if err != nil {
 

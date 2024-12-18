@@ -50,6 +50,7 @@ type (
 		IRepositoryFilterableOperator[Model_T]
 		IFilterMethods[Model_T]
 		IProjector[Model_T]
+		IPaginateClonableRepository[Model_T]
 		Create(model *Model_T, ctx context.Context) error
 
 		// FindOffset(

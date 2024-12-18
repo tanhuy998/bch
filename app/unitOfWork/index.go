@@ -1,6 +1,7 @@
 package unitOfWork
 
 import (
+	repositoryAPI "app/repository/api"
 	genericUseCase "app/unitOfWork/genericUsecase"
 	paginateUseCase "app/unitOfWork/genericUsecase/paginate"
 	opLog "app/unitOfWork/operationLog"
@@ -11,8 +12,8 @@ type (
 	OperationLogger  = opLog.OperationLogger
 	IOperationLogger = opLog.IOperationLogger
 
-	PaginateUseCase[Entity_T any, Cursor_T comparable] struct {
-		paginateUseCase.PaginateUseCase[Entity_T, Cursor_T]
+	PaginateUseCase[Repository_T repositoryAPI.IPaginateClonableRepository[Entity_T], Entity_T any, Cursor_T comparable] struct {
+		paginateUseCase.PaginateUseCase[Repository_T, Entity_T, Cursor_T]
 	}
 
 	UseCaseResultWrapper[Input_T, Output_T any] struct {

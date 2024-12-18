@@ -14,9 +14,9 @@ type (
 	}
 )
 
-func (this MongoCursorPaginateInput) GetCursor() primitive.ObjectID /**tv(Cursor_Type)*/ {
+func (this MongoCursorPaginateInput) GetCursor() *primitive.ObjectID {
 
-	return this.ObjectID
+	return libCommon.Ternary[*primitive.ObjectID](this.ObjectID != primitive.NilObjectID, &this.ObjectID, nil)
 }
 
 func (this MongoCursorPaginateInput) IsPrevious() bool {
@@ -29,9 +29,9 @@ func (this MongoCursorPaginateInput) HasCursor() bool {
 	return this.ObjectID != primitive.NilObjectID
 }
 
-func (this MongoCursorPaginateInput) CursorNilValue() primitive.ObjectID {
+func (this MongoCursorPaginateInput) CursorNilValue() *primitive.ObjectID {
 
-	return primitive.NilObjectID
+	return libCommon.PointerPrimitive(primitive.NilObjectID)
 }
 
 func (this MongoCursorPaginateInput) GetCursorDirection() paginateServicePort.CursorDirection {

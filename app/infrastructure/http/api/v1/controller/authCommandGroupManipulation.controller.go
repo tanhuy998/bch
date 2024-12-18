@@ -4,6 +4,7 @@ import (
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
 	"app/infrastructure/http/middleware/middlewareHelper"
+	"app/model"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -18,7 +19,7 @@ type (
 		CreateCommandGroupUseCase                       usecasePort.IUseCase[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse]
 		AddUserToCommandGroupUseCase                    usecasePort.IUseCase[requestPresenter.AddUserToCommandGroupRequest, responsePresenter.AddUserToCommandGroupResponse]
 		GetParitcipatedCommandGroupUseCase              usecasePort.IUseCase[requestPresenter.GetUserParticipatedCommandGroups, responsePresenter.GetUserParticipatedCommandGroups]
-		GetTenantAllGroupsUseCase                       usecasePort.IUseCase[requestPresenter.GetTenantAllGroups, responsePresenter.GetTenantAllGroups]
+		GetTenantCommandGroupsUseCase                   usecasePort.IUseCase[requestPresenter.GetTenantCommandGroups, responsePresenter.GetTenantCommandGroups[model.CommandGroup]]
 		GetAssignmentUnAssignedCommandGroupUsersUseCase usecasePort.IUseCase[requestPresenter.GetAssignmentGroupUnAssignedCommandGroupUsers, responsePresenter.GetAssignmentGroupUnAssignedCommandGroupUsers]
 	}
 )
@@ -37,8 +38,8 @@ func (this *AuthCommandGroupManipulationController) BeforeActivation(activator m
 	)
 
 	activator.Handle(
-		"GET", "/", "GetAllGroups",
-		middleware.BindRequest[requestPresenter.GetTenantAllGroups](
+		"GET", "/", "GetCommandGroups",
+		middleware.BindRequest[requestPresenter.GetTenantCommandGroups](
 			container,
 			middlewareHelper.UseAuthority,
 			middlewareHelper.UseTenantMapping,
@@ -96,12 +97,12 @@ func (this *AuthCommandGroupManipulationController) AddUserToGroup(
 	)
 }
 
-func (this *AuthCommandGroupManipulationController) GetAllGroups(
-	input *requestPresenter.GetTenantAllGroups,
+func (this *AuthCommandGroupManipulationController) GetCommandGroups(
+	input *requestPresenter.GetTenantCommandGroups,
 ) (mvc.Result, error) {
 
 	return this.ResultOf(
-		this.GetTenantAllGroupsUseCase.Execute(input),
+		this.GetTenantCommandGroupsUseCase.Execute(input),
 	)
 }
 
