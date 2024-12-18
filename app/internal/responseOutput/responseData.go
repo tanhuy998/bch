@@ -94,7 +94,10 @@ func (this *ResponseDataList[Data_T]) ResolveNavNext() {
 
 	if v, ok := any(lastElement).(*requestInput.MongoCursorPaginateInput); ok {
 
-		this.Next.ObjectID = v.GetCursor()
+		if v.GetCursor() != nil {
+
+			this.Next.ObjectID = *v.GetCursor()
+		}
 	}
 
 	this.Next.PageSize = uint64(len(this.Data))
@@ -114,12 +117,12 @@ func (this *ResponseDataList[Data_T]) ResolveNavPrev() {
 		this.Prev = new(PaginationNav)
 	}
 
-	firstElement := this.Data[0]
+	// firstElement := this.Data[0]
 
-	if v, ok := any(firstElement).(*requestInput.MongoCursorPaginateInput); ok {
+	// if v, ok := any(firstElement).(*requestInput.MongoCursorPaginateInput); ok {
 
-		this.Next.ObjectID = v.GetCursor()
-	}
+	// 	this.Next.ObjectID = v.GetCursor()
+	// }
 
 	this.Prev.PageSize = uint64(len(this.Data))
 	this.Next.IsPrev = false
