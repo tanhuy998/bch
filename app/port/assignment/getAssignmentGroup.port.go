@@ -11,6 +11,6 @@ type (
 	IGetAssignmentGroups interface {
 		Serve(
 			tenantUUID uuid.UUID, assignmentUUID uuid.UUID, ctx context.Context,
-		) ([]*model.AssignmentGroup, error)
+		) ([]model.AssignmentGroup, error)
 	}
 )

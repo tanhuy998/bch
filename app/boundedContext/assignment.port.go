@@ -2,6 +2,7 @@ package boundedContext
 
 import (
 	libConfig "app/internal/lib/config"
+	"app/model"
 	assignmentServicePort "app/port/assignment"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
@@ -66,7 +67,7 @@ func RegisterAssignmentBoundedContext(container *hero.Container) {
 		getAssignmentsDomain.GetAssignmentUseCase,
 	](container, nil)
 	libConfig.BindDependency[
-		usecasePort.IUseCase[requestPresenter.GetAssignmentGroups, responsePresenter.GetAssignmentGroups],
+		usecasePort.IUseCase[requestPresenter.GetAssignmentGroups, responsePresenter.GetAssignmentGroups[model.AssignmentGroup]],
 		getAssignmentGroupsDomain.GetAssignmentGroupsUseCase,
 	](container, nil)
 

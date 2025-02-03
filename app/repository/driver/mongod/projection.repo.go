@@ -16,7 +16,7 @@ type (
 
 func (this *mongo_read_projection[Model_T]) InitCollection(col *mongo.Collection) {
 
-	this.collection = col
+	this.SetCollection(col)
 }
 
 func (this *mongo_read_projection[Model_T]) Select(fields ...string) (ret repositoryAPI.IRepositoryProjectableOperator[Model_T]) {

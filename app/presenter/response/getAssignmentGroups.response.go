@@ -1,10 +1,8 @@
 package responsePresenter
 
-import "app/model"
-
 type (
-	GetAssignmentGroups struct {
-		Message string                   `json:"message"`
-		Data    []*model.AssignmentGroup `json:"data"`
+	GetAssignmentGroups[Res_Data_T any] struct {
+		Message string       `json:"message"`
+		Data    []Res_Data_T `json:"data"`
 	}
 )

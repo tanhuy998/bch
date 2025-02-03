@@ -1,0 +1,131 @@
+package filter
+
+import (
+	"app/internal/db/query"
+	libCommon "app/internal/lib/common"
+
+	"go.mongodb.org/mongo-driver/bson"
+)
+
+type (
+	mongo_filter_expr struct {
+		ref        *filter_generator
+		lhs        string
+		rhs        interface{}
+		is_antonym bool
+	}
+)
+
+func (this *mongo_filter_expr) Equal(val interface{}) {
+
+	if this.lhs == "" {
+
+		return
+	}
+
+	if this.is_antonym {
+
+		this.ref.Add(
+			bson.E{
+				this.lhs, bson.E{
+					"$ne", val,
+				},
+			},
+		)
+		return
+	}
+
+	this.ref.Add(bson.E{this.lhs, val})
+}
+
+func (this *mongo_filter_expr) GreaterThan(val interface{}) {
+
+	if this.lhs == "" {
+
+		return
+	}
+
+	op := libCommon.Ternary(this.is_antonym, "$lte", "$gt")
+
+	this.ref.Add(
+		bson.E{
+			this.lhs, bson.E{
+				op, val,
+			},
+		},
+	)
+}
+
+func (this *mongo_filter_expr) GreaterOrEqual(val interface{}) {
+
+	if this.lhs == "" {
+
+		return
+	}
+
+	op := libCommon.Ternary(this.is_antonym, "$lt", "$gte")
+
+	this.ref.Add(
+		bson.E{
+			this.lhs, bson.E{
+				op, val,
+			},
+		},
+	)
+}
+
+func (this *mongo_filter_expr) LessThan(val interface{}) {
+
+	if this.lhs == "" {
+
+		return
+	}
+
+	op := libCommon.Ternary(this.is_antonym, "$gte", "$lt")
+
+	this.ref.Add(
+		bson.E{
+			this.lhs, bson.E{
+				op, val,
+			},
+		},
+	)
+}
+
+func (this *mongo_filter_expr) LessThanOrEqual(val interface{}) {
+
+	if this.lhs == "" {
+
+		return
+	}
+
+	op := libCommon.Ternary(this.is_antonym, "$gt", "$lte")
+
+	this.ref.Add(
+		bson.E{
+			this.lhs, bson.E{
+				op, val,
+			},
+		},
+	)
+}
+
+func (this *mongo_filter_expr) In(vals ...interface{}) {
+
+	op := libCommon.Ternary(this.is_antonym, "$nin", "$in")
+
+	this.ref.Add(
+		bson.E{
+			this.lhs, bson.E{
+				op, vals,
+			},
+		},
+	)
+}
+
+func (this *mongo_filter_expr) Not() query.IComaparisonOperator {
+
+	this.is_antonym = true
+
+	return this
+}

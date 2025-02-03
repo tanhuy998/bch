@@ -2,6 +2,8 @@ package mongoRepository
 
 import (
 	"app/internal"
+
+	"app/internal/db/driver/mongoDriver"
 	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	mongoRepositoryFilter "app/repository/driver/mongod/filter"
@@ -18,7 +20,8 @@ import (
 
 type (
 	mongo_repository[Model_T any] struct {
-		MongoDBQueryMonitorCollection
+		//MongoDBQueryMonitorCollection
+		mongoDriver.MongoDBQueryMonitorCollection
 		filter     mongoRepositoryFilter.MongoRepositoryFilterGenerator
 		sort       mongoRepositorySorter.MongoSorterGenerator
 		projection map[string]uint
@@ -176,7 +179,7 @@ func (this *mongo_repository[Model_T]) _FindOffset(
 		ctx = context.TODO()
 	}
 
-	cursor, err := this.collection.Find(ctx, this.prepareFilter(), findOption)
+	cursor, err := this.GetStorageUnit().Find(ctx, this.prepareFilter(), findOption)
 
 	if err != nil {
 
@@ -220,7 +223,7 @@ func (this *mongo_repository[Model_T]) FindOffset(
 		ctx = context.TODO()
 	}
 
-	cursor, err := this.collection.Find(ctx, query, findOption)
+	cursor, err := this.GetStorageUnit().Find(ctx, query, findOption)
 
 	if err != nil {
 

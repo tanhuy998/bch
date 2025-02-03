@@ -5,6 +5,7 @@ import (
 	"app/infrastructure/http/common"
 	"app/internal/bootstrap"
 	"app/internal/db"
+	"app/internal/db/driver/mongoDriver"
 	"app/internal/generalToken"
 	libConfig "app/internal/lib/config"
 	"app/model"
@@ -62,10 +63,10 @@ func InitializeDatabase(app router.Party) {
 	fmt.Println("Initialize DBMS client...")
 	client := db.GetClient()
 
-	db := db.GetDB()
+	dbInstance := db.GetDB()
 
 	container.Register(log.Default()).Explicitly()
-	container.Register(db).Explicitly()
+	container.Register(dbInstance).Explicitly()
 	container.Register(client).Explicitly()
 
 	libConfig.BindDependency[repository.ITransactionDBClient, repository.MongoDBClient](container, nil)
@@ -86,10 +87,10 @@ func InitializeDatabase(app router.Party) {
 
 	fmt.Println("Initialize Repositories...")
 	libConfig.BindDependency[repository.ITenant](
-		container, new(repository.TenantRepository).Init(db),
+		container, new(repository.TenantRepository).Init(dbInstance),
 	).EnableStructDependents()
 	libConfig.BindDependency[repository.ITenantAgent](
-		container, new(repository.TenantAgentRepository).Init(db),
+		container, new(repository.TenantAgentRepository).Init(dbInstance),
 	).EnableStructDependents()
 
 	// libConfig.BindDependency[repository.IUser](
@@ -97,7 +98,7 @@ func InitializeDatabase(app router.Party) {
 	// ).EnableStructDependents()
 
 	libConfig.BindAs(
-		container, new(repository.UserRepository).Init(db),
+		container, new(repository.UserRepository).Init(dbInstance),
 		[]reflect.Type{
 			reflect.TypeFor[repository.IUser](),
 			reflect.TypeFor[repositoryAPI.ICRUDMongoRepository[model.User]](),
@@ -105,17 +106,27 @@ func InitializeDatabase(app router.Party) {
 		libConfig.StructDependents(true),
 	)
 
-	libConfig.BindDependency[repository.ICommandGroup](
-		container, new(repository.CommandGroupRepository).Init(db),
-	).EnableStructDependents()
+	// libConfig.BindDependency[repository.ICommandGroup](
+	// 	container, new(repository.CommandGroupRepository).Init(db),
+	// ).EnableStructDependents()
+
+	libConfig.BindAs(
+		container, new(repository.CommandGroupRepository).Init(dbInstance),
+		[]reflect.Type{
+			reflect.TypeFor[repository.ICommandGroup](),
+			reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.CommandGroup]](),
+		},
+		libConfig.StructDependents(true),
+	)
+
 	libConfig.BindDependency[repository.ICommandGroupUser](
-		container, new(repository.CommandGroupUserRepository).Init(db),
+		container, new(repository.CommandGroupUserRepository).Init(dbInstance),
 	).EnableStructDependents()
 	libConfig.BindDependency[repository.ICommandGroupUserRole](
-		container, new(repository.CommandGroupUserRoleRepository).Init(db),
+		container, new(repository.CommandGroupUserRoleRepository).Init(dbInstance),
 	).EnableStructDependents()
 	libConfig.BindDependency[repository.IRole](
-		container, new(repository.RoleRepository).Init(db),
+		container, new(repository.RoleRepository).Init(dbInstance),
 	).EnableStructDependents()
 	// libConfig.BindDependency[repository.ICampaignRepository](
 	// 	container, new(repository.CampaignRepository).Init(db),
@@ -134,22 +145,23 @@ func InitializeDatabase(app router.Party) {
 	// ).EnableStructDependents()
 
 	libConfig.BindAs(
-		container, new(repository.AssignmentRepository).Init(db),
+		container, new(repository.AssignmentRepository).Init(dbInstance),
 		[]reflect.Type{
 			reflect.TypeFor[repository.IAssignment](),
 			reflect.TypeFor[repositoryAPI.IPaginateClonableRepository[model.Assignment]](),
+			reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.AssignmentGroup]](),
 		},
 		libConfig.StructDependents(true),
 	)
 
 	libConfig.BindDependency[repository.IAssignmentGroup](
-		container, new(repository.AssignmentGroupRepository).Init(db),
+		container, new(repository.AssignmentGroupRepository).Init(dbInstance),
 	).EnableStructDependents()
 	libConfig.BindDependency[repository.IAssignmentGroupMember](
-		container, new(repository.AssignmentGroupMemberRepository).Init(db),
+		container, new(repository.AssignmentGroupMemberRepository).Init(dbInstance),
 	).EnableStructDependents()
 	libConfig.BindDependency[repository.IUserSession](
-		container, new(repository.UserSessionRepository).Init(db),
+		container, new(repository.UserSessionRepository).Init(dbInstance),
 	).EnableStructDependents()
 	fmt.Println("Repositories Initialized.")
 }

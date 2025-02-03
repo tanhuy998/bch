@@ -1,4 +1,4 @@
-package mongoRepository
+package mongoDriver
 
 import (
 	libCommon "app/internal/lib/common"
@@ -7,9 +7,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -24,7 +21,7 @@ var (
 )
 
 type (
-	IMongoRepositoryOperator interface {
+	IMongoCollection interface {
 		Database() *mongo.Database
 		BulkWrite(ctx context.Context, models []mongo.WriteModel,
 			opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error)
@@ -79,22 +76,11 @@ type (
 	IMongoDBRepository interface {
 		IAbstractRepository[mongo.Client]
 		//Init(*mongo.Database)
-		GetCollection() IMongoRepositoryOperator
+		GetCollection() IMongoCollection
 	}
 
 	IMongoDBAggregator[Model_T any] interface {
 		Aggregate(pipeline mongo.Pipeline, ctx context.Context) ([]*Model_T, error)
-	}
-
-	IMongodDBCustomPagination[Model_T any] interface {
-		RetrieveCustomPagination(
-			pipeline mongo.Pipeline,
-			paginationPivotField string,
-			pivotValue interface{},
-			pageLimit int64,
-			isPrevDir bool,
-			ctx context.Context,
-		) (*PaginationPack[Model_T], error)
 	}
 
 	PaginationPack[Model_T any] struct {
@@ -111,60 +97,8 @@ type (
 		SigningInfo *model.CandidateSigningInfo `bson:"signingInfo,omitEmpty"`
 	}
 
-	ICampaignRepository interface {
-		IMongoDBRepository
-		FindByUUID(uuid.UUID, context.Context) (*model.Campaign, error)
-		Get(page int, ctx context.Context) ([]*model.Campaign, error)
-		GetPendingCampaigns(
-			id primitive.ObjectID,
-			pageLimit int64,
-			direction bool,
-			ctx context.Context,
-		) (data *PaginationPack[model.Campaign], err error)
-		GetCampaignList(
-			id primitive.ObjectID,
-			pageLimit int64,
-			direction bool,
-			ctx context.Context,
-		) (data *PaginationPack[model.Campaign], err error)
-		Create(*model.Campaign, context.Context) error
-		//CreateMany([]*model.Campaign) error
-		Update(*model.Campaign, context.Context) error
-		Delete(uuid.UUID, context.Context) error
-		//Remove(uuid uuid.UUID) (bool, error)
-	}
-
-	ICandidateRepository interface {
-		IMongoDBAggregator[model.Candidate]
-		IMongoDBRepository
-		//IMongodDBCustomPagination[model.Candidate]
-		Find(query bson.D, ctx context.Context) (*model.Candidate, error)
-		FindByUUID(uuid.UUID, context.Context) (*model.Candidate, error)
-		Get(page int, ctx context.Context) ([]*model.Candidate, error)
-		Create(*model.Candidate, context.Context) error
-		GetOneSigningInfo(query bson.D, ctx context.Context, projections ...bson.E) (*model.CandidateSigningInfo, error)
-		Update(*model.Candidate, context.Context) error
-		UpdateSigningInfo(candidateUUID uuid.UUID, campaignUUID uuid.UUID, query *CandidateSigninInfoUpdateQuery, ctx context.Context) error
-		Delete(uuid.UUID, context.Context) error
-		GetCandidaiteList(
-			campaignUUID uuid.UUID,
-			pivot_id primitive.ObjectID,
-			pageLimit int64,
-			isPrevDir bool,
-			ctx context.Context,
-		) (*PaginationPack[model.Candidate], error)
-		//Remove(uuid uuid.UUID) (bool, error)
-	}
-
-	AbstractMongoRepository struct {
+	AbstractMongoCollection struct {
 		collection *mongo.Collection
-	}
-)
-
-type (
-	IRepository[Model_T any] interface {
-		IMongoDBRepository
-		ICRUDMongoRepository[Model_T]
 	}
 )
 
@@ -195,18 +129,12 @@ func (this *MongoDBClient) WithTransaction(ctx context.Context, fn func(sessionC
 	})
 }
 
-// implements db.IDBStorageUnit
-func (this *AbstractMongoRepository) GetName() string {
-
-	return this.collection.Name()
-}
-
-func (this *AbstractMongoRepository) Init(db *mongo.Database, collectionName string) {
+func (this *AbstractMongoCollection) Init(db *mongo.Database, collectionName string) {
 
 	this.collection = db.Collection(collectionName)
 }
 
-func (this *AbstractMongoRepository) CountPage() (int64, error) {
+func (this *AbstractMongoCollection) CountPage() (int64, error) {
 
 	docNum, err := this.collection.CountDocuments(context.TODO(), struct{}{})
 
@@ -221,7 +149,7 @@ func (this *AbstractMongoRepository) CountPage() (int64, error) {
 	return even + odd, nil
 }
 
-func (this *AbstractMongoRepository) returnPageThresholdIfOutOfRange(inputPageNum int64) int64 {
+func (this *AbstractMongoCollection) returnPageThresholdIfOutOfRange(inputPageNum int64) int64 {
 
 	inputPageNum = libCommon.Ternary(inputPageNum <= 0, 1, inputPageNum)
 
@@ -235,19 +163,14 @@ func (this *AbstractMongoRepository) returnPageThresholdIfOutOfRange(inputPageNu
 	return libCommon.Ternary[int64](inputPageNum > pageCount, pageCount, inputPageNum)
 }
 
-func (this *AbstractMongoRepository) Collection() *mongo.Collection {
+func (this *AbstractMongoCollection) Collection() *mongo.Collection {
 
 	return this.collection
 }
 
-func (this *AbstractMongoRepository) GetDBClient() *mongo.Client /**tv(DBClient_T)*/ {
+func (this *AbstractMongoCollection) GetDBClient() *mongo.Client /**tv(DBClient_T)*/ {
 
 	return this.collection.Database().Client()
-}
-
-func (this *AbstractMongoRepository) GetStorageUnit() *mongo.Collection /**tv(DBStorage_T)*/ {
-
-	return this.collection
 }
 
 func CheckUpdateOneResult(result *mongo.UpdateResult) error {

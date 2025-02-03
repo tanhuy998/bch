@@ -2,6 +2,7 @@ package getAssignmentGroupsDomain
 
 import (
 	"app/internal/common"
+	"app/model"
 	assignmentServicePort "app/port/assignment"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
@@ -10,14 +11,14 @@ import (
 
 type (
 	GetAssignmentGroupsUseCase struct {
-		usecasePort.UseCase[requestPresenter.GetAssignmentGroups, responsePresenter.GetAssignmentGroups]
+		usecasePort.UseCase[requestPresenter.GetAssignmentGroups, responsePresenter.GetAssignmentGroups[model.AssignmentGroup]]
 		GetAssignmentGroupService assignmentServicePort.IGetAssignmentGroups
 	}
 )
 
 func (this *GetAssignmentGroupsUseCase) Execute(
 	input *requestPresenter.GetAssignmentGroups,
-) (*responsePresenter.GetAssignmentGroups, error) {
+) (*responsePresenter.GetAssignmentGroups[model.AssignmentGroup], error) {
 
 	if !input.IsValidTenantUUID() {
 

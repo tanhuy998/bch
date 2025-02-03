@@ -4,6 +4,7 @@ import (
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
 	"app/infrastructure/http/middleware/middlewareHelper"
+	"app/model"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -21,7 +22,7 @@ type (
 		ModifyAssignmentUseCase                     usecasePort.IUseCase[requestPresenter.ModifyAssignment, responsePresenter.ModifyAssignment]
 		AddCommandGroupUserToAssignmentGroupUseCase usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupMember, responsePresenter.CreateAssignmentGroupMemeber]
 		GetAssignmentsUseCase                       usecasePort.IUseCase[requestPresenter.GetAssignments, responsePresenter.GetAssignments]
-		GetAssignmnentGroupsUseCase                 usecasePort.IUseCase[requestPresenter.GetAssignmentGroups, responsePresenter.GetAssignmentGroups]
+		GetAssignmnentGroupsUseCase                 usecasePort.IUseCase[requestPresenter.GetAssignmentGroups, responsePresenter.GetAssignmentGroups[model.AssignmentGroup]]
 	}
 )
 
