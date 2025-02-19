@@ -7,19 +7,6 @@ import (
 )
 
 type (
-	/*
-		IDBStorageUnit interface defines a way to get the object which is mapped
-		to a specific storage unit (database's table/collection).
-	*/
-	IDBStorageUnit[DBStorage_T, Model_T any] interface {
-		IDBStorageIdentifier
-		GetStorageUnit() *DBStorage_T
-	}
-
-	IDBStorageIdentifier interface {
-		GetName() string
-	}
-
 	IDBDelegator[Model_T any] interface {
 		query.IQueryBuilder[Model_T]
 		Clone() IDBDelegator[Model_T]
@@ -34,34 +21,34 @@ type (
 
 func test(q IDBDelegator[model.User]) {
 
-	q.Join(
-		"asdsa",
-		func(queryBuilder query.IJoinField) {
+	// q.Join(
+	// 	"asdsa",
+	// 	func(queryBuilder query.IJoinField) {
 
-			queryBuilder.On("localField", "foreignField").
-				As("alias").
-				Join(
-					"asdsa",
-					func(query query.IJoinField) {
+	// 		queryBuilder.On("localField", "foreignField").
+	// 			As("alias").
+	// 			Join(
+	// 				"asdsa",
+	// 				func(query query.IJoinField) {
 
-					},
-				).Join(
-				"asdssad",
-				func(query query.IJoinField) {
+	// 				},
+	// 			).Join(
+	// 			"asdssad",
+	// 			func(query query.IJoinField) {
 
-				},
-			)
-		},
-	).Filter(
-		func(filter query.IFilterExpression) {
+	// 			},
+	// 		)
+	// 	},
+	// ).Filter(
+	// 	func(filter query.IFilterExpression) {
 
-		},
-	).Transform(
-		func(tran query.IDataTransformer) {
-			tran.Set("new").Value("sad")
-			tran.Set("new").Ref("name.last")
-		},
-	)
+	// 	},
+	// ).Transform(
+	// 	func(tran query.IDataTransformer) {
+	// 		tran.Set("new").Value("sad")
+	// 		tran.Set("new").Ref("name.last")
+	// 	},
+	// )
 
 	// q.Join(
 	// 	"asdasd",

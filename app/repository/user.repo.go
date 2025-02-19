@@ -2,7 +2,6 @@ package repository
 
 import (
 	"app/model"
-	repositoryAPI "app/repository/api"
 	mongoRepository "app/repository/driver/mongod"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,7 +19,7 @@ type (
 
 	// IUser = IRepository[model.User]
 
-	IUser = repositoryAPI.ICRUDRepository[model.User]
+	IUser = mongoRepository.ICRUDMongoRepository[model.User] // repositoryAPI.ICRUDRepository[model.User]
 
 	UserRepository struct {
 		//AbstractMongoRepository

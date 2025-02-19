@@ -4,7 +4,8 @@ import (
 	authenticateCredentialsDomain "app/domain/authGen/authenticateCredentials"
 	checkGeneralTokenDomain "app/domain/authGen/checkGeneralToken"
 	navigateTenantDomain "app/domain/authGen/navigateTenant"
-	libConfig "app/internal/lib/config"
+	irisIoc "app/internal/lib/iris/ioc"
+
 	authGenServicePort "app/port/authGenService"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
@@ -15,20 +16,20 @@ import (
 
 func RegisterAuthGenBoundedContext(container *hero.Container) {
 
-	libConfig.BindDependency[authGenServicePort.IAuthenticateCrdentials, authenticateCredentialsDomain.AuthenticateCredentialsService](container, nil)
-	libConfig.BindDependency[authGenServicePort.INavigateTenant, navigateTenantDomain.NavigateTenantService](container, nil)
+	irisIoc.BindDependency[authGenServicePort.IAuthenticateCrdentials, authenticateCredentialsDomain.AuthenticateCredentialsService](container, nil)
+	irisIoc.BindDependency[authGenServicePort.INavigateTenant, navigateTenantDomain.NavigateTenantService](container, nil)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.LoginRequest, responsePresenter.LoginResponse],
 		authenticateCredentialsDomain.AuthenticateCredentialsUseCase,
 	](container, nil)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.CheckLogin, responsePresenter.CheckLogin],
 		checkGeneralTokenDomain.CheckGeneralTokenUseCase,
 	](container, nil)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant],
 		navigateTenantDomain.NavigateTenantUseCase,
 	](container, nil)

@@ -1,7 +1,7 @@
 package boundedContext
 
 import (
-	libConfig "app/internal/lib/config"
+	irisIoc "app/internal/lib/iris/ioc"
 	"app/model"
 	authServicePort "app/port/auth"
 	usecasePort "app/port/usecase"
@@ -36,69 +36,69 @@ import (
 
 type (
 	AuthBoundedContext struct {
-		AddUserToCommandGroup            authServicePort.IAddUserToCommandGroup
-		CheckCommandGroupUserRole        authServicePort.ICheckCommandGroupUserRole
-		CheckUserInCommandGroup          authServicePort.ICheckUserInCommandGroup
-		CreateCommandGroup               authServicePort.ICreateCommandGroup
-		CreateUser                       authServicePort.ICreateUser
-		GetAllRoles                      authServicePort.IGetAllRoles
-		GetCommandGroupUsers             authServicePort.IGetCommandGroupUsers
-		GetSingleCommandGroup            authServicePort.IGetSingleCommandGroup
-		GetSingleUser                    authServicePort.IGetSingleUser
-		GrantCommandGroupRolesToUser     authServicePort.IGrantCommandGroupRolesToUser
-		ModifyUser                       authServicePort.IModifyUser
-		GetUserParticipatedCommandGroups authServicePort.IGetUserParticipatedCommandGroups
+		AddUserToCommandGroupService            authServicePort.IAddUserToCommandGroup
+		CheckCommandGroupUserRoleService        authServicePort.ICheckCommandGroupUserRole
+		CheckUserInCommandGroupService          authServicePort.ICheckUserInCommandGroup
+		CreateCommandGroupService               authServicePort.ICreateCommandGroup
+		CreateUserService                       authServicePort.ICreateUser
+		GetAllRolesService                      authServicePort.IGetAllRoles
+		GetCommandGroupUsersService             authServicePort.IGetCommandGroupUsers
+		GetSingleCommandGroupService            authServicePort.IGetSingleCommandGroup
+		GetSingleUserService                    authServicePort.IGetSingleUser
+		GrantCommandGroupRolesToUserService     authServicePort.IGrantCommandGroupRolesToUser
+		ModifyUserService                       authServicePort.IModifyUser
+		GetUserParticipatedCommandGroupsService authServicePort.IGetUserParticipatedCommandGroups
 	}
 )
 
 func RegisterAuthBoundedContext(container *hero.Container) {
 
-	libConfig.BindDependency[authServicePort.IRemoveDBUserSession, removeDBUserSessionDomain.RemoveDBUserSessionService](container, nil)
-	libConfig.BindDependency[authServicePort.ICheckUserInCommandGroup, checkUserInCommandGroupDomain.CheckUserInCommandGroupService](container, nil)
-	libConfig.BindDependency[authServicePort.ICheckCommandGroupUserRole, checkCommandGroupUserRolesDomain.CheckCommandGroupUserRoleService](container, nil)
+	irisIoc.BindDependency[authServicePort.IRemoveDBUserSession, removeDBUserSessionDomain.RemoveDBUserSessionService](container, nil)
+	irisIoc.BindDependency[authServicePort.ICheckUserInCommandGroup, checkUserInCommandGroupDomain.CheckUserInCommandGroupService](container, nil)
+	irisIoc.BindDependency[authServicePort.ICheckCommandGroupUserRole, checkCommandGroupUserRolesDomain.CheckCommandGroupUserRoleService](container, nil)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		//paginateServicePort.IPaginateService[model.CommandGroup, primitive.ObjectID],
 		authServicePort.IGetTenantCommandGroups[model.CommandGroup],
 		getTenantCommandGroupDomain.GetTenantCommandGroupService,
 	](container, nil)
 
-	libConfig.BindDependency[authServicePort.IGetAssignmentGroupUnAssignedCommandGroupUsers, getAssignmentGroupUnAssignedCommandGroupUsersDomain.GetAssignmentGroupUnAssignedCommandGroupUserService](container, nil)
-	libConfig.BindDependency[authServicePort.IGetUserAuthorityServicePort, getUserAuthorityDomain.GetUsertAuthorityService](container, nil)
-	libConfig.BindDependency[authServicePort.IGetAllRoles, getAllRoleDomain.GetAllRolesService](container, nil)
-	libConfig.BindDependency[authServicePort.IGetCommandGroupUsers, getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetAssignmentGroupUnAssignedCommandGroupUsers, getAssignmentGroupUnAssignedCommandGroupUsersDomain.GetAssignmentGroupUnAssignedCommandGroupUserService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetUserAuthorityServicePort, getUserAuthorityDomain.GetUsertAuthorityService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetAllRoles, getAllRoleDomain.GetAllRolesService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetCommandGroupUsers, getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
 	//libConfig.BindDependency[authServicePort.IGetParticipatedCommandGroups, getUserParticipatedCommandGroupDomain.GetParticipatedCommandGroupsService](container, nil)
 	//libConfig.BindDependency[]()
-	libConfig.BindDependency[authServicePort.IGetTenantUsers[model.User], getTenantUsersDomain.GetTenantUsersService](container, nil)
-	libConfig.BindDependency[authServicePort.IGetTenantAllGroups, getTenantAllGroupsDomain.GetTenantAllGroupService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetTenantUsers[model.User], getTenantUsersDomain.GetTenantUsersService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetTenantAllGroups, getTenantAllGroupsDomain.GetTenantAllGroupService](container, nil)
 
-	libConfig.BindDependency[authServicePort.IReportParticipatedCommandGroups, reportUserParticipatedCommandGroupsDomain.ReportParticipatedCommandGroupsService](container, nil)
-	libConfig.BindDependency[authServicePort.IGetUserParticipatedCommandGroups, getUserParticipatedCommandGroupsDomain.GetUserParticipatedCommandGroupService](container, nil)
-	libConfig.BindDependency[authServicePort.IGetSingleCommandGroup, getSingleCommandGroupDomain.GetSingleCommandGroupService](container, nil)
-	libConfig.BindDependency[authServicePort.IGetSingleUser, getSingleUserDomain.GetSingleUserService](container, nil)
-	libConfig.BindDependency[authServicePort.IGetCommandGroupUsers, getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
+	irisIoc.BindDependency[authServicePort.IReportParticipatedCommandGroups, reportUserParticipatedCommandGroupsDomain.ReportParticipatedCommandGroupsService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetUserParticipatedCommandGroups, getUserParticipatedCommandGroupsDomain.GetUserParticipatedCommandGroupService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetSingleCommandGroup, getSingleCommandGroupDomain.GetSingleCommandGroupService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetSingleUser, getSingleUserDomain.GetSingleUserService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetCommandGroupUsers, getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
 
-	libConfig.BindDependency[authServicePort.IAddUserToCommandGroup, addUserToCommandGroupDomain.AddUserToCommandGroupService](container, nil)
-	libConfig.BindDependency[authServicePort.ICreateCommandGroup, createCommandGroupDomain.CreateCommandGroupService](container, nil)
-	libConfig.BindDependency[authServicePort.ICreateUser, createUserDomain.CreateUserService](container, nil)
+	irisIoc.BindDependency[authServicePort.IAddUserToCommandGroup, addUserToCommandGroupDomain.AddUserToCommandGroupService](container, nil)
+	irisIoc.BindDependency[authServicePort.ICreateCommandGroup, createCommandGroupDomain.CreateCommandGroupService](container, nil)
+	irisIoc.BindDependency[authServicePort.ICreateUser, createUserDomain.CreateUserService](container, nil)
 
-	libConfig.BindDependency[authServicePort.IGrantCommandGroupRolesToUser, grantCommandGroupRoleToUserDomain.GrantCommandGroupRolesToUserService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGrantCommandGroupRolesToUser, grantCommandGroupRoleToUserDomain.GrantCommandGroupRolesToUserService](container, nil)
 
-	libConfig.BindDependency[authServicePort.IModifyUser, modifyUserDomain.ModifyUserService](container, nil)
-	libConfig.BindDependency[authServicePort.ICheckAuthority, checkAuthorityDomain.CheckAuthorityService](container, nil)
+	irisIoc.BindDependency[authServicePort.IModifyUser, modifyUserDomain.ModifyUserService](container, nil)
+	irisIoc.BindDependency[authServicePort.ICheckAuthority, checkAuthorityDomain.CheckAuthorityService](container, nil)
 
 	registerDomainSpecificUtils(container)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetTenantCommandGroups, responsePresenter.GetTenantCommandGroups[model.CommandGroup]],
 		getTenantCommandGroupDomain.GetTenantCommandGroupsUseCase,
 	](container, nil)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetTenantUsers, responsePresenter.GetTenantUsers[model.User]],
 		getTenantUsersDomain.GetTenantUserUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.CreateUserRequestPresenter, responsePresenter.CreateUserPresenter],
 		createUserDomain.CreateUserUsecase,
 	](container, nil)
@@ -106,48 +106,48 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	// 	usecasePort.IUseCase[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse],
 	// 	getGroupUser
 	// ]()
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse],
 		getCommandGroupUsersDomain.GetCommandGroupUsersUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.ModifyUserRequest, responsePresenter.ModifyUserResponse],
 		modifyUserDomain.ModifyUserUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse],
 		getAllRoleDomain.GetAllRolesUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GrantCommandGroupRolesToUserRequest, responsePresenter.GrantCommandGroupRolesToUserResponse],
 		grantCommandGroupRoleToUserDomain.GrantCommandGroupRolesToUserUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse],
 		createCommandGroupDomain.CreateCommandGroupUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.AddUserToCommandGroupRequest, responsePresenter.AddUserToCommandGroupResponse],
 		addUserToCommandGroupDomain.AddUserToCommandGroupUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetUserParticipatedCommandGroups, responsePresenter.GetUserParticipatedCommandGroups],
 		getUserParticipatedCommandGroupsDomain.GetUserParticipatedCommandGroupsUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.ReportParticipatedGroups, responsePresenter.ReportParticipatedGroups],
 		reportUserParticipatedCommandGroupsDomain.ReportParticipatedCommandGroupsUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetTenantAllGroups, responsePresenter.GetTenantAllGroups],
 		getTenantAllGroupsDomain.GetTenantAllGroupUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetAssignmentGroupUnAssignedCommandGroupUsers, responsePresenter.GetAssignmentGroupUnAssignedCommandGroupUsers],
 		getAssignmentGroupUnAssignedCommandGroupUsersDomain.GetAssignmentGroupUnAssignedCommandGroupUsersUseCase,
 	](container, nil)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IMiddlewareUseCase, checkAuthorityDomain.CheckAuthorityUseCase,
 	](container, nil)
 

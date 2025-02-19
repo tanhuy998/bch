@@ -1,4 +1,4 @@
-package mongoDriver
+package mongoQueryBuilder
 
 type (
 	mongo_pipeline struct {
@@ -6,7 +6,7 @@ type (
 	}
 )
 
-func (this *mongo_pipeline) Add(stages ...interface{}) {
+func (this *mongo_pipeline) PushStages(stages ...interface{}) {
 
 	this.p = append(this.p, stages...)
 }

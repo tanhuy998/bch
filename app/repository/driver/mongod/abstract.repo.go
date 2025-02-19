@@ -4,6 +4,7 @@ import (
 	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	"app/model"
+	repositoryAPI "app/repository/api"
 	"context"
 	"errors"
 
@@ -79,7 +80,7 @@ type (
 	IMongoDBRepository interface {
 		IAbstractRepository[mongo.Client]
 		//Init(*mongo.Database)
-		GetCollection() IMongoRepositoryOperator
+		GetCollection() repositoryAPI.IMongoRepositoryOperator //IMongoRepositoryOperator
 	}
 
 	IMongoDBAggregator[Model_T any] interface {

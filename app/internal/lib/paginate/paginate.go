@@ -1,0 +1,3 @@
+package libPaginate
+
+type ()

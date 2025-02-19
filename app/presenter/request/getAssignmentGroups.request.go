@@ -11,6 +11,7 @@ type (
 		requestInput.ContextInput
 		requestInput.AuthorityInput
 		requestInput.TenantMappingInput
+		requestInput.RangePaginateInput
 		AssignmentUUID *uuid.UUID `param:"uuid" validate:"required"`
 	}
 )

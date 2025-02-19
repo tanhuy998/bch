@@ -1,24 +1,31 @@
 package getAssignmentGroupsDomain
 
 import (
+	"app/domain"
 	"app/internal/common"
 	"app/model"
 	assignmentServicePort "app/port/assignment"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
+	"fmt"
 )
 
 type (
 	GetAssignmentGroupsUseCase struct {
 		usecasePort.UseCase[requestPresenter.GetAssignmentGroups, responsePresenter.GetAssignmentGroups[model.AssignmentGroup]]
-		GetAssignmentGroupService assignmentServicePort.IGetAssignmentGroups
+		GetAssignmentGroupService assignmentServicePort.IGetAssignmentGroups[domain.PaginateCursorType]
 	}
 )
 
 func (this *GetAssignmentGroupsUseCase) Execute(
 	input *requestPresenter.GetAssignmentGroups,
-) (*responsePresenter.GetAssignmentGroups[model.AssignmentGroup], error) {
+) (ret *responsePresenter.GetAssignmentGroups[model.AssignmentGroup], err error) {
+
+	defer func() {
+
+		this.WrapResults(&input, &ret, &err)
+	}()
 
 	if !input.IsValidTenantUUID() {
 
@@ -31,8 +38,10 @@ func (this *GetAssignmentGroupsUseCase) Execute(
 	}
 
 	data, err := this.GetAssignmentGroupService.Serve(
-		input.GetTenantUUID(), *input.AssignmentUUID, input.GetContext(),
+		input.GetTenantUUID(), *input.AssignmentUUID, input, input.GetContext(),
 	)
+
+	fmt.Println(data, err)
 
 	if err != nil {
 

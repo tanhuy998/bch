@@ -7,12 +7,12 @@ import (
 	assignmentServicePort "app/port/assignment"
 	authServicePort "app/port/auth"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
 	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
@@ -41,13 +41,20 @@ func (this *CreateAssignmentGroupService) Serve(
 		return nil, errors.Join(common.ERR_FORBIDEN, fmt.Errorf("commond group not in tenant"))
 	}
 
-	similarQuery := bson.D{
-		{"assignmentUUID", assignmentUUID},
-		{"tenantUUID", tenantUUID},
-		{"name", dataModel.Name},
+	// similarQuery := bson.D{
+	// 	{"assignmentUUID", assignmentUUID},
+	// 	{"tenantUUID", tenantUUID},
+	// 	{"name", dataModel.Name},
+	// }
+
+	var similarFilterFunc repositoryAPI.FilterFunc = func(filter repositoryAPI.IFilterGenerator) {
+
+		filter.Field("assignmentUUID").Equal(assignmentUUID)
+		filter.Field("TenantUUID").Equal(tenantUUID)
+		filter.Field("name").Equal(dataModel.Name)
 	}
 
-	switch existing, err := this.AssignmentGroupRepo.Find(similarQuery, ctx); {
+	switch existing, err := this.AssignmentGroupRepo.Filter(similarFilterFunc).Find(ctx); {
 	case err != nil:
 		return nil, err
 	case existing != nil:

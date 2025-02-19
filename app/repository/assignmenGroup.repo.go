@@ -2,6 +2,7 @@ package repository
 
 import (
 	"app/model"
+	mongoRepository "app/repository/driver/mongod"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -18,11 +19,12 @@ type (
 	// 	ICreateMany[model.AssignmentGroup]
 	// }
 
-	IAssignmentGroup = IRepository[model.AssignmentGroup]
+	IAssignmentGroup = mongoRepository.ICRUDMongoRepository[model.AssignmentGroup] // repositoryAPI.ICRUDMongoRepository[model.AssignmentGroup] //IRepository[model.AssignmentGroup]
 
 	AssignmentGroupRepository struct {
 		//AbstractMongoRepository
-		crud_mongo_repository[model.AssignmentGroup]
+		//crud_mongo_repository[model.AssignmentGroup]
+		mongoRepository.MongoCRUDRepository[model.AssignmentGroup]
 	}
 )
 
@@ -32,7 +34,7 @@ func (this *AssignmentGroupRepository) Init(db *mongo.Database) *AssignmentGroup
 
 	// this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
 
-	this.crud_mongo_repository.Init(db, ASSIGNMENT_GROUP_COLLECTION_NAME)
+	this.MongoCRUDRepository.Init(db, ASSIGNMENT_GROUP_COLLECTION_NAME)
 
 	return this
 }

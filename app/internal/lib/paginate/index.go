@@ -1,4 +1,4 @@
-package paginate
+package libPaginate
 
 // func resolveNext[Model_T ModelInterfaceForPagination](
 // 	output IPaginationResult,

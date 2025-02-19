@@ -3,24 +3,30 @@ package mongoDriver
 import (
 	"app/internal/db/driver/mongoDriver/lib"
 	"app/internal/db/query"
+	"app/internal/db/storage"
 	libCommon "app/internal/lib/common"
-	"context"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
 	DelegatorQueryBuilder[Model_T any] struct {
-		delegator lib.IMongoDBCollection //*MongoDBDelegator[Model_T]
-		mongo_query
+		// delegator lib.IMongoDBCollection //*MongoDBDelegator[Model_T]
+		// mongo_query
+		//QueryExecutor[Model_T]
+		PaginateExecutor[Model_T]
 	}
 )
 
 func NewDelegatorQueryBuilder[Model_T any](det lib.IMongoDBCollection) *DelegatorQueryBuilder[Model_T] {
 
-	return &DelegatorQueryBuilder[Model_T]{
-		delegator: det,
-	}
+	// return &DelegatorQueryBuilder[Model_T]{
+	// 	delegator: det,
+	// }
+
+	ret := new(DelegatorQueryBuilder[Model_T])
+
+	ret.delegator = det
+
+	return ret
 }
 
 func (this *DelegatorQueryBuilder[Model_T]) Clone() query.IQueryBuilder[Model_T] {
@@ -28,30 +34,30 @@ func (this *DelegatorQueryBuilder[Model_T]) Clone() query.IQueryBuilder[Model_T]
 	return libCommon.PointerPrimitive(*this)
 }
 
-func (this *DelegatorQueryBuilder[Model_T]) Join(another string, fn func(query.IJoinField)) query.IQueryBuilder[Model_T] {
+func (this *DelegatorQueryBuilder[Model_T]) Join(storage storage.IDBStorageIdentifier, fn func(query.IJoinField)) query.IQueryBuilder[Model_T] {
 
-	this.mongo_query.Join(another, fn)
+	this.MongoAggregateQueryBuilder.Join(storage.GetDBStorageUnitName(), fn)
 
 	return this
 }
 
 func (this *DelegatorQueryBuilder[Model_T]) Filter(fn query.FilterFunc) query.IQueryBuilder[Model_T] /*named("app/internal/db/query",IFilterableOperator)[tv(Model_T)]*/ {
 
-	this.mongo_query.Filter(fn)
+	this.MongoAggregateQueryBuilder.Filter(fn)
 
 	return this
 }
 
 func (this *DelegatorQueryBuilder[Model_T]) Select(fields ...string) query.IQueryBuilder[Model_T] {
 
-	this.mongo_query.Select(fields...)
+	this.MongoAggregateQueryBuilder.Select(fields...)
 
 	return this
 }
 
 func (this *DelegatorQueryBuilder[Model_T]) ExcludeFields(fields ...string) query.IQueryBuilder[Model_T] {
 
-	this.mongo_query.ExcludeFields(fields...)
+	this.MongoAggregateQueryBuilder.ExcludeFields(fields...)
 
 	return this
 }
@@ -64,33 +70,9 @@ func (this *DelegatorQueryBuilder[Model_T]) Skip() {
 
 }
 
-func (this *DelegatorQueryBuilder[Model_T]) First(ctx context.Context) (*Model_T, error) {
-
-	this.mongo_pipeline.Add(
-		bson.D{
-			{"$limit", 1},
-		},
-	)
-
-	return lib.AggregateOne[Model_T](
-		this.delegator,
-		&this.mongo_pipeline,
-		ctx,
-	)
-}
-
-func (this *DelegatorQueryBuilder[Model_T]) All(ctx context.Context) ([]Model_T, error) {
-
-	return lib.Aggregate[Model_T](
-		this.delegator,
-		&this.mongo_pipeline,
-		ctx,
-	)
-}
-
 func (this *DelegatorQueryBuilder[Model_T]) Transform(fn query.DataTransformFunc) query.IQueryBuilder[Model_T] {
 
-	this.mongo_query.Transform(fn)
+	this.MongoAggregateQueryBuilder.Transform(fn)
 
 	return this
 }
@@ -111,6 +93,10 @@ func (this *DelegatorQueryBuilder[Model_T]) NewExecutor(delegator query.IDBDeleg
 	return ret
 }
 
-func (d *DelegatorQueryBuilder[Model_T]) SortOrder(fn query.SortFunc) query.IQueryBuilder[Model_T] {
+func (this *DelegatorQueryBuilder[Model_T]) SortOrder(fn query.SortFunc) query.IQueryBuilder[Model_T] {
 	panic("TODO: Implement")
 }
+
+// func (this *DelegatorQueryBuilder[Model_T]) Paginate(p0 query.PaginateInitFunc[interface{}]) ([]Model_T, error) {
+// 	panic("TODO: Implement")
+// }

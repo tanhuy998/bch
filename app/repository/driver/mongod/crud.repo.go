@@ -1,6 +1,7 @@
 package mongoRepository
 
 import (
+	"app/internal/db/driver/mongoDriver/mongoStorage"
 	libCommon "app/internal/lib/common"
 	repositoryAPI "app/repository/api"
 )
@@ -13,6 +14,8 @@ type (
 	ICRUDMongoRepository[Model_T any] interface {
 		IMongoDBRepository
 		repositoryAPI.ICRUDRepository[Model_T]
+		//storage.IDBStorageUnit[mongo.Collection, Model_T]
+		mongoStorage.IMongoDBStorageUnit[Model_T]
 	}
 
 	MongoCRUDRepository[Model_T any] struct {

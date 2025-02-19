@@ -6,6 +6,7 @@ type (
 		ISubQueryJoinMethod
 		ISubQueryProjector
 		ISubQueryDataTransform
+		ISubQueryDataLimit
 	}
 )
 

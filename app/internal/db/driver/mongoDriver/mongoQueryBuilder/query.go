@@ -1,4 +1,4 @@
-package mongoDriver
+package mongoQueryBuilder
 
 import (
 	"app/internal/db/driver/mongoDriver/filter"
@@ -10,13 +10,18 @@ import (
 )
 
 type (
-	mongo_query struct {
+	MongoAggregateQueryBuilder struct {
 		mongo_pipeline
 		projection map[string]uint
 	}
 )
 
-func (this *mongo_query) initProjection() {
+func (this *MongoAggregateQueryBuilder) GetPipeline() []interface{} {
+
+	return this.mongo_pipeline.p
+}
+
+func (this *MongoAggregateQueryBuilder) initProjection() {
 
 	if this.projection != nil {
 
@@ -26,9 +31,9 @@ func (this *mongo_query) initProjection() {
 	this.projection = make(map[string]uint)
 }
 
-func (this *mongo_query) Join(another string, fn func(query.IJoinField)) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) Join(another string, fn func(query.IJoinField)) query.ISubQueryBuilder {
 
-	joinIntializer := &join_op{
+	joinIntializer := &JoinOperationInitializer{
 		From: another,
 	}
 
@@ -75,25 +80,25 @@ func (this *mongo_query) Join(another string, fn func(query.IJoinField)) query.I
 		{"$lookup", joinIntializer},
 	}
 
-	this.mongo_pipeline.Add(ops...)
+	this.mongo_pipeline.PushStages(ops...)
 
 	return this
 }
 
-func (this *mongo_query) Filter(fn query.FilterFunc) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) Filter(fn query.FilterFunc) query.ISubQueryBuilder {
 
 	filter := filter.NewFilterGenerator()
 
 	fn(filter)
 
-	this.mongo_pipeline.Add(
+	this.mongo_pipeline.PushStages(
 		filter.Get(),
 	)
 
 	return this
 }
 
-func (this *mongo_query) Select(fields ...string) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) Select(fields ...string) query.ISubQueryBuilder {
 
 	this.initProjection()
 
@@ -105,7 +110,7 @@ func (this *mongo_query) Select(fields ...string) query.ISubQueryBuilder {
 	return this
 }
 
-func (this *mongo_query) ExcludeFields(fields ...string) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) ExcludeFields(fields ...string) query.ISubQueryBuilder {
 
 	this.initProjection()
 
@@ -117,45 +122,45 @@ func (this *mongo_query) ExcludeFields(fields ...string) query.ISubQueryBuilder 
 	return this
 }
 
-func (this *mongo_query) Done() {
+func (this *MongoAggregateQueryBuilder) Done() {
 
 	this.mergeProjection()
 }
 
-func (this *mongo_query) mergeProjection() {
+func (this *MongoAggregateQueryBuilder) mergeProjection() {
 
 	if this.projection == nil {
 
 		return
 	}
 
-	this.Add(
+	this.PushStages(
 		bson.D{
 			{"$project", this.projection},
 		},
 	)
 }
 
-func (this *mongo_query) Transform(fn query.DataTransformFunc) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) Transform(fn query.DataTransformFunc) query.ISubQueryBuilder {
 
 	transformer := transform.NewDataTransformer()
 
 	fn(transformer)
 
-	this.mongo_pipeline.Add(
+	this.mongo_pipeline.PushStages(
 		transformer.GetQuery()...,
 	)
 
 	return this
 }
 
-func (this *mongo_query) SortOrder(fn query.SortFunc) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) SortOrder(fn query.SortFunc) query.ISubQueryBuilder {
 
 	initializer := sort.NewSortInitializer()
 
 	fn(initializer)
 
-	this.mongo_pipeline.Add(
+	this.mongo_pipeline.PushStages(
 		bson.D{
 			{"$sort", initializer},
 		},
@@ -164,9 +169,9 @@ func (this *mongo_query) SortOrder(fn query.SortFunc) query.ISubQueryBuilder {
 	return this
 }
 
-func (this *mongo_query) Limit(num uint) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) Limit(num uint) query.ISubQueryBuilder {
 
-	this.mongo_pipeline.Add(
+	this.mongo_pipeline.PushStages(
 		bson.D{
 			{"$limit", num},
 		},

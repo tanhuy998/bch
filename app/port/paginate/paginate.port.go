@@ -25,11 +25,16 @@ type (
 	}
 
 	IOffsetPaginator interface {
+		IAbstractPaginator
 		GetPageNumber() uint64
+	}
+
+	IAbstractPaginator interface {
 		GetPageSize() uint64
 	}
 
 	ICursorPaginator[Cursor_T comparable] interface {
+		IAbstractPaginator
 		GetCursor() *Cursor_T
 		IsPrevious() bool
 		GetCursorDirection() CursorDirection

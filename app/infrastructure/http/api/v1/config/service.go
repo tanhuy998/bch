@@ -3,11 +3,14 @@ package config
 import (
 	"app/boundedContext"
 	"app/infrastructure/http/common"
+
 	"app/internal/bootstrap"
 	"app/internal/db"
-	"app/internal/db/driver/mongoDriver"
+	"app/internal/db/driver/mongoDriver/mongoStorage"
 	"app/internal/generalToken"
-	libConfig "app/internal/lib/config"
+	irisIoc "app/internal/lib/iris/ioc"
+	iocOption "app/internal/lib/iris/ioc/option"
+
 	"app/model"
 	accessLogServicePort "app/port/accessLog"
 	actionResultServicePort "app/port/actionResult"
@@ -69,27 +72,27 @@ func InitializeDatabase(app router.Party) {
 	container.Register(dbInstance).Explicitly()
 	container.Register(client).Explicitly()
 
-	libConfig.BindDependency[repository.ITransactionDBClient, repository.MongoDBClient](container, nil)
+	irisIoc.BindDependency[repository.ITransactionDBClient, repository.MongoDBClient](container, nil)
 
 	fmt.Println("DBMS client initialized.")
 
 	/*
 		access logger must be initialized before repositories in order to trace db query
 	*/
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		accessLogServicePort.IAccessLogger,
 		irisAccessLoggerService.IrisAccessLoggerService,
 	](container, nil)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		dbQueryTracerPort.IDBQueryTracer, mongoDBTracerService.DBQueryTracerService,
 	](container, nil)
 
 	fmt.Println("Initialize Repositories...")
-	libConfig.BindDependency[repository.ITenant](
+	irisIoc.BindDependency[repository.ITenant](
 		container, new(repository.TenantRepository).Init(dbInstance),
 	).EnableStructDependents()
-	libConfig.BindDependency[repository.ITenantAgent](
+	irisIoc.BindDependency[repository.ITenantAgent](
 		container, new(repository.TenantAgentRepository).Init(dbInstance),
 	).EnableStructDependents()
 
@@ -97,35 +100,38 @@ func InitializeDatabase(app router.Party) {
 	// 	container, new(repository.UserRepository).Init(db),
 	// ).EnableStructDependents()
 
-	libConfig.BindAs(
+	irisIoc.RegisterDependency(
 		container, new(repository.UserRepository).Init(dbInstance),
-		[]reflect.Type{
-			reflect.TypeFor[repository.IUser](),
-			reflect.TypeFor[repositoryAPI.ICRUDMongoRepository[model.User]](),
-		},
-		libConfig.StructDependents(true),
+		iocOption.StructDependents(true),
+		// iocOption.AsAbstracts(
+		// 	reflect.TypeFor[repository.IUser](),
+		// 	reflect.TypeFor[repositoryAPI.ICRUDMongoRepository[model.User]](),
+		// ),
+		iocOption.BindAs[repository.IUser](),
+		iocOption.BindAs[repositoryAPI.ICRUDMongoRepository[model.User]](),
 	)
 
 	// libConfig.BindDependency[repository.ICommandGroup](
 	// 	container, new(repository.CommandGroupRepository).Init(db),
 	// ).EnableStructDependents()
 
-	libConfig.BindAs(
+	irisIoc.RegisterDependency(
 		container, new(repository.CommandGroupRepository).Init(dbInstance),
-		[]reflect.Type{
+		iocOption.StructDependents(true),
+		iocOption.AsAbstracts(
 			reflect.TypeFor[repository.ICommandGroup](),
-			reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.CommandGroup]](),
-		},
-		libConfig.StructDependents(true),
+			//reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.CommandGroup]](),
+			reflect.TypeFor[mongoStorage.IMongoDBStorageUnit[model.CommandGroup]](),
+		),
 	)
 
-	libConfig.BindDependency[repository.ICommandGroupUser](
+	irisIoc.BindDependency[repository.ICommandGroupUser](
 		container, new(repository.CommandGroupUserRepository).Init(dbInstance),
 	).EnableStructDependents()
-	libConfig.BindDependency[repository.ICommandGroupUserRole](
+	irisIoc.BindDependency[repository.ICommandGroupUserRole](
 		container, new(repository.CommandGroupUserRoleRepository).Init(dbInstance),
 	).EnableStructDependents()
-	libConfig.BindDependency[repository.IRole](
+	irisIoc.BindDependency[repository.IRole](
 		container, new(repository.RoleRepository).Init(dbInstance),
 	).EnableStructDependents()
 	// libConfig.BindDependency[repository.ICampaignRepository](
@@ -144,23 +150,44 @@ func InitializeDatabase(app router.Party) {
 	// 	container, new(repository.AssignmentRepository).Init(db),
 	// ).EnableStructDependents()
 
-	libConfig.BindAs(
+	irisIoc.RegisterDependency(
 		container, new(repository.AssignmentRepository).Init(dbInstance),
-		[]reflect.Type{
-			reflect.TypeFor[repository.IAssignment](),
-			reflect.TypeFor[repositoryAPI.IPaginateClonableRepository[model.Assignment]](),
-			reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.AssignmentGroup]](),
-		},
-		libConfig.StructDependents(true),
+		iocOption.StructDependents(true),
+		// libIoc.AsAbstracts(
+		// 	reflect.TypeFor[repository.IAssignment](),
+		// 	reflect.TypeFor[repositoryAPI.IPaginateClonableRepository[model.Assignment]](),
+		// 	//reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.AssignmentGroup]](),
+		// 	reflect.TypeFor[mongoDriver.IMongoDBStorageUnit[model.Assignment]](),
+		// ),
+		iocOption.BindAs[repository.IAssignment](),
+		iocOption.BindAs[repositoryAPI.IPaginateClonableRepository[model.Assignment]](),
+		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.Assignment]](),
 	)
 
-	libConfig.BindDependency[repository.IAssignmentGroup](
+	// libConfig.BindDependency[repository.IAssignmentGroup](
+	// 	container, new(repository.AssignmentGroupRepository).Init(dbInstance),
+	// ).EnableStructDependents()
+
+	irisIoc.RegisterDependency(
 		container, new(repository.AssignmentGroupRepository).Init(dbInstance),
-	).EnableStructDependents()
-	libConfig.BindDependency[repository.IAssignmentGroupMember](
+		iocOption.StructDependents(true),
+		// libIoc.AsAbstracts(
+		// 	reflect.TypeFor[repository.IAssignmentGroup](),
+		// 	reflect.TypeFor[repositoryAPI.IPaginateClonableRepository[model.AssignmentGroup]](),
+		// 	reflect.TypeFor[mongoDriver.IMongoDBStorageUnit[model.AssignmentGroup]](),
+		// ),
+		//iocOption.BindAs[storage.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.AssignmentGroup]](),
+		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.AssignmentGroup]](),
+		iocOption.BindAs[repository.IAssignmentGroup](),
+		iocOption.BindAs[repositoryAPI.IPaginateClonableRepository[model.AssignmentGroup]](),
+		//iocOption.BindAs[mongoDriver.IMongoDBStorageUnit[model.AssignmentGroup]](),
+
+	)
+
+	irisIoc.BindDependency[repository.IAssignmentGroupMember](
 		container, new(repository.AssignmentGroupMemberRepository).Init(dbInstance),
 	).EnableStructDependents()
-	libConfig.BindDependency[repository.IUserSession](
+	irisIoc.BindDependency[repository.IUserSession](
 		container, new(repository.UserSessionRepository).Init(dbInstance),
 	).EnableStructDependents()
 	fmt.Println("Repositories Initialized.")
@@ -241,11 +268,11 @@ func InitializeDatabase(app router.Party) {
 
 func RegisterUtilServices(container *hero.Container) {
 
-	libConfig.BindDependency[context.Validator, validator.Validate](container, validator.New())
-	libConfig.BindDependency[actionResultServicePort.IActionResult, actionResultService.ResponseResultService](container, nil)
-	libConfig.BindDependency[responsePresetPort.IResponsePreset, responsePresetService.ResponsePresetService](container, nil)
-	libConfig.BindDependency[passwordServicePort.IPassword, passwordService.PasswordService](container, nil)
-	libConfig.BindDependency[common.IMiddlewareErrorHandler, common.ErrorHandler](container, nil)
+	irisIoc.BindDependency[context.Validator, validator.Validate](container, validator.New())
+	irisIoc.BindDependency[actionResultServicePort.IActionResult, actionResultService.ResponseResultService](container, nil)
+	irisIoc.BindDependency[responsePresetPort.IResponsePreset, responsePresetService.ResponsePresetService](container, nil)
+	irisIoc.BindDependency[passwordServicePort.IPassword, passwordService.PasswordService](container, nil)
+	irisIoc.BindDependency[common.IMiddlewareErrorHandler, common.ErrorHandler](container, nil)
 	// container.Register(new(common.Controller)).Explicitly().EnableStructDependents()
 }
 
@@ -269,7 +296,7 @@ func RegisterCaches(container *hero.Container) {
 
 	container.Register(generalTokenWhiteListCacheClient)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		cacheListServicePort.ICacheList[string, bootstrap.RefreshTokenBlackListCacheValue],
 		cacheListService.CacheListManipulator[string, bootstrap.RefreshTokenBlackListCacheValue],
 	](
@@ -277,7 +304,7 @@ func RegisterCaches(container *hero.Container) {
 		cacheListService.NewCacheListManipulator[string, bootstrap.RefreshTokenBlackListCacheValue]("refresh_token_black_list"),
 	)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		cacheListServicePort.ICacheList[generalToken.GeneralTokenID, bootstrap.GeneralTokenWhiteListCacheValue],
 		cacheListService.CacheListManipulator[generalToken.GeneralTokenID, bootstrap.GeneralTokenWhiteListCacheValue],
 	](
@@ -298,17 +325,17 @@ func RegisterAuthDependencies(container *hero.Container) {
 	// 	return auth
 	// })
 
-	libConfig.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticationService](container, nil, AUTH)
+	irisIoc.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticationService](container, nil, AUTH)
 
 	asymmetricJWTService := jwtTokenService.NewECDSAService(
 		jwt.SigningMethodES256, *bootstrap.GetJWTAsymmetricEncryptionPrivateKey(), *bootstrap.GetJWTAsymmetricEncryptionPublicKey(),
 	)
-	libConfig.BindDependency[jwtTokenServicePort.IAsymmetricJWTTokenManipulator](container, asymmetricJWTService)
+	irisIoc.BindDependency[jwtTokenServicePort.IAsymmetricJWTTokenManipulator](container, asymmetricJWTService)
 
 	symmetricJWTService := jwtTokenService.NewHMACService(
 		jwt.SigningMethodHS256, bootstrap.GetJWTSymmetricEncryptionSecret(),
 	)
-	libConfig.BindDependency[jwtTokenServicePort.ISymmetricJWTTokenManipulator](container, symmetricJWTService)
+	irisIoc.BindDependency[jwtTokenServicePort.ISymmetricJWTTokenManipulator](container, symmetricJWTService)
 
 	uniqueID, err := uniqueIDService.New(15)
 
@@ -317,13 +344,13 @@ func RegisterAuthDependencies(container *hero.Container) {
 		panic("error while initiating uniqueID service: " + err.Error())
 	}
 
-	libConfig.BindDependency[uniqueIDServicePort.IUniqueIDGenerator](container, uniqueID)
-	libConfig.BindDependency[generalTokenIDServicePort.IGeneralTokenIDProvider, generalTokenIDService.GeneralTokenIDProvider](container, nil)
+	irisIoc.BindDependency[uniqueIDServicePort.IUniqueIDGenerator](container, uniqueID)
+	irisIoc.BindDependency[generalTokenIDServicePort.IGeneralTokenIDProvider, generalTokenIDService.GeneralTokenIDProvider](container, nil)
 
-	libConfig.BindDependency[refreshTokenIdServicePort.IRefreshTokenIDProvider, refreshTokenIDService.RefreshTokenIDProviderService](container, nil)
+	irisIoc.BindDependency[refreshTokenIdServicePort.IRefreshTokenIDProvider, refreshTokenIDService.RefreshTokenIDProviderService](container, nil)
 
-	libConfig.BindDependency[generalTokenServicePort.IGeneralTokenManipulator, generalTokenService.GeneralTokenManipulator](container, nil)
-	libConfig.BindDependency[generalTokenClientServicePort.IGeneralTokenClient, generalTokenClientService.GeneralTokenClientService](container, nil)
+	irisIoc.BindDependency[generalTokenServicePort.IGeneralTokenManipulator, generalTokenService.GeneralTokenManipulator](container, nil)
+	irisIoc.BindDependency[generalTokenClientServicePort.IGeneralTokenClient, generalTokenClientService.GeneralTokenClientService](container, nil)
 
 	//accessTokenSevice := new(accessTokenService.JWTAccessTokenManipulatorService)
 

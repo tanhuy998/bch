@@ -1,7 +1,8 @@
 package boundedContext
 
 import (
-	libConfig "app/internal/lib/config"
+	"app/domain"
+	irisIoc "app/internal/lib/iris/ioc"
 	"app/model"
 	assignmentServicePort "app/port/assignment"
 	usecasePort "app/port/usecase"
@@ -33,40 +34,40 @@ type (
 
 func RegisterAssignmentBoundedContext(container *hero.Container) {
 
-	libConfig.BindDependency[assignmentServicePort.IGetAssignments[primitive.ObjectID], getAssignmentsDomain.GetAssignmentsService](container, nil)
-	libConfig.BindDependency[assignmentServicePort.IGetAssignmentGroups, getAssignmentGroupsDomain.GetAssignmentGroupsService](container, nil)
-	libConfig.BindDependency[assignmentServicePort.IGetSingleAssignnment, getSingleAssignmentDomain.GetSingleAssignmentService](container, nil)
-	libConfig.BindDependency[assignmentServicePort.IGetSingleAssignmentGroup, getSingleAssignmentGroupDomain.GetSingleAssignmentGroupService](container, nil)
-	libConfig.BindDependency[assignmentServicePort.ICreateAssignment, createAssignmentDomain.CreateAssignmentService](container, nil)
-	libConfig.BindDependency[assignmentServicePort.ICreateAssignmentGroup, createAssignmentGroupDomain.CreateAssignmentGroupService](container, nil)
-	libConfig.BindDependency[assignmentServicePort.ICreateAssignmentGroupMember, createAssignmentGroupMemberDomain.CreateAssignmentGroupMemberService](container, nil)
-	libConfig.BindDependency[assignmentServicePort.IModifyAssignment, modifyAssignmentDomain.ModifyAssignmentService](container, nil)
+	irisIoc.BindDependency[assignmentServicePort.IGetAssignments[primitive.ObjectID], getAssignmentsDomain.GetAssignmentsService](container, nil)
+	irisIoc.BindDependency[assignmentServicePort.IGetAssignmentGroups[domain.PaginateCursorType], getAssignmentGroupsDomain.GetAssignmentGroupsService](container, nil)
+	irisIoc.BindDependency[assignmentServicePort.IGetSingleAssignnment, getSingleAssignmentDomain.GetSingleAssignmentService](container, nil)
+	irisIoc.BindDependency[assignmentServicePort.IGetSingleAssignmentGroup, getSingleAssignmentGroupDomain.GetSingleAssignmentGroupService](container, nil)
+	irisIoc.BindDependency[assignmentServicePort.ICreateAssignment, createAssignmentDomain.CreateAssignmentService](container, nil)
+	irisIoc.BindDependency[assignmentServicePort.ICreateAssignmentGroup, createAssignmentGroupDomain.CreateAssignmentGroupService](container, nil)
+	irisIoc.BindDependency[assignmentServicePort.ICreateAssignmentGroupMember, createAssignmentGroupMemberDomain.CreateAssignmentGroupMemberService](container, nil)
+	irisIoc.BindDependency[assignmentServicePort.IModifyAssignment, modifyAssignmentDomain.ModifyAssignmentService](container, nil)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.CreateAssigmentRequest, responsePresenter.CreateAssignmentResponse],
 		createAssignmentDomain.CreateAssignmentUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetSingleAssignmentRequest, responsePresenter.GetSingleAssignmentResponse],
 		getSingleAssignmentDomain.GetSingleAssignmentUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupRequest, responsePresenter.CreateAssignmentGroupResponse],
 		createAssignmentGroupDomain.CreateAssignmentGroupUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.ModifyAssignment, responsePresenter.ModifyAssignment],
 		modifyAssignmentDomain.ModifyAssignmentUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupMember, responsePresenter.CreateAssignmentGroupMemeber],
 		createAssignmentGroupMemberDomain.CreateAssignmentGroupMemberUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetAssignments, responsePresenter.GetAssignments],
 		getAssignmentsDomain.GetAssignmentUseCase,
 	](container, nil)
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.GetAssignmentGroups, responsePresenter.GetAssignmentGroups[model.AssignmentGroup]],
 		getAssignmentGroupsDomain.GetAssignmentGroupsUseCase,
 	](container, nil)

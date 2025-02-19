@@ -4,7 +4,8 @@ import (
 	revokeSignaturesDomain "app/domain/authSignatures/revokeSignatures"
 	rotateSignaturesDomain "app/domain/authSignatures/rotateSignatures"
 	switchTenantDomain "app/domain/authSignatures/switchTenant"
-	libConfig "app/internal/lib/config"
+	irisIoc "app/internal/lib/iris/ioc"
+
 	accessTokenServicePort "app/port/accessToken"
 	accessTokenClientPort "app/port/accessTokenClient"
 	authSignatureTokenPort "app/port/authSignatureToken"
@@ -25,35 +26,35 @@ import (
 
 func registerDomainSpecificUtils(container *hero.Container) {
 
-	libConfig.BindDependency[accessTokenServicePort.IAccessTokenManipulator, accessTokenService.JWTAccessTokenManipulatorService](container, nil)
-	libConfig.BindDependency[accessTokenClientPort.IAccessTokenClient, accessTokenClientService.BearerAccessTokenClientService](container, nil)
+	irisIoc.BindDependency[accessTokenServicePort.IAccessTokenManipulator, accessTokenService.JWTAccessTokenManipulatorService](container, nil)
+	irisIoc.BindDependency[accessTokenClientPort.IAccessTokenClient, accessTokenClientService.BearerAccessTokenClientService](container, nil)
 
 	//refreshTokenService := new(refreshTokenService.RefreshTokenManipulatorService)
-	libConfig.BindDependency[refreshTokenServicePort.IRefreshTokenManipulator, refreshTokenService.RefreshTokenManipulatorService](container, nil)
-	libConfig.BindDependency[refreshTokenClientPort.IRefreshTokenClient, refreshTokenClientService.RefreshTokenClientService](container, nil)
+	irisIoc.BindDependency[refreshTokenServicePort.IRefreshTokenManipulator, refreshTokenService.RefreshTokenManipulatorService](container, nil)
+	irisIoc.BindDependency[refreshTokenClientPort.IRefreshTokenClient, refreshTokenClientService.RefreshTokenClientService](container, nil)
 
-	libConfig.BindDependency[authSignatureTokenPort.IAuthSignatureProvider, authSignatureToken.AuthSignatureTokenService](container, nil)
+	irisIoc.BindDependency[authSignatureTokenPort.IAuthSignatureProvider, authSignatureToken.AuthSignatureTokenService](container, nil)
 }
 
 func RegisterAuthSignaturesBoundedContext(container *hero.Container) {
 
 	registerDomainSpecificUtils(container)
 
-	libConfig.BindDependency[authSignaturesServicePort.IRotateSignatures, rotateSignaturesDomain.RotateSignaturesService](container, nil)
-	libConfig.BindDependency[authSignaturesServicePort.ISwitchTenant, switchTenantDomain.SwitchTenantService](container, nil)
-	libConfig.BindDependency[authSignaturesServicePort.IRevokeSignatures, revokeSignaturesDomain.RevokeSignaturesService](container, nil)
+	irisIoc.BindDependency[authSignaturesServicePort.IRotateSignatures, rotateSignaturesDomain.RotateSignaturesService](container, nil)
+	irisIoc.BindDependency[authSignaturesServicePort.ISwitchTenant, switchTenantDomain.SwitchTenantService](container, nil)
+	irisIoc.BindDependency[authSignaturesServicePort.IRevokeSignatures, revokeSignaturesDomain.RevokeSignaturesService](container, nil)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse],
 		rotateSignaturesDomain.RotateSignaturesUseCase,
 	](container, nil)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant],
 		switchTenantDomain.SwitchTenantUseCase,
 	](container, nil)
 
-	libConfig.BindDependency[
+	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.Logout, responsePresenter.Logout],
 		revokeSignaturesDomain.RevokeSignaturesUseCase,
 	](container, nil)

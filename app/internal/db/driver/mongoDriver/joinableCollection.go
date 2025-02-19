@@ -1,12 +1,13 @@
 package mongoDriver
 
 import (
+	"app/internal/db/driver/mongoDriver/mongoStorage"
 	libCommon "app/internal/lib/common"
 )
 
 type (
 	joinable_collection[Model_T, Target_Entity_T any] struct {
-		MongoDBQueryMonitorCollection
+		mongoStorage.MongoDBQueryMonitorCollection
 	}
 )
 

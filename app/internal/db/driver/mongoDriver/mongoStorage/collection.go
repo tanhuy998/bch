@@ -1,4 +1,4 @@
-package mongoDriver
+package mongoStorage
 
 import (
 	dbQueryTracerPort "app/port/dbQueryTracer"
@@ -312,11 +312,6 @@ func (this *MongoDBQueryMonitorCollection) Watch(ctx context.Context, pipeline i
 	)
 }
 
-func (this *MongoDBQueryMonitorCollection) GetName() string {
-
-	return this.collection.Name()
-}
-
 func (this *MongoDBQueryMonitorCollection) GetStorageUnit() *MongoDBQueryMonitorCollection {
 
 	return this
@@ -330,4 +325,9 @@ func (this *MongoDBQueryMonitorCollection) SetCollection(col *mongo.Collection) 
 	}
 
 	this.collection = col
+}
+
+func (this *MongoDBQueryMonitorCollection) GetDBStorageUnitName() string {
+
+	return this.collection.Name()
 }

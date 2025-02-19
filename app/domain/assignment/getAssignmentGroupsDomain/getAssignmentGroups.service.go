@@ -1,11 +1,11 @@
 package getAssignmentGroupsDomain
 
 import (
+	"app/domain"
 	"app/internal/common"
-	"app/internal/db/query"
 	"app/model"
+	paginateServicePort "app/port/paginate"
 	"app/repository"
-	"app/unitOfWork/aggregate"
 	"context"
 	"errors"
 	"fmt"
@@ -16,30 +16,34 @@ import (
 type (
 	GetAssignmentGroupsService struct {
 		AssignmentGroupRepo repository.IAssignmentGroup
-		aggregate.AggegateRoot[model.AssignmentGroup, model.AssignmentGroup]
+		//AssignmentGroupAggregate aggregate.AggegateRoot[model.AssignmentGroup, model.AssignmentGroup]
+		GetAssignmentGroupAggegate
 	}
 )
 
-func (this *GetAssignmentGroupsService) TestAggregate(
-	tenantUUID uuid.UUID, assignmentUUID uuid.UUID, ctx context.Context,
-) ([]model.AssignmentGroup, error) {
+// func (this *GetAssignmentGroupsService) TestAggregate(
+// 	tenantUUID uuid.UUID, assignmentUUID uuid.UUID, paginator domain.IPaginator, ctx context.Context,
+// ) ([]model.AssignmentGroup, error) {
 
-	return this.Query().
-		Join("users", func(queryBuilder query.IJoinField) {
-			queryBuilder.On("createdBy", "uuid").As("createdUser")
-		}).
-		Join("commandGroups", func(queryBuilder query.IJoinField) {
-			queryBuilder.On("commandGroupUUID", "uuid").As("commandGroup")
-		}).
-		ExcludeFields(
-			"user.password",
-			"user.secret",
-		).
-		All(ctx)
-}
+// 	return this.AssignmentGroupAggregate.Query().
+// 		Join("users", func(queryBuilder query.IJoinField) {
+// 			queryBuilder.On("createdBy", "uuid").As("createdUser")
+// 		}).
+// 		Join("commandGroups", func(queryBuilder query.IJoinField) {
+// 			queryBuilder.On("commandGroupUUID", "uuid").As("commandGroup")
+// 		}).
+// 		ExcludeFields(
+// 			"user.password",
+// 			"user.secret",
+// 		).
+// 		Paginate(ctx, func() paginateServicePort.IPaginator[interface{}] {
+
+// 			return (paginator).(paginateServicePort.IPaginator[interface{}])
+// 		})
+// }
 
 func (this *GetAssignmentGroupsService) Serve(
-	tenantUUID uuid.UUID, assignmentUUID uuid.UUID, ctx context.Context,
+	tenantUUID uuid.UUID, assignmentUUID uuid.UUID, paginator domain.IPaginator, ctx context.Context,
 ) ([]model.AssignmentGroup, error) {
 
 	switch {
@@ -114,5 +118,11 @@ func (this *GetAssignmentGroupsService) Serve(
 	// 	ctx,
 	// )
 
-	return this.TestAggregate(tenantUUID, assignmentUUID, ctx)
+	return this.GetAssignentGroup().Paginate(
+		ctx,
+		func() paginateServicePort.IPaginator[interface{}] {
+
+			return (paginator).(paginateServicePort.IPaginator[interface{}])
+		},
+	)
 }

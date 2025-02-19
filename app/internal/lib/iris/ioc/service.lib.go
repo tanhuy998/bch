@@ -1,8 +1,9 @@
-package libConfig
+package irisIoc
 
 import (
 	libCommon "app/internal/lib/common"
-	"fmt"
+	"app/internal/lib/iris/ioc/internal"
+	iocOption "app/internal/lib/iris/ioc/option"
 	"reflect"
 
 	"github.com/kataras/iris/v12"
@@ -13,32 +14,45 @@ var (
 	concrete_pool map[reflect.Type]interface{} = map[reflect.Type]interface{}{}
 )
 
-func RegisterObject(container *hero.Container, obj any) {
+// func RegisterObject(container *hero.Container, obj any) {
 
-	dep := container.Register(obj)
+// 	dep := container.Register(obj)
 
-	dep.StructDependents = true
-	dep.Explicitly()
-}
+// 	dep.StructDependents = true
+// 	dep.Explicitly()
+// }
 
-func BindAs[ConcreteType any](
-	container *hero.Container, concreateObj *ConcreteType, abstractTypes []reflect.Type, options ...DependencyOptionFunc,
+func RegisterDependency[ConcreteType any](
+	container *hero.Container, concreateObj *ConcreteType, options ...iocOption.DependencyOptionFunc,
 ) {
+
+	var autowired bool = false
 
 	switch {
 	case container == nil:
 		panic("nil container passed to libConfig.BindAs()")
-	case len(abstractTypes) == 0:
-		panic("empty abstract type passed to libConfig.BindAs()")
+	// case len(abstractTypes) == 0:
+	// 	panic("empty abstract type passed to libConfig.BindAs()")
+	case concreateObj == nil:
+		autowired = true
+		concreateObj = resolve_concrete_instance[ConcreteType]()
 	}
 
-	for _, abstract := range abstractTypes {
+	// for _, abstract := range abstractTypes {
 
-		dep := _bindDependency(container, abstract, concreateObj)
+	// 	dep := _bindDependency(container, abstract, concreateObj)
 
-		for _, optionFn := range options {
-			optionFn(dep)
-		}
+	// 	for _, optionFn := range options {
+	// 		optionFn(dep)
+	// 	}
+	// }
+
+	dep := container.Register(concreateObj)
+	dep.StructDependents = autowired
+
+	for _, fn := range options {
+
+		fn(container, dep)
 	}
 }
 
@@ -53,7 +67,7 @@ func BindDependency[AbstractType, ConcreteType any](
 
 func _bindDependency[ConcreteType any](container *hero.Container, abstractType reflect.Type, concreteVal *ConcreteType) *hero.Dependency {
 
-	checkInterfaceOrPanic(abstractType)
+	internal.CheckInterfaceOrPanic(abstractType)
 
 	var autowireField bool = false
 
@@ -63,12 +77,15 @@ func _bindDependency[ConcreteType any](container *hero.Container, abstractType r
 		concreteVal = resolve_concrete_instance[ConcreteType]()
 	}
 
-	_checkImplementationOrPanic(abstractType, reflect.TypeOf(concreteVal))
+	internal.CheckTypeImplementationOrPanic(abstractType, reflect.TypeOf(concreteVal))
 
-	dep := container.Register(concreteVal)
-	dep.DestType = abstractType
+	// dep := container.Register(concreteVal)
+	// dep.DestType = abstractType
+
+	dep := internal.Register(container, abstractType, concreteVal)
+
 	dep.StructDependents = autowireField
-	dep.Explicitly()
+	//dep.Explicitly()
 
 	return dep
 }
@@ -132,7 +149,7 @@ func BindAndMapDependencyToContext[AbstractType any, ConcreteType any](
 
 	aType := libCommon.Wrap[AbstractType]()
 
-	checkInterfaceOrPanic(aType)
+	internal.CheckInterfaceOrPanic(aType)
 
 	var autowireField bool = false
 
@@ -142,7 +159,7 @@ func BindAndMapDependencyToContext[AbstractType any, ConcreteType any](
 		concreteVal = new(ConcreteType)
 	}
 
-	_checkImplementationOrPanic(aType, reflect.TypeOf(concreteVal))
+	internal.CheckTypeImplementationOrPanic(aType, reflect.TypeOf(concreteVal))
 
 	mappedObj, _ := any(concreteVal).(AbstractType)
 
@@ -164,37 +181,24 @@ func BindAndMapDependencyToContext[AbstractType any, ConcreteType any](
 	return dep
 }
 
-func checkInterfaceOrPanic(t reflect.Type) {
+// func checkImplementationOrPanic[AbstractType any, ConcreteType any]() {
 
-	if t.Kind() != reflect.Interface {
+// 	_checkImplementationOrPanic(libCommon.Wrap[AbstractType](), libCommon.Wrap[ConcreteType]())
+// }
 
-		panic(
-			fmt.Sprintf(
-				"Could not use %s as abstract type which is not an interface",
-				t.String(),
-			),
-		)
-	}
-}
+// func _checkImplementationOrPanic(abstract reflect.Type, concrete reflect.Type) {
 
-func checkImplementationOrPanic[AbstractType any, ConcreteType any]() {
+// 	if concrete.Implements(abstract) {
 
-	_checkImplementationOrPanic(libCommon.Wrap[AbstractType](), libCommon.Wrap[ConcreteType]())
-}
+// 		return
+// 	}
 
-func _checkImplementationOrPanic(abstract reflect.Type, concrete reflect.Type) {
-
-	if concrete.Implements(abstract) {
-
-		return
-	}
-
-	panic(
-		fmt.Sprintf(
-			"Could not bind concrete type %s as interface %s",
-			//reflect.TypeOf(concreteVal).String(),
-			concrete.String(),
-			abstract.String(),
-		),
-	)
-}
+// 	panic(
+// 		fmt.Sprintf(
+// 			"Could not bind concrete type %s as interface %s",
+// 			//reflect.TypeOf(concreteVal).String(),
+// 			concrete.String(),
+// 			abstract.String(),
+// 		),
+// 	)
+// }

@@ -1,4 +1,4 @@
-package paginate
+package libPaginate
 
 // import (
 // 	"app/model"

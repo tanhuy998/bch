@@ -1,4 +1,4 @@
-package mongoDriver
+package mongoStorage
 
 import (
 	libCommon "app/internal/lib/common"

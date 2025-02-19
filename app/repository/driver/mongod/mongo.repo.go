@@ -3,7 +3,7 @@ package mongoRepository
 import (
 	"app/internal"
 
-	"app/internal/db/driver/mongoDriver"
+	"app/internal/db/driver/mongoDriver/mongoStorage"
 	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	mongoRepositoryFilter "app/repository/driver/mongod/filter"
@@ -21,7 +21,7 @@ import (
 type (
 	mongo_repository[Model_T any] struct {
 		//MongoDBQueryMonitorCollection
-		mongoDriver.MongoDBQueryMonitorCollection
+		mongoStorage.MongoDBQueryMonitorCollection
 		filter     mongoRepositoryFilter.MongoRepositoryFilterGenerator
 		sort       mongoRepositorySorter.MongoSorterGenerator
 		projection map[string]uint
