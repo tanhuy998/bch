@@ -49,6 +49,7 @@ func RegisterDependency[ConcreteType any](
 
 	dep := container.Register(concreateObj)
 	dep.StructDependents = autowired
+	dep.Explicitly()
 
 	for _, fn := range options {
 

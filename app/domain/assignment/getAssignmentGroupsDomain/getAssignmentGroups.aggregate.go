@@ -1,10 +1,12 @@
 package getAssignmentGroupsDomain
 
 import (
+	"app/internal/db/driver/mongoDriver/mongoStorage"
 	"app/internal/db/query"
 	"app/model"
 	"app/repository"
 	"app/unitOfWork/aggregate"
+	"fmt"
 )
 
 type (
@@ -12,12 +14,13 @@ type (
 		aggregate.AggegateRoot[model.AssignmentGroup, model.AssignmentGroup]
 		AssignmentGroup_User_Relation
 		AssigmentGroup_CommandGroup_Relation
+		Stu              mongoStorage.IMongoDBStorageUnit[model.User]
 		UserRepo         repository.IUser
 		CommandGroupRepo repository.ICommandGroup
 	}
 )
 
-func (this *GetAssignmentGroupAggegate) GetAssignentGroup() query.IQueryBuilder[model.AssignmentGroup] {
+func (this *GetAssignmentGroupAggegate) GetAssignentGroups() query.IQueryBuilder[model.AssignmentGroup] {
 
 	// return this.Query().
 	// 	Join(this.UserRepo, func(queryBuilder query.IJoinField) {
@@ -31,11 +34,10 @@ func (this *GetAssignmentGroupAggegate) GetAssignentGroup() query.IQueryBuilder[
 	// 		"user.secret",
 	// 	)
 
-	return this.AggregateRelationsOrDefault(
+	fmt.Println("test storage unit:", this.Stu.GetDBStorageUnitName())
+
+	return this.AggregateRelationsOnceOrDefault(
 		&this.AssignmentGroup_User_Relation,
 		&this.AssigmentGroup_CommandGroup_Relation,
-	).ExcludeFields(
-		"user.password",
-		"user.secret",
 	)
 }

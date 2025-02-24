@@ -5,8 +5,8 @@ import (
 )
 
 type (
-	asbtract_relation[Repo_Entity_T any] struct {
-		mongoStorage.IMongoDBStorageUnit[Repo_Entity_T]
+	abstract_relation[Repo_Entity_T any] struct {
+		Stu mongoStorage.IMongoDBStorageUnit[Repo_Entity_T]
 	}
 )
 
@@ -14,3 +14,8 @@ type (
 
 // 	return new(mongoQueryBuilder.JoinOperationInitializer)
 // }
+
+func (this *abstract_relation[Repo_Entity_T]) GetDBStorageUnitName() string {
+
+	return this.Stu.GetDBStorageUnitName()
+}

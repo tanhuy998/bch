@@ -8,7 +8,7 @@ import (
 
 type (
 	OneToManyWith[Foreign_Entity_T any] struct {
-		asbtract_relation[Foreign_Entity_T]
+		abstract_relation[Foreign_Entity_T]
 	}
 )
 

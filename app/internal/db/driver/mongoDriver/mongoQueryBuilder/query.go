@@ -18,7 +18,7 @@ type (
 
 func (this *MongoAggregateQueryBuilder) GetPipeline() []interface{} {
 
-	return this.mongo_pipeline.p
+	return this.mongo_pipeline.P
 }
 
 func (this *MongoAggregateQueryBuilder) initProjection() {
@@ -92,7 +92,9 @@ func (this *MongoAggregateQueryBuilder) Filter(fn query.FilterFunc) query.ISubQu
 	fn(filter)
 
 	this.mongo_pipeline.PushStages(
-		filter.Get(),
+		bson.D{
+			{"$match", filter.Get()},
+		},
 	)
 
 	return this

@@ -6,13 +6,16 @@ import (
 )
 
 type (
-	MongoRelationQueryBuilder struct {
-		MongoAggregateQueryBuilder
-	}
+	/*
+		Type Redefinition here just to add new method for the current struct,
+		for better type convertion accross Relation delegator query builder and
+		Delegator query builder.
+	*/
+	MongoRelationQueryBuilder MongoAggregateQueryBuilder
 )
 
 func (this *MongoRelationQueryBuilder) PushRelations(
-	relations ...relation.IDBRelationshipQueryInitializer[mongoRelation.Query_Type],
+	relations ...relation.IDBRelationshipNavigator[mongoRelation.Query_Type],
 ) {
 
 	for _, rel := range relations {
@@ -20,12 +23,12 @@ func (this *MongoRelationQueryBuilder) PushRelations(
 		initializer := &JoinOperationInitializer{
 			From: rel.GetDBStorageUnitName(),
 		}
-		initFunc := rel.GetInitFunc()
+		initFunc := rel.GetRelationInitFunc()
 
 		initFunc(initializer)
 
-		this.MongoAggregateQueryBuilder.PushStages(
-			rel.ResolveQuery(initializer)...,
+		this.PushStages(
+			rel.ResolveRelationQuery(initializer)...,
 		)
 	}
 }

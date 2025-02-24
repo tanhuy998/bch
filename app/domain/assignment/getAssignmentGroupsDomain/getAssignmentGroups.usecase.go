@@ -8,13 +8,14 @@ import (
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
+	"encoding/json"
 	"fmt"
 )
 
 type (
 	GetAssignmentGroupsUseCase struct {
 		usecasePort.UseCase[requestPresenter.GetAssignmentGroups, responsePresenter.GetAssignmentGroups[model.AssignmentGroup]]
-		GetAssignmentGroupService assignmentServicePort.IGetAssignmentGroups[domain.PaginateCursorType]
+		GetAssignmentGroupService assignmentServicePort.IGetAssignmentGroups[domain.PaginateCursorType, model.AssignmentGroup]
 	}
 )
 
@@ -22,26 +23,35 @@ func (this *GetAssignmentGroupsUseCase) Execute(
 	input *requestPresenter.GetAssignmentGroups,
 ) (ret *responsePresenter.GetAssignmentGroups[model.AssignmentGroup], err error) {
 
-	defer func() {
+	// defer func() {
 
-		this.WrapResults(&input, &ret, &err)
-	}()
+	// 	this.WrapResults(&input, &ret, &err)
+	// }()
 
-	if !input.IsValidTenantUUID() {
-
+	switch {
+	case !input.IsValidTenantUUID():
 		return nil, common.ERR_UNAUTHORIZED
-	}
-
-	if !input.IsTenantAgent() {
-
+	case !input.IsTenantAgent():
 		return nil, common.ERR_FORBIDEN
 	}
+
+	// if !input.IsValidTenantUUID() {
+
+	// 	return nil, common.ERR_UNAUTHORIZED
+	// }
+
+	// if !input.IsTenantAgent() {
+
+	// 	return nil, common.ERR_FORBIDEN
+	// }
 
 	data, err := this.GetAssignmentGroupService.Serve(
 		input.GetTenantUUID(), *input.AssignmentUUID, input, input.GetContext(),
 	)
 
-	fmt.Println(data, err)
+	jsonData, _ := json.Marshal(data)
+
+	fmt.Println(string(jsonData))
 
 	if err != nil {
 

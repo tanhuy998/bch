@@ -1,19 +1,21 @@
 package mongoQueryBuilder
 
 import (
+	mongoRelation "app/internal/db/driver/mongoDriver/relation"
 	"app/internal/db/query"
+	"app/internal/db/relation"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
 	JoinOperationInitializer struct {
-		From          string                      `bson:"from"`
-		Local_field   string                      `bson:"localField"`
-		Foreign_field string                      `bson:"foreignField"`
-		Alias         string                      `bson:"as"`
-		Pipeline      *MongoAggregateQueryBuilder `bson:"pipeline,omitempty"`
-		is_unwind     bool
+		From                       string           `json:"from" bson:"from"`
+		Local_field                string           `json:"localField" bson:"localField"`
+		Foreign_field              string           `json:"foreignField" bson:"foreignField"`
+		Alias                      string           `json:"as" bson:"as"`
+		MongoAggregateQueryBuilder `bson:",inline"` // $lookup stage's pipeline, struct metadatas for bson are defined in mongo_pipeline struct
+		is_unwind                  bool
 	}
 )
 
@@ -29,7 +31,7 @@ func (this *JoinOperationInitializer) As(name string) query.ISubQueryBuilder {
 
 	this.Alias = name
 
-	return this.Pipeline
+	return &this.MongoAggregateQueryBuilder
 }
 
 func (this *JoinOperationInitializer) NeedUnwind() bool {
@@ -54,11 +56,32 @@ func (this *JoinOperationInitializer) GetAliasName() string {
 
 func (this *JoinOperationInitializer) SetLimit(num uint64) {
 
-	this.Pipeline.p = append(
-		[]interface{}{
-			bson.D{
-				{"$limit", num},
-			},
+	// this.Pipeline.p = append(
+	// 	[]interface{}{
+	// 		bson.D{
+	// 			{"$limit", num},
+	// 		},
+	// 	},
+	// 	this.Pipeline.p...)
+
+	this.MongoAggregateQueryBuilder.PrependStages(
+		bson.D{
+			{"$limit", num},
 		},
-		this.Pipeline.p...)
+	)
+}
+
+func (this *JoinOperationInitializer) AggregateRelations(
+	relations ...relation.IDBRelationshipNavigator[mongoRelation.Query_Type],
+) query.ISubQueryBuilder {
+
+	stage := MongoRelationQueryBuilder{}
+
+	stage.PushRelations(relations...)
+
+	this.MongoAggregateQueryBuilder.PushStages(
+		stage,
+	)
+
+	return this
 }

@@ -35,7 +35,7 @@ type (
 func RegisterAssignmentBoundedContext(container *hero.Container) {
 
 	irisIoc.BindDependency[assignmentServicePort.IGetAssignments[primitive.ObjectID], getAssignmentsDomain.GetAssignmentsService](container, nil)
-	irisIoc.BindDependency[assignmentServicePort.IGetAssignmentGroups[domain.PaginateCursorType], getAssignmentGroupsDomain.GetAssignmentGroupsService](container, nil)
+	irisIoc.BindDependency[assignmentServicePort.IGetAssignmentGroups[domain.PaginateCursorType, model.AssignmentGroup], getAssignmentGroupsDomain.GetAssignmentGroupsService](container, nil)
 	irisIoc.BindDependency[assignmentServicePort.IGetSingleAssignnment, getSingleAssignmentDomain.GetSingleAssignmentService](container, nil)
 	irisIoc.BindDependency[assignmentServicePort.IGetSingleAssignmentGroup, getSingleAssignmentGroupDomain.GetSingleAssignmentGroupService](container, nil)
 	irisIoc.BindDependency[assignmentServicePort.ICreateAssignment, createAssignmentDomain.CreateAssignmentService](container, nil)

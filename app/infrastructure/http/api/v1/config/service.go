@@ -21,7 +21,6 @@ import (
 	generalTokenIDServicePort "app/port/generalTokenID"
 	repositoryAPI "app/repository/api"
 	"log"
-	"reflect"
 
 	jwtTokenServicePort "app/port/jwtTokenService"
 	passwordServicePort "app/port/passwordService"
@@ -109,6 +108,7 @@ func InitializeDatabase(app router.Party) {
 		// ),
 		iocOption.BindAs[repository.IUser](),
 		iocOption.BindAs[repositoryAPI.ICRUDMongoRepository[model.User]](),
+		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.User]](),
 	)
 
 	// libConfig.BindDependency[repository.ICommandGroup](
@@ -118,11 +118,13 @@ func InitializeDatabase(app router.Party) {
 	irisIoc.RegisterDependency(
 		container, new(repository.CommandGroupRepository).Init(dbInstance),
 		iocOption.StructDependents(true),
-		iocOption.AsAbstracts(
-			reflect.TypeFor[repository.ICommandGroup](),
-			//reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.CommandGroup]](),
-			reflect.TypeFor[mongoStorage.IMongoDBStorageUnit[model.CommandGroup]](),
-		),
+		iocOption.BindAs[repository.ICommandGroup](),
+		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.CommandGroup]](),
+		// iocOption.AsAbstracts(
+		// 	reflect.TypeFor[repository.ICommandGroup](),
+		// 	//reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.CommandGroup]](),
+		// 	reflect.TypeFor[mongoStorage.IMongoDBStorageUnit[model.CommandGroup]](),
+		// ),
 	)
 
 	irisIoc.BindDependency[repository.ICommandGroupUser](

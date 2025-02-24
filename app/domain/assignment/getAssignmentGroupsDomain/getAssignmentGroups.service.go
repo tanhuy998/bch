@@ -3,6 +3,7 @@ package getAssignmentGroupsDomain
 import (
 	"app/domain"
 	"app/internal/common"
+	"app/internal/db/query"
 	"app/model"
 	paginateServicePort "app/port/paginate"
 	"app/repository"
@@ -118,11 +119,22 @@ func (this *GetAssignmentGroupsService) Serve(
 	// 	ctx,
 	// )
 
-	return this.GetAssignentGroup().Paginate(
-		ctx,
-		func() paginateServicePort.IPaginator[interface{}] {
+	return this.GetAssignentGroups().
+		Filter(
+			func(filter query.IFilterExpression) {
 
-			return (paginator).(paginateServicePort.IPaginator[interface{}])
-		},
-	)
+				filter.Field("tenantUUID").Equal(tenantUUID)
+			},
+		).
+		ExcludeFields(
+			"user.password",
+			"user.secret",
+		).
+		Paginate(
+			ctx,
+			func() paginateServicePort.IPaginator[interface{}] {
+
+				return (paginator).(paginateServicePort.IPaginator[interface{}])
+			},
+		)
 }

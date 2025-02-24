@@ -8,9 +8,9 @@ import (
 type (
 	IDBRelationshipQueryInitializer[Query_Meta_T any] interface {
 		storage.IDBStorageIdentifier
-		GetInitFunc() query.JoinInitFunc
+		GetRelationInitFunc() query.JoinInitFunc
 		//GetJoinFieldInitializer() query.IJoinField
-		ResolveQuery(IDBRelationQueryMetadata) Query_Meta_T
+		ResolveRelationQuery(IDBRelationQueryMetadata) Query_Meta_T
 	}
 
 	IDBRelationQueryMetadata interface {
