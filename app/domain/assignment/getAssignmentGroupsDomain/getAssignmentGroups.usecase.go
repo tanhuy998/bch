@@ -8,8 +8,6 @@ import (
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
-	"encoding/json"
-	"fmt"
 )
 
 type (
@@ -48,10 +46,6 @@ func (this *GetAssignmentGroupsUseCase) Execute(
 	data, err := this.GetAssignmentGroupService.Serve(
 		input.GetTenantUUID(), *input.AssignmentUUID, input, input.GetContext(),
 	)
-
-	jsonData, _ := json.Marshal(data)
-
-	fmt.Println(string(jsonData))
 
 	if err != nil {
 

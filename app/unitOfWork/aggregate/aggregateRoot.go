@@ -15,7 +15,6 @@ type (
 	*/
 	AggegateRoot[Aggregate_Mapping_Entity_T any, Source_Repository_Entity_T any] struct {
 		AggregateTransaction IAggregateTransaction
-		//mongoDriver.MongoDBDelegator[Aggregate_Mapping_Entity_T, Source_Repository_Entity_T]
 		mongoDriver.RelationDelegator[Aggregate_Mapping_Entity_T, Source_Repository_Entity_T]
 		default_aggregate_query_builder query.IQueryBuilder[Aggregate_Mapping_Entity_T]
 	}
@@ -33,6 +32,9 @@ func (this *AggegateRoot[Retrieval_Entity_T, Repository_Entity_T]) Transaction(
 	return this.AggregateTransaction.Transaction(initCtx, fn)
 }
 
+/*
+Aggregate given relations on first invocation. After that,
+*/
 func (this *AggegateRoot[Aggregate_Mapping_Entity_T, Source_Repository_Entity_T]) AggregateRelationsOnceOrDefault(
 	relations ...aggregateRelation.AbstractRelation,
 ) query.IQueryBuilder[Aggregate_Mapping_Entity_T] {
@@ -44,7 +46,7 @@ func (this *AggegateRoot[Aggregate_Mapping_Entity_T, Source_Repository_Entity_T]
 		)
 	}
 
-	return this.default_aggregate_query_builder
+	return this.default_aggregate_query_builder.Clone()
 }
 
 /*

@@ -181,3 +181,12 @@ func (this *MongoAggregateQueryBuilder) Limit(num uint) query.ISubQueryBuilder {
 
 	return this
 }
+
+func (this *MongoAggregateQueryBuilder) Clone() *MongoAggregateQueryBuilder {
+
+	ret := new(MongoAggregateQueryBuilder)
+
+	ret.P = this.P[:]
+
+	return ret
+}

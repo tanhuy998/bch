@@ -29,19 +29,34 @@ func NewDelegatorQueryBuilder[Model_T any](det lib.IMongoDBCollection) *Delegato
 	return ret
 }
 
-func (this *DelegatorQueryBuilder[Model_T]) Clone() query.IQueryBuilder[Model_T] {
+func (this *DelegatorQueryBuilder[Entity_T]) _clone() *DelegatorQueryBuilder[Entity_T] {
 
-	return libCommon.PointerPrimitive(*this)
+	//ret := new(DelegatorQueryBuilder[Entity_T])
+
+	var ret *DelegatorQueryBuilder[Entity_T] = libCommon.PointerPrimitive(*this)
+
+	ret.MongoAggregateQueryBuilder = *this.MongoAggregateQueryBuilder.Clone()
+
+	return ret
 }
 
-func (this *DelegatorQueryBuilder[Model_T]) Join(storage storage.IDBStorageIdentifier, fn func(query.IJoinField)) query.IQueryBuilder[Model_T] {
+func (this *DelegatorQueryBuilder[Model_T]) Clone() query.IQueryBuilder[Model_T] {
+
+	//return libCommon.PointerPrimitive(*this)
+
+	return this._clone()
+}
+
+func (this *DelegatorQueryBuilder[Model_T]) Join(
+	storage storage.IDBStorageIdentifier, fn func(query.IJoinField),
+) query.IQueryBuilder[Model_T] {
 
 	this.MongoAggregateQueryBuilder.Join(storage.GetDBStorageUnitName(), fn)
 
 	return this
 }
 
-func (this *DelegatorQueryBuilder[Model_T]) Filter(fn query.FilterFunc) query.IQueryBuilder[Model_T] /*named("app/internal/db/query",IFilterableOperator)[tv(Model_T)]*/ {
+func (this *DelegatorQueryBuilder[Model_T]) Filter(fn query.FilterFunc) query.IQueryBuilder[Model_T] {
 
 	this.MongoAggregateQueryBuilder.Filter(fn)
 

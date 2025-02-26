@@ -18,6 +18,7 @@ type (
 		IClonableQueryExecutor[Model_T]
 		IDataTransform[Model_T]
 		IDataSortOrder[Model_T]
+		Clone() IQueryBuilder[Model_T]
 		//IFilterableOperator[Model_T]
 	}
 )

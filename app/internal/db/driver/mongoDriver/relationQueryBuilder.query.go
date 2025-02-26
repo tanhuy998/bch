@@ -11,8 +11,6 @@ import (
 
 type (
 	RelationDelegatorQueryBuilder[Entity_T any] struct {
-		//DelegatorQueryBuilder[Entity_T]
-		//MongoDBDelegator[Entity_T, Source_Repo_Entity]
 		DelegatorQueryBuilder[Entity_T]
 	}
 )
@@ -26,18 +24,29 @@ func NewRelationDelegatorQueryBuilder[Entity_T any](det lib.IMongoDBCollection) 
 	return ret
 }
 
+func (this *RelationDelegatorQueryBuilder[Entity_T]) _clone() *RelationDelegatorQueryBuilder[Entity_T] {
+
+	var ret *RelationDelegatorQueryBuilder[Entity_T] = libCommon.PointerPrimitive(*this)
+
+	ret.DelegatorQueryBuilder = *this.DelegatorQueryBuilder._clone()
+
+	return ret
+}
+
 func (this *RelationDelegatorQueryBuilder[Entity_T]) Clone() query.IQueryBuilder[Entity_T] {
 
-	return libCommon.PointerPrimitive(*this)
+	return this._clone()
 }
 
 func (this *RelationDelegatorQueryBuilder[Entity_T]) AggregateRelations(
 	relations ...relation.IDBRelationshipNavigator[mongoRelation.Query_Type],
 ) query.IQueryBuilder[Entity_T] {
 
-	queryBuilder := mongoQueryBuilder.MongoRelationQueryBuilder(this.MongoAggregateQueryBuilder)
+	ret := this._clone()
+
+	queryBuilder := (*mongoQueryBuilder.MongoRelationQueryBuilder)(&ret.MongoAggregateQueryBuilder)
 
 	queryBuilder.PushRelations(relations...)
 
-	return this.Clone()
+	return ret
 }

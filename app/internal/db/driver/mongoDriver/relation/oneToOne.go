@@ -2,7 +2,6 @@ package mongoRelation
 
 import (
 	"app/internal/db/relation"
-	"encoding/json"
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -19,13 +18,9 @@ type (
 )
 
 func (this *OneToOneWith[Foreign_Entity_T]) ResolveRelationQuery(initializer relation.IDBRelationQueryMetadata) Query_Type {
-	fmt.Println("one to one with:", initializer.GetAliasName())
+
 	initializer.SetLimit(1)
 	alias := initializer.GetAliasName()
-
-	j, _ := json.Marshal(initializer)
-
-	fmt.Println("--------------", string(j))
 
 	ret := []interface{}{
 		bson.D{

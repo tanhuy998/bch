@@ -1,12 +1,9 @@
 package getAssignmentGroupsDomain
 
 import (
-	"app/internal/db/driver/mongoDriver/mongoStorage"
 	"app/internal/db/query"
 	"app/model"
-	"app/repository"
 	"app/unitOfWork/aggregate"
-	"fmt"
 )
 
 type (
@@ -14,9 +11,6 @@ type (
 		aggregate.AggegateRoot[model.AssignmentGroup, model.AssignmentGroup]
 		AssignmentGroup_User_Relation
 		AssigmentGroup_CommandGroup_Relation
-		Stu              mongoStorage.IMongoDBStorageUnit[model.User]
-		UserRepo         repository.IUser
-		CommandGroupRepo repository.ICommandGroup
 	}
 )
 
@@ -33,8 +27,6 @@ func (this *GetAssignmentGroupAggegate) GetAssignentGroups() query.IQueryBuilder
 	// 		"user.password",
 	// 		"user.secret",
 	// 	)
-
-	fmt.Println("test storage unit:", this.Stu.GetDBStorageUnitName())
 
 	return this.AggregateRelationsOnceOrDefault(
 		&this.AssignmentGroup_User_Relation,
