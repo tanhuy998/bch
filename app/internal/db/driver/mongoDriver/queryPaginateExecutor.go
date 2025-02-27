@@ -11,6 +11,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+const (
+	SORT_ASC  = 1
+	SORT_DESC = -1
+)
+
 type (
 	paginate_err_msg struct {
 		Operation string `json:"operation"`
@@ -113,10 +118,10 @@ func (this *PaginateExecutor[Entity_T]) resovleCursorPaginateOperator(
 
 		ret = make([]interface{}, 4)
 
-		ret[0] = bson.D{
+		ret[1] = bson.D{
 			{
 				"$sort", bson.D{
-					{"_id", -1},
+					{"_id", SORT_DESC},
 				},
 			},
 		}
@@ -124,7 +129,7 @@ func (this *PaginateExecutor[Entity_T]) resovleCursorPaginateOperator(
 		ret[len(ret)] = bson.D{
 			{
 				"$sort", bson.D{
-					{"_id", 1},
+					{"_id", SORT_ASC},
 				},
 			},
 		}
@@ -133,7 +138,7 @@ func (this *PaginateExecutor[Entity_T]) resovleCursorPaginateOperator(
 
 		ret = make([]interface{}, 3)
 
-		ret[0] = bson.D{
+		ret[1] = bson.D{
 			{
 				"$sort", bson.D{
 					{"_id", 1},
@@ -142,7 +147,7 @@ func (this *PaginateExecutor[Entity_T]) resovleCursorPaginateOperator(
 		}
 	}
 
-	ret[1] = bson.D{
+	ret[0] = bson.D{
 		{
 			"$match", bson.D{
 				{
