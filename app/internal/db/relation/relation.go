@@ -6,9 +6,13 @@ import (
 )
 
 type (
+	IDBRelationshipDeclarativeInitializer interface {
+		GetRelationInitFunc() query.JoinInitFunc
+	}
+
 	IDBRelationshipQueryInitializer[Query_Meta_T any] interface {
 		storage.IDBStorageIdentifier
-		GetRelationInitFunc() query.JoinInitFunc
+		IDBRelationshipDeclarativeInitializer
 		//GetJoinFieldInitializer() query.IJoinField
 		ResolveRelationQuery(IDBRelationQueryMetadata) Query_Meta_T
 	}

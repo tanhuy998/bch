@@ -11,4 +11,8 @@ type (
 	OneToOneWith[Repo_Entity_T any] struct {
 		mongoRelation.OneToOneWith[Repo_Entity_T]
 	}
+
+	OneToManyWith[Repo_Entity_T any] struct {
+		mongoRelation.OneToManyWith[Repo_Entity_T]
+	}
 )

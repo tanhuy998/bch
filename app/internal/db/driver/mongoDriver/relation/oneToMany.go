@@ -12,7 +12,7 @@ type (
 	}
 )
 
-func (this *OneToManyWith[Foreign_Entity_T]) ResolveQuery(initializer relation.IDBRelationQueryMetadata) Query_Type {
+func (this *OneToManyWith[Foreign_Entity_T]) ResolveRelationQuery(initializer relation.IDBRelationQueryMetadata) Query_Type {
 
 	//initializer.SetLimit(1)
 
