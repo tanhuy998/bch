@@ -2,8 +2,8 @@ package query
 
 type (
 	ISubQueryProjector interface {
-		Select(fields ...string) ISubQueryBuilder
-		ExcludeFields(fields ...string) ISubQueryBuilder
+		Select(fields ...string) IQueryBuilder
+		ExcludeFields(fields ...string) IQueryBuilder
 	}
 )
 
@@ -15,7 +15,7 @@ type (
 
 	IProjector[Model_T any] interface {
 		//IDataRetrievalQuery[Model_T]
-		Select(fields ...string) IQueryBuilder[Model_T]        //IDataRetrievalQuery[Model_T]        // IRepositoryProjectableOperator[Model_T]
-		ExcludeFields(fields ...string) IQueryBuilder[Model_T] // IDataRetrievalQuery[Model_T] // IRepositoryProjectableOperator[Model_T]
+		Select(fields ...string) IGenericQueryBuilder[Model_T]        //IDataRetrievalQuery[Model_T]        // IRepositoryProjectableOperator[Model_T]
+		ExcludeFields(fields ...string) IGenericQueryBuilder[Model_T] // IDataRetrievalQuery[Model_T] // IRepositoryProjectableOperator[Model_T]
 	}
 )

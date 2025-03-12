@@ -16,7 +16,7 @@ func NewJoinOperationPipeline(ref *JoinOperationInitializer) *join_op_pipeline {
 	}
 }
 
-func (this *join_op_pipeline) Limit(number uint) query.ISubQueryBuilder {
+func (this *join_op_pipeline) Limit(number uint64) query.IQueryBuilder {
 
 	if number <= 1 {
 

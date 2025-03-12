@@ -1,3 +1,0 @@
-package mongoDriver
-
-type ()

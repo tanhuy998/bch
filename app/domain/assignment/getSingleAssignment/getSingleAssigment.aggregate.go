@@ -1,9 +1,9 @@
 package getSingleAssignmentDomain
 
 import (
-	"app/internal/db/query"
 	"app/model"
 	"app/unitOfWork/aggregate"
+	"app/unitOfWork/aggregate/api/crud"
 )
 
 type (
@@ -13,9 +13,9 @@ type (
 	}
 )
 
-func (this *GetSingleAssigmentAggregate) MergeRelations() query.IQueryBuilder[model.Assignment] {
+func (this *GetSingleAssigmentAggregate) MergeRelations() crud.IAggregateReader[model.Assignment] {
 
-	return this.AggregateRelations(
+	return this.ByDefaultRelations(
 		&this.Assignment_User_Relation,
 	)
 }

@@ -38,5 +38,7 @@ func (this *Expression_Map[T]) Value(val T) {
 		return
 	}
 
+	this.init()
+
 	this.m[key] = val
 }

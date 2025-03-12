@@ -8,7 +8,7 @@ import (
 
 type (
 	IDBDelegator[Model_T any] interface {
-		query.IQueryBuilder[Model_T]
+		query.IGenericQueryBuilder[Model_T]
 		//Clone() IDBDelegator[Model_T]
 	}
 )

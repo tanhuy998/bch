@@ -7,3 +7,10 @@ type (
 		Trace(collectionName string, label string, ctx context.Context) (stop func(error))
 	}
 )
+
+type (
+	IDBQueryTracerDebugContext interface {
+		context.Context
+		GetDBDebugLog() interface{}
+	}
+)

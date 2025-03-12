@@ -2,12 +2,12 @@ package query
 
 type (
 	ISubQueryDataLimit interface {
-		Limit(num uint) ISubQueryBuilder
+		Limit(num uint64) IQueryBuilder
 	}
 )
 
 type (
 	IDataLimit[Model_T any] interface {
-		Limit(num uint) IQueryBuilder[Model_T]
+		Limit(num uint64) IGenericQueryBuilder[Model_T]
 	}
 )

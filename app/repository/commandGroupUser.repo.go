@@ -2,6 +2,8 @@ package repository
 
 import (
 	"app/model"
+	repositoryAPI "app/repository/api"
+	mongoRepository "app/repository/driver/mongod"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -16,11 +18,12 @@ type (
 	// 	ICRUDMongoRepository[model.CommandGroupUser]
 	// }
 
-	ICommandGroupUser = IRepository[model.CommandGroupUser]
+	ICommandGroupUser = repositoryAPI.ICRUDMongoRepository[model.CommandGroupUser] // IRepository[model.CommandGroupUser]
 
 	CommandGroupUserRepository struct {
 		//AbstractMongoRepository
-		crud_mongo_repository[model.CommandGroupUser]
+		//crud_mongo_repository[model.CommandGroupUser]
+		mongoRepository.MongoCRUDRepository[model.CommandGroupUser]
 	}
 )
 
@@ -30,7 +33,9 @@ func (this *CommandGroupUserRepository) Init(db *mongo.Database) *CommandGroupUs
 
 	// this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
 
-	this.crud_mongo_repository.Init(db, COMMAND_GROUP_USER_COLLECTION_NAME)
+	//this.crud_mongo_repository.Init(db, COMMAND_GROUP_USER_COLLECTION_NAME)
+
+	this.MongoCRUDRepository.Init(db, COMMAND_GROUP_USER_COLLECTION_NAME)
 
 	return this
 }

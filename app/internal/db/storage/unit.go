@@ -1,5 +1,9 @@
 package storage
 
+import (
+	"context"
+)
+
 type (
 	/*
 		IDBStorageUnit interface defines a way to get the object which is mapped
@@ -16,5 +20,12 @@ type (
 
 	IDBStorageIdentifier interface {
 		GetDBStorageUnitName() string
+	}
+
+	// This interface is used for detemining which repository whose storage unit refer to the target
+	// collection/table.
+	IDBStorageQueryExecutor[Local_Storage_Unit_Entity_T any] interface {
+		ToSlice(resulSlice interface{}, query IArbitraryQuery, ctx context.Context) error
+		First(result interface{}, query IArbitraryQuery, ctx context.Context) error
 	}
 )

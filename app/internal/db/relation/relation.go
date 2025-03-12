@@ -10,24 +10,53 @@ type (
 		GetRelationInitFunc() query.JoinInitFunc
 	}
 
-	IDBRelationshipQueryInitializer[Query_Meta_T any] interface {
+	IDBRelationshipQueryInitiator interface {
 		storage.IDBStorageIdentifier
 		IDBRelationshipDeclarativeInitializer
 		//GetJoinFieldInitializer() query.IJoinField
-		ResolveRelationQuery(IDBRelationQueryMetadata) Query_Meta_T
+		//ResolveRelationQuery(IDBRelationQueryMetadata) Query_T
+		ResolveRelation(
+			refQueryBuilder query.IQueryBuilder, foreignInializer IDBRelationNavigator,
+		)
 	}
 
-	IDBRelationQueryMetadata interface {
+	IDBRelationNavigator interface {
 		SetLimit(uint64)
 		GetLocalField() string
 		GetForeignField() string
 		GetAliasName() string
 	}
 
-	IDBRelationshipNavigator[Query_T any] interface {
+	IDBRelationInitiator interface {
 		//storage.IDBStorageUnitGetter[DB_Storage_T]
 		storage.IDBStorageIdentifier
 		//ResolveQuery(fn query.JoinInitFunc) Query_T
-		IDBRelationshipQueryInitializer[Query_T]
+		IDBRelationshipQueryInitiator
+		IDBRelationKind
+	}
+
+	IDBRelationKind interface {
+		GetDBRelationKind() string
+	}
+
+	IReadRelationQueryBuilder interface {
+		query.IQueryBuilder
+		// query.ISubqueryFilterMethod
+		// query.ISubQueryJoinMethod
+		// query.ISubQueryProjector
+		// query.ISubQueryDataTransform
+		// query.ISubQueryDataLimit
+		// query.ISkipQueryBuilder
+		// query.ISubQueryDataSortOrder
+		PushRelations(relation ...IDBRelationInitiator)
+	}
+
+	IClonableReadRelationQueryBuilder interface {
+		IReadRelationQueryBuilder
+		Clone() IClonableReadRelationQueryBuilder
+	}
+
+	IReadRelationQueryBuilderGenerator interface {
+		NewRelationQuery() IClonableReadRelationQueryBuilder
 	}
 )

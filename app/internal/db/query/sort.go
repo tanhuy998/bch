@@ -13,12 +13,12 @@ type (
 	SortFunc = func(sorter ISortInitializer)
 
 	ISubQueryDataSortOrder interface {
-		SortOrder(fn SortFunc) ISubQueryBuilder
+		SortOrder(fn SortFunc) IQueryBuilder
 	}
 )
 
 type (
 	IDataSortOrder[Model_T any] interface {
-		SortOrder(fn SortFunc) IQueryBuilder[Model_T]
+		SortOrder(fn SortFunc) IGenericQueryBuilder[Model_T]
 	}
 )

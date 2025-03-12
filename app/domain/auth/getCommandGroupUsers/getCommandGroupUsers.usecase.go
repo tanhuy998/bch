@@ -1,10 +1,10 @@
 package getCommandGroupUsersDomain
 
 import (
+	"app/domain"
 	"app/internal/common"
 	libCommon "app/internal/lib/common"
 	authServicePort "app/port/auth"
-	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
 	"app/repository"
@@ -15,9 +15,10 @@ import (
 
 type (
 	GetCommandGroupUsersUseCase struct {
-		usecasePort.UseCase[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse]
+		//usecasePort.UseCase[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse]
+		domain.PaginatableUseCase[requestPresenter.GetGroupUsersRequest, responsePresenter.GetGroupUsersResponse]
 		CommandGroupRepo           repository.ICommandGroup
-		GetCommandGroupUserService authServicePort.IGetCommandGroupUsers
+		GetCommandGroupUserService authServicePort.IGetCommandGroupUsers[domain.PaginateCursorType]
 	}
 )
 
@@ -46,7 +47,7 @@ func (this *GetCommandGroupUsersUseCase) Execute(
 	)
 
 	data, err := this.GetCommandGroupUserService.Serve(
-		input.GetTenantUUID(), *input.GroupUUID, executionCtx,
+		input.GetTenantUUID(), *input.GroupUUID, input, executionCtx,
 	)
 
 	if err != nil {

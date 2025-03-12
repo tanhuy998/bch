@@ -1,6 +1,7 @@
 package boundedContext
 
 import (
+	"app/domain"
 	irisIoc "app/internal/lib/iris/ioc"
 	"app/model"
 	authServicePort "app/port/auth"
@@ -42,7 +43,7 @@ type (
 		CreateCommandGroupService               authServicePort.ICreateCommandGroup
 		CreateUserService                       authServicePort.ICreateUser
 		GetAllRolesService                      authServicePort.IGetAllRoles
-		GetCommandGroupUsersService             authServicePort.IGetCommandGroupUsers
+		GetCommandGroupUsersService             authServicePort.IGetCommandGroupUsers[domain.PaginateCursorType]
 		GetSingleCommandGroupService            authServicePort.IGetSingleCommandGroup
 		GetSingleUserService                    authServicePort.IGetSingleUser
 		GrantCommandGroupRolesToUserService     authServicePort.IGrantCommandGroupRolesToUser
@@ -66,7 +67,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	irisIoc.BindDependency[authServicePort.IGetAssignmentGroupUnAssignedCommandGroupUsers, getAssignmentGroupUnAssignedCommandGroupUsersDomain.GetAssignmentGroupUnAssignedCommandGroupUserService](container, nil)
 	irisIoc.BindDependency[authServicePort.IGetUserAuthorityServicePort, getUserAuthorityDomain.GetUsertAuthorityService](container, nil)
 	irisIoc.BindDependency[authServicePort.IGetAllRoles, getAllRoleDomain.GetAllRolesService](container, nil)
-	irisIoc.BindDependency[authServicePort.IGetCommandGroupUsers, getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetCommandGroupUsers[domain.PaginateCursorType], getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
 	//libConfig.BindDependency[authServicePort.IGetParticipatedCommandGroups, getUserParticipatedCommandGroupDomain.GetParticipatedCommandGroupsService](container, nil)
 	//libConfig.BindDependency[]()
 	irisIoc.BindDependency[authServicePort.IGetTenantUsers[model.User], getTenantUsersDomain.GetTenantUsersService](container, nil)
@@ -76,7 +77,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	irisIoc.BindDependency[authServicePort.IGetUserParticipatedCommandGroups, getUserParticipatedCommandGroupsDomain.GetUserParticipatedCommandGroupService](container, nil)
 	irisIoc.BindDependency[authServicePort.IGetSingleCommandGroup, getSingleCommandGroupDomain.GetSingleCommandGroupService](container, nil)
 	irisIoc.BindDependency[authServicePort.IGetSingleUser, getSingleUserDomain.GetSingleUserService](container, nil)
-	irisIoc.BindDependency[authServicePort.IGetCommandGroupUsers, getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetCommandGroupUsers[domain.PaginateCursorType], getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
 
 	irisIoc.BindDependency[authServicePort.IAddUserToCommandGroup, addUserToCommandGroupDomain.AddUserToCommandGroupService](container, nil)
 	irisIoc.BindDependency[authServicePort.ICreateCommandGroup, createCommandGroupDomain.CreateCommandGroupService](container, nil)

@@ -1,9 +1,9 @@
 package getAssignmentGroupsDomain
 
 import (
-	"app/internal/db/query"
 	"app/model"
 	"app/unitOfWork/aggregate"
+	"app/unitOfWork/aggregate/api/crud"
 )
 
 type (
@@ -14,7 +14,7 @@ type (
 	}
 )
 
-func (this *GetAssignmentGroupAggegate) GetAssignentGroups() query.IQueryBuilder[model.AssignmentGroup] {
+func (this *GetAssignmentGroupAggegate) GetAssignentGroups() crud.IAggregateReader[model.AssignmentGroup] {
 
 	// return this.Query().
 	// 	Join(this.UserRepo, func(queryBuilder query.IJoinField) {
@@ -28,7 +28,12 @@ func (this *GetAssignmentGroupAggegate) GetAssignentGroups() query.IQueryBuilder
 	// 		"user.secret",
 	// 	)
 
-	return this.AggregateRelationsOnceOrDefault(
+	// return this.AggregateRelationsOnceOrDefault(
+	// 	&this.AssignmentGroup_User_Relation,
+	// 	&this.AssigmentGroup_CommandGroup_Relation,
+	// )
+
+	return this.ByDefaultRelations(
 		&this.AssignmentGroup_User_Relation,
 		&this.AssigmentGroup_CommandGroup_Relation,
 	)

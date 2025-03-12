@@ -119,22 +119,46 @@ func (this *GetAssignmentGroupsService) Serve(
 	// 	ctx,
 	// )
 
-	return this.GetAssignentGroups().
-		Filter(
-			func(filter query.IFilterExpression) {
+	// return this.GetAssignentGroups().
+	// 	Filter(
+	// 		func(filter query.IFilterExpression) {
 
-				filter.Field("tenantUUID").Equal(tenantUUID)
-			},
-		).
-		ExcludeFields(
-			"user.password",
-			"user.secret",
-		).
-		Paginate(
-			ctx,
-			func() paginateServicePort.IPaginator[interface{}] {
+	// 			filter.Field("tenantUUID").Equal(tenantUUID)
+	// 		},
+	// 	).
+	// 	ExcludeFields(
+	// 		"user.password",
+	// 		"user.secret",
+	// 	).
+	// 	Paginate(
+	// 		ctx,
+	// 		func() paginateServicePort.IPaginator[interface{}] {
 
-				return (paginator).(paginateServicePort.IPaginator[interface{}])
-			},
-		)
+	// 			return (paginator).(paginateServicePort.IPaginator[interface{}])
+	// 		},
+	// 	)
+
+	res, err := this.GetAssignentGroups().Read(
+		func(queryBuilder query.IQueryBuilder) {
+
+			queryBuilder.
+				Filter(
+					func(filter query.IFilterExpression) {
+
+						filter.Field("tenantUUID").Equal(tenantUUID)
+					},
+				).
+				ExcludeFields(
+					"user.password",
+					"user.secret",
+				)
+		},
+	).Paginate(
+		(paginator).(paginateServicePort.IPaginator[interface{}]),
+		ctx,
+	)
+
+	fmt.Println(err)
+
+	return res, err
 }

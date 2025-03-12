@@ -3,6 +3,7 @@ package lib
 import (
 	libError "app/internal/lib/error"
 	"context"
+	"errors"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -84,6 +85,78 @@ func ParseCursorOne[T any](cursor *mongo.Cursor, ctx context.Context) (*T, error
 	}
 
 	return ret, nil
+}
+
+func AggregateRaw(
+	result interface{}, collection IMongoDBCollection, pipeline interface{}, ctx context.Context, options ...*options.AggregateOptions,
+) error {
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline, options...)
+
+	if err != nil {
+
+		return libError.NewInternal(
+			errors.New("mongo driver aggregate raw error while marshalling query:"),
+			err,
+		)
+	}
+
+	err = cursor.All(ctx, result)
+
+	if err != nil {
+
+		return libError.NewInternal(
+			errors.New("mongo driver aggregate raw error while decoding result:"),
+			err,
+		)
+	}
+
+	return nil
+}
+
+func AggregateRawOne(
+	result interface{}, collection IMongoDBCollection, pipeline interface{}, ctx context.Context, options ...*options.AggregateOptions,
+) error {
+
+	if ctx == nil {
+
+		ctx = context.TODO()
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline, options...)
+
+	if err != nil {
+
+		return libError.NewInternal(
+			errors.New("mongo driver aggregate raw one error while marshalling query:"),
+			err,
+		)
+	}
+
+	hasDocument := cursor.Next(ctx)
+
+	if !hasDocument {
+
+		result = nil
+		return nil
+	}
+
+	err = cursor.Decode(result)
+
+	if err != nil {
+
+		return libError.NewInternal(
+			errors.New("mongo driver aggregate raw one error while decoding result:"),
+			err,
+		)
+	}
+
+	return nil
 }
 
 func Aggregate[Model_T any](

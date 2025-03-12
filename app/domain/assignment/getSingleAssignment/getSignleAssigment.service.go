@@ -24,15 +24,28 @@ func (this *GetSingleAssignmentService) ServeUsingRelations(
 	tenantUUID uuid.UUID, assignmentUUID uuid.UUID, ctx context.Context,
 ) (*model.Assignment, error) {
 
-	return this.GetSingleAssigmentAggregate.
-		MergeRelations().
-		Filter(
-			func(filter query.IFilterExpression) {
+	// return this.GetSingleAssigmentAggregate.
+	// 	MergeRelations().
+	// 	Filter(
+	// 		func(filter query.IFilterExpression) {
 
-				filter.Field("tenantUUID").Equal(tenantUUID)
-				filter.Field("uuid").Equal(assignmentUUID)
-			},
-		).First(ctx)
+	// 			filter.Field("tenantUUID").Equal(tenantUUID)
+	// 			filter.Field("uuid").Equal(assignmentUUID)
+	// 		},
+	// 	).First(ctx)
+
+	return this.GetSingleAssigmentAggregate.MergeRelations().Read(
+		func(queryBuilder query.IQueryBuilder) {
+
+			queryBuilder.Filter(
+				func(filter query.IFilterExpression) {
+
+					filter.Field("tenantUUID").Equal(tenantUUID)
+					filter.Field("uuid").Equal(assignmentUUID)
+				},
+			)
+		},
+	).First(ctx)
 }
 
 func (this *GetSingleAssignmentService) Serve(

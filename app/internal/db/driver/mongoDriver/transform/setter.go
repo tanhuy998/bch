@@ -12,6 +12,16 @@ type (
 	}
 )
 
+func (this *setter) init() {
+
+	if len(this.SetterMap) > 0 {
+
+		return
+	}
+
+	this.SetterMap = make(map[string]interface{})
+}
+
 // func (this *data_transformer)
 
 func (this *setter) Set(field string) query.IDataTransformSetter {
@@ -30,6 +40,8 @@ func (this *setter) Value(val interface{}) {
 		return
 	}
 
+	this.init()
+
 	this.SetterMap[field] = val
 }
 
@@ -41,6 +53,8 @@ func (this *setter) Ref(field string) {
 
 		return
 	}
+
+	this.init()
 
 	this.SetterMap[newField] = fmt.Sprintf("$%s", field)
 }

@@ -51,6 +51,6 @@ type (
 	FilterFunc             = func(filter IFilterExpression)
 
 	IFilterMethods[Model_T any] interface {
-		Filter(FilterFunc) IQueryBuilder[Model_T]
+		Filter(FilterFunc) IGenericQueryBuilder[Model_T]
 	}
 )

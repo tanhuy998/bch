@@ -5,6 +5,7 @@ import (
 	"app/internal/db/driver/mongoDriver/sort"
 	"app/internal/db/driver/mongoDriver/transform"
 	"app/internal/db/query"
+	"app/internal/db/storage"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -31,10 +32,12 @@ func (this *MongoAggregateQueryBuilder) initProjection() {
 	this.projection = make(map[string]uint)
 }
 
-func (this *MongoAggregateQueryBuilder) Join(another string, fn func(query.IJoinField)) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) Join(
+	another storage.IDBStorageIdentifier, fn func(query.IJoinField),
+) query.IQueryBuilder {
 
 	joinIntializer := &JoinOperationInitializer{
-		From: another,
+		From: another.GetDBStorageUnitName(),
 	}
 
 	fn(joinIntializer)
@@ -85,7 +88,7 @@ func (this *MongoAggregateQueryBuilder) Join(another string, fn func(query.IJoin
 	return this
 }
 
-func (this *MongoAggregateQueryBuilder) Filter(fn query.FilterFunc) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) Filter(fn query.FilterFunc) query.IQueryBuilder {
 
 	filter := filter.NewFilterGenerator()
 
@@ -100,7 +103,7 @@ func (this *MongoAggregateQueryBuilder) Filter(fn query.FilterFunc) query.ISubQu
 	return this
 }
 
-func (this *MongoAggregateQueryBuilder) Select(fields ...string) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) Select(fields ...string) query.IQueryBuilder {
 
 	this.initProjection()
 
@@ -112,7 +115,7 @@ func (this *MongoAggregateQueryBuilder) Select(fields ...string) query.ISubQuery
 	return this
 }
 
-func (this *MongoAggregateQueryBuilder) ExcludeFields(fields ...string) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) ExcludeFields(fields ...string) query.IQueryBuilder {
 
 	this.initProjection()
 
@@ -143,7 +146,7 @@ func (this *MongoAggregateQueryBuilder) mergeProjection() {
 	)
 }
 
-func (this *MongoAggregateQueryBuilder) Transform(fn query.DataTransformFunc) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) Transform(fn query.DataTransformFunc) query.IQueryBuilder {
 
 	transformer := transform.NewDataTransformer()
 
@@ -156,7 +159,7 @@ func (this *MongoAggregateQueryBuilder) Transform(fn query.DataTransformFunc) qu
 	return this
 }
 
-func (this *MongoAggregateQueryBuilder) SortOrder(fn query.SortFunc) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) SortOrder(fn query.SortFunc) query.IQueryBuilder {
 
 	initializer := sort.NewSortInitializer()
 
@@ -164,14 +167,14 @@ func (this *MongoAggregateQueryBuilder) SortOrder(fn query.SortFunc) query.ISubQ
 
 	this.mongo_pipeline.PushStages(
 		bson.D{
-			{"$sort", initializer},
+			{"$sort", initializer.GetMap()},
 		},
 	)
 
 	return this
 }
 
-func (this *MongoAggregateQueryBuilder) Limit(num uint) query.ISubQueryBuilder {
+func (this *MongoAggregateQueryBuilder) Limit(num uint64) query.IQueryBuilder {
 
 	this.mongo_pipeline.PushStages(
 		bson.D{
@@ -182,11 +185,29 @@ func (this *MongoAggregateQueryBuilder) Limit(num uint) query.ISubQueryBuilder {
 	return this
 }
 
-func (this *MongoAggregateQueryBuilder) Clone() *MongoAggregateQueryBuilder {
+func (this *MongoAggregateQueryBuilder) Clone() query.IClonableQueryBuilder {
+
+	return this._clone()
+}
+
+func (this *MongoAggregateQueryBuilder) _clone() *MongoAggregateQueryBuilder {
 
 	ret := new(MongoAggregateQueryBuilder)
 
-	ret.P = this.P[:]
+	//ret.P = this.P[:]
+
+	ret.P = make([]interface{}, len(this.P))
+	copy(ret.P, this.P)
 
 	return ret
+}
+func (this *MongoAggregateQueryBuilder) Skip(time uint64) query.IQueryBuilder {
+
+	this.mongo_pipeline.PushStages(
+		bson.D{
+			{"$skip", time},
+		},
+	)
+
+	return this
 }

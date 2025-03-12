@@ -1,7 +1,7 @@
 package query
 
 type (
-	DataTransformFunc = func(IDataTransformer)
+	DataTransformFunc func(IDataTransformer)
 
 	IDataTransformer interface {
 		Set(field string) IDataTransformSetter
@@ -15,12 +15,12 @@ type (
 
 type (
 	ISubQueryDataTransform interface {
-		Transform(DataTransformFunc) ISubQueryBuilder
+		Transform(DataTransformFunc) IQueryBuilder
 	}
 )
 
 type (
 	IDataTransform[Model_T any] interface {
-		Transform(DataTransformFunc) IQueryBuilder[Model_T]
+		Transform(DataTransformFunc) IGenericQueryBuilder[Model_T]
 	}
 )

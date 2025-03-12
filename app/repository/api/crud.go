@@ -1,6 +1,7 @@
 package repositoryAPI
 
 import (
+	"app/internal/db/storage"
 	"context"
 
 	"github.com/google/uuid"
@@ -51,6 +52,7 @@ type (
 		IFilterMethods[Model_T]
 		IProjector[Model_T]
 		IPaginateClonableRepository[Model_T]
+		storage.IDBStorageQueryExecutor[Model_T]
 		Create(model *Model_T, ctx context.Context) error
 
 		// FindOffset(
@@ -68,5 +70,6 @@ type (
 	ICRUDMongoRepository[Model_T any] interface {
 		ICRUDRepository[Model_T]
 		IMongoDBRepository
+		storage.IDBStorageQueryExecutor[Model_T]
 	}
 )

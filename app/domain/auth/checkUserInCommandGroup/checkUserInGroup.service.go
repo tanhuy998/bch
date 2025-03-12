@@ -1,14 +1,13 @@
 package checkUserInCommandGroupDomain
 
 import (
-	"app/internal/common"
+	libError "app/internal/lib/error"
 	"app/model"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
-	"errors"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
@@ -38,44 +37,75 @@ func (this *CheckUserInCommandGroupService) Serve(groupUUID, userUUID uuid.UUID,
 	// 	return false, err
 	// }
 
-	res, err := this.CommandGroupUserRepo.Find(
-		bson.D{
-			{"commandGroupUUID", groupUUID},
-			{"userUUID", userUUID},
+	// res, err := this.CommandGroupUserRepo.Find(
+	// 	bson.D{
+	// 		{"commandGroupUUID", groupUUID},
+	// 		{"userUUID", userUUID},
+	// 	},
+	// 	ctx,
+	// )
+
+	// if err != nil {
+
+	// 	return false, err
+	// }
+
+	// if res == nil {
+
+	// 	return false, nil
+	// }
+
+	// return true, nil
+
+	queryBuilder := this.CommandGroupUserRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+
+			filter.Field("commandGroupUUID").Equal(groupUUID)
+			filter.Field("userUUID").Equal(userUUID)
 		},
-		ctx,
 	)
 
-	if err != nil {
-
+	switch res, err := queryBuilder.FindOne(ctx); {
+	case err != nil, res == nil:
 		return false, err
+	default:
+		return true, nil
 	}
-
-	if res == nil {
-
-		return false, nil
-	}
-
-	return true, nil
 }
 
 func (this *CheckUserInCommandGroupService) Detail(groupUUID uuid.UUID, userUUID uuid.UUID, ctx context.Context) (*model.CommandGroupUser, error) {
 
-	ret, err := this.CommandGroupUserRepo.Find(
-		bson.D{
-			{"commandGroupUUID", groupUUID},
-			{"userUUID", userUUID},
+	// ret, err := this.CommandGroupUserRepo.Find(
+	// 	bson.D{
+	// 		{"commandGroupUUID", groupUUID},
+	// 		{"userUUID", userUUID},
+	// 	},
+	// 	context.TODO(),
+	// )
+
+	// if err != nil {
+
+	// 	return ret, errors.Join(
+	// 		common.ERR_INTERNAL,
+	// 		err,
+	// 	)
+	// }
+
+	// return ret, nil
+
+	queryBuilder := this.CommandGroupUserRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+			filter.Field("CommandGroupUUID").Equal(groupUUID)
+			filter.Field("userUUID").Equal(userUUID)
 		},
-		context.TODO(),
 	)
 
-	if err != nil {
-
-		return ret, errors.Join(
-			common.ERR_INTERNAL,
+	switch res, err := queryBuilder.FindOne(ctx); {
+	case err != nil:
+		return nil, libError.NewInternal(
 			err,
 		)
+	default:
+		return res, err
 	}
-
-	return ret, nil
 }

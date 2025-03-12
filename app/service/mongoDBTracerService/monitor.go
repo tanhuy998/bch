@@ -13,6 +13,7 @@ type (
 		DBTime     float64       `json:"db_time_ms"`
 		dbTimeDur  time.Duration `json:"-"`
 		Err        error         `json:"error,omitempty"`
+		Debug      interface{}   `json:"debug,omitempty"`
 	}
 )
 

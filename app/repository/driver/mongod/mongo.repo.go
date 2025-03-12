@@ -21,7 +21,8 @@ import (
 type (
 	mongo_repository[Model_T any] struct {
 		//MongoDBQueryMonitorCollection
-		mongoStorage.MongoDBQueryMonitorCollection
+		//mongoStorage.MongoDBQueryMonitorCollection
+		mongoStorage.QueryExecutorProxy[Model_T]
 		filter     mongoRepositoryFilter.MongoRepositoryFilterGenerator
 		sort       mongoRepositorySorter.MongoSorterGenerator
 		projection map[string]uint

@@ -11,6 +11,8 @@ type (
 		requestInput.ContextInput
 		requestInput.AuthorityInput
 		requestInput.TenantMappingInput
+		requestInput.MongoCursorPaginateInput
+		requestInput.RangePaginateInput
 		// tenantUUID uuid.UUID
 		// ctx        context.Context
 		// auth       accessTokenServicePort.IAccessTokenAuthData

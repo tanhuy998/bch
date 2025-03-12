@@ -6,7 +6,11 @@ import (
 
 	"app/internal/bootstrap"
 	"app/internal/db"
+	"app/internal/db/driver/mongoDriver"
 	"app/internal/db/driver/mongoDriver/mongoStorage"
+	"app/internal/db/query"
+	"app/internal/db/relation"
+	"app/internal/db/storage"
 	"app/internal/generalToken"
 	irisIoc "app/internal/lib/iris/ioc"
 	iocOption "app/internal/lib/iris/ioc/option"
@@ -87,6 +91,22 @@ func InitializeDatabase(app router.Party) {
 		dbQueryTracerPort.IDBQueryTracer, mongoDBTracerService.DBQueryTracerService,
 	](container, nil)
 
+	/*
+		Bind QueryBuilderGenerator as query.IQueryBuilderGenerator for agggregate
+		to build complex query
+	*/
+	irisIoc.RegisterDependency(
+		container, new(mongoDriver.ReadQueryBuilderGenerator),
+		iocOption.StructDependents(true),
+		iocOption.BindAs[query.IReadQueryBuilderGenerator](),
+	)
+
+	irisIoc.RegisterDependency(
+		container, new(mongoDriver.ReadRelationQueryBuilderGenerator),
+		iocOption.StructDependents(true),
+		iocOption.BindAs[relation.IReadRelationQueryBuilderGenerator](),
+	)
+
 	fmt.Println("Initialize Repositories...")
 	irisIoc.BindDependency[repository.ITenant](
 		container, new(repository.TenantRepository).Init(dbInstance),
@@ -108,7 +128,9 @@ func InitializeDatabase(app router.Party) {
 		// ),
 		iocOption.BindAs[repository.IUser](),
 		iocOption.BindAs[repositoryAPI.ICRUDMongoRepository[model.User]](),
+		iocOption.BindAs[repositoryAPI.ICRUDRepository[model.User]](),
 		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.User]](),
+		iocOption.BindAs[storage.IDBStorageQueryExecutor[model.User]](),
 	)
 
 	// libConfig.BindDependency[repository.ICommandGroup](
@@ -120,16 +142,28 @@ func InitializeDatabase(app router.Party) {
 		iocOption.StructDependents(true),
 		iocOption.BindAs[repository.ICommandGroup](),
 		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.CommandGroup]](),
+		iocOption.BindAs[repositoryAPI.ICRUDRepository[model.CommandGroup]](),
 		// iocOption.AsAbstracts(
 		// 	reflect.TypeFor[repository.ICommandGroup](),
 		// 	//reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.CommandGroup]](),
 		// 	reflect.TypeFor[mongoStorage.IMongoDBStorageUnit[model.CommandGroup]](),
 		// ),
+		iocOption.BindAs[storage.IDBStorageQueryExecutor[model.CommandGroup]](),
 	)
 
-	irisIoc.BindDependency[repository.ICommandGroupUser](
+	// irisIoc.BindDependency[repository.ICommandGroupUser](
+	// 	container, new(repository.CommandGroupUserRepository).Init(dbInstance),
+	// ).EnableStructDependents()
+
+	irisIoc.RegisterDependency(
 		container, new(repository.CommandGroupUserRepository).Init(dbInstance),
-	).EnableStructDependents()
+		iocOption.StructDependents(true),
+		iocOption.BindAs[repository.ICommandGroupUser](),
+		iocOption.BindAs[repositoryAPI.ICRUDRepository[model.CommandGroupUser]](),
+		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.CommandGroupUser]](),
+		iocOption.BindAs[storage.IDBStorageQueryExecutor[model.CommandGroupUser]](),
+	)
+
 	irisIoc.BindDependency[repository.ICommandGroupUserRole](
 		container, new(repository.CommandGroupUserRoleRepository).Init(dbInstance),
 	).EnableStructDependents()
@@ -163,7 +197,9 @@ func InitializeDatabase(app router.Party) {
 		// ),
 		iocOption.BindAs[repository.IAssignment](),
 		iocOption.BindAs[repositoryAPI.IPaginateClonableRepository[model.Assignment]](),
+		iocOption.BindAs[repositoryAPI.ICRUDRepository[model.Assignment]](),
 		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.Assignment]](),
+		iocOption.BindAs[storage.IDBStorageQueryExecutor[model.Assignment]](),
 	)
 
 	// libConfig.BindDependency[repository.IAssignmentGroup](
@@ -181,9 +217,10 @@ func InitializeDatabase(app router.Party) {
 		//iocOption.BindAs[storage.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.AssignmentGroup]](),
 		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.AssignmentGroup]](),
 		iocOption.BindAs[repository.IAssignmentGroup](),
+		iocOption.BindAs[repositoryAPI.ICRUDRepository[model.AssignmentGroup]](),
 		iocOption.BindAs[repositoryAPI.IPaginateClonableRepository[model.AssignmentGroup]](),
 		//iocOption.BindAs[mongoDriver.IMongoDBStorageUnit[model.AssignmentGroup]](),
-
+		iocOption.BindAs[storage.IDBStorageQueryExecutor[model.AssignmentGroup]](),
 	)
 
 	irisIoc.BindDependency[repository.IAssignmentGroupMember](
