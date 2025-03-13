@@ -71,7 +71,11 @@ func (this *MongoRelationQueryBuilder) PushRelations(
 		)
 
 		initiator.ResolveRelation(
-			&this.MongoAggregateQueryBuilder, initializer,
+			NewRelationQueryBuilder(
+				&this.MongoAggregateQueryBuilder,
+				initializer,
+			),
+			initializer,
 		)
 	}
 

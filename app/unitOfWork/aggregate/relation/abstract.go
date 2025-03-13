@@ -14,3 +14,13 @@ func (this *abstract_relation[Repo_Entity_T]) GetDBStorageUnitName() string {
 
 	return this.Stu.GetDBStorageUnitName()
 }
+
+// func (this *abstract_relation[Repo_Entity_T]) TryJoin(unit interface{}, initializer query.IQueryBuilder) {
+
+// 	switch initiator, accept := unit.(relation.IDBRelationInitiator); {
+// 	case accept:>
+// 		initiator.ResolveRelation(initializer)
+// 	default:
+// 		return
+// 	}
+// }

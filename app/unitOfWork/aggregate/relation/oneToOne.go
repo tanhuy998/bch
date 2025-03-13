@@ -1,11 +1,7 @@
 package aggregateRelation
 
 import (
-	"app/internal/db/query"
 	"app/internal/db/relation"
-	"fmt"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
@@ -49,29 +45,43 @@ type (
 // }
 
 func (this *OneToOneWith[Foreign_Entity_T]) ResolveRelation(
-	refQueryBuilder query.IQueryBuilder, foreignInitializer relation.IDBRelationNavigator,
+	queryBuilder relation.IRelationQueryBuilder, foreignInitializer relation.IDBRelationNavigator,
 ) {
 
 	foreignInitializer.SetLimit(1)
 	alias := foreignInitializer.GetAliasName()
 
-	refQueryBuilder.Transform(
-		func(transform query.IDataTransformer) {
+	/*
+		Decouple the the domain from concrete aspect of mongodb
+	*/
 
-			transform.Set(alias).Value(
-				bson.D{
-					{
-						"$arrayElemAt", bson.A{
-							//"$commandGroup", 0,
-							fmt.Sprintf("$%s", alias), 0,
-						},
-					},
-				},
-			)
+	// queryBuilder.Transform(
+	// 	func(transform query.IDataTransformer) {
+
+	// 		transform.Set(alias).Value(
+	// 			bson.D{
+	// 				{
+	// 					"$arrayElemAt", bson.A{
+	// 						//"$commandGroup", 0,
+	// 						fmt.Sprintf("$%s", alias), 0,
+	// 					},
+	// 				},
+	// 			},
+	// 		)
+	// 	},
+	// )
+
+	queryBuilder.Transform(
+		func(transform relation.IRelationDataTransformer) {
+
+			transform.Set(alias).AsForeign().FirstElement()
 		},
 	)
 }
 
+/*
+for debug log
+*/
 func (this *OneToOneWith[Foreign_Entity_T]) GetDBRelationKind() string {
 
 	return "one_to_one"

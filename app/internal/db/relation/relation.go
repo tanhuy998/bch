@@ -16,7 +16,7 @@ type (
 		//GetJoinFieldInitializer() query.IJoinField
 		//ResolveRelationQuery(IDBRelationQueryMetadata) Query_T
 		ResolveRelation(
-			refQueryBuilder query.IQueryBuilder, foreignInializer IDBRelationNavigator,
+			refQueryBuilder IRelationQueryBuilder, foreignInializer IDBRelationNavigator,
 		)
 	}
 

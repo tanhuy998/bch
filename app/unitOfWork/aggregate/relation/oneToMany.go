@@ -1,7 +1,6 @@
 package aggregateRelation
 
 import (
-	"app/internal/db/query"
 	"app/internal/db/relation"
 )
 
@@ -24,7 +23,7 @@ type (
 //		return ret[:]
 //	}
 func (this *OneToManyWith[Foreign_Entity_T]) ResolveRelation(
-	refQueryBuilder query.IQueryBuilder, foreignInitializer relation.IDBRelationInitiator,
+	refQueryBuilder relation.IRelationQueryBuilder, foreignInitializer relation.IDBRelationInitiator,
 ) {
 
 }

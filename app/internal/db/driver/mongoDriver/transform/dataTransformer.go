@@ -3,17 +3,17 @@ package transform
 import "go.mongodb.org/mongo-driver/bson"
 
 type (
-	data_transformer struct {
+	QueryBuilderDataTransformer struct {
 		setter
 	}
 )
 
-func NewDataTransformer() *data_transformer {
+func NewDataTransformer() *QueryBuilderDataTransformer {
 
-	return new(data_transformer)
+	return new(QueryBuilderDataTransformer)
 }
 
-func (this *data_transformer) GetQuery() []interface{} {
+func (this *QueryBuilderDataTransformer) GetQuery() []interface{} {
 
 	ret := make([]interface{}, 0)
 
