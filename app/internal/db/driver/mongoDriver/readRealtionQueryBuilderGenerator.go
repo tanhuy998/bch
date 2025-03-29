@@ -1,7 +1,7 @@
 package mongoDriver
 
 import (
-	"app/internal/db/driver/mongoDriver/mongoQueryBuilder"
+	"app/internal/db/driver/mongoDriver/mongoQueryBuilder/relationQueryBuilder"
 	"app/internal/db/relation"
 )
 
@@ -11,5 +11,9 @@ type (
 )
 
 func (r *ReadRelationQueryBuilderGenerator) NewRelationQuery() relation.IClonableReadRelationQueryBuilder {
-	return new(mongoQueryBuilder.MongoRelationQueryBuilder)
+	ret := new(relationQueryBuilder.MongoRelationQueryBuilder)
+
+	ret.Init()
+
+	return ret
 }

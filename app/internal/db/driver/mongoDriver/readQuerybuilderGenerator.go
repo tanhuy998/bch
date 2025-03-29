@@ -1,7 +1,7 @@
 package mongoDriver
 
 import (
-	"app/internal/db/driver/mongoDriver/mongoQueryBuilder"
+	"app/internal/db/driver/mongoDriver/mongoQueryBuilder/queryBuilder"
 	"app/internal/db/query"
 )
 
@@ -12,5 +12,5 @@ type (
 
 func (this *ReadQueryBuilderGenerator) NewQueryBuilder() query.IClonableQueryBuilder {
 
-	return new(mongoQueryBuilder.MongoAggregateQueryBuilder)
+	return new(queryBuilder.MongoAggregateQueryBuilder)
 }

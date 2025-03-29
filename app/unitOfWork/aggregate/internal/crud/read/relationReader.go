@@ -12,7 +12,7 @@ type (
 )
 
 func (this *QueryReaderExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) ByRelations(
-	relation ...relation.IDBRelationNavigator,
+	relation ...relation.IRelationForeignNavigator,
 ) crud.IAggregateReader[Read_Entity_T] {
 
 	return this

@@ -3,7 +3,7 @@ package query
 import "app/internal/db/storage"
 
 type (
-	JoinInitFunc = func(queryBuilder IJoinField)
+	JoinInitFunc func(queryBuilder IJoinField)
 
 	ISubqueryFilterMethod interface {
 		Filter(fn FilterFunc) IQueryBuilder //ISubQueryJoinProjectionMethods

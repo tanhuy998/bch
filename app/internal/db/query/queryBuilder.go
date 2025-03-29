@@ -12,6 +12,7 @@ type (
 		ISkipQueryBuilder
 		ISubQueryDataSortOrder
 		storage.IArbitraryQuery
+		storage.IQueryEndingPhase
 	}
 
 	IClonableQueryBuilder interface {

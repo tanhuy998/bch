@@ -2,6 +2,7 @@ package aggregateRelation
 
 import (
 	"app/internal/db/driver/mongoDriver/mongoStorage"
+	"app/internal/db/relation"
 )
 
 type (
@@ -18,9 +19,15 @@ func (this *abstract_relation[Repo_Entity_T]) GetDBStorageUnitName() string {
 // func (this *abstract_relation[Repo_Entity_T]) TryJoin(unit interface{}, initializer query.IQueryBuilder) {
 
 // 	switch initiator, accept := unit.(relation.IDBRelationInitiator); {
-// 	case accept:>
+// 	case accept:
 // 		initiator.ResolveRelation(initializer)
 // 	default:
 // 		return
 // 	}
 // }
+
+func (this *abstract_relation[Repo_Entity_T]) PushRelations(
+	relations ...relation.IDBRelationInitiator,
+) {
+
+}

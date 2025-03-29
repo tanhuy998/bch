@@ -7,12 +7,12 @@ import (
 type (
 	RelationDataTransformer struct {
 		QueryBuilderDataTransformer
-		relation_navigator relation.IDBRelationNavigator
+		relation_navigator relation.IRelationForeignNavigator
 	}
 )
 
 func NewRelationDataTransformer(
-	navigator relation.IDBRelationNavigator,
+	navigator relation.IRelationForeignNavigator,
 ) *RelationDataTransformer {
 
 	return &RelationDataTransformer{
@@ -20,7 +20,7 @@ func NewRelationDataTransformer(
 	}
 }
 
-func (this *RelationDataTransformer) Set(field string) relation.IRelationDataTransformerSetterExpression {
+func (this *RelationDataTransformer) Set(field string) relation.IRelationalDataTransformerSetterExpression {
 
 	this.QueryBuilderDataTransformer.Set(field)
 

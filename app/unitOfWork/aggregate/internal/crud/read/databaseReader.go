@@ -33,9 +33,9 @@ func (this *DatabaseReaderExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) 
 	ctx context.Context,
 ) ([]Read_Entity_T, error) {
 
-	ret := make([]Read_Entity_T, 0)
+	var ret []Read_Entity_T
 
-	err := this.stu.ToSlice(ret, this.query_builder, ctx)
+	err := this.stu.ToSlice(&ret, this.query_builder, ctx)
 
 	if err != nil {
 

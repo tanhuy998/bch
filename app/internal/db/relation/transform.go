@@ -3,27 +3,15 @@ package relation
 import "app/internal/db/query"
 
 type (
-	RelationDataTransformFunc func(transform IRelationDataTransformer)
+	RelationDataTransformFunc func(transform IRelationLocalDataTransformer)
 
 	ForeignDataExtractFunc func(foreign IRelationForeignField)
 
-	IRelationQueryBuilder interface {
-		query.ISubqueryFilterMethod
-		query.ISubQueryJoinMethod
-		query.ISubQueryProjector
-		query.ISubQueryDataLimit
-		query.ISkipQueryBuilder
-		query.ISubQueryDataSortOrder
-		Transform(
-			fn RelationDataTransformFunc,
-		)
+	IRelationLocalDataTransformer interface {
+		Set(field string) IRelationalDataTransformerSetterExpression
 	}
 
-	IRelationDataTransformer interface {
-		Set(field string) IRelationDataTransformerSetterExpression
-	}
-
-	IRelationDataTransformerSetterExpression interface {
+	IRelationalDataTransformerSetterExpression interface {
 		query.IDataTransformSetter
 		AsForeign() IRelationForeignField
 	}

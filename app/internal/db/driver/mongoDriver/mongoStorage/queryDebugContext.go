@@ -1,7 +1,6 @@
 package mongoStorage
 
 import (
-	"app/internal/db/query"
 	"app/internal/db/storage"
 	"context"
 )
@@ -42,7 +41,7 @@ func (this *aggregate_query_debug_context) GetDBDebugLog() interface{} {
 
 func (this *aggregate_query_debug_context) getDetailQueryDebugLog() interface{} {
 
-	switch debugger, exist := this.query.(query.IQueryDebugger); {
+	switch debugger, exist := this.query.(storage.IQueryDebugger); {
 	case exist:
 		return debugger.GetDetailQueryDebugLog()
 	default:

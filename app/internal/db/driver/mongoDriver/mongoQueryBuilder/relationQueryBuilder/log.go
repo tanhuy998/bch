@@ -1,4 +1,4 @@
-package mongoQueryBuilder
+package relationQueryBuilder
 
 type (
 	aggregate_relation_debug_log struct {

@@ -149,8 +149,8 @@ func (this *GetAssignmentGroupsService) Serve(
 					},
 				).
 				ExcludeFields(
-					"user.password",
-					"user.secret",
+					"createdUser.password",
+					"createdUser.username",
 				)
 		},
 	).Paginate(

@@ -14,65 +14,37 @@ type (
 	}
 )
 
-// func (this *OneToOneWith[Foreign_Entity_T]) ResolveRelationQuery(initializer relation.IDBRelationQueryMetadata) Query_Type {
-
-// 	initializer.SetLimit(1)
-// 	alias := initializer.GetAliasName()
-
-// 	ret := []interface{}{
-// 		bson.D{
-// 			{"$lookup", initializer},
-// 		},
-// 		bson.D{
-// 			{
-// 				"$set", bson.D{
-// 					{
-// 						alias, bson.D{
-// 							{
-// 								"$arrayElemAt", bson.A{
-// 									//"$commandGroup", 0,
-// 									fmt.Sprintf("$%s", alias), 0,
-// 								},
-// 							},
-// 						},
-// 					},
-// 				},
-// 			},
-// 		},
-// 	}
-
-// 	return ret[:]
-// }
-
 func (this *OneToOneWith[Foreign_Entity_T]) ResolveRelation(
-	queryBuilder relation.IRelationQueryBuilder, foreignInitializer relation.IDBRelationNavigator,
+	local relation.IRelationLocalNavigator, foreign relation.IRelationForeignNavigator,
 ) {
 
-	foreignInitializer.SetLimit(1)
-	alias := foreignInitializer.GetAliasName()
+	//foreign.SetLimit(1)
 
-	/*
-		Decouple the the domain from concrete aspect of mongodb
-	*/
+	// foreign.Manipulate(
+	// 	func(foreign relation.IReadRelationQueryBuilder) {
 
-	// queryBuilder.Transform(
-	// 	func(transform query.IDataTransformer) {
+	// 		foreign.Filter(
+	// 			func(filter query.IFilterExpression) {
 
-	// 		transform.Set(alias).Value(
-	// 			bson.D{
-	// 				{
-	// 					"$arrayElemAt", bson.A{
-	// 						//"$commandGroup", 0,
-	// 						fmt.Sprintf("$%s", alias), 0,
-	// 					},
-	// 				},
+	// 				filter.Field("uuid").Equal(nil)
 	// 			},
+	// 		).Select(
+	// 			"name",
 	// 		)
 	// 	},
 	// )
 
-	queryBuilder.Transform(
-		func(transform relation.IRelationDataTransformer) {
+	foreign.Manipulate(
+		func(foreign relation.IReadRelationQueryBuilder) {
+
+			foreign.Limit(1)
+		},
+	)
+
+	local.Transform(
+		func(transform relation.IRelationLocalDataTransformer) {
+
+			alias := foreign.GetAliasName()
 
 			transform.Set(alias).AsForeign().FirstElement()
 		},

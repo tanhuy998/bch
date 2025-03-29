@@ -16,15 +16,16 @@ type (
 		//GetJoinFieldInitializer() query.IJoinField
 		//ResolveRelationQuery(IDBRelationQueryMetadata) Query_T
 		ResolveRelation(
-			refQueryBuilder IRelationQueryBuilder, foreignInializer IDBRelationNavigator,
+			refQueryBuilder IRelationLocalNavigator, foreignInializer IRelationForeignNavigator,
 		)
 	}
 
-	IDBRelationNavigator interface {
-		SetLimit(uint64)
-		GetLocalField() string
-		GetForeignField() string
-		GetAliasName() string
+	IForeignManipulatorQueryBuilder IReadRelationQueryBuilder
+
+	IDBRelationForeignManipulator interface {
+		Manipulate(
+			fn ForeignManipulatorFunc,
+		)
 	}
 
 	IDBRelationInitiator interface {

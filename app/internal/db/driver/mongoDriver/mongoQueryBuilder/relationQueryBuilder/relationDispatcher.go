@@ -1,0 +1,69 @@
+package relationQueryBuilder
+
+import (
+	"app/internal/db/driver/mongoDriver/mongoQueryBuilder/queryBuilder"
+	"app/internal/db/relation"
+
+	"go.mongodb.org/mongo-driver/bson"
+)
+
+type (
+	relation_dispatcher struct {
+		*queryBuilder.MongoAggregateQueryBuilder
+	}
+)
+
+func NewRelationDispatcher(ref *queryBuilder.MongoAggregateQueryBuilder) *relation_dispatcher {
+
+	if ref == nil {
+
+		panic(
+			`relation_dispatcher must point to an "app/internal/db/driver/mongoDriver/mongoQueryBuilder/queryBuilder\".MongoAggregateQueryBuilder`,
+		)
+	}
+
+	ret := new(relation_dispatcher)
+
+	ret.MongoAggregateQueryBuilder = ref
+
+	return ret
+}
+
+func (this *relation_dispatcher) PushRelations(
+	relations ...relation.IDBRelationInitiator,
+) {
+
+	for _, initiator := range relations {
+
+		initFn := initiator.GetRelationInitFunc()
+
+		if initFn == nil {
+
+			panic("relation init function could not be nil")
+		}
+
+		foreignNavigator := NewRelationForeignNavigator()
+		foreignNavigator.join_op.From = initiator.GetDBStorageUnitName()
+
+		// this.PushStages(
+		// 	bson.D{
+		// 		{"$lookup", &foreignNavigator.join_op},
+		// 	},
+		// )
+
+		this.PushStages(
+			bson.D{
+				{"$lookup", foreignNavigator.join_op.GetRawQuery()},
+			},
+		)
+
+		initFn(&foreignNavigator.join_op)
+
+		initiator.ResolveRelation(
+			NewRelationLocalNaviagator(
+				this, foreignNavigator,
+			),
+			foreignNavigator,
+		)
+	}
+}

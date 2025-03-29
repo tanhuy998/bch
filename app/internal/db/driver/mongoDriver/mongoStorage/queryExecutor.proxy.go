@@ -18,6 +18,8 @@ func (this *QueryExecutorProxy[Entity_T]) ToSlice(
 
 	ctx = resolveDebugContext(ctx, query)
 
+	query.Done()
+
 	return lib.AggregateRaw(
 		result, &this.MongoDBQueryMonitorCollection, query.GetArbitraryQuery(), ctx,
 	)
@@ -28,6 +30,8 @@ func (this *QueryExecutorProxy[Entity_T]) First(
 ) error {
 
 	ctx = resolveDebugContext(ctx, query)
+
+	query.Done()
 
 	return lib.AggregateRawOne(
 		result, &this.MongoDBQueryMonitorCollection, query.GetArbitraryQuery(), ctx,

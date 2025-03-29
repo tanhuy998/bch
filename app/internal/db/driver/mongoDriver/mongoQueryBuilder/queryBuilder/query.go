@@ -1,7 +1,9 @@
-package mongoQueryBuilder
+package queryBuilder
 
 import (
 	"app/internal/db/driver/mongoDriver/filter"
+	"app/internal/db/driver/mongoDriver/lib"
+
 	"app/internal/db/driver/mongoDriver/sort"
 	"app/internal/db/driver/mongoDriver/transform"
 	"app/internal/db/query"
@@ -12,14 +14,14 @@ import (
 
 type (
 	MongoAggregateQueryBuilder struct {
-		mongo_pipeline
+		lib.MongoPipeline
 		projection map[string]uint
 	}
 )
 
 func (this *MongoAggregateQueryBuilder) GetPipeline() []interface{} {
 
-	return this.mongo_pipeline.P
+	return this.MongoPipeline.P
 }
 
 func (this *MongoAggregateQueryBuilder) initProjection() {
@@ -36,54 +38,65 @@ func (this *MongoAggregateQueryBuilder) Join(
 	another storage.IDBStorageIdentifier, fn func(query.IJoinField),
 ) query.IQueryBuilder {
 
-	joinIntializer := &JoinOperationInitializer{
-		From: another.GetDBStorageUnitName(),
-	}
+	// joinIntializer := &JoinOperationInitializer{
+	// 	From: another.GetDBStorageUnitName(),
+	// }
+
+	joinIntializer := NewJoinOperationQueryBuilder()
+	joinIntializer.From = another.GetDBStorageUnitName()
 
 	fn(joinIntializer)
 
-	var ops []interface{}
+	// var ops []interface{}
 
-	if joinIntializer.is_unwind {
+	// if joinIntializer.is_unwind {
 
-		/*
-			when the join operation has data limit less than or equal 1
-			unwind looked up nested documents for explicit query on joined collection
+	// 	/*
+	// 		when the join operation has data limit less than or equal 1
+	// 		unwind looked up nested documents for explicit query on joined collection
 
-			example aggregate pipeline:
-			[
-				{
-					$lookup: {
-						"form": "anotherCollecction",
-						"localField": "id",
-						"foreignField": "fID",
-						"as": "tests"
-					}
-				},
-				{
-					$set: {
-						test
-					}
-				}
-			]
-		*/
+	// 		example aggregate pipeline:
+	// 		[
+	// 			{
+	// 				$lookup: {
+	// 					"form": "anotherCollecction",
+	// 					"localField": "id",
+	// 					"foreignField": "fID",
+	// 					"as": "tests"
+	// 				}
+	// 			},
+	// 			{
+	// 				$set: {
+	// 					test
+	// 				}
+	// 			}
+	// 		]
+	// 	*/
 
-		ops = make([]interface{}, 2)
+	// 	ops = make([]interface{}, 2)
 
-		ops[1] = bson.D{
-			{"$unwind", joinIntializer.Alias},
-		}
+	// 	ops[1] = bson.D{
+	// 		{"$unwind", joinIntializer.Alias},
+	// 	}
 
-	} else {
+	// } else {
 
-		ops = make([]interface{}, 1)
-	}
+	// 	ops = make([]interface{}, 1)
+	// }
 
-	ops[0] = bson.D{
-		{"$lookup", joinIntializer},
-	}
+	// ops[0] = bson.D{
+	// 	{"$lookup", joinIntializer},
+	// }
 
-	this.mongo_pipeline.PushStages(ops...)
+	// this.MongoPipeline.PushStages(ops...)
+
+	joinIntializer.Done()
+
+	this.MongoPipeline.PushStages(
+		bson.D{
+			{"$lookup", joinIntializer.GetRawQuery()},
+		},
+	)
 
 	return this
 }
@@ -94,7 +107,7 @@ func (this *MongoAggregateQueryBuilder) Filter(fn query.FilterFunc) query.IQuery
 
 	fn(filter)
 
-	this.mongo_pipeline.PushStages(
+	this.MongoPipeline.PushStages(
 		bson.D{
 			{"$match", filter.Get()},
 		},
@@ -152,7 +165,7 @@ func (this *MongoAggregateQueryBuilder) Transform(fn query.DataTransformFunc) qu
 
 	fn(transformer)
 
-	this.mongo_pipeline.PushStages(
+	this.MongoPipeline.PushStages(
 		transformer.GetQuery()...,
 	)
 
@@ -165,7 +178,7 @@ func (this *MongoAggregateQueryBuilder) SortOrder(fn query.SortFunc) query.IQuer
 
 	fn(initializer)
 
-	this.mongo_pipeline.PushStages(
+	this.MongoPipeline.PushStages(
 		bson.D{
 			{"$sort", initializer.GetMap()},
 		},
@@ -176,7 +189,7 @@ func (this *MongoAggregateQueryBuilder) SortOrder(fn query.SortFunc) query.IQuer
 
 func (this *MongoAggregateQueryBuilder) Limit(num uint64) query.IQueryBuilder {
 
-	this.mongo_pipeline.PushStages(
+	this.MongoPipeline.PushStages(
 		bson.D{
 			{"$limit", num},
 		},
@@ -186,6 +199,11 @@ func (this *MongoAggregateQueryBuilder) Limit(num uint64) query.IQueryBuilder {
 }
 
 func (this *MongoAggregateQueryBuilder) Clone() query.IClonableQueryBuilder {
+
+	return this._clone()
+}
+
+func (this *MongoAggregateQueryBuilder) CloneThis() *MongoAggregateQueryBuilder {
 
 	return this._clone()
 }
@@ -203,7 +221,7 @@ func (this *MongoAggregateQueryBuilder) _clone() *MongoAggregateQueryBuilder {
 }
 func (this *MongoAggregateQueryBuilder) Skip(time uint64) query.IQueryBuilder {
 
-	this.mongo_pipeline.PushStages(
+	this.MongoPipeline.PushStages(
 		bson.D{
 			{"$skip", time},
 		},

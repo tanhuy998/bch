@@ -10,20 +10,8 @@ type (
 	}
 )
 
-// func (this *OneToManyWith[Foreign_Entity_T]) ResolveRelationQuery(initializer relation.IDBRelationQueryMetadata) Query_Type {
-
-// 	//initializer.SetLimit(1)
-
-// 	ret := [1]interface{}{
-// 		bson.D{
-// 			{"$lookup", initializer},
-// 		},
-// 	}
-
-//		return ret[:]
-//	}
 func (this *OneToManyWith[Foreign_Entity_T]) ResolveRelation(
-	refQueryBuilder relation.IRelationQueryBuilder, foreignInitializer relation.IDBRelationInitiator,
+	refQueryBuilder relation.IRelationLocalNavigator, foreignInitializer relation.IRelationForeignNavigator,
 ) {
 
 }
