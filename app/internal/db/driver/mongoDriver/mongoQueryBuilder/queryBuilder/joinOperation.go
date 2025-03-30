@@ -8,13 +8,12 @@ import (
 
 type (
 	JoinOperationInitializer struct {
-		From          string       `json:"from" bson:"from"`
-		Local_field   string       `json:"localField" bson:"localField"`
-		Foreign_field string       `json:"foreignField" bson:"foreignField"`
-		Alias         string       `json:"as" bson:"as"`
-		Pipeline      JoinPipeline `json:",inline" bson:",inline"`
+		From          string `json:"from" bson:"from"`
+		Local_field   string `json:"localField" bson:"localField"`
+		Foreign_field string `json:"foreignField" bson:"foreignField"`
+		Alias         string `json:"as" bson:"as"`
+		JoinPipeline  `json:",inline" bson:",inline"`
 		is_unwind     bool
-		raw           *bson.M
 	}
 )
 
@@ -22,9 +21,7 @@ func NewJoinOperationQueryBuilder() *JoinOperationInitializer {
 
 	ret := new(JoinOperationInitializer)
 
-	//ret.Init()
-
-	ret.Pipeline.Init()
+	ret.JoinPipeline.Init()
 
 	return ret
 }
@@ -41,9 +38,7 @@ func (this *JoinOperationInitializer) As(name string) query.IQueryBuilder {
 
 	this.Alias = name
 
-	// return &this.MongoAggregateQueryBuilder
-
-	return &(&this.Pipeline).MongoAggregateQueryBuilder
+	return &(&this.JoinPipeline).MongoAggregateQueryBuilder
 }
 
 func (this *JoinOperationInitializer) NeedUnwind() bool {
@@ -53,28 +48,20 @@ func (this *JoinOperationInitializer) NeedUnwind() bool {
 
 func (this *JoinOperationInitializer) Done() {
 
-	this.Pipeline.Done()
-
-	switch this.raw {
-	case nil:
-		this.raw = &bson.M{
-			"from":         this.From,
-			"localField":   this.Local_field,
-			"foreignField": this.Foreign_field,
-			"as":           this.Alias,
-			"pipeline":     this.Pipeline.MongoAggregateQueryBuilder.P,
-		}
-	default:
-		(*this.raw)["pipeline"] = this.Pipeline.MongoAggregateQueryBuilder.P
-		(*this.raw)["as"] = this.Alias
-	}
+	this.JoinPipeline.Done()
 }
 
-func (this *JoinOperationInitializer) GetRawQuery() *bson.M {
+func (this *JoinOperationInitializer) GetRawQuery() bson.M {
 
 	this.Done()
 
-	return this.raw
+	return bson.M{
+		"from":         this.From,
+		"localField":   this.Local_field,
+		"foreignField": this.Foreign_field,
+		"as":           this.Alias,
+		"pipeline":     this.JoinPipeline.MongoAggregateQueryBuilder.P,
+	}
 }
 
 // func (this *JoinOperationInitializer) GetLocalField() string {

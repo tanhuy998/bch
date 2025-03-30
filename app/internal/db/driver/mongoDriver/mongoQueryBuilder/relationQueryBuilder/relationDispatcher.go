@@ -45,15 +45,9 @@ func (this *relation_dispatcher) PushRelations(
 		foreignNavigator := NewRelationForeignNavigator()
 		foreignNavigator.join_op.From = initiator.GetDBStorageUnitName()
 
-		// this.PushStages(
-		// 	bson.D{
-		// 		{"$lookup", &foreignNavigator.join_op},
-		// 	},
-		// )
-
 		this.PushStages(
 			bson.D{
-				{"$lookup", foreignNavigator.join_op.GetRawQuery()},
+				{"$lookup", &foreignNavigator.join_op},
 			},
 		)
 

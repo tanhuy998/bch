@@ -38,63 +38,16 @@ func (this *MongoAggregateQueryBuilder) Join(
 	another storage.IDBStorageIdentifier, fn func(query.IJoinField),
 ) query.IQueryBuilder {
 
-	// joinIntializer := &JoinOperationInitializer{
-	// 	From: another.GetDBStorageUnitName(),
-	// }
-
 	joinIntializer := NewJoinOperationQueryBuilder()
 	joinIntializer.From = another.GetDBStorageUnitName()
 
 	fn(joinIntializer)
 
-	// var ops []interface{}
-
-	// if joinIntializer.is_unwind {
-
-	// 	/*
-	// 		when the join operation has data limit less than or equal 1
-	// 		unwind looked up nested documents for explicit query on joined collection
-
-	// 		example aggregate pipeline:
-	// 		[
-	// 			{
-	// 				$lookup: {
-	// 					"form": "anotherCollecction",
-	// 					"localField": "id",
-	// 					"foreignField": "fID",
-	// 					"as": "tests"
-	// 				}
-	// 			},
-	// 			{
-	// 				$set: {
-	// 					test
-	// 				}
-	// 			}
-	// 		]
-	// 	*/
-
-	// 	ops = make([]interface{}, 2)
-
-	// 	ops[1] = bson.D{
-	// 		{"$unwind", joinIntializer.Alias},
-	// 	}
-
-	// } else {
-
-	// 	ops = make([]interface{}, 1)
-	// }
-
-	// ops[0] = bson.D{
-	// 	{"$lookup", joinIntializer},
-	// }
-
-	// this.MongoPipeline.PushStages(ops...)
-
 	joinIntializer.Done()
 
 	this.MongoPipeline.PushStages(
 		bson.D{
-			{"$lookup", joinIntializer.GetRawQuery()},
+			{"$lookup", joinIntializer},
 		},
 	)
 
@@ -211,8 +164,6 @@ func (this *MongoAggregateQueryBuilder) CloneThis() *MongoAggregateQueryBuilder 
 func (this *MongoAggregateQueryBuilder) _clone() *MongoAggregateQueryBuilder {
 
 	ret := new(MongoAggregateQueryBuilder)
-
-	//ret.P = this.P[:]
 
 	ret.P = make([]interface{}, len(this.P))
 	copy(ret.P, this.P)

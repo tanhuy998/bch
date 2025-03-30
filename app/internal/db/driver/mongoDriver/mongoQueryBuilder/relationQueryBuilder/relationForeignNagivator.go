@@ -3,6 +3,7 @@ package relationQueryBuilder
 import (
 	"app/internal/db/driver/mongoDriver/mongoQueryBuilder/queryBuilder"
 	"app/internal/db/relation"
+	libCommon "app/internal/lib/common"
 )
 
 type (
@@ -20,20 +21,16 @@ func NewRelationForeignNavigator() *RelationForeignNavigator {
 
 	ret := new(RelationForeignNavigator)
 
-	ret.join_op.Pipeline.Init()
+	ret.join_op.JoinPipeline.Init()
 
 	return ret
 }
 
 func (this *RelationForeignNavigator) SetLimit(num uint64) {
 
-	// this.join_op.join_pipeline.PrependStages(
-	// 	bson.D{
-	// 		{"$limit", num},
-	// 	},
-	// )
+	num = libCommon.Ternary(num == 0, 1, num)
 
-	this.join_op.Pipeline.Limit(num)
+	this.join_op.JoinPipeline.Limit(num)
 }
 
 func (this *RelationForeignNavigator) GetLocalField() string {
@@ -65,10 +62,10 @@ func (this *RelationForeignNavigator) Manipulate(fn relation.ForeignManipulatorF
 		panic("foreign manipulator func must not be nil")
 	}
 
-	this.join_op.Pipeline.Init()
+	this.join_op.JoinPipeline.Init()
 
 	dispatcher := NewRelationDispatcher(
-		&this.join_op.Pipeline.MongoAggregateQueryBuilder,
+		&this.join_op.JoinPipeline.MongoAggregateQueryBuilder,
 	)
 
 	fn(dispatcher)

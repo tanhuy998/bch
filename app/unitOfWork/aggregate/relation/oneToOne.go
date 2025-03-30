@@ -18,22 +18,6 @@ func (this *OneToOneWith[Foreign_Entity_T]) ResolveRelation(
 	local relation.IRelationLocalNavigator, foreign relation.IRelationForeignNavigator,
 ) {
 
-	//foreign.SetLimit(1)
-
-	// foreign.Manipulate(
-	// 	func(foreign relation.IReadRelationQueryBuilder) {
-
-	// 		foreign.Filter(
-	// 			func(filter query.IFilterExpression) {
-
-	// 				filter.Field("uuid").Equal(nil)
-	// 			},
-	// 		).Select(
-	// 			"name",
-	// 		)
-	// 	},
-	// )
-
 	foreign.Manipulate(
 		func(foreign relation.IReadRelationQueryBuilder) {
 

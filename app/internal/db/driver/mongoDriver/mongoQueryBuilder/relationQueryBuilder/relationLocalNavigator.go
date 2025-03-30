@@ -8,7 +8,13 @@ import (
 
 type (
 	RelationLocalNavigator struct {
+		/*
+			foreign reference
+		*/
 		ptr_foreign_navigator *RelationForeignNavigator
+		/*
+			local query builder, implement query.ICLonableQueryBuilder
+		*/
 		*queryBuilder.MongoAggregateQueryBuilder
 	}
 )

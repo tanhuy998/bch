@@ -19,12 +19,6 @@ func NewMongoRelationQueryBuilder() {
 
 func (this *MongoRelationQueryBuilder) init() {
 
-	// if this.MongoAggregateQueryBuilder != nil {
-
-	// 	return
-	// }
-
-	// this.MongoAggregateQueryBuilder = new(queryBuilder.MongoAggregateQueryBuilder)
 }
 
 func (this *MongoRelationQueryBuilder) Init() {
@@ -62,56 +56,6 @@ func (this *MongoRelationQueryBuilder) PushRelations(
 	relations ...relation.IDBRelationInitiator,
 ) {
 
-	// for _, rel := range relations {
-
-	// 	initializer := &JoinOperationInitializer{
-	// 		From: rel.GetDBStorageUnitName(),
-	// 	}
-	// 	initFunc := rel.GetRelationInitFunc()
-
-	// 	initFunc(initializer)
-
-	// 	this.PushStages(
-	// 		rel.ResolveRelationQuery(initializer)...,
-	// 	)
-	// }
-
-	// for _, initiator := range relations {
-
-	// 	initFn := initiator.GetRelationInitFunc()
-
-	// 	if initFn == nil {
-
-	// 		panic("relation init function could not be nil")
-	// 	}
-
-	// 	// initializer := &JoinOperationInitializer{
-	// 	// 	From: initiator.GetDBStorageUnitName(),
-	// 	// }
-
-	// 	foreignNavigator := NewRelationForeignNavigator() // new(relation_navigator)
-	// 	//initializer.stu_indentifier = initiator
-	// 	foreignNavigator.join_op.From = initiator.GetDBStorageUnitName()
-
-	// 	this.PushStages(
-	// 		bson.D{
-	// 			{"$lookup", &foreignNavigator.join_op},
-	// 		},
-	// 	)
-
-	// 	initFn(&foreignNavigator.join_op)
-
-	// 	initiator.ResolveRelation(
-	// 		NewRelationLocalNaviagator(
-	// 			//this.MongoAggregateQueryBuilder,
-	// 			this, foreignNavigator,
-	// 		),
-	// 		foreignNavigator,
-	// 	)
-
-	// 	//foreignNavigator.join_op.Done()
-	// }
-
 	NewRelationDispatcher(
 		&this.MongoAggregateQueryBuilder,
 	).PushRelations(relations...)
@@ -130,7 +74,6 @@ func (this *MongoRelationQueryBuilder) _clone() *MongoRelationQueryBuilder {
 
 	ret := new(MongoRelationQueryBuilder)
 
-	// ret.MongoAggregateQueryBuilder = this.MongoAggregateQueryBuilder._clone()
 	ret.MongoAggregateQueryBuilder = *this.MongoAggregateQueryBuilder.CloneThis()
 
 	ret.relations = make([]relation.IDBRelationInitiator, len(this.relations))
