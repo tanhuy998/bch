@@ -2,6 +2,7 @@ package aggregateRelation
 
 import (
 	"app/internal/db/relation"
+	"app/unitOfWork/aggregate/relation/internal/resolver"
 )
 
 type (
@@ -10,7 +11,8 @@ type (
 
 type (
 	OneToOneWith[Foreign_Entity_T any] struct {
-		abstract_relation[Foreign_Entity_T]
+		AbstractRelationInitiator[Foreign_Entity_T]
+		resolver.One_To_One
 	}
 )
 
@@ -18,20 +20,24 @@ func (this *OneToOneWith[Foreign_Entity_T]) ResolveRelation(
 	local relation.IRelationLocalNavigator, foreign relation.IRelationForeignNavigator,
 ) {
 
-	foreign.Manipulate(
-		func(foreign relation.IReadRelationQueryBuilder) {
+	// foreign.Manipulate(
+	// 	func(foreign relation.IReadRelationQueryBuilder) {
 
-			foreign.Limit(1)
-		},
-	)
+	// 		foreign.Limit(1)
+	// 	},
+	// )
 
-	local.Transform(
-		func(transform relation.IRelationLocalDataTransformer) {
+	// local.Transform(
+	// 	func(transform relation.IRelationLocalDataTransformer) {
 
-			alias := foreign.GetAliasName()
+	// 		alias := foreign.GetAliasName()
 
-			transform.Set(alias).AsForeign().FirstElement()
-		},
+	// 		transform.Set(alias).AsForeign().FirstElement()
+	// 	},
+	// )
+
+	this.One_To_One.ResolveRelation(
+		local, foreign,
 	)
 }
 

@@ -1,17 +1,16 @@
 package aggregateRelation
 
 import (
-	"app/internal/db/driver/mongoDriver/mongoStorage"
-	"app/internal/db/relation"
+	"app/internal/db/storage"
 )
 
 type (
-	abstract_relation[Repo_Entity_T any] struct {
-		Stu mongoStorage.IMongoDBStorageUnit[Repo_Entity_T]
+	AbstractRelationInitiator[Repo_Entity_T any] struct {
+		Stu storage.IDBStoragePivot[Repo_Entity_T] //mongoStorage.IMongoDBStorageUnit[Repo_Entity_T]
 	}
 )
 
-func (this *abstract_relation[Repo_Entity_T]) GetDBStorageUnitName() string {
+func (this *AbstractRelationInitiator[Repo_Entity_T]) GetDBStorageUnitName() string {
 
 	return this.Stu.GetDBStorageUnitName()
 }
@@ -26,8 +25,8 @@ func (this *abstract_relation[Repo_Entity_T]) GetDBStorageUnitName() string {
 // 	}
 // }
 
-func (this *abstract_relation[Repo_Entity_T]) PushRelations(
-	relations ...relation.IDBRelationInitiator,
-) {
+// func (this *abstract_relation[Repo_Entity_T]) PushRelations(
+// 	relations ...relation.IDBRelationInitiator,
+// ) {
 
-}
+// }
