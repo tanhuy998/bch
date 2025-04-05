@@ -3,14 +3,14 @@ package config
 import (
 	"app/boundedContext"
 	"app/infrastructure/http/common"
+	repositoryConfig "app/infrastructure/http/common/config/repository"
+	"app/infrastructure/http/common/config/repository/binding"
 
 	"app/internal/bootstrap"
 	"app/internal/db"
 	"app/internal/db/driver/mongoDriver"
-	"app/internal/db/driver/mongoDriver/mongoStorage"
 	"app/internal/db/query"
 	"app/internal/db/relation"
-	"app/internal/db/storage"
 	"app/internal/generalToken"
 	irisIoc "app/internal/lib/iris/ioc"
 	iocOption "app/internal/lib/iris/ioc/option"
@@ -23,7 +23,6 @@ import (
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	generalTokenIDServicePort "app/port/generalTokenID"
-	repositoryAPI "app/repository/api"
 	"log"
 
 	jwtTokenServicePort "app/port/jwtTokenService"
@@ -119,50 +118,69 @@ func InitializeDatabase(app router.Party) {
 	// 	container, new(repository.UserRepository).Init(db),
 	// ).EnableStructDependents()
 
-	irisIoc.RegisterDependency(
-		container, new(repository.UserRepository).Init(dbInstance),
-		iocOption.StructDependents(true),
-		// iocOption.AsAbstracts(
-		// 	reflect.TypeFor[repository.IUser](),
-		// 	reflect.TypeFor[repositoryAPI.ICRUDMongoRepository[model.User]](),
-		// ),
-		iocOption.BindAs[repository.IUser](),
-		iocOption.BindAs[repositoryAPI.ICRUDMongoRepository[model.User]](),
-		iocOption.BindAs[repositoryAPI.ICRUDRepository[model.User]](),
-		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.User]](),
-		iocOption.BindAs[storage.IDBStorageQueryExecutor[model.User]](),
-	)
+	// irisIoc.RegisterDependency(
+	// 	container, new(repository.UserRepository).Init(dbInstance),
+	// 	iocOption.StructDependents(true),
+	// 	// iocOption.AsAbstracts(
+	// 	// 	reflect.TypeFor[repository.IUser](),
+	// 	// 	reflect.TypeFor[repositoryAPI.ICRUDMongoRepository[model.User]](),
+	// 	// ),
+	// 	iocOption.BindAs[repository.IUser](),
+	// 	iocOption.BindAs[repositoryAPI.ICRUDMongoRepository[model.User]](),
+	// 	iocOption.BindAs[repositoryAPI.ICRUDRepository[model.User]](),
+	// 	iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.User]](),
+	// 	iocOption.BindAs[storage.IDBStorageQueryExecutor[model.User]](),
+	// )
 
 	// libConfig.BindDependency[repository.ICommandGroup](
 	// 	container, new(repository.CommandGroupRepository).Init(db),
 	// ).EnableStructDependents()
 
-	irisIoc.RegisterDependency(
-		container, new(repository.CommandGroupRepository).Init(dbInstance),
-		iocOption.StructDependents(true),
-		iocOption.BindAs[repository.ICommandGroup](),
-		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.CommandGroup]](),
-		iocOption.BindAs[repositoryAPI.ICRUDRepository[model.CommandGroup]](),
-		// iocOption.AsAbstracts(
-		// 	reflect.TypeFor[repository.ICommandGroup](),
-		// 	//reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.CommandGroup]](),
-		// 	reflect.TypeFor[mongoStorage.IMongoDBStorageUnit[model.CommandGroup]](),
-		// ),
-		iocOption.BindAs[storage.IDBStorageQueryExecutor[model.CommandGroup]](),
+	// irisIoc.RegisterDependency(
+	// 	container, new(repository.CommandGroupRepository).Init(dbInstance),
+	// 	iocOption.StructDependents(true),
+	// 	iocOption.BindAs[repository.ICommandGroup](),
+	// 	iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.CommandGroup]](),
+	// 	iocOption.BindAs[repositoryAPI.ICRUDRepository[model.CommandGroup]](),
+	// 	// iocOption.AsAbstracts(
+	// 	// 	reflect.TypeFor[repository.ICommandGroup](),
+	// 	// 	//reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.CommandGroup]](),
+	// 	// 	reflect.TypeFor[mongoStorage.IMongoDBStorageUnit[model.CommandGroup]](),
+	// 	// ),
+	// 	iocOption.BindAs[storage.IDBStorageQueryExecutor[model.CommandGroup]](),
+	// )
+
+	repositoryConfig.BindRepositories(
+		container,
+		binding.ByRepositoryOf[model.CommandGroup](
+			new(repository.CommandGroupRepository).Init(dbInstance),
+		),
+		binding.ByRepositoryOf[model.User](
+			new(repository.UserRepository).Init(dbInstance),
+		),
+		binding.ByRepositoryOf[model.CommandGroupUser](
+			new(repository.CommandGroupUserRepository).Init(dbInstance),
+		),
+		binding.ByRepositoryOf[model.Assignment](
+			new(repository.AssignmentRepository).Init(dbInstance),
+		),
+		binding.ByRepositoryOf[model.AssignmentGroup](
+			new(repository.AssignmentGroupRepository).Init(dbInstance),
+		),
 	)
 
 	// irisIoc.BindDependency[repository.ICommandGroupUser](
 	// 	container, new(repository.CommandGroupUserRepository).Init(dbInstance),
 	// ).EnableStructDependents()
 
-	irisIoc.RegisterDependency(
-		container, new(repository.CommandGroupUserRepository).Init(dbInstance),
-		iocOption.StructDependents(true),
-		iocOption.BindAs[repository.ICommandGroupUser](),
-		iocOption.BindAs[repositoryAPI.ICRUDRepository[model.CommandGroupUser]](),
-		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.CommandGroupUser]](),
-		iocOption.BindAs[storage.IDBStorageQueryExecutor[model.CommandGroupUser]](),
-	)
+	// irisIoc.RegisterDependency(
+	// 	container, new(repository.CommandGroupUserRepository).Init(dbInstance),
+	// 	iocOption.StructDependents(true),
+	// 	iocOption.BindAs[repository.ICommandGroupUser](),
+	// 	iocOption.BindAs[repositoryAPI.ICRUDRepository[model.CommandGroupUser]](),
+	// 	iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.CommandGroupUser]](),
+	// 	iocOption.BindAs[storage.IDBStorageQueryExecutor[model.CommandGroupUser]](),
+	// )
 
 	irisIoc.BindDependency[repository.ICommandGroupUserRole](
 		container, new(repository.CommandGroupUserRoleRepository).Init(dbInstance),
@@ -186,42 +204,42 @@ func InitializeDatabase(app router.Party) {
 	// 	container, new(repository.AssignmentRepository).Init(db),
 	// ).EnableStructDependents()
 
-	irisIoc.RegisterDependency(
-		container, new(repository.AssignmentRepository).Init(dbInstance),
-		iocOption.StructDependents(true),
-		// libIoc.AsAbstracts(
-		// 	reflect.TypeFor[repository.IAssignment](),
-		// 	reflect.TypeFor[repositoryAPI.IPaginateClonableRepository[model.Assignment]](),
-		// 	//reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.AssignmentGroup]](),
-		// 	reflect.TypeFor[mongoDriver.IMongoDBStorageUnit[model.Assignment]](),
-		// ),
-		iocOption.BindAs[repository.IAssignment](),
-		iocOption.BindAs[repositoryAPI.IPaginateClonableRepository[model.Assignment]](),
-		iocOption.BindAs[repositoryAPI.ICRUDRepository[model.Assignment]](),
-		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.Assignment]](),
-		iocOption.BindAs[storage.IDBStorageQueryExecutor[model.Assignment]](),
-	)
+	// irisIoc.RegisterDependency(
+	// 	container, new(repository.AssignmentRepository).Init(dbInstance),
+	// 	iocOption.StructDependents(true),
+	// 	// libIoc.AsAbstracts(
+	// 	// 	reflect.TypeFor[repository.IAssignment](),
+	// 	// 	reflect.TypeFor[repositoryAPI.IPaginateClonableRepository[model.Assignment]](),
+	// 	// 	//reflect.TypeFor[db.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.AssignmentGroup]](),
+	// 	// 	reflect.TypeFor[mongoDriver.IMongoDBStorageUnit[model.Assignment]](),
+	// 	// ),
+	// 	iocOption.BindAs[repository.IAssignment](),
+	// 	iocOption.BindAs[repositoryAPI.IPaginateClonableRepository[model.Assignment]](),
+	// 	iocOption.BindAs[repositoryAPI.ICRUDRepository[model.Assignment]](),
+	// 	iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.Assignment]](),
+	// 	iocOption.BindAs[storage.IDBStorageQueryExecutor[model.Assignment]](),
+	// )
 
 	// libConfig.BindDependency[repository.IAssignmentGroup](
 	// 	container, new(repository.AssignmentGroupRepository).Init(dbInstance),
 	// ).EnableStructDependents()
 
-	irisIoc.RegisterDependency(
-		container, new(repository.AssignmentGroupRepository).Init(dbInstance),
-		iocOption.StructDependents(true),
-		// libIoc.AsAbstracts(
-		// 	reflect.TypeFor[repository.IAssignmentGroup](),
-		// 	reflect.TypeFor[repositoryAPI.IPaginateClonableRepository[model.AssignmentGroup]](),
-		// 	reflect.TypeFor[mongoDriver.IMongoDBStorageUnit[model.AssignmentGroup]](),
-		// ),
-		//iocOption.BindAs[storage.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.AssignmentGroup]](),
-		iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.AssignmentGroup]](),
-		iocOption.BindAs[repository.IAssignmentGroup](),
-		iocOption.BindAs[repositoryAPI.ICRUDRepository[model.AssignmentGroup]](),
-		iocOption.BindAs[repositoryAPI.IPaginateClonableRepository[model.AssignmentGroup]](),
-		//iocOption.BindAs[mongoDriver.IMongoDBStorageUnit[model.AssignmentGroup]](),
-		iocOption.BindAs[storage.IDBStorageQueryExecutor[model.AssignmentGroup]](),
-	)
+	// irisIoc.RegisterDependency(
+	// 	container, new(repository.AssignmentGroupRepository).Init(dbInstance),
+	// 	iocOption.StructDependents(true),
+	// 	// libIoc.AsAbstracts(
+	// 	// 	reflect.TypeFor[repository.IAssignmentGroup](),
+	// 	// 	reflect.TypeFor[repositoryAPI.IPaginateClonableRepository[model.AssignmentGroup]](),
+	// 	// 	reflect.TypeFor[mongoDriver.IMongoDBStorageUnit[model.AssignmentGroup]](),
+	// 	// ),
+	// 	//iocOption.BindAs[storage.IDBStorageUnit[mongoDriver.MongoDBQueryMonitorCollection, model.AssignmentGroup]](),
+	// 	iocOption.BindAs[mongoStorage.IMongoDBStorageUnit[model.AssignmentGroup]](),
+	// 	iocOption.BindAs[repository.IAssignmentGroup](),
+	// 	iocOption.BindAs[repositoryAPI.ICRUDRepository[model.AssignmentGroup]](),
+	// 	iocOption.BindAs[repositoryAPI.IPaginateClonableRepository[model.AssignmentGroup]](),
+	// 	//iocOption.BindAs[mongoDriver.IMongoDBStorageUnit[model.AssignmentGroup]](),
+	// 	iocOption.BindAs[storage.IDBStorageQueryExecutor[model.AssignmentGroup]](),
+	// )
 
 	irisIoc.BindDependency[repository.IAssignmentGroupMember](
 		container, new(repository.AssignmentGroupMemberRepository).Init(dbInstance),
