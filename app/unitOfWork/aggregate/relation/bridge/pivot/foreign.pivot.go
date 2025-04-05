@@ -8,7 +8,7 @@ type (
 	}
 )
 
-func (this *Foreign[Repo_Entity_T]) GetForeignDBStorageUnitName() string {
+func (this Foreign[Repo_Entity_T]) GetForeignDBStorageUnitName() string {
 
 	return this.Pivot.GetDBStorageUnitName()
 }
