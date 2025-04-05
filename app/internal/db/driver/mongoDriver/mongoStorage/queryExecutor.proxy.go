@@ -8,7 +8,8 @@ import (
 
 type (
 	QueryExecutorProxy[Entity_T any] struct {
-		MongoDBQueryMonitorCollection
+		//MongoDBQueryMonitorCollection
+		MongoStorageUnit[Entity_T]
 	}
 )
 

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"reflect"
 )
 
 type (
@@ -10,7 +11,8 @@ type (
 		to a specific storage unit (database's table/collection).
 	*/
 	IDBStorageUnit[DBStorage_T, Model_T any] interface {
-		IDBStorageIdentifier
+		//IDBStorageIdentifier
+		IDBStoragePivot[Model_T]
 		IDBStorageUnitGetter[DBStorage_T]
 	}
 
@@ -20,6 +22,11 @@ type (
 
 	IDBStorageIdentifier interface {
 		GetDBStorageUnitName() string
+	}
+
+	IDBStoragePivot[Entity_T any] interface {
+		IDBStorageIdentifier
+		GetEntityMappingType() reflect.Type // pivot method
 	}
 
 	// This interface is used for detemining which repository whose storage unit refer to the target

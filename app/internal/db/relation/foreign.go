@@ -11,3 +11,13 @@ type (
 		GetAliasName() string
 	}
 )
+
+type (
+	IRelationForeignBeforeInitialization interface {
+		BeforeInitialization()
+	}
+
+	IRelationForeignAfterInitialization interface {
+		AfterInitialization()
+	}
+)

@@ -15,6 +15,10 @@ type (
 		IDBRelationshipDeclarativeInitializer
 		//GetJoinFieldInitializer() query.IJoinField
 		//ResolveRelationQuery(IDBRelationQueryMetadata) Query_T
+		IDBRelationResolver
+	}
+
+	IDBRelationResolver interface {
 		ResolveRelation(
 			refQueryBuilder IRelationLocalNavigator, foreignInializer IRelationForeignNavigator,
 		)

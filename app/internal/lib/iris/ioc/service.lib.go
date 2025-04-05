@@ -29,8 +29,8 @@ func RegisterDependency[ConcreteType any](
 	var autowired bool = false
 
 	switch {
-	case container == nil:
-		panic("nil container passed to libConfig.BindAs()")
+	// case container == nil:
+	// 	panic("nil container given")
 	// case len(abstractTypes) == 0:
 	// 	panic("empty abstract type passed to libConfig.BindAs()")
 	case concreateObj == nil:
@@ -47,8 +47,38 @@ func RegisterDependency[ConcreteType any](
 	// 	}
 	// }
 
-	dep := container.Register(concreateObj)
-	dep.StructDependents = autowired
+	if autowired {
+
+		options = append(
+			[]iocOption.DependencyOptionFunc{
+				iocOption.StructDependents(true),
+			},
+			options...,
+		)
+	}
+
+	RegisterArbitrary(container, concreateObj, options...)
+
+	// dep := container.Register(concreateObj)
+	// dep.StructDependents = autowired
+	// dep.Explicitly()
+
+	// for _, fn := range options {
+
+	// 	fn(container, dep)
+	// }
+}
+
+func RegisterArbitrary(
+	container *hero.Container, concreteObj interface{}, options ...iocOption.DependencyOptionFunc,
+) {
+
+	switch {
+	case container == nil:
+		panic("nil container given")
+	}
+
+	dep := container.Register(concreteObj)
 	dep.Explicitly()
 
 	for _, fn := range options {

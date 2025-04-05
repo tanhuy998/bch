@@ -312,10 +312,10 @@ func (this *MongoDBQueryMonitorCollection) Watch(ctx context.Context, pipeline i
 	)
 }
 
-func (this *MongoDBQueryMonitorCollection) GetStorageUnit() *MongoDBQueryMonitorCollection {
+// func (this *MongoDBQueryMonitorCollection) GetStorageUnit() *MongoDBQueryMonitorCollection {
 
-	return this
-}
+// 	return this
+// }
 
 func (this *MongoDBQueryMonitorCollection) SetCollection(col *mongo.Collection) {
 
@@ -327,7 +327,7 @@ func (this *MongoDBQueryMonitorCollection) SetCollection(col *mongo.Collection) 
 	this.collection = col
 }
 
-func (this *MongoDBQueryMonitorCollection) GetDBStorageUnitName() string {
+// func (this *MongoDBQueryMonitorCollection) GetDBStorageUnitName() string {
 
-	return this.collection.Name()
-}
+// 	return this.collection.Name()
+// }
