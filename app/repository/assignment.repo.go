@@ -20,7 +20,7 @@ type (
 	// 	ICreateMany[model.Assignment]
 	// }
 
-	IAssignment = repositoryAPI.ICRUDMongoRepository[model.Assignment] // IRepository[model.Assignment]
+	IAssignment = repositoryAPI.ICRUDRepository[model.Assignment] // repositoryAPI.ICRUDMongoRepository[model.Assignment] // IRepository[model.Assignment]
 
 	AssignmentRepository struct {
 		//AbstractMongoRepository

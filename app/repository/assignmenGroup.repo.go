@@ -2,6 +2,7 @@ package repository
 
 import (
 	"app/model"
+	repositoryAPI "app/repository/api"
 	mongoRepository "app/repository/driver/mongod"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,7 +20,7 @@ type (
 	// 	ICreateMany[model.AssignmentGroup]
 	// }
 
-	IAssignmentGroup = mongoRepository.ICRUDMongoRepository[model.AssignmentGroup] // repositoryAPI.ICRUDMongoRepository[model.AssignmentGroup] //IRepository[model.AssignmentGroup]
+	IAssignmentGroup = repositoryAPI.ICRUDRepository[model.AssignmentGroup] // mongoRepository.ICRUDMongoRepository[model.AssignmentGroup] // repositoryAPI.ICRUDMongoRepository[model.AssignmentGroup] //IRepository[model.AssignmentGroup]
 
 	AssignmentGroupRepository struct {
 		//AbstractMongoRepository
