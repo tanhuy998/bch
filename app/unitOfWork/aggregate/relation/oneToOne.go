@@ -16,7 +16,7 @@ type (
 	}
 )
 
-func (this *OneToOneWith[Foreign_Entity_T]) ResolveRelation(
+func (this OneToOneWith[Foreign_Entity_T]) ResolveRelation(
 	local relation.IRelationLocalNavigator, foreign relation.IRelationForeignNavigator,
 ) {
 
@@ -44,7 +44,7 @@ func (this *OneToOneWith[Foreign_Entity_T]) ResolveRelation(
 /*
 for debug log
 */
-func (this *OneToOneWith[Foreign_Entity_T]) GetDBRelationKind() string {
+func (this OneToOneWith[Foreign_Entity_T]) GetDBRelationKind() string {
 
 	return "one_to_one"
 }

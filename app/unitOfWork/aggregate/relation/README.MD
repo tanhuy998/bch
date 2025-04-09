@@ -1,0 +1,2 @@
+
+## packages provided by app/unitOfWork/aggregate/realation/unary and app/unitOfWork/aggregate/realation/bridge are malfunction because the ioc container could not inject generic typed field (embedded generic typed fields are not allowed by golang compiler)

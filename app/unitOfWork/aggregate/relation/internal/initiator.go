@@ -16,6 +16,18 @@ type (
 	}
 )
 
+func NewInitiator[Initiator_T relation.IDBRelationInitiator](
+	ref Initiator_T,
+) *Initiator[relation.IDBRelationInitiator, relation.IDBRelationInitiator] {
+
+	ret := &Initiator[relation.IDBRelationInitiator, relation.IDBRelationInitiator]{
+		Initiator: ref,
+		Resolver:  ref,
+	}
+
+	return ret
+}
+
 func (this Initiator[R, I]) GetDBStorageUnitName() string {
 
 	return this.Initiator.GetDBStorageUnitName()

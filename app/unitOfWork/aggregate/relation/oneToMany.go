@@ -12,7 +12,7 @@ type (
 	}
 )
 
-func (this *OneToManyWith[Foreign_Entity_T]) ResolveRelation(
+func (this OneToManyWith[Foreign_Entity_T]) ResolveRelation(
 	refQueryBuilder relation.IRelationLocalNavigator, foreignInitializer relation.IRelationForeignNavigator,
 ) {
 
@@ -21,7 +21,7 @@ func (this *OneToManyWith[Foreign_Entity_T]) ResolveRelation(
 	)
 }
 
-func (this *OneToManyWith[Foreign_Entity_T]) GetDBRelationKind() string {
+func (this OneToManyWith[Foreign_Entity_T]) GetDBRelationKind() string {
 
 	return "one_to_many"
 }

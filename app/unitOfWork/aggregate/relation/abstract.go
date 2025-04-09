@@ -10,7 +10,7 @@ type (
 	}
 )
 
-func (this *AbstractRelationInitiator[Repo_Entity_T]) GetDBStorageUnitName() string {
+func (this AbstractRelationInitiator[Repo_Entity_T]) GetDBStorageUnitName() string {
 
 	return this.Stu.GetDBStorageUnitName()
 }

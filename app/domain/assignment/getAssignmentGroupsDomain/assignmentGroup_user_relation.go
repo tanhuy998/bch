@@ -12,7 +12,7 @@ type (
 	}
 )
 
-func (this *AssignmentGroup_User_Relation) GetRelationInitFunc() query.JoinInitFunc {
+func (this AssignmentGroup_User_Relation) GetRelationInitFunc() query.JoinInitFunc {
 
 	return func(join query.IJoinField) {
 		join.On("createdBy", "uuid").As("createdUser")

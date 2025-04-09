@@ -12,7 +12,7 @@ type (
 	}
 )
 
-func (this *AssigmentGroup_CommandGroup_Relation) GetRelationInitFunc() query.JoinInitFunc {
+func (this AssigmentGroup_CommandGroup_Relation) GetRelationInitFunc() query.JoinInitFunc {
 
 	return func(join query.IJoinField) {
 		join.On("commandGroupUUID", "uuid").As("commandGroup")

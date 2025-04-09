@@ -17,31 +17,9 @@ import (
 type (
 	GetAssignmentGroupsService struct {
 		AssignmentGroupRepo repository.IAssignmentGroup
-		//AssignmentGroupAggregate aggregate.AggegateRoot[model.AssignmentGroup, model.AssignmentGroup]
 		GetAssignmentGroupAggegate
 	}
 )
-
-// func (this *GetAssignmentGroupsService) TestAggregate(
-// 	tenantUUID uuid.UUID, assignmentUUID uuid.UUID, paginator domain.IPaginator, ctx context.Context,
-// ) ([]model.AssignmentGroup, error) {
-
-// 	return this.AssignmentGroupAggregate.Query().
-// 		Join("users", func(queryBuilder query.IJoinField) {
-// 			queryBuilder.On("createdBy", "uuid").As("createdUser")
-// 		}).
-// 		Join("commandGroups", func(queryBuilder query.IJoinField) {
-// 			queryBuilder.On("commandGroupUUID", "uuid").As("commandGroup")
-// 		}).
-// 		ExcludeFields(
-// 			"user.password",
-// 			"user.secret",
-// 		).
-// 		Paginate(ctx, func() paginateServicePort.IPaginator[interface{}] {
-
-// 			return (paginator).(paginateServicePort.IPaginator[interface{}])
-// 		})
-// }
 
 func (this *GetAssignmentGroupsService) Serve(
 	tenantUUID uuid.UUID, assignmentUUID uuid.UUID, paginator domain.IPaginator, ctx context.Context,
@@ -138,7 +116,7 @@ func (this *GetAssignmentGroupsService) Serve(
 	// 		},
 	// 	)
 
-	res, err := this.GetAssignentGroups().Read(
+	res, err := this.ByDomain(tenantUUID).Read(
 		func(queryBuilder query.IQueryBuilder) {
 
 			queryBuilder.

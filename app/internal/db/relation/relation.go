@@ -6,6 +6,11 @@ import (
 )
 
 type (
+	IDBRelationInitializer interface {
+		IDBRelationshipDeclarativeInitializer
+		storage.IDBStorageIdentifier
+	}
+
 	IDBRelationshipDeclarativeInitializer interface {
 		GetRelationInitFunc() query.JoinInitFunc
 	}
