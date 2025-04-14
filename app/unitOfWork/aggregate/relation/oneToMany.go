@@ -16,7 +16,7 @@ func (this OneToManyWith[Foreign_Entity_T]) ResolveRelation(
 	refQueryBuilder relation.IRelationLocalNavigator, foreignInitializer relation.IRelationForeignNavigator,
 ) {
 
-	this.ResolveRelation(
+	this.One_To_Many.ResolveRelation(
 		refQueryBuilder, foreignInitializer,
 	)
 }
