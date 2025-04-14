@@ -11,7 +11,13 @@ type (
 		requestInput.ContextInput
 		requestInput.AuthorityInput
 		requestInput.TenantMappingInput
-		requestInput.RangePaginateInput
+		//requestInput.RangePaginateInput
+		requestInput.PaginateInput
 		AssignmentUUID *uuid.UUID `param:"uuid" validate:"required"`
 	}
 )
+
+func (this *GetAssignmentGroups) GetAssignmentUUID() uuid.UUID {
+
+	return *this.AssignmentUUID
+}

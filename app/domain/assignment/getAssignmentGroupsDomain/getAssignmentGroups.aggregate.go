@@ -4,8 +4,6 @@ import (
 	"app/model"
 	"app/unitOfWork/aggregate"
 	"app/unitOfWork/aggregate/api/crud"
-
-	"github.com/google/uuid"
 )
 
 type (
@@ -42,11 +40,11 @@ func (this *GetAssignmentGroupAggegate) GetAssignentGroups() crud.IAggregateRead
 }
 
 func (this *GetAssignmentGroupAggegate) ByDomain(
-	tenantUUID uuid.UUID,
+	ctx aggregate.IDomainContext,
 ) crud.IAggregateReader[model.AssignmentGroup] {
 
 	return this.MergeRelationsByDomain(
-		tenantUUID,
+		ctx,
 		this.AssignmentGroup_User_Relation,
 		&this.AssigmentGroup_CommandGroup_Relation,
 	)

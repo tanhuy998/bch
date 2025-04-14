@@ -43,8 +43,12 @@ func (this *GetAssignmentGroupsUseCase) Execute(
 	// 	return nil, common.ERR_FORBIDEN
 	// }
 
+	// data, err := this.GetAssignmentGroupService.Serve(
+	// 	input.GetTenantUUID(), *input.AssignmentUUID, input, input.GetContext(),
+	// )
+
 	data, err := this.GetAssignmentGroupService.Serve(
-		input.GetTenantUUID(), *input.AssignmentUUID, input, input.GetContext(),
+		input,
 	)
 
 	if err != nil {

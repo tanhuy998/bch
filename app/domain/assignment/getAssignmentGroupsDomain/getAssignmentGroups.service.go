@@ -1,17 +1,18 @@
 package getAssignmentGroupsDomain
 
 import (
-	"app/domain"
 	"app/internal/common"
 	"app/internal/db/query"
 	"app/model"
+	assignmentServicePort "app/port/assignment"
 	paginateServicePort "app/port/paginate"
+
 	"app/repository"
-	"context"
 	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
@@ -22,8 +23,15 @@ type (
 )
 
 func (this *GetAssignmentGroupsService) Serve(
-	tenantUUID uuid.UUID, assignmentUUID uuid.UUID, paginator domain.IPaginator, ctx context.Context,
+	//tenantUUID uuid.UUID, assignmentUUID uuid.UUID, paginator domain.IPaginator, ctx context.Context,
+	ctx assignmentServicePort.IGetAssignmentInputContext[primitive.ObjectID],
 ) ([]model.AssignmentGroup, error) {
+
+	var (
+		tenantUUID     = ctx.GetTenantUUID()
+		assignmentUUID = ctx.GetAssignmentUUID()
+		paginator      = ctx.GetPaginator()
+	)
 
 	switch {
 	case tenantUUID == uuid.Nil:
@@ -116,7 +124,7 @@ func (this *GetAssignmentGroupsService) Serve(
 	// 		},
 	// 	)
 
-	res, err := this.ByDomain(tenantUUID).Read(
+	res, err := this.ByDomain(ctx).Read(
 		func(queryBuilder query.IQueryBuilder) {
 
 			queryBuilder.
@@ -124,6 +132,7 @@ func (this *GetAssignmentGroupsService) Serve(
 					func(filter query.IFilterExpression) {
 
 						filter.Field("tenantUUID").Equal(tenantUUID)
+						filter.Field("assignmentUUID").Equal(assignmentUUID)
 					},
 				).
 				ExcludeFields(

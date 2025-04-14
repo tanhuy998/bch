@@ -10,18 +10,24 @@ import (
 )
 
 type (
+	IDomainContext interface {
+		GetTenantUUID() uuid.UUID
+	}
+)
+
+type (
 	DomainAggregateRoot[Read_Entity_T any, Local_Storage_Unit_Entity_T any] struct {
 		AggegateRoot[Read_Entity_T, Local_Storage_Unit_Entity_T]
 	}
 )
 
 func (this *DomainAggregateRoot[Read_Entity_T, Local_Storage_Unit_Entity_T]) MergeRelationsByDomain(
-	tenantUUID uuid.UUID, relationIntitiators ...relation.IDBRelationInitiator,
+	ctx IDomainContext, relationIntitiators ...relation.IDBRelationInitiator,
 ) crud.IAggregateReader[Read_Entity_T] {
 
 	var filter_func query.FilterFunc = func(filter query.IFilterExpression) {
 
-		filter.Field("tenantUUID").Equal(tenantUUID)
+		filter.Field("tenantUUID").Equal(ctx.GetTenantUUID())
 	}
 
 	transformedIntitiator := make([]relation.IDBRelationInitiator, len(relationIntitiators))
