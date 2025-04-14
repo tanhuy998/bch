@@ -3,6 +3,8 @@ package queryBuilder
 import (
 	"app/internal/db/driver/mongoDriver/filter"
 	"app/internal/db/driver/mongoDriver/lib"
+	libCommon "app/internal/lib/common"
+	"fmt"
 
 	"app/internal/db/driver/mongoDriver/sort"
 	"app/internal/db/driver/mongoDriver/transform"
@@ -36,7 +38,7 @@ func (this *MongoAggregateQueryBuilder) initProjection() {
 
 func (this *MongoAggregateQueryBuilder) Join(
 	another storage.IDBStorageIdentifier, fn func(query.IJoinField),
-) query.IQueryBuilder {
+) query.IJoinUnwindableQueryBuilder /* query.IQueryBuilder */ {
 
 	joinIntializer := NewJoinOperationQueryBuilder()
 	joinIntializer.From = another.GetDBStorageUnitName()
@@ -51,7 +53,12 @@ func (this *MongoAggregateQueryBuilder) Join(
 		},
 	)
 
-	return this
+	//return this
+
+	return NewJoinUnwindableDelegator(
+		libCommon.Ternary(joinIntializer.Alias == "", fmt.Sprintf(`%ss`, another.GetDBStorageUnitName()), joinIntializer.Alias),
+		this,
+	)
 }
 
 func (this *MongoAggregateQueryBuilder) Filter(fn query.FilterFunc) query.IQueryBuilder {
@@ -179,4 +186,19 @@ func (this *MongoAggregateQueryBuilder) Skip(time uint64) query.IQueryBuilder {
 	)
 
 	return this
+}
+
+func (this *MongoAggregateQueryBuilder) Unwind(field string) {
+
+	this.MongoPipeline.PushStages(
+		bson.D{
+			{
+				"$unwind", bson.D{
+					{"path", field},
+					//{"includeArrayIndex", false},
+					{"preserveNullAndEmptyArrays", true},
+				},
+			},
+		},
+	)
 }

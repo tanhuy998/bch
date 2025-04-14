@@ -13,7 +13,9 @@ type (
 		to indentify and manipulate the relation.
 	*/
 	RelationForeignNavigator struct {
-		join_op queryBuilder.JoinOperationInitializer
+		join_op      queryBuilder.JoinOperationInitializer
+		unwind_local bool
+		//local_unwind_delegator query.IUnwindJoinedData
 	}
 )
 
@@ -71,4 +73,9 @@ func (this *RelationForeignNavigator) Manipulate(fn relation.ForeignManipulatorF
 	fn(dispatcher)
 
 	this.join_op.Done()
+}
+
+func (this *RelationForeignNavigator) UnwindLocal() {
+
+	this.unwind_local = true
 }

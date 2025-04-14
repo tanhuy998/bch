@@ -15,22 +15,22 @@ type (
 		/*
 			local query builder, implement query.ICLonableQueryBuilder
 		*/
-		*queryBuilder.MongoAggregateQueryBuilder
+		queryBuilder.MongoAggregateQueryBuilder
 	}
 )
 
-func NewRelationLocalNaviagator(
-	localQueryBuilder *relation_dispatcher,
-	foreignNavigator *RelationForeignNavigator,
-) *RelationLocalNavigator {
+// func NewRelationLocalNaviagator(
+// 	localQueryBuilder *relation_dispatcher,
+// 	foreignNavigator *RelationForeignNavigator,
+// ) *RelationLocalNavigator {
 
-	ret := new(RelationLocalNavigator)
+// 	ret := new(RelationLocalNavigator)
 
-	ret.ptr_foreign_navigator = foreignNavigator
-	ret.MongoAggregateQueryBuilder = localQueryBuilder.MongoAggregateQueryBuilder
+// 	ret.ptr_foreign_navigator = foreignNavigator
+// 	ret.MongoAggregateQueryBuilder = localQueryBuilder.MongoAggregateQueryBuilder
 
-	return ret
-}
+// 	return ret
+// }
 
 func (this *RelationLocalNavigator) Transform(fn relation.RelationDataTransformFunc) relation.IRelationLocalNavigator {
 
@@ -40,7 +40,7 @@ func (this *RelationLocalNavigator) Transform(fn relation.RelationDataTransformF
 
 	fn(transformer)
 
-	(*this.MongoAggregateQueryBuilder).PushStages(
+	(this.MongoAggregateQueryBuilder).PushStages(
 		transformer.GetQuery()...,
 	)
 

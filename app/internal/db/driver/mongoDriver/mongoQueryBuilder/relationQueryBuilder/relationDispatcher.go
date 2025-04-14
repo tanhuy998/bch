@@ -30,7 +30,14 @@ func NewRelationDispatcher(ref *queryBuilder.MongoAggregateQueryBuilder) *relati
 }
 
 func (this *relation_dispatcher) PushRelations(
-	relations ...relation.IDBRelationInitiator,
+	relation ...relation.IDBRelationInitiator,
+) {
+
+	this._dispatch(relation)
+}
+
+func (this *relation_dispatcher) _dispatch(
+	relations []relation.IDBRelationInitiator,
 ) {
 
 	for _, initiator := range relations {
@@ -42,22 +49,40 @@ func (this *relation_dispatcher) PushRelations(
 			panic("relation init function could not be nil")
 		}
 
-		foreignNavigator := NewRelationForeignNavigator()
-		foreignNavigator.join_op.From = initiator.GetDBStorageUnitName()
+		// foreignNavigator := NewRelationForeignNavigator()
+		// foreignNavigator.join_op.From = initiator.GetDBStorageUnitName()
+
+		// this.PushStages(
+		// 	bson.D{
+		// 		{"$lookup", &foreignNavigator.join_op},
+		// 	},
+		// )
+
+		// initFn(&foreignNavigator.join_op)
+
+		// initiator.ResolveRelation(
+		// 	NewRelationLocalNaviagator(
+		// 		this, foreignNavigator,
+		// 	),
+		// 	foreignNavigator,
+		// )
+
+		relationResolver := NewRelationResolver(initiator)
+
+		foreignInitializer := relationResolver.GetForeignInitializer()
 
 		this.PushStages(
 			bson.D{
-				{"$lookup", &foreignNavigator.join_op},
+				{"$lookup", foreignInitializer},
 			},
 		)
 
-		initFn(&foreignNavigator.join_op)
+		initFn(foreignInitializer)
 
-		initiator.ResolveRelation(
-			NewRelationLocalNaviagator(
-				this, foreignNavigator,
-			),
-			foreignNavigator,
+		relationResolver.Resolve()
+
+		this.MongoAggregateQueryBuilder.PushStages(
+			relationResolver.local_navigator.P...,
 		)
 	}
 }

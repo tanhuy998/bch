@@ -9,6 +9,7 @@ type (
 	MongoRelationQueryBuilder struct {
 		queryBuilder.MongoAggregateQueryBuilder
 		//query.IClonableQueryBuilder
+		//relation_dispatcher
 		relations []relation.IDBRelationInitiator
 	}
 )
@@ -38,19 +39,6 @@ func (this *MongoRelationQueryBuilder) _trackRelations(
 
 	this.relations = append(this.relations, relations...)
 }
-
-// func (this *MongoRelationQueryBuilder) Transform(fn relation.RelationDataTransformFunc) {
-
-// 	transformer := transform.NewRelationDataTransformer(
-// 		this.relation_navigator,
-// 	)
-
-// 	fn(transformer)
-
-// 	(*this.MongoAggregateQueryBuilder).PushStages(
-// 		transformer.GetQuery()...,
-// 	)
-// }
 
 func (this *MongoRelationQueryBuilder) PushRelations(
 	relations ...relation.IDBRelationInitiator,
