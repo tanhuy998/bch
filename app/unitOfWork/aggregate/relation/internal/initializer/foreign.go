@@ -2,21 +2,21 @@ package initializer
 
 import (
 	"app/internal/db/query"
-	"app/unitOfWork/aggregate/relation/bridge/api"
+	"app/unitOfWork/aggregate/relation/binary/api"
 )
 
 type (
-	Foreign[Initiator_T api.IForeign] struct {
-		Initiator Initiator_T
+	Foreign[Initializer_T api.IForeign] struct {
+		Initializer Initializer_T
 	}
 )
 
-func (this Foreign[Initiator_T]) GetRelationInitFunc() query.JoinInitFunc {
+func (this Foreign[Initializer_T]) GetRelationInitFunc() query.JoinInitFunc {
 
-	return this.Initiator.GetForeignInitFunc()
+	return this.Initializer.GetForeignInitFunc()
 }
 
-func (this Foreign[Initiator_T]) GetDBStorageUnitName() string {
+func (this Foreign[Initializer_T]) GetDBStorageUnitName() string {
 
-	return this.Initiator.GetForeignDBStorageUnitName()
+	return this.Initializer.GetForeignDBStorageUnitName()
 }

@@ -1,4 +1,4 @@
-package bridgeRelation
+package binaryRelation
 
 import "app/internal/db/query"
 
