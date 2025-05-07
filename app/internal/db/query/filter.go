@@ -45,6 +45,7 @@ type (
 		GreaterOrEqual(val interface{})
 		LessThan(val interface{})
 		LessThanOrEqual(val interface{})
+		In(vals ...interface{})
 	}
 
 	FilterLogicalGroupFunc func(filteredField IFilterExpressionOperator)

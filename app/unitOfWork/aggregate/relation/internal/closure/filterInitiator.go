@@ -3,6 +3,7 @@ package closure
 import (
 	"app/internal/db/query"
 	"app/internal/db/relation"
+	"app/unitOfWork/aggregate/api/crud"
 	"app/unitOfWork/aggregate/relation/internal"
 	"app/unitOfWork/aggregate/relation/internal/api"
 )
@@ -55,4 +56,20 @@ func NewFilterInitiator[Initiator_T relation.IDBRelationInitiator](
 	}
 
 	return ret
+}
+
+func WithQueryBuilderInterceptor(
+	relationInitiator relation.IDBRelationInitiator,
+	beforeJoin crud.QueryBuilderFunc,
+	afterJoin crud.QueryBuilderFunc,
+) relation.IDBRelationInitiator {
+
+	switch {
+	case beforeJoin != nil || afterJoin != nil:
+		return &interceptor_initiator{
+			relationInitiator, beforeJoin, afterJoin,
+		}
+	default:
+		panic("closure.WithQueryBuilderInterceptor's 2nd and 3rd paramemter must not both nil")
+	}
 }

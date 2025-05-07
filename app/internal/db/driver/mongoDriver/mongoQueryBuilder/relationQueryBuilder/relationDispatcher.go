@@ -42,13 +42,6 @@ func (this *relation_dispatcher) _dispatch(
 
 	for _, initiator := range relations {
 
-		initFn := initiator.GetRelationInitFunc()
-
-		if initFn == nil {
-
-			panic("relation init function could not be nil")
-		}
-
 		// foreignNavigator := NewRelationForeignNavigator()
 		// foreignNavigator.join_op.From = initiator.GetDBStorageUnitName()
 
@@ -67,6 +60,11 @@ func (this *relation_dispatcher) _dispatch(
 		// 	foreignNavigator,
 		// )
 
+		if v, ok := initiator.(relation.IDBRelationBeforeJoinInterceptor); ok {
+
+			v.InterceptBeforeJoin(this)
+		}
+
 		relationResolver := NewRelationResolver(initiator)
 
 		foreignInitializer := relationResolver.GetForeignInitializer()
@@ -77,12 +75,29 @@ func (this *relation_dispatcher) _dispatch(
 			},
 		)
 
-		initFn(foreignInitializer)
+		switch v := initiator.(type) {
+		case relation.IDBRelationForeignInitializer:
+			v.InitializeForeign(foreignInitializer)
+		default:
+			initFn := initiator.GetRelationInitFunc()
+
+			if initFn == nil {
+
+				panic("relation init function could not be nil")
+			}
+
+			initFn(foreignInitializer)
+		}
 
 		relationResolver.Resolve()
 
 		this.MongoAggregateQueryBuilder.PushStages(
 			relationResolver.local_navigator.P...,
 		)
+
+		if v, ok := initiator.(relation.IDBRelationAfterJoinInterceptor); ok {
+
+			v.InterceptAfterJoin(this)
+		}
 	}
 }

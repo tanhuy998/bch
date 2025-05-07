@@ -15,6 +15,10 @@ type (
 		GetRelationInitFunc() query.JoinInitFunc
 	}
 
+	IDBRelationForeignInitializer interface {
+		InitializeForeign(join query.IJoinField)
+	}
+
 	IDBRelationshipQueryInitiator interface {
 		storage.IDBStorageIdentifier
 		IDBRelationshipDeclarativeInitializer

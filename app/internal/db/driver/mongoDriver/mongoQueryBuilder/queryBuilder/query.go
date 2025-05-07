@@ -1,6 +1,7 @@
 package queryBuilder
 
 import (
+	"app/internal/db/driver/mongoDriver/condition/expression"
 	"app/internal/db/driver/mongoDriver/filter"
 	"app/internal/db/driver/mongoDriver/lib"
 	libCommon "app/internal/lib/common"
@@ -201,4 +202,24 @@ func (this *MongoAggregateQueryBuilder) Unwind(field string) {
 			},
 		},
 	)
+}
+
+func (this *MongoAggregateQueryBuilder) Match(fn query.DataConditionMatchFunc) query.IQueryBuilder {
+
+	if fn == nil {
+
+		panic("data condition match fun must not be nil")
+	}
+
+	initializer := expression.NewConditionExpressionInitializer()
+
+	res := fn(initializer)
+
+	this.PushStages(
+		bson.D{
+			{"$match", res.GetCondtionExpression()},
+		},
+	)
+
+	return this
 }

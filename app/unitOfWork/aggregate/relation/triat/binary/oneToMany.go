@@ -21,3 +21,8 @@ func (this OneToManyBy[Bridge_Entity_T, Foreign_Entity_T]) GetForeignResolver() 
 
 	return resolver.One_To_Many{}
 }
+
+func (this OneToManyBy[Bridge_Entity_T, Foreign_Entity_T]) GetDBRelationKind() string {
+
+	return "binary_one_to_many_relation"
+}

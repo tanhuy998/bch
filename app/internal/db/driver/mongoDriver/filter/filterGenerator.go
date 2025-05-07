@@ -38,8 +38,13 @@ func (this *filter_generator) Get() bson.D {
 
 func (this *filter_generator) Field(name string) query.IFilterExpressionOperator {
 
-	return &mongo_filter_expr{
+	return &MongoComparisonExprFilter{
 		ref: this,
 		lhs: name,
 	}
+}
+
+func (this *filter_generator) GetCondtionExpression() interface{} {
+
+	return (bson.D)(*this)
 }

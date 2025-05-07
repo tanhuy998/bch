@@ -78,8 +78,21 @@ func MarshallWithFilter[Initializer_T IBinaryRelationTriat](
 
 	if foreignFilterFunc != nil {
 
-		foreign = closure.NewFilterInitiator(bridge, bridgeFilterFunc)
+		foreign = closure.NewFilterInitiator(foreign, bridgeFilterFunc)
 	}
+
+	return marshall_binary_relation(
+		bridge, foreign,
+	)
+}
+
+func MarshallWithConditions[Initializer_T IBinaryRelationTriat](
+	RelationInitiator Initializer_T,
+	BridgeConditionFunc query.DataConditionMatchFunc,
+	ForeignConditionFunc query.DataConditionMatchFunc,
+) relation.IDBRelationInitiator {
+
+	bridge, foreign := resolve_initiators(RelationInitiator)
 
 	return marshall_binary_relation(
 		bridge, foreign,

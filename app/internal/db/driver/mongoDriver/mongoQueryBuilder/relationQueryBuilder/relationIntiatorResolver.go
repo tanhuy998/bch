@@ -70,6 +70,8 @@ func (this *relation_initiator_resolver) Resolve() {
 		&this.foreign_navigator,
 	)
 
+	this.foreign_navigator.join_op.Done()
+
 	switch {
 	case this.foreign_navigator.unwind_local:
 

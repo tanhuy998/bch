@@ -46,7 +46,7 @@ func (this *MongoRelationQueryBuilder) PushRelations(
 
 	NewRelationDispatcher(
 		&this.MongoAggregateQueryBuilder,
-	).PushRelations(relations...)
+	)._dispatch(relations)
 
 	this._trackRelations(relations)
 }

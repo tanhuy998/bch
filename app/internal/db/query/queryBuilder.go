@@ -11,6 +11,7 @@ type (
 		ISubQueryDataLimit
 		ISkipQueryBuilder
 		ISubQueryDataSortOrder
+		IDataCondition
 		storage.IArbitraryQuery
 		storage.IQueryEndingPhase
 	}

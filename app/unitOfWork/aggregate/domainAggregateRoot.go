@@ -5,14 +5,6 @@ import (
 	"app/internal/db/relation"
 	"app/unitOfWork/aggregate/api/crud"
 	"app/unitOfWork/aggregate/relation/lib/closure"
-
-	"github.com/google/uuid"
-)
-
-type (
-	IDomainContext interface {
-		GetTenantUUID() uuid.UUID
-	}
 )
 
 type (

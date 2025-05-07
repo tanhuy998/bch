@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	mongo_filter_expr struct {
+	MongoComparisonExprFilter struct {
 		ref        *filter_generator
 		lhs        string
 		rhs        interface{}
@@ -16,7 +16,7 @@ type (
 	}
 )
 
-func (this *mongo_filter_expr) Equal(val interface{}) {
+func (this *MongoComparisonExprFilter) Equal(val interface{}) {
 
 	if this.lhs == "" {
 
@@ -38,7 +38,7 @@ func (this *mongo_filter_expr) Equal(val interface{}) {
 	this.ref.Add(bson.E{this.lhs, val})
 }
 
-func (this *mongo_filter_expr) GreaterThan(val interface{}) {
+func (this *MongoComparisonExprFilter) GreaterThan(val interface{}) {
 
 	if this.lhs == "" {
 
@@ -56,7 +56,7 @@ func (this *mongo_filter_expr) GreaterThan(val interface{}) {
 	)
 }
 
-func (this *mongo_filter_expr) GreaterOrEqual(val interface{}) {
+func (this *MongoComparisonExprFilter) GreaterOrEqual(val interface{}) {
 
 	if this.lhs == "" {
 
@@ -74,7 +74,7 @@ func (this *mongo_filter_expr) GreaterOrEqual(val interface{}) {
 	)
 }
 
-func (this *mongo_filter_expr) LessThan(val interface{}) {
+func (this *MongoComparisonExprFilter) LessThan(val interface{}) {
 
 	if this.lhs == "" {
 
@@ -92,7 +92,7 @@ func (this *mongo_filter_expr) LessThan(val interface{}) {
 	)
 }
 
-func (this *mongo_filter_expr) LessThanOrEqual(val interface{}) {
+func (this *MongoComparisonExprFilter) LessThanOrEqual(val interface{}) {
 
 	if this.lhs == "" {
 
@@ -110,7 +110,7 @@ func (this *mongo_filter_expr) LessThanOrEqual(val interface{}) {
 	)
 }
 
-func (this *mongo_filter_expr) In(vals ...interface{}) {
+func (this *MongoComparisonExprFilter) In(vals ...interface{}) {
 
 	op := libCommon.Ternary(this.is_antonym, "$nin", "$in")
 
@@ -123,7 +123,7 @@ func (this *mongo_filter_expr) In(vals ...interface{}) {
 	)
 }
 
-func (this *mongo_filter_expr) Not() query.IComaparisonOperator {
+func (this *MongoComparisonExprFilter) Not() query.IComaparisonOperator {
 
 	this.is_antonym = true
 
