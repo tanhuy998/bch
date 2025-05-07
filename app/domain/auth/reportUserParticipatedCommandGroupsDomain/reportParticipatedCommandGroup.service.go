@@ -3,6 +3,7 @@ package reportUserParticipatedCommandGroupsDomain
 import (
 	"app/domain"
 	"app/internal/common"
+	"app/internal/db/driver/mongoDriver/mongoStorage"
 	"app/repository"
 	"app/valueObject"
 	"context"
@@ -20,6 +21,7 @@ type (
 	ReportParticipatedCommandGroupsService struct {
 		domain.ContextualDomainService[domain_context]
 		CommandGroupUserRepo repository.ICommandGroupUser
+		ComamndGroupUserStu  mongoStorage.IMongoDBStorageUnit[model.CommandGroupUser]
 		UserRepo             repository.IUser
 	}
 )
@@ -41,7 +43,8 @@ func (this *ReportParticipatedCommandGroupsService) Serve(
 	}
 
 	res, err := repository.Aggregate[valueObject.ParticipatedCommandGroupDetail](
-		this.CommandGroupUserRepo.GetCollection(),
+		//this.CommandGroupUserRepo.GetCollection(),
+		this.ComamndGroupUserStu.GetStorageUnit(),
 		mongo.Pipeline{
 			bson.D{
 				{
@@ -140,7 +143,8 @@ func (this *ReportParticipatedCommandGroupsService) SearchAndRetrieveByModel(
 ) (*valueObject.ParticipatedCommandGroupReport, error) {
 
 	res, err := repository.Aggregate[valueObject.ParticipatedCommandGroupDetail](
-		this.CommandGroupUserRepo.GetCollection(),
+		//this.CommandGroupUserRepo.GetCollection(),
+		this.ComamndGroupUserStu.GetStorageUnit(),
 		mongo.Pipeline{
 			bson.D{
 				{

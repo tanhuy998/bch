@@ -14,9 +14,17 @@ type (
 		GetContext() context.Context
 	}
 
-	IAuthorityBringAlong interface {
+	IAuthorityGetter interface {
 		GetAuthority() valueObject.IAuthorityData
+	}
+
+	IAuthoritySetter interface {
 		SetAuthority(auth valueObject.IAuthorityData)
+	}
+
+	IAuthorityBringAlong interface {
+		IAuthorityGetter
+		IAuthoritySetter
 	}
 
 	ITenantMappingInput interface {

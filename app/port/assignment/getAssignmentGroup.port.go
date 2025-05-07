@@ -13,7 +13,7 @@ type (
 		context.Context
 		aggregate.IDomainContext
 		paginateServicePort.IPaginateContext[Cursor_T]
-		GetAssignmentUUID() uuid.UUID
+		GetRequestedAssignmentUUID() uuid.UUID
 	}
 
 	// IGetAssignmentGroups[Cursor_T comparable, Data_T any] interface {

@@ -1,52 +1,60 @@
 package requestPresenter
 
 import (
-	accessTokenServicePort "app/port/accessToken"
-	"context"
+	"app/valueObject/requestInput"
 
 	"github.com/google/uuid"
 )
 
 type (
 	GetUserParticipatedCommandGroups struct {
-		tenantUUID uuid.UUID
-		ctx        context.Context
-		auth       accessTokenServicePort.IAccessTokenAuthData
-		UserUUID   *uuid.UUID `param:"userUUID" validate:"required"`
+		requestInput.TenantMappingInput
+		requestInput.PaginateInput
+		requestInput.AuthorityInput
+		requestInput.ContextInput
+		//tenantUUID uuid.UUID
+		//ctx context.Context
+		//auth     accessTokenServicePort.IAccessTokenAuthData
+		UserUUID *uuid.UUID `param:"userUUID" validate:"required"`
 	}
 )
 
-func (this *GetUserParticipatedCommandGroups) ReceiveContext(ctx context.Context) {
+// func (this *GetUserParticipatedCommandGroups) ReceiveContext(ctx context.Context) {
 
-	this.ctx = ctx
-}
+// 	this.ctx = ctx
+// }
 
-func (this *GetUserParticipatedCommandGroups) GetContext() context.Context {
+// func (this *GetUserParticipatedCommandGroups) GetContext() context.Context {
 
-	return this.ctx
-}
+// 	return this.ctx
+// }
 
-func (this *GetUserParticipatedCommandGroups) GetAuthority() accessTokenServicePort.IAccessTokenAuthData {
+// func (this *GetUserParticipatedCommandGroups) GetAuthority() accessTokenServicePort.IAccessTokenAuthData {
 
-	return this.auth
-}
+// 	return this.auth
+// }
 
-func (this *GetUserParticipatedCommandGroups) SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData) {
+// func (this *GetUserParticipatedCommandGroups) SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData) {
 
-	this.auth = auth
-}
+// 	this.auth = auth
+// }
 
-func (this *GetUserParticipatedCommandGroups) SetTenantUUID(tenantUUID uuid.UUID) {
+// func (this *GetUserParticipatedCommandGroups) SetTenantUUID(tenantUUID uuid.UUID) {
 
-	this.tenantUUID = tenantUUID
-}
+// 	this.tenantUUID = tenantUUID
+// }
 
-func (this *GetUserParticipatedCommandGroups) IsValidTenantUUID() bool {
+// func (this *GetUserParticipatedCommandGroups) IsValidTenantUUID() bool {
 
-	return this.tenantUUID != uuid.Nil
-}
+// 	return this.tenantUUID != uuid.Nil
+// }
 
-func (this *GetUserParticipatedCommandGroups) GetTenantUUID() uuid.UUID {
+// func (this *GetUserParticipatedCommandGroups) GetTenantUUID() uuid.UUID {
 
-	return this.tenantUUID
+// 	return this.auth.GetTenantUUID() //this.tenantUUID
+// }
+
+func (this *GetUserParticipatedCommandGroups) GetRequestedUserUUID() uuid.UUID {
+
+	return *this.UserUUID
 }

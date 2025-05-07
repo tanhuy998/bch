@@ -16,7 +16,7 @@ type (
 		// tenantUUID uuid.UUID
 		// ctx        context.Context
 		// auth       accessTokenServicePort.IAccessTokenAuthData
-		GroupUUID *uuid.UUID `json:"groupUUID" validate:"required"`
+		RequestedGroupUUID *uuid.UUID `json:"groupUUID" validate:"required"`
 	}
 )
 

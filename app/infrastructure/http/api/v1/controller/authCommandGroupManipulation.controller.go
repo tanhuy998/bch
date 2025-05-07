@@ -18,9 +18,9 @@ type (
 		common.Controller
 		CreateCommandGroupUseCase                       usecasePort.IUseCase[requestPresenter.CreateCommandGroupRequest, responsePresenter.CreateCommandGroupResponse]
 		AddUserToCommandGroupUseCase                    usecasePort.IUseCase[requestPresenter.AddUserToCommandGroupRequest, responsePresenter.AddUserToCommandGroupResponse]
-		GetParitcipatedCommandGroupUseCase              usecasePort.IUseCase[requestPresenter.GetUserParticipatedCommandGroups, responsePresenter.GetUserParticipatedCommandGroups]
+		GetParitcipatedCommandGroupUseCase              usecasePort.IUseCase[requestPresenter.GetUserParticipatedCommandGroups, responsePresenter.GetUserParticipatedCommandGroups[model.CommandGroup]]
 		GetTenantCommandGroupsUseCase                   usecasePort.IUseCase[requestPresenter.GetTenantCommandGroups, responsePresenter.GetTenantCommandGroups[model.CommandGroup]]
-		GetAssignmentUnAssignedCommandGroupUsersUseCase usecasePort.IUseCase[requestPresenter.GetAssignmentGroupUnAssignedCommandGroupUsers, responsePresenter.GetAssignmentGroupUnAssignedCommandGroupUsers]
+		GetAssignmentUnAssignedCommandGroupUsersUseCase usecasePort.IUseCase[requestPresenter.GetAssignmentGroupUnAssignedCommandGroupUsers, responsePresenter.GetAssignmentGroupUnAssignedCommandGroupUsers[model.CommandGroupUser]]
 	}
 )
 

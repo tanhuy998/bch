@@ -1,12 +1,8 @@
 package responsePresenter
 
-import (
-	"app/model"
-)
-
 type (
-	GetUserParticipatedCommandGroups struct {
-		Message string                `json:"message"`
-		Data    []*model.CommandGroup `json:"data"`
+	GetUserParticipatedCommandGroups[Entity_T any] struct {
+		Message string     `json:"message"`
+		Data    []Entity_T `json:"data"`
 	}
 )

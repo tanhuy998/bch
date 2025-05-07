@@ -2,6 +2,7 @@ package usecasePort
 
 import (
 	"app/internal/common"
+	"app/internal/db/driver/mongoDriver/mongoStorage"
 	"app/model"
 	"app/repository"
 	"app/valueObject/requestInput"
@@ -15,7 +16,7 @@ import (
 
 type (
 	AuthDomainUseCase[Input_T requestInput.ITenantDomainInput] struct {
-		CommandGroupUserRepo repository.ICommandGroupUser
+		CommandGroupUserStu mongoStorage.IMongoDBStorageUnit[model.CommandGroupUser] // repository.ICommandGroupUser
 	}
 )
 
@@ -111,7 +112,7 @@ func (this *AuthDomainUseCase[Input_T]) CheckUserJoinedAssignment(
 		AssignmentGroup model.AssignmentGroup `bson:"assignmentGroups"`
 	}
 
-	switch ret, err := repository.AggregateOne[T](this.CommandGroupUserRepo.GetCollection(), query, input.GetContext()); {
+	switch ret, err := repository.AggregateOne[T](this.CommandGroupUserStu.GetStorageUnit(), query, input.GetContext()); {
 	case err != nil:
 		return err
 	case ret == nil:

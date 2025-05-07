@@ -48,7 +48,7 @@ type (
 		GetSingleUserService                    authServicePort.IGetSingleUser
 		GrantCommandGroupRolesToUserService     authServicePort.IGrantCommandGroupRolesToUser
 		ModifyUserService                       authServicePort.IModifyUser
-		GetUserParticipatedCommandGroupsService authServicePort.IGetUserParticipatedCommandGroups
+		GetUserParticipatedCommandGroupsService authServicePort.IGetUserParticipatedCommandGroups[model.CommandGroup]
 	}
 )
 
@@ -64,7 +64,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 		getTenantCommandGroupDomain.GetTenantCommandGroupService,
 	](container, nil)
 
-	irisIoc.BindDependency[authServicePort.IGetAssignmentGroupUnAssignedCommandGroupUsers, getAssignmentGroupUnAssignedCommandGroupUsersDomain.GetAssignmentGroupUnAssignedCommandGroupUserService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetAssignmentGroupUnAssignedCommandGroupUsers[model.CommandGroupUser], getAssignmentGroupUnAssignedCommandGroupUsersDomain.GetAssignmentGroupUnAssignedCommandGroupUserService](container, nil)
 	irisIoc.BindDependency[authServicePort.IGetUserAuthorityServicePort, getUserAuthorityDomain.GetUsertAuthorityService](container, nil)
 	irisIoc.BindDependency[authServicePort.IGetAllRoles, getAllRoleDomain.GetAllRolesService](container, nil)
 	irisIoc.BindDependency[authServicePort.IGetCommandGroupUsers[domain.PaginateCursorType], getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
@@ -74,7 +74,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	irisIoc.BindDependency[authServicePort.IGetTenantAllGroups, getTenantAllGroupsDomain.GetTenantAllGroupService](container, nil)
 
 	irisIoc.BindDependency[authServicePort.IReportParticipatedCommandGroups, reportUserParticipatedCommandGroupsDomain.ReportParticipatedCommandGroupsService](container, nil)
-	irisIoc.BindDependency[authServicePort.IGetUserParticipatedCommandGroups, getUserParticipatedCommandGroupsDomain.GetUserParticipatedCommandGroupService](container, nil)
+	irisIoc.BindDependency[authServicePort.IGetUserParticipatedCommandGroups[model.CommandGroup], getUserParticipatedCommandGroupsDomain.GetUserParticipatedCommandGroupService](container, nil)
 	irisIoc.BindDependency[authServicePort.IGetSingleCommandGroup, getSingleCommandGroupDomain.GetSingleCommandGroupService](container, nil)
 	irisIoc.BindDependency[authServicePort.IGetSingleUser, getSingleUserDomain.GetSingleUserService](container, nil)
 	irisIoc.BindDependency[authServicePort.IGetCommandGroupUsers[domain.PaginateCursorType], getCommandGroupUsersDomain.GetCommandGroupUsersService](container, nil)
@@ -132,7 +132,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 		addUserToCommandGroupDomain.AddUserToCommandGroupUseCase,
 	](container, nil)
 	irisIoc.BindDependency[
-		usecasePort.IUseCase[requestPresenter.GetUserParticipatedCommandGroups, responsePresenter.GetUserParticipatedCommandGroups],
+		usecasePort.IUseCase[requestPresenter.GetUserParticipatedCommandGroups, responsePresenter.GetUserParticipatedCommandGroups[model.CommandGroup]],
 		getUserParticipatedCommandGroupsDomain.GetUserParticipatedCommandGroupsUseCase,
 	](container, nil)
 	irisIoc.BindDependency[
@@ -144,7 +144,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 		getTenantAllGroupsDomain.GetTenantAllGroupUseCase,
 	](container, nil)
 	irisIoc.BindDependency[
-		usecasePort.IUseCase[requestPresenter.GetAssignmentGroupUnAssignedCommandGroupUsers, responsePresenter.GetAssignmentGroupUnAssignedCommandGroupUsers],
+		usecasePort.IUseCase[requestPresenter.GetAssignmentGroupUnAssignedCommandGroupUsers, responsePresenter.GetAssignmentGroupUnAssignedCommandGroupUsers[model.CommandGroupUser]],
 		getAssignmentGroupUnAssignedCommandGroupUsersDomain.GetAssignmentGroupUnAssignedCommandGroupUsersUseCase,
 	](container, nil)
 

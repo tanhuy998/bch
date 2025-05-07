@@ -1,10 +1,8 @@
 package responsePresenter
 
-import "app/model"
-
 type (
-	GetAssignmentGroupUnAssignedCommandGroupUsers struct {
-		Message string                    `json:"message"`
-		Data    []*model.CommandGroupUser `json:"data"`
+	GetAssignmentGroupUnAssignedCommandGroupUsers[Data_T any] struct {
+		Message string   `json:"message"`
+		Data    []Data_T `json:"data"`
 	}
 )

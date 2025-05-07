@@ -2,6 +2,7 @@ package checkCommandGroupUserRoles
 
 import (
 	"app/internal/common"
+	"app/internal/db/query"
 	"app/model"
 	"app/repository"
 	"context"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type (
@@ -21,6 +21,7 @@ type (
 
 	CheckCommandGroupUserRoleService struct {
 		CommandGroupUserRepo repository.ICommandGroupUser
+		CheckCommandGroupUserRoleAggregate
 	}
 )
 
@@ -138,6 +139,33 @@ func (this *CheckCommandGroupUserRoleService) _prepareRolesConditions(
 	return ret, nil
 }
 
+func (this *CheckCommandGroupUserRoleService) _prepareRoleConditionsFuncs(
+	roleUUIDList []uuid.UUID,
+) ([]query.DataConditionMatchFunc, error) {
+
+	if len(roleUUIDList) == 0 {
+
+		return nil, errors.New("no input")
+	}
+
+	ret := make([]query.DataConditionMatchFunc, len(roleUUIDList))
+
+	for i, v := range roleUUIDList {
+
+		ret[i] = func(expression query.IGeneralDataConditionExpression) query.IDataConditionExpressionResult {
+
+			return expression.Filter(
+				func(filter query.IDataConditionFilterExpression) {
+
+					filter.Field("roleUUID").Equal(v)
+				},
+			)
+		}
+	}
+
+	return ret, nil
+}
+
 func (this *CheckCommandGroupUserRoleService) Compare(
 	groupUUID uuid.UUID,
 	userUUID uuid.UUID,
@@ -145,64 +173,108 @@ func (this *CheckCommandGroupUserRoleService) Compare(
 	ctx context.Context,
 ) (unGrantedRoles []uuid.UUID, err error) {
 
-	var conditions []bson.D
+	// var conditions []bson.D
 
-	conditions, err = this._prepareRolesConditions(roleUUIDList)
+	// conditions, err = this._prepareRolesConditions(roleUUIDList)
+
+	// if err != nil {
+
+	// 	return unGrantedRoles, err
+	// }
+
+	// res, err := repository.Aggregate[model.CommandGroupUserRole](
+	// 	this.CommandGroupUserRepo.GetCollection(),
+	// 	mongo.Pipeline{
+	// 		bson.D{
+	// 			{
+	// 				"$match", bson.D{
+	// 					{"commandGroupUUID", groupUUID},
+	// 					{"userUUID", userUUID},
+	// 				},
+	// 			},
+	// 		},
+	// 		bson.D{
+	// 			{"$lookup",
+	// 				bson.D{
+	// 					{"from", "commandGroupUserRoles"},
+	// 					{"localField", "uuid"},
+	// 					{"foreignField", "commandGroupUserUUID"},
+	// 					{"as", "roles"},
+	// 				},
+	// 			},
+	// 		},
+	// 		bson.D{{"$unwind", bson.D{{"path", "$roles"}}}},
+	// 		bson.D{
+	// 			{"$set",
+	// 				bson.D{
+	// 					{"roleUUID", "$roles.roleUUID"},
+	// 					{"userUUID", "$role.userUUID"},
+	// 				},
+	// 			},
+	// 		},
+	// 		bson.D{
+	// 			{
+	// 				"$match", bson.D{
+	// 					{"$or", conditions},
+	// 				},
+	// 			},
+	// 		},
+	// 		bson.D{
+	// 			{"$project",
+	// 				bson.D{
+	// 					{"_id", 0},
+	// 					{"uuid", 0},
+	// 					{"roles", 0},
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// 	ctx,
+	// )
+
+	conditions, err := this._prepareRoleConditionsFuncs(roleUUIDList)
 
 	if err != nil {
 
-		return unGrantedRoles, err
+		return nil, err
 	}
 
-	res, err := repository.Aggregate[model.CommandGroupUserRole](
-		this.CommandGroupUserRepo.GetCollection(),
-		mongo.Pipeline{
-			bson.D{
-				{
-					"$match", bson.D{
-						{"commandGroupUUID", groupUUID},
-						{"userUUID", userUUID},
-					},
+	res, err := this.CheckCommandGroupUserRoleAggregate._merge().Read(
+		func(queryBuilder query.IQueryBuilder) {
+
+			queryBuilder.Match(
+				func(expression query.IGeneralDataConditionExpression) query.IDataConditionExpressionResult {
+
+					return expression.Logical().And(
+						func(expression query.IGeneralDataConditionExpression) query.IDataConditionExpressionResult {
+
+							return expression.Filter(
+								func(filter query.IDataConditionFilterExpression) {
+
+									filter.Field("commandGroupUUID").Equal(groupUUID)
+									filter.Field("userUUID").Equal(userUUID)
+								},
+							)
+						},
+						func(expression query.IGeneralDataConditionExpression) query.IDataConditionExpressionResult {
+
+							return expression.Logical().Or(
+								conditions...,
+							)
+						},
+					)
 				},
-			},
-			bson.D{
-				{"$lookup",
-					bson.D{
-						{"from", "commandGroupUserRoles"},
-						{"localField", "uuid"},
-						{"foreignField", "commandGroupUserUUID"},
-						{"as", "roles"},
-					},
+			).Transform(
+				func(transform query.IDataTransformer) {
+
+					transform.Set("roleUUID").Ref("roles.roleUUID")
+					transform.Set("userUUID").Ref("roles.userUUID")
 				},
-			},
-			bson.D{{"$unwind", bson.D{{"path", "$roles"}}}},
-			bson.D{
-				{"$set",
-					bson.D{
-						{"roleUUID", "$roles.roleUUID"},
-						{"userUUID", "$role.userUUID"},
-					},
-				},
-			},
-			bson.D{
-				{
-					"$match", bson.D{
-						{"$or", conditions},
-					},
-				},
-			},
-			bson.D{
-				{"$project",
-					bson.D{
-						{"_id", 0},
-						{"uuid", 0},
-						{"roles", 0},
-					},
-				},
-			},
+			).ExcludeFields(
+				"_id", "uuid", "roles",
+			)
 		},
-		ctx,
-	)
+	).All(ctx)
 
 	if err != nil {
 
@@ -233,7 +305,7 @@ to get the unassigned roles
 */
 func (this *CheckCommandGroupUserRoleService) differentiate(
 	input []uuid.UUID,
-	fetchedRoles []*model.CommandGroupUserRole,
+	fetchedRoles []model.CommandGroupUserRole,
 ) (unAssignedRoles []uuid.UUID) {
 
 	tempInput := make([]uuid.UUID, 0)

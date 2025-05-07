@@ -29,7 +29,7 @@ func (this *GetAssignmentGroupsService) Serve(
 
 	var (
 		tenantUUID     = ctx.GetTenantUUID()
-		assignmentUUID = ctx.GetAssignmentUUID()
+		assignmentUUID = ctx.GetRequestedAssignmentUUID()
 		paginator      = ctx.GetPaginator()
 	)
 

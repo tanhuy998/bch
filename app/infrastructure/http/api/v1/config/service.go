@@ -167,6 +167,9 @@ func InitializeDatabase(app router.Party) {
 		binding.ByRepositoryOf[model.AssignmentGroup](
 			new(repository.AssignmentGroupRepository).Init(dbInstance),
 		),
+		binding.ByRepositoryOf[model.AssignmentGroupMember](
+			new(repository.AssignmentGroupMemberRepository).Init(dbInstance),
+		),
 	)
 
 	// irisIoc.BindDependency[repository.ICommandGroupUser](
@@ -241,9 +244,9 @@ func InitializeDatabase(app router.Party) {
 	// 	iocOption.BindAs[storage.IDBStorageQueryExecutor[model.AssignmentGroup]](),
 	// )
 
-	irisIoc.BindDependency[repository.IAssignmentGroupMember](
-		container, new(repository.AssignmentGroupMemberRepository).Init(dbInstance),
-	).EnableStructDependents()
+	// irisIoc.BindDependency[repository.IAssignmentGroupMember](
+	// 	container, new(repository.AssignmentGroupMemberRepository).Init(dbInstance),
+	// ).EnableStructDependents()
 	irisIoc.BindDependency[repository.IUserSession](
 		container, new(repository.UserSessionRepository).Init(dbInstance),
 	).EnableStructDependents()

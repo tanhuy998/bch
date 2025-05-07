@@ -12,5 +12,6 @@ type (
 		Paginate(
 			paginator paginateServicePort.IPaginator[interface{}], ctx context.Context,
 		) ([]Entity_T, error)
+		ToSLiceByContext(context context.Context) ([]Entity_T, error)
 	}
 )

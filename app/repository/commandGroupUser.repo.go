@@ -18,7 +18,7 @@ type (
 	// 	ICRUDMongoRepository[model.CommandGroupUser]
 	// }
 
-	ICommandGroupUser = repositoryAPI.ICRUDMongoRepository[model.CommandGroupUser] // IRepository[model.CommandGroupUser]
+	ICommandGroupUser = repositoryAPI.ICRUDRepository[model.CommandGroupUser] // repositoryAPI.ICRUDMongoRepository[model.CommandGroupUser] // IRepository[model.CommandGroupUser]
 
 	CommandGroupUserRepository struct {
 		//AbstractMongoRepository

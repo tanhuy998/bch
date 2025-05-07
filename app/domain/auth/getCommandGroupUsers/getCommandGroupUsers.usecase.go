@@ -47,7 +47,7 @@ func (this *GetCommandGroupUsersUseCase) Execute(
 	)
 
 	data, err := this.GetCommandGroupUserService.Serve(
-		input.GetTenantUUID(), *input.GroupUUID, input, executionCtx,
+		input.GetTenantUUID(), *input.RequestedGroupUUID, input, executionCtx,
 	)
 
 	if err != nil {
@@ -71,12 +71,14 @@ func (this *GetCommandGroupUsersUseCase) validateAuthority(
 		return common.ERR_FORBIDEN
 	}
 
-	if input.IsTenantAgent() {
+	auth := input.GetAuthority()
+
+	if auth.IsTenantAgent() {
 
 		return nil
 	}
 
-	if !input.QueryCommandGroup(*input.GroupUUID).HasRoles("COMMANDER").Done() {
+	if !auth.QueryCommandGroup(*input.RequestedGroupUUID).HasRoles("COMMANDER").Done() {
 
 		return errors.Join(common.ERR_FORBIDEN, fmt.Errorf("the current user doesn't has authority to access this enpoint"))
 	}

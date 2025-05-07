@@ -16,6 +16,7 @@ import (
 	getAssignmentsDomain "app/domain/assignment/getAssignments"
 	getSingleAssignmentDomain "app/domain/assignment/getSingleAssignment"
 	getSingleAssignmentGroupDomain "app/domain/assignment/getSingleAssignmentGroup"
+	checkAssignmentParticipantDomain "app/domain/auth/checkAssignmenParticipant"
 
 	modifyAssignmentDomain "app/domain/assignment/modifyAssignment"
 
@@ -42,6 +43,8 @@ func RegisterAssignmentBoundedContext(container *hero.Container) {
 	irisIoc.BindDependency[assignmentServicePort.ICreateAssignmentGroup, createAssignmentGroupDomain.CreateAssignmentGroupService](container, nil)
 	irisIoc.BindDependency[assignmentServicePort.ICreateAssignmentGroupMember, createAssignmentGroupMemberDomain.CreateAssignmentGroupMemberService](container, nil)
 	irisIoc.BindDependency[assignmentServicePort.IModifyAssignment, modifyAssignmentDomain.ModifyAssignmentService](container, nil)
+
+	irisIoc.BindDependency[assignmentServicePort.ICheckAssigmnetParticipant, checkAssignmentParticipantDomain.CheckAssignmentPariticipantService](container, nil)
 
 	irisIoc.BindDependency[
 		usecasePort.IUseCase[requestPresenter.CreateAssigmentRequest, responsePresenter.CreateAssignmentResponse],

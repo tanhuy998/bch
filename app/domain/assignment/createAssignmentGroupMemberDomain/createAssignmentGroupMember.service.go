@@ -18,7 +18,7 @@ import (
 type (
 	CreateAssignmentGroupMemberService struct {
 		domain.ContextualDomainService[domain_context]
-		GetUnAssignedCommandGroupUsersService authServicePort.IGetAssignmentGroupUnAssignedCommandGroupUsers
+		GetUnAssignedCommandGroupUsersService authServicePort.IGetAssignmentGroupUnAssignedCommandGroupUsers[model.CommandGroupUser]
 		AssignmentGroupRepo                   repository.IAssignmentGroup
 		AssignmentGroupMemberRepo             repository.IAssignmentGroupMember
 		CommandGroupUserRepo                  repository.ICommandGroupUser

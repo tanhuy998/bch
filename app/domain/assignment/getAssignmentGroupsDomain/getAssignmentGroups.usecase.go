@@ -29,7 +29,7 @@ func (this *GetAssignmentGroupsUseCase) Execute(
 	switch {
 	case !input.IsValidTenantUUID():
 		return nil, common.ERR_UNAUTHORIZED
-	case !input.IsTenantAgent():
+	case !input.GetAuthority().IsTenantAgent():
 		return nil, common.ERR_FORBIDEN
 	}
 

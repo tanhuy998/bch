@@ -61,4 +61,8 @@ type (
 		IOffsetPaginator
 		//ICursorPaginator[Cursor_T]
 	}
+
+	IGeneralPaginator interface {
+		GetGeneralPaginator() IPaginator[interface{}]
+	}
 )

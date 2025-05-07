@@ -8,6 +8,7 @@ import (
 
 type (
 	GetAssignmentGroupUnAssignedCommandGroupUsers struct {
+		requestInput.PaginateInput
 		requestInput.ContextInput
 		requestInput.TenantMappingInput
 		requestInput.AuthorityInput
