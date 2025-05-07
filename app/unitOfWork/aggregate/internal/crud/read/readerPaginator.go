@@ -10,12 +10,12 @@ import (
 )
 
 type (
-	ReaderPagianteExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T any] struct {
+	ReaderPaginateExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T any] struct {
 		DatabaseReaderExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]
 	}
 )
 
-func (this *ReaderPagianteExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) Paginate(
+func (this *ReaderPaginateExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) Paginate(
 	paginator paginateServicePort.IPaginator[interface{}], ctx context.Context,
 ) ([]Read_Entity_T, error) {
 
@@ -42,7 +42,7 @@ func (this *ReaderPagianteExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) 
 	return ret, nil
 }
 
-func (this *ReaderPagianteExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) resolvePaginateOperators(
+func (this *ReaderPaginateExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) resolvePaginateOperators(
 	paginator paginateServicePort.IPaginator[interface{}],
 ) {
 
@@ -73,7 +73,7 @@ func (this *ReaderPagianteExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) 
 	)
 }
 
-func (this *ReaderPagianteExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) resovleCursorPaginateOperator(
+func (this *ReaderPaginateExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) resovleCursorPaginateOperator(
 	paginator paginateServicePort.ICursorPaginator[interface{}],
 ) {
 
@@ -87,7 +87,7 @@ func (this *ReaderPagianteExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) 
 	this.resolveNextOperators(paginator)
 }
 
-func (this *ReaderPagianteExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) resolveNextOperators(
+func (this *ReaderPaginateExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) resolveNextOperators(
 	paginator paginateServicePort.ICursorPaginator[interface{}],
 ) {
 
@@ -112,7 +112,7 @@ func (this *ReaderPagianteExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) 
 	)
 }
 
-func (this *ReaderPagianteExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) resolvePrevOperators(
+func (this *ReaderPaginateExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) resolvePrevOperators(
 	paginator paginateServicePort.ICursorPaginator[interface{}],
 ) {
 

@@ -12,7 +12,7 @@ func NewExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T any](
 	queryBuilder query.IQueryBuilder,
 ) query.IGenericQueryExecutor[Read_Entity_T] {
 
-	ret := new(ReaderPagianteExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T])
+	ret := new(QueryReader[Read_Entity_T, Local_Storage_Unit_Entity_T])
 
 	ret.stu = stu
 	ret.query_builder = queryBuilder
