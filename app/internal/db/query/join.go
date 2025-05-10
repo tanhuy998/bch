@@ -14,7 +14,19 @@ type (
 	}
 
 	ISubQueryJoinMethod interface {
-		Join(another storage.IDBStorageIdentifier, fn func(query IJoinField)) IJoinUnwindableQueryBuilder // IQueryBuilder
+		Join(another storage.IDBStorageIdentifier, fn func(join IJoinField)) IJoinUnwindableQueryBuilder // IQueryBuilder
+	}
+
+	ILeftJoinMethod interface {
+		LeftJoin(
+			another storage.IDBStorageIdentifier, fn func(join IJoinField),
+		) IQueryBuilder
+	}
+
+	IInnerJoinMethod interface {
+		InnerJoin(
+			another storage.IDBStorageIdentifier, fn func(join IJoinField),
+		) IQueryBuilder
 	}
 
 	IJoinField interface {

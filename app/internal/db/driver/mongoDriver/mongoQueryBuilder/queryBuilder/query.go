@@ -4,7 +4,6 @@ import (
 	"app/internal/db/driver/mongoDriver/condition/expression"
 	"app/internal/db/driver/mongoDriver/filter"
 	"app/internal/db/driver/mongoDriver/lib"
-	libCommon "app/internal/lib/common"
 	"fmt"
 
 	"app/internal/db/driver/mongoDriver/sort"
@@ -37,30 +36,30 @@ func (this *MongoAggregateQueryBuilder) initProjection() {
 	this.projection = make(map[string]uint)
 }
 
-func (this *MongoAggregateQueryBuilder) Join(
-	another storage.IDBStorageIdentifier, fn func(query.IJoinField),
-) query.IJoinUnwindableQueryBuilder /* query.IQueryBuilder */ {
+// func (this *MongoAggregateQueryBuilder) DoJoin(
+// 	another storage.IDBStorageIdentifier, fn func(query.IJoinField),
+// ) *JoinOperationDispatcher {
 
-	joinIntializer := NewJoinOperationQueryBuilder()
-	joinIntializer.From = another.GetDBStorageUnitName()
+// 	joinIntializer := NewJoinOperationQueryBuilder()
+// 	joinIntializer.From = another.GetDBStorageUnitName()
 
-	fn(joinIntializer)
+// 	fn(joinIntializer)
 
-	joinIntializer.Done()
+// 	joinIntializer.Done()
 
-	this.MongoPipeline.PushStages(
-		bson.D{
-			{"$lookup", joinIntializer},
-		},
-	)
+// 	this.MongoPipeline.PushStages(
+// 		bson.D{
+// 			{"$lookup", joinIntializer},
+// 		},
+// 	)
 
-	//return this
+// 	//return this
 
-	return NewJoinUnwindableDelegator(
-		libCommon.Ternary(joinIntializer.Alias == "", fmt.Sprintf(`%ss`, another.GetDBStorageUnitName()), joinIntializer.Alias),
-		this,
-	)
-}
+// 	return NewJoinUnwindableDelegator(
+// 		libCommon.Ternary(joinIntializer.Alias == "", fmt.Sprintf(`%ss`, another.GetDBStorageUnitName()), joinIntializer.Alias),
+// 		this,
+// 	)
+// }
 
 func (this *MongoAggregateQueryBuilder) Filter(fn query.FilterFunc) query.IQueryBuilder {
 
@@ -195,7 +194,7 @@ func (this *MongoAggregateQueryBuilder) Unwind(field string) {
 		bson.D{
 			{
 				"$unwind", bson.D{
-					{"path", field},
+					{"path", fmt.Sprintf(`$%s`, field)},
 					//{"includeArrayIndex", false},
 					{"preserveNullAndEmptyArrays", true},
 				},
@@ -222,4 +221,40 @@ func (this *MongoAggregateQueryBuilder) Match(fn query.DataConditionMatchFunc) q
 	)
 
 	return this
+}
+
+func (this *MongoAggregateQueryBuilder) LeftJoin(
+	another storage.IDBStorageIdentifier, fn func(query.IJoinField),
+) query.IQueryBuilder {
+
+	NewJoinUnwindableDispatcher(this).DoJoin(another, fn).AsLeftJoin()
+
+	return this
+}
+
+func (this *MongoAggregateQueryBuilder) InnerJoin(
+	another storage.IDBStorageIdentifier, fn func(query.IJoinField),
+) query.IQueryBuilder {
+
+	NewJoinUnwindableDispatcher(this).DoJoin(another, fn).AsInnerJoin()
+
+	// this.PushStages(
+	// 	bson.D{
+	// 		{
+	// 			"$unwind", bson.D{
+	// 				{"path", fmt.Sprintf(`$%s`, delegator.foreign_alias)},
+	// 				{"preserveNullAndEmptyArrays", false},
+	// 			},
+	// 		},
+	// 	},
+	// )
+
+	return this
+}
+
+func (this *MongoAggregateQueryBuilder) Join(
+	another storage.IDBStorageIdentifier, fn func(query.IJoinField),
+) query.IJoinUnwindableQueryBuilder /* query.IQueryBuilder */ {
+
+	return NewJoinUnwindableDispatcher(this).DoJoin(another, fn)
 }

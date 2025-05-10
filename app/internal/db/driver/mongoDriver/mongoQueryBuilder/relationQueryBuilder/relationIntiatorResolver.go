@@ -2,9 +2,9 @@ package relationQueryBuilder
 
 import (
 	"app/internal/db/driver/mongoDriver/mongoQueryBuilder/queryBuilder"
+	"app/internal/db/driver/mongoDriver/mongoQueryBuilder/relationQueryBuilder/determiner.go"
 	"app/internal/db/relation"
 	libCommon "app/internal/lib/common"
-	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -15,7 +15,9 @@ const (
 
 type (
 	relation_initiator_resolver struct {
-		initiator         relation.IDBRelationshipQueryInitiator
+		//join_dispatcher queryBuilder.JoinOperationDispatcher
+		determiner.RelationJoinDeterminer
+		initiator         relation.IDBRelationInitiator
 		local_navigator   RelationLocalNavigator
 		foreign_navigator RelationForeignNavigator
 	}
@@ -46,6 +48,31 @@ func (this *relation_initiator_resolver) Init() {
 
 	this.initLocal()
 	this.initForeign()
+	this.initJoinDeteminer()
+	this.setupJoinOperator()
+}
+
+func (this *relation_initiator_resolver) setupJoinOperator() {
+
+	this.local_navigator.PushStages(
+		bson.D{
+			{"$lookup", this.GetForeignInitializer()},
+		},
+	)
+}
+
+func (this *relation_initiator_resolver) initJoinDeteminer() {
+
+	// this.join_dispatcher.MongoAggregateQueryBuilder = &this.local_navigator.MongoAggregateQueryBuilder
+	// this.join_dispatcher.JoinInitializer = &this.foreign_navigator.join_op
+
+	this.RelationJoinDeterminer.SetJoinInitializer(
+		&this.foreign_navigator.join_op,
+	)
+
+	this.RelationJoinDeterminer.SetLocalQueryBuilder(
+		&this.local_navigator.MongoAggregateQueryBuilder,
+	)
 }
 
 func (this *relation_initiator_resolver) initLocal() {
@@ -72,25 +99,43 @@ func (this *relation_initiator_resolver) Resolve() {
 
 	this.foreign_navigator.join_op.Done()
 
+	this.DetermineJoinOperation(this.initiator)
+
 	switch {
 	case this.foreign_navigator.unwind_local:
 
 		joinInitializer := this.GetForeignInitializer()
 
-		this.local_navigator.MongoAggregateQueryBuilder.MongoPipeline.PrependStages(
-			bson.D{
-				{
-					"$unwind", bson.D{
-						{
-							"path", libCommon.Ternary(
-								joinInitializer.Alias == "",
-								fmt.Sprintf(`%ss`, this.initiator.GetDBStorageUnitName()),
-								joinInitializer.Alias,
-							),
-						},
-					},
-				},
-			},
+		var unwindPath string = libCommon.Ternary(
+			joinInitializer.Alias == "",
+			this.initiator.GetDBStorageUnitName(),
+			joinInitializer.Alias,
 		)
+
+		// switch joinInitializer.Alias {
+		// case "":
+		// 	unwindPath = fmt.Sprintf(`$%ss`, this.initiator.GetDBStorageUnitName())
+		// default:
+		// 	unwindPath = fmt.Sprintf("$%s", joinInitializer.Alias)
+		// }
+
+		// this.local_navigator.MongoAggregateQueryBuilder.MongoPipeline.PrependStages(
+		// 	bson.D{
+		// 		{
+		// 			"$unwind", bson.D{
+		// 				// {
+		// 				// 	"path", libCommon.Ternary(
+		// 				// 		joinInitializer.Alias == "",
+		// 				// 		fmt.Sprintf(`%ss`, this.initiator.GetDBStorageUnitName()),
+		// 				// 		joinInitializer.Alias,
+		// 				// 	),
+		// 				// },
+		// 				{"path", unwindPath},
+		// 			},
+		// 		},
+		// 	},
+		// )
+
+		this.local_navigator.MongoAggregateQueryBuilder.Unwind(unwindPath)
 	}
 }

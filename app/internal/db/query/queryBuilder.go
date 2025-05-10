@@ -12,6 +12,8 @@ type (
 		ISkipQueryBuilder
 		ISubQueryDataSortOrder
 		IDataCondition
+		ILeftJoinMethod
+		IInnerJoinMethod
 		storage.IArbitraryQuery
 		storage.IQueryEndingPhase
 	}

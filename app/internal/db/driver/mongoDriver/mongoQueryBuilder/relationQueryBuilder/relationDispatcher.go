@@ -3,8 +3,6 @@ package relationQueryBuilder
 import (
 	"app/internal/db/driver/mongoDriver/mongoQueryBuilder/queryBuilder"
 	"app/internal/db/relation"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
@@ -69,12 +67,6 @@ func (this *relation_dispatcher) _dispatch(
 
 		foreignInitializer := relationResolver.GetForeignInitializer()
 
-		this.PushStages(
-			bson.D{
-				{"$lookup", foreignInitializer},
-			},
-		)
-
 		switch v := initiator.(type) {
 		case relation.IDBRelationForeignInitializer:
 			v.InitializeForeign(foreignInitializer)
@@ -88,6 +80,12 @@ func (this *relation_dispatcher) _dispatch(
 
 			initFn(foreignInitializer)
 		}
+
+		// this.PushStages(
+		// 	bson.D{
+		// 		{"$lookup", foreignInitializer},
+		// 	},
+		// )
 
 		relationResolver.Resolve()
 
