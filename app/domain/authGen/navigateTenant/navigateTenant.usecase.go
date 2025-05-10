@@ -3,6 +3,7 @@ package navigateTenantDomain
 import (
 	"app/internal/common"
 	libCommon "app/internal/lib/common"
+	"app/model"
 	authGenServicePort "app/port/authGenService"
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	requestPresenter "app/presenter/request"
@@ -19,8 +20,8 @@ var (
 
 type (
 	NavigateTenantUseCase struct {
-		unitOfWork.GenericUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant]
-		unitOfWork.UseCaseResultWrapper[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant]
+		unitOfWork.GenericUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant[model.Tenant]]
+		unitOfWork.UseCaseResultWrapper[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant[model.Tenant]]
 		unitOfWork.MongoUserSessionCacheUseCase[requestPresenter.AuthNavigateTenant]
 		GeneralTokenClient    generalTokenClientServicePort.IGeneralTokenClient
 		NavigateTenantService authGenServicePort.INavigateTenant
@@ -29,7 +30,7 @@ type (
 
 func (this *NavigateTenantUseCase) Execute(
 	input *requestPresenter.AuthNavigateTenant,
-) (output *responsePresenter.AuthNavigateTenant, err error) {
+) (output *responsePresenter.AuthNavigateTenant[model.Tenant], err error) {
 
 	defer this.WrapResults(input, &output, &err)
 
@@ -68,7 +69,11 @@ func (this *NavigateTenantUseCase) Execute(
 		return nil, errGeneralTokenMustBeRemovedFromClient
 	}
 
-	data, err := this.NavigateTenantService.Serve(generalToken.GetUserUUID(), input.GetContext())
+	// data, err := this.NavigateTenantService.Serve(generalToken.GetUserUUID(), input.GetContext())
+
+	data, err := this.NavigateTenantService.Serve(
+		domain_input{generalToken.GetUserUUID(), input.GetContext()},
+	)
 
 	if err != nil {
 

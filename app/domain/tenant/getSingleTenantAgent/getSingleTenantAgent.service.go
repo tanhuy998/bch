@@ -3,10 +3,10 @@ package getSingleTenantAgent
 import (
 	"app/model"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
@@ -35,12 +35,19 @@ func (this *GetSingleTenantAgentService) Serve(uuid_str string) (*model.TenantAg
 
 func (this *GetSingleTenantAgentService) SearchByUsername(username string) (*model.TenantAgent, error) {
 
-	ret, err := this.TenantAgentRepo.Find(
-		bson.D{
-			{"username", username},
+	// ret, err := this.TenantAgentRepo.Find(
+	// 	bson.D{
+	// 		{"username", username},
+	// 	},
+	// 	context.TODO(),
+	// )
+
+	ret, err := this.TenantAgentRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+
+			filter.Field("username").Equal(username)
 		},
-		context.TODO(),
-	)
+	).FindOne(context.TODO())
 
 	if err != nil {
 
@@ -52,19 +59,21 @@ func (this *GetSingleTenantAgentService) SearchByUsername(username string) (*mod
 
 func (this *GetSingleTenantAgentService) CheckUsernameExistence(username string) (bool, error) {
 
-	ret, err := this.TenantAgentRepo.Find(
-		bson.D{
-			{"username", username},
-		},
-		context.TODO(),
-	)
+	// ret, err := this.TenantAgentRepo.Find(
+	// 	bson.D{
+	// 		{"username", username},
+	// 	},
+	// 	context.TODO(),
+	// )
+
+	user, err := this.SearchByUsername(username)
 
 	if err != nil {
 
 		return false, err
 	}
 
-	if ret == nil {
+	if user == nil {
 
 		return false, nil
 	}

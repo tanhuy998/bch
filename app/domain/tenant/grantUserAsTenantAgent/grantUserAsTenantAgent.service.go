@@ -7,12 +7,12 @@ import (
 	authServicePort "app/port/auth"
 	tenantServicePort "app/port/tenant"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	"context"
 	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -62,20 +62,35 @@ func (this *GrantUserAsTenantAgentService) Serve(
 		return nil, errors.Join(common.ERR_NOT_FOUND, fmt.Errorf("%s error: user not found", SERVICE_NAME))
 	}
 
-	userAlreadyTenantAgent, err := this.TenantAgentRepo.Find(
-		bson.D{
-			{"userUUID", userUUID},
+	// userAlreadyTenantAgent, err := this.TenantAgentRepo.Find(
+	// 	bson.D{
+	// 		{"userUUID", userUUID},
+	// 	},
+	// 	ctx,
+	// )
+
+	// if err != nil {
+
+	// 	return nil, err
+	// }
+
+	// if userAlreadyTenantAgent != nil {
+
+	// 	return nil, errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("%s error: user are currently a tenant agent", SERVICE_NAME))
+	// }
+
+	findExisingUserQuery := this.TenantAgentRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+
+			filter.Field("userUUID").Equal(userUUID)
+			filter.Field("tenantUUID").Equal(tenantUUID)
 		},
-		ctx,
 	)
 
-	if err != nil {
-
+	switch userAlreadyTenantAgent, err := findExisingUserQuery.FindOne(ctx); {
+	case err != nil:
 		return nil, err
-	}
-
-	if userAlreadyTenantAgent != nil {
-
+	case userAlreadyTenantAgent != nil:
 		return nil, errors.Join(common.ERR_BAD_REQUEST, fmt.Errorf("%s error: user are currently a tenant agent", SERVICE_NAME))
 	}
 

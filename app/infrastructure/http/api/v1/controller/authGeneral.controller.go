@@ -4,6 +4,7 @@ import (
 	"app/infrastructure/http/common"
 	routeAuth "app/infrastructure/http/common/auth/route"
 	"app/infrastructure/http/middleware"
+	"app/model"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -15,7 +16,7 @@ type (
 	AuthGeneralController struct {
 		common.Controller
 		AuthenticateCredentialsUseCase usecasePort.IUseCase[requestPresenter.LoginRequest, responsePresenter.LoginResponse]
-		NavigateTenantUseCase          usecasePort.IUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant]
+		NavigateTenantUseCase          usecasePort.IUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant[model.Tenant]]
 		CheckGenTokenUseCase           usecasePort.IUseCase[requestPresenter.CheckLogin, responsePresenter.CheckLogin]
 	}
 )

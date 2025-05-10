@@ -18,7 +18,7 @@ type (
 	// 	ICRUDMongoRepository[model.Tenant]
 	// }
 
-	ITenant = repositoryAPI.ICRUDMongoRepository[model.Tenant]
+	ITenant = repositoryAPI.ICRUDRepository[model.Tenant] // repositoryAPI.ICRUDMongoRepository[model.Tenant]
 
 	TenantRepository struct {
 		//AbstractMongoRepository

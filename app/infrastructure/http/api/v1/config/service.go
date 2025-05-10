@@ -107,12 +107,13 @@ func InitializeDatabase(app router.Party) {
 	)
 
 	fmt.Println("Initialize Repositories...")
-	irisIoc.BindDependency[repository.ITenant](
-		container, new(repository.TenantRepository).Init(dbInstance),
-	).EnableStructDependents()
-	irisIoc.BindDependency[repository.ITenantAgent](
-		container, new(repository.TenantAgentRepository).Init(dbInstance),
-	).EnableStructDependents()
+	// irisIoc.BindDependency[repository.ITenant](
+	// 	container, new(repository.TenantRepository).Init(dbInstance),
+	// ).EnableStructDependents()
+
+	// irisIoc.BindDependency[repository.ITenantAgent](
+	// 	container, new(repository.TenantAgentRepository).Init(dbInstance),
+	// ).EnableStructDependents()
 
 	// libConfig.BindDependency[repository.IUser](
 	// 	container, new(repository.UserRepository).Init(db),
@@ -152,6 +153,12 @@ func InitializeDatabase(app router.Party) {
 
 	repositoryConfig.BindRepositories(
 		container,
+		binding.ByRepositoryOf[model.Tenant](
+			new(repository.TenantRepository).Init(dbInstance),
+		),
+		binding.ByRepositoryOf[model.TenantAgent](
+			new(repository.TenantAgentRepository).Init(dbInstance),
+		),
 		binding.ByRepositoryOf[model.CommandGroup](
 			new(repository.CommandGroupRepository).Init(dbInstance),
 		),

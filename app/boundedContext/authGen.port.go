@@ -5,6 +5,7 @@ import (
 	checkGeneralTokenDomain "app/domain/authGen/checkGeneralToken"
 	navigateTenantDomain "app/domain/authGen/navigateTenant"
 	irisIoc "app/internal/lib/iris/ioc"
+	"app/model"
 
 	authGenServicePort "app/port/authGenService"
 	usecasePort "app/port/usecase"
@@ -30,7 +31,7 @@ func RegisterAuthGenBoundedContext(container *hero.Container) {
 	](container, nil)
 
 	irisIoc.BindDependency[
-		usecasePort.IUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant],
+		usecasePort.IUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant[model.Tenant]],
 		navigateTenantDomain.NavigateTenantUseCase,
 	](container, nil)
 }

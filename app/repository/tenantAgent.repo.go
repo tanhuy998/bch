@@ -2,6 +2,8 @@ package repository
 
 import (
 	"app/model"
+	repositoryAPI "app/repository/api"
+	mongoRepository "app/repository/driver/mongod"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -16,11 +18,12 @@ type (
 	// 	ICRUDMongoRepository[model.TenantAgent]
 	// }
 
-	ITenantAgent = IRepository[model.TenantAgent]
+	ITenantAgent = repositoryAPI.ICRUDRepository[model.TenantAgent] // IRepository[model.TenantAgent]
 
 	TenantAgentRepository struct {
 		//AbstractMongoRepository
-		crud_mongo_repository[model.TenantAgent]
+		//crud_mongo_repository[model.TenantAgent]
+		mongoRepository.MongoCRUDRepository[model.TenantAgent]
 	}
 )
 
@@ -30,7 +33,9 @@ func (this *TenantAgentRepository) Init(db *mongo.Database) *TenantAgentReposito
 
 	// this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
 
-	this.crud_mongo_repository.Init(db, TENANT_AGENT_COLLECTION_NAME)
+	// this.crud_mongo_repository.Init(db, TENANT_AGENT_COLLECTION_NAME)
+
+	this.MongoCRUDRepository.Init(db, TENANT_AGENT_COLLECTION_NAME)
 
 	return this
 }

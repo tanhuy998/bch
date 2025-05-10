@@ -3,12 +3,12 @@ package checkCommandGroupUserRoles
 import (
 	"app/internal/db/query"
 	"app/model"
-	"app/unitOfWork/aggregate/relation/unwind"
+	"app/unitOfWork/aggregate/relation/triat/leftJoin"
 )
 
 type (
 	CommandGroupUser_CommandGroupUserRole_Relation struct {
-		unwind.OneToManyWith[model.CommandGroupUserRole]
+		leftJoin.OneToManyWith[model.CommandGroupUserRole]
 	}
 )
 
