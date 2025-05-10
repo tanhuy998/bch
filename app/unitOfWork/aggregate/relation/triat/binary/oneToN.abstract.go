@@ -12,5 +12,7 @@ type (
 
 func (this abstract_one_to_n) GetBridgeResolver() relation.IDBRelationResolver {
 
-	return resolver.Unwind{}
+	// return resolver.Unwind{}
+
+	return resolver.One_To_Many{}
 }

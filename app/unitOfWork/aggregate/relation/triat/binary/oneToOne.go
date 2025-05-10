@@ -11,11 +11,16 @@ type (
 		Bridge_Entity_T any,
 		Foreign_Entity_T any,
 	] struct {
-		abstract_one_to_n
+		//abstract_one_to_n
 		pivot.Bridge[Bridge_Entity_T]
 		pivot.Foreign[Foreign_Entity_T]
 	}
 )
+
+func (this OneToOneBy[Bridge_Entity_T, Foreign_Entity_T]) GetBridgeResolver() relation.IDBRelationResolver {
+
+	return resolver.One_To_One{}
+}
 
 func (this OneToOneBy[Bridge_Entity_T, Foreign_Entity_T]) GetForeignResolver() relation.IDBRelationResolver {
 

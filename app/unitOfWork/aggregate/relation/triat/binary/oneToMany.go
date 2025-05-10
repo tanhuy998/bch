@@ -19,7 +19,8 @@ type (
 
 func (this OneToManyBy[Bridge_Entity_T, Foreign_Entity_T]) GetForeignResolver() relation.IDBRelationResolver {
 
-	return resolver.One_To_Many{}
+	// return resolver.One_To_Many{}
+	return resolver.One_To_One{}
 }
 
 func (this OneToManyBy[Bridge_Entity_T, Foreign_Entity_T]) GetDBRelationKind() string {

@@ -1,4 +1,4 @@
-package unwind
+package leftJoin
 
 import (
 	"app/internal/db/relation"
@@ -17,5 +17,15 @@ func (this OneToManyWith[Entity_T]) ResolveRelation(
 
 	this.OneToManyWith.ResolveRelation(local, foreignNavigator)
 
-	foreignNavigator.UnwindLocal()
+	//foreignNavigator.UnwindLocal()
+}
+
+func (this OneToManyWith[Entity_T]) DetermineJoinOperation(initializer relation.IJoinDeterminerInitializer) relation.IJoinOperator {
+
+	return initializer.AsLeftJoin()
+}
+
+func (this OneToManyWith[Entity_T]) GetDBRelationKind() string {
+
+	return "left_join_one_to_many"
 }
