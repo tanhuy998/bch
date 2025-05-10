@@ -50,8 +50,8 @@ type (
 		LessThanOrEqual(val interface{})
 	}
 
-	FilterLogicalGroupFunc = func(filteredField IFilterExpressionOperator)
-	FilterFunc             = func(filter IFilterGenerator)
+	FilterLogicalGroupFunc func(filteredField IFilterExpressionOperator)
+	FilterFunc             func(filter IFilterGenerator)
 
 	IFilterMethods[Model_T any] interface {
 		Filter(FilterFunc) IRepositoryFilterableOperator[Model_T]
