@@ -86,7 +86,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	irisIoc.BindDependency[authServicePort.IGrantCommandGroupRolesToUser, grantCommandGroupRoleToUserDomain.GrantCommandGroupRolesToUserService](container, nil)
 
 	irisIoc.BindDependency[authServicePort.IModifyUser, modifyUserDomain.ModifyUserService](container, nil)
-	irisIoc.BindDependency[authServicePort.ICheckAuthority, checkAuthorityDomain.CheckAuthorityService](container, nil)
+	irisIoc.BindDependency[authServicePort.ICheckAuthorityDBSession, checkAuthorityDomain.CheckAuthorityDBSessionService](container, nil)
 
 	registerDomainSpecificUtils(container)
 
@@ -149,7 +149,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 	](container, nil)
 
 	irisIoc.BindDependency[
-		usecasePort.IMiddlewareUseCase, checkAuthorityDomain.CheckAuthorityUseCase,
+		usecasePort.IMiddlewareUseCase, checkAuthorityDomain.CheckAuthoritySessionUseCase,
 	](container, nil)
 
 	container.Register(new(AuthBoundedContext)).Explicitly().EnableStructDependents()

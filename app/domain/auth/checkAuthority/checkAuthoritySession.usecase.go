@@ -17,16 +17,16 @@ const (
 )
 
 type (
-	CheckAuthorityUseCase struct {
+	CheckAuthoritySessionUseCase struct {
 		usecasePort.UserSessionCacheUseCase
-		CheckAuthorityService  authServicePort.ICheckAuthority
+		CheckAuthorityService  authServicePort.ICheckAuthorityDBSession
 		AccessTokenClient      accessTokenClientPort.IAccessTokenClient
 		AccessTokenManipulator accessTokenServicePort.IAccessTokenManipulator
 		RefreshTokenIDProvider refreshTokenIdServicePort.IRefreshTokenIDProvider
 	}
 )
 
-func (this *CheckAuthorityUseCase) Execute(
+func (this *CheckAuthoritySessionUseCase) Execute(
 	ctx context.Context,
 ) error {
 
@@ -39,6 +39,8 @@ func (this *CheckAuthorityUseCase) Execute(
 		return errors.Join(common.ERR_UNAUTHORIZED, fmt.Errorf("%s error: no access token", USE_CASE_NAME))
 	case accessToken.Expired():
 		return errors.Join(common.ERR_UNAUTHORIZED, fmt.Errorf("%s error: access token expires", USE_CASE_NAME))
+	case !accessToken.HasExpire():
+		return nil
 	}
 
 	// access token and refresh token share the same token id

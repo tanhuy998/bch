@@ -14,12 +14,11 @@ import (
 	refreshTokenIdServicePort "app/port/refreshTokenID"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
+	repositoryAPI "app/repository/api"
 	"app/unitOfWork"
 	"context"
 	"errors"
 	"fmt"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 var (
@@ -165,14 +164,23 @@ func (this *RotateSignaturesUseCase) checkUserSession(
 		return nil
 	}
 
-	dbUserSession, err := this.UserSessionRepo.Find(
-		bson.D{
-			{"userUUID", generalTokenID.GetUserUUID()},
-			{"tenantUUID", refreshToken.GetTenantUUID()},
-			{"sessionID", generalTokenID},
+	// dbUserSession, err := this.UserSessionRepo.Find(
+	// 	bson.D{
+	// 		{"userUUID", generalTokenID.GetUserUUID()},
+	// 		{"tenantUUID", refreshToken.GetTenantUUID()},
+	// 		{"sessionID", generalTokenID},
+	// 	},
+	// 	input.GetContext(),
+	// )
+
+	dbUserSession, err := this.UserSessionRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+
+			filter.Field("userUUID").Equal(generalTokenID.GetUserUUID())
+			filter.Field("tenantUUID").Equal(refreshToken.GetTenantUUID())
+			filter.Field("sessionID").Equal(generalTokenID)
 		},
-		input.GetContext(),
-	)
+	).FindOne(input.GetContext())
 
 	if err != nil {
 

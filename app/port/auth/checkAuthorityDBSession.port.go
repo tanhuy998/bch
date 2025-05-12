@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	ICheckAuthority interface {
+	ICheckAuthorityDBSession interface {
 		Serve(
 			tenantUUID, userUUID uuid.UUID, sessionID generalToken.GeneralTokenID, ctx context.Context,
 		) error

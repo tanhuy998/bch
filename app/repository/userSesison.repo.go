@@ -2,6 +2,8 @@ package repository
 
 import (
 	"app/model"
+	repositoryAPI "app/repository/api"
+	mongoRepository "app/repository/driver/mongod"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -18,11 +20,12 @@ type (
 	// 	ICreateMany[model.UserSession]
 	// }
 
-	IUserSession = IRepository[model.UserSession]
+	IUserSession = repositoryAPI.ICRUDRepository[model.UserSession] // IRepository[model.UserSession]
 
 	UserSessionRepository struct {
 		AbstractMongoRepository
-		crud_mongo_repository[model.UserSession]
+		//crud_mongo_repository[model.UserSession]
+		mongoRepository.MongoCRUDRepository[model.UserSession]
 	}
 )
 
@@ -32,7 +35,9 @@ func (this *UserSessionRepository) Init(db *mongo.Database) *UserSessionReposito
 
 	// this.crud_mongo_repository.InitCollection(this.AbstractMongoRepository.collection)
 
-	this.crud_mongo_repository.Init(db, USER_COLLECTION_NAME)
+	//this.crud_mongo_repository.Init(db, USER_COLLECTION_NAME)
+
+	this.MongoCRUDRepository.Init(db, USER_SESSION_COLLECTION_NAME)
 
 	return this
 }

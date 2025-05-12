@@ -85,6 +85,7 @@ type (
 		GetAuthData() IAccessTokenAuthData
 		Expired() bool
 		GetExpireTime() *time.Time
+		HasExpire() bool
 		GetTokenID() string
 		SetTokenID(string)
 	}

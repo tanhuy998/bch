@@ -7,7 +7,6 @@ import (
 	irisIoc "app/internal/lib/iris/ioc"
 
 	accessTokenServicePort "app/port/accessToken"
-	accessTokenClientPort "app/port/accessTokenClient"
 	authSignatureTokenPort "app/port/authSignatureToken"
 	authSignaturesServicePort "app/port/authSignatures"
 	refreshTokenServicePort "app/port/refreshToken"
@@ -15,7 +14,6 @@ import (
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
-	accessTokenClientService "app/service/accessTokenClient"
 	"app/service/accessTokenService"
 	"app/service/authSignatureToken"
 	refreshTokenService "app/service/refreshToken"
@@ -26,8 +24,7 @@ import (
 
 func registerDomainSpecificUtils(container *hero.Container) {
 
-	irisIoc.BindDependency[accessTokenServicePort.IAccessTokenManipulator, accessTokenService.JWTAccessTokenManipulatorService](container, nil)
-	irisIoc.BindDependency[accessTokenClientPort.IAccessTokenClient, accessTokenClientService.BearerAccessTokenClientService](container, nil)
+	irisIoc.BindDependency[accessTokenServicePort.IAccessTokenManipulator, accessTokenService.JWTAccessTokenProviderService](container, nil)
 
 	//refreshTokenService := new(refreshTokenService.RefreshTokenManipulatorService)
 	irisIoc.BindDependency[refreshTokenServicePort.IRefreshTokenManipulator, refreshTokenService.RefreshTokenManipulatorService](container, nil)
