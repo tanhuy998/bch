@@ -173,6 +173,9 @@ func (this *IrisAccessLoggerService) assignLogObject(ctx context.Context) {
 	logObj.Path = c.Path()
 	logObj.SourceIP = c.GetHeader("X-Real-IP")
 	logObj.UserAgent = c.Request().UserAgent()
+
+	assignIdentity(logObj, c)
+
 	logObj.ResponseStatus = c.GetStatusCode()
 }
 func (this *IrisAccessLoggerService) HasError(ctx context.Context) bool {

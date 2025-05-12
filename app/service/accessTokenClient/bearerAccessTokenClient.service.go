@@ -6,6 +6,7 @@ import (
 	accessTokenServicePort "app/port/accessToken"
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/kataras/iris/v12"
@@ -15,9 +16,14 @@ const (
 	HEADER_AUTH = "Authorization"
 )
 
+var (
+	bearerHeaderDetect = regexp.MustCompile(`^Bearer .*`)
+)
+
 type (
 	BearerAccessTokenClientService struct {
-		AccessTokenManipulator accessTokenServicePort.IAccessTokenManipulator
+		// AccessTokenManipulator accessTokenServicePort.IAccessTokenManipulator
+		AccessTokenReader accessTokenServicePort.IAccessTokenReader
 	}
 )
 
@@ -44,12 +50,18 @@ func (this *BearerAccessTokenClientService) readRaw(ctx iris.Context) (accessTok
 
 	header_value := ctx.GetHeader(HEADER_AUTH)
 
-	if header_value == "" {
+	// if header_value == "" {
+
+	// 	return nil, nil
+	// }
+
+	if !bearerHeaderDetect.MatchString(header_value) {
 
 		return nil, nil
 	}
 
-	raw := strings.TrimPrefix(header_value, "Bearer ")
+	rawString := strings.TrimPrefix(header_value, "Bearer ")
 
-	return this.AccessTokenManipulator.Read(raw)
+	//return this.AccessTokenManipulator.Read(raw)
+	return this.AccessTokenReader.Read(rawString)
 }

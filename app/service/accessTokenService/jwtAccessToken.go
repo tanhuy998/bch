@@ -2,6 +2,7 @@ package accessTokenService
 
 import (
 	"app/internal/common"
+	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	accessTokenServicePort "app/port/accessToken"
 	"app/valueObject"
@@ -131,7 +132,12 @@ func (this *jwt_access_token) GetExpireTime() *time.Time {
 		return nil
 	}
 
-	return &claims.ExpireAt.Time
+	return libCommon.PointerPrimitive(claims.ExpireAt.Time)
+}
+
+func (this *jwt_access_token) HasExpire() bool {
+
+	return this.GetExpireTime() != nil
 }
 
 func (this *jwt_access_token) GetTokenID() string {

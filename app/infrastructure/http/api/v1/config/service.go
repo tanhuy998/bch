@@ -5,6 +5,7 @@ import (
 	"app/infrastructure/http/common"
 	repositoryConfig "app/infrastructure/http/common/config/repository"
 	"app/infrastructure/http/common/config/repository/binding"
+	"log"
 
 	"app/internal/bootstrap"
 	"app/internal/db"
@@ -17,13 +18,14 @@ import (
 
 	"app/model"
 	accessLogServicePort "app/port/accessLog"
+	accessTokenServicePort "app/port/accessToken"
+	accessTokenClientPort "app/port/accessTokenClient"
 	actionResultServicePort "app/port/actionResult"
 	cacheListServicePort "app/port/cacheList"
 	dbQueryTracerPort "app/port/dbQueryTracer"
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	generalTokenIDServicePort "app/port/generalTokenID"
-	"log"
 
 	jwtTokenServicePort "app/port/jwtTokenService"
 	passwordServicePort "app/port/passwordService"
@@ -31,6 +33,8 @@ import (
 	"app/port/responsePresetPort"
 	uniqueIDServicePort "app/port/uniqueID"
 	"app/repository"
+	accessTokenClientService "app/service/accessTokenClient"
+	"app/service/accessTokenService"
 	actionResultService "app/service/actionResult"
 	authService "app/service/auth"
 	cacheListService "app/service/cacheList"
@@ -70,21 +74,12 @@ func InitializeDatabase(app router.Party) {
 
 	dbInstance := db.GetDB()
 
-	container.Register(log.Default()).Explicitly()
 	container.Register(dbInstance).Explicitly()
 	container.Register(client).Explicitly()
 
 	irisIoc.BindDependency[repository.ITransactionDBClient, repository.MongoDBClient](container, nil)
 
 	fmt.Println("DBMS client initialized.")
-
-	/*
-		access logger must be initialized before repositories in order to trace db query
-	*/
-	irisIoc.BindDependency[
-		accessLogServicePort.IAccessLogger,
-		irisAccessLoggerService.IrisAccessLoggerService,
-	](container, nil)
 
 	irisIoc.BindDependency[
 		dbQueryTracerPort.IDBQueryTracer, mongoDBTracerService.DBQueryTracerService,
@@ -177,6 +172,9 @@ func InitializeDatabase(app router.Party) {
 		binding.ByRepositoryOf[model.AssignmentGroupMember](
 			new(repository.AssignmentGroupMemberRepository).Init(dbInstance),
 		),
+		binding.ByRepositoryOf[model.UserSession](
+			new(repository.UserSessionRepository).Init(dbInstance),
+		),
 	)
 
 	// irisIoc.BindDependency[repository.ICommandGroupUser](
@@ -254,9 +252,9 @@ func InitializeDatabase(app router.Party) {
 	// irisIoc.BindDependency[repository.IAssignmentGroupMember](
 	// 	container, new(repository.AssignmentGroupMemberRepository).Init(dbInstance),
 	// ).EnableStructDependents()
-	irisIoc.BindDependency[repository.IUserSession](
-		container, new(repository.UserSessionRepository).Init(dbInstance),
-	).EnableStructDependents()
+	// irisIoc.BindDependency[repository.IUserSession](
+	// 	container, new(repository.UserSessionRepository).Init(dbInstance),
+	// ).EnableStructDependents()
 	fmt.Println("Repositories Initialized.")
 }
 
@@ -335,11 +333,20 @@ func InitializeDatabase(app router.Party) {
 
 func RegisterUtilServices(container *hero.Container) {
 
+	container.Register(log.Default()).Explicitly()
 	irisIoc.BindDependency[context.Validator, validator.Validate](container, validator.New())
 	irisIoc.BindDependency[actionResultServicePort.IActionResult, actionResultService.ResponseResultService](container, nil)
 	irisIoc.BindDependency[responsePresetPort.IResponsePreset, responsePresetService.ResponsePresetService](container, nil)
 	irisIoc.BindDependency[passwordServicePort.IPassword, passwordService.PasswordService](container, nil)
 	irisIoc.BindDependency[common.IMiddlewareErrorHandler, common.ErrorHandler](container, nil)
+
+	/*
+		access logger must be initialized before repositories in order to trace db query
+	*/
+	irisIoc.BindDependency[
+		accessLogServicePort.IAccessLogger,
+		irisAccessLoggerService.IrisAccessLoggerService,
+	](container, nil)
 	// container.Register(new(common.Controller)).Explicitly().EnableStructDependents()
 }
 
@@ -411,6 +418,8 @@ func RegisterAuthDependencies(container *hero.Container) {
 		panic("error while initiating uniqueID service: " + err.Error())
 	}
 
+	irisIoc.BindDependency[accessTokenServicePort.IAccessTokenReader, accessTokenService.AccessTokenManufacturerService](container, nil)
+
 	irisIoc.BindDependency[uniqueIDServicePort.IUniqueIDGenerator](container, uniqueID)
 	irisIoc.BindDependency[generalTokenIDServicePort.IGeneralTokenIDProvider, generalTokenIDService.GeneralTokenIDProvider](container, nil)
 
@@ -418,7 +427,7 @@ func RegisterAuthDependencies(container *hero.Container) {
 
 	irisIoc.BindDependency[generalTokenServicePort.IGeneralTokenManipulator, generalTokenService.GeneralTokenManipulator](container, nil)
 	irisIoc.BindDependency[generalTokenClientServicePort.IGeneralTokenClient, generalTokenClientService.GeneralTokenClientService](container, nil)
-
+	irisIoc.BindDependency[accessTokenClientPort.IAccessTokenClient, accessTokenClientService.BearerAccessTokenClientService](container, nil)
 	//accessTokenSevice := new(accessTokenService.JWTAccessTokenManipulatorService)
 
 	// libConfig.BindDependency[accessTokenServicePort.IAccessTokenManipulator, accessTokenService.JWTAccessTokenManipulatorService](container, nil)
@@ -460,10 +469,18 @@ func RegisterServices(app router.Party) {
 
 	fmt.Println("Wiring dependencies...")
 
+	/*
+		Database independent services
+	*/
 	RegisterUtilServices(container)
 	// RegisterAdapters(container)
 	RegisterCaches(container)
 	RegisterAuthDependencies(container)
+
+	InitializeDatabase(app)
+	/*
+		Database dependent services
+	*/
 	boundedContext.RegisterAuthBoundedContext(container)
 	boundedContext.RegisterTenantBoundedContext(container)
 	boundedContext.RegisterAuthGenBoundedContext(container)

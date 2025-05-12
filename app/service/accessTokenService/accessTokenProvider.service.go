@@ -4,11 +4,9 @@ import (
 	"app/internal/bootstrap"
 	"app/internal/common"
 	libCommon "app/internal/lib/common"
-	libError "app/internal/lib/error"
 	accessTokenServicePort "app/port/accessToken"
 	authServicePort "app/port/auth"
 	generalTokenServicePort "app/port/generalToken"
-	jwtTokenServicePort "app/port/jwtTokenService"
 	"app/repository"
 	"app/service/noExpireTokenProvider"
 	"app/unitOfWork"
@@ -42,21 +40,22 @@ type (
 	IAccessTokenHandler = accessTokenServicePort.IAccessTokenManipulator
 	IGeneralToken       = generalTokenServicePort.IGeneralToken
 
-	JWTAccessTokenManipulatorService struct {
+	JWTAccessTokenProviderService struct {
 		AudienceList accessTokenServicePort.AccessTokenAudienceList
 		unitOfWork.OperationLogger
-		JWTTokenManipulatorService jwtTokenServicePort.IAsymmetricJWTTokenManipulator
-		GetUserAuthority           authServicePort.IGetUserAuthorityServicePort
-		UserRepo                   repository.IUser
-		ExpDuration                time.Duration
-		WithoutExpire              bool
+		AccessTokenManufacturerService
+		//JWTTokenManipulatorService jwtTokenServicePort.IAsymmetricJWTTokenManipulator
+		GetUserAuthority authServicePort.IGetUserAuthorityServicePort
+		UserRepo         repository.IUser
+		ExpDuration      time.Duration
+		WithoutExpire    bool
 		noExpireTokenProvider.NoExpireTokenProvider
 	}
 )
 
-func New(options ...AccessTokenManipulatorOption) *JWTAccessTokenManipulatorService {
+func New(options ...AccessTokenManipulatorOption) *JWTAccessTokenProviderService {
 
-	ret := new(JWTAccessTokenManipulatorService)
+	ret := new(JWTAccessTokenProviderService)
 
 	for _, fn := range options {
 
@@ -66,19 +65,19 @@ func New(options ...AccessTokenManipulatorOption) *JWTAccessTokenManipulatorServ
 	return ret
 }
 
-func (this *JWTAccessTokenManipulatorService) Read(token_str string) (IAccessToken, error) {
+// func (this *JWTAccessTokenProviderService) Read(token_str string) (IAccessToken, error) {
 
-	token, err := this.JWTTokenManipulatorService.VerifyTokenStringCustomClaim(token_str, &jwt_access_token_custom_claims{})
+// 	token, err := this.JWTTokenManipulatorService.VerifyTokenStringCustomClaim(token_str, &jwt_access_token_custom_claims{})
 
-	if err != nil {
+// 	if err != nil {
 
-		return nil, err
-	}
+// 		return nil, err
+// 	}
 
-	return newFromToken(token)
-}
+// 	return newFromToken(token)
+// }
 
-func (this *JWTAccessTokenManipulatorService) GenerateBased(
+func (this *JWTAccessTokenProviderService) GenerateBased(
 	accessToken IAccessToken, ctx context.Context,
 ) (IAccessToken, error) {
 
@@ -92,7 +91,7 @@ func (this *JWTAccessTokenManipulatorService) GenerateBased(
 	return newAt, nil
 }
 
-func (this *JWTAccessTokenManipulatorService) makeFor(
+func (this *JWTAccessTokenProviderService) makeFor(
 	tenantUUID, userUUID uuid.UUID, ctx context.Context,
 ) (ret *jwt_access_token, err error) {
 
@@ -145,22 +144,22 @@ func (this *JWTAccessTokenManipulatorService) makeFor(
 	return accesstoken, nil
 }
 
-func (this *JWTAccessTokenManipulatorService) SignString(accessToken IAccessToken) (string, error) {
+// func (this *JWTAccessTokenProviderService) SignString(accessToken IAccessToken) (string, error) {
 
-	if val, ok := accessToken.(*jwt_access_token); ok {
+// 	if val, ok := accessToken.(*jwt_access_token); ok {
 
-		return this.JWTTokenManipulatorService.SignString(val.jwt_token)
-	}
+// 		return this.JWTTokenManipulatorService.SignString(val.jwt_token)
+// 	}
 
-	return "", libError.NewInternal(ERR_INVALID_ACCESS_TOKEN_TYPE)
-}
+// 	return "", libError.NewInternal(ERR_INVALID_ACCESS_TOKEN_TYPE)
+// }
 
-func (this *JWTAccessTokenManipulatorService) DefaultExpireDuration() time.Duration {
+func (this *JWTAccessTokenProviderService) DefaultExpireDuration() time.Duration {
 
 	return default_exp_duration
 }
 
-func (this *JWTAccessTokenManipulatorService) GenerateFor(
+func (this *JWTAccessTokenProviderService) GenerateFor(
 	tenantUUID uuid.UUID, generalToken IGeneralToken, tokenID string, ctx context.Context,
 ) (accessTokenServicePort.IAccessToken, error) {
 
