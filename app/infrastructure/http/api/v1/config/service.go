@@ -175,6 +175,12 @@ func InitializeDatabase(app router.Party) {
 		binding.ByRepositoryOf[model.UserSession](
 			new(repository.UserSessionRepository).Init(dbInstance),
 		),
+		binding.ByRepositoryOf[model.CommandGroupUserRole](
+			new(repository.CommandGroupUserRoleRepository).Init(dbInstance),
+		),
+		binding.ByRepositoryOf[model.Role](
+			new(repository.RoleRepository).Init(dbInstance),
+		),
 	)
 
 	// irisIoc.BindDependency[repository.ICommandGroupUser](
@@ -190,12 +196,12 @@ func InitializeDatabase(app router.Party) {
 	// 	iocOption.BindAs[storage.IDBStorageQueryExecutor[model.CommandGroupUser]](),
 	// )
 
-	irisIoc.BindDependency[repository.ICommandGroupUserRole](
-		container, new(repository.CommandGroupUserRoleRepository).Init(dbInstance),
-	).EnableStructDependents()
-	irisIoc.BindDependency[repository.IRole](
-		container, new(repository.RoleRepository).Init(dbInstance),
-	).EnableStructDependents()
+	// irisIoc.BindDependency[repository.ICommandGroupUserRole](
+	// 	container, new(repository.CommandGroupUserRoleRepository).Init(dbInstance),
+	// ).EnableStructDependents()
+	// irisIoc.BindDependency[repository.IRole](
+	// 	container, new(repository.RoleRepository).Init(dbInstance),
+	// ).EnableStructDependents()
 	// libConfig.BindDependency[repository.ICampaignRepository](
 	// 	container, new(repository.CampaignRepository).Init(db),
 	// ).EnableStructDependents()
