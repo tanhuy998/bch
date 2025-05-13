@@ -7,6 +7,6 @@ import (
 
 type (
 	IGetAllRoles interface {
-		Serve(ctx context.Context) ([]*model.Role, error)
+		Serve(ctx context.Context) ([]model.Role, error)
 	}
 )

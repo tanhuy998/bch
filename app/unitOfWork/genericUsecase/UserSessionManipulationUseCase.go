@@ -6,13 +6,13 @@ import (
 	cacheListServicePort "app/port/cacheList"
 	generalTokenServicePort "app/port/generalToken"
 	"app/repository"
+	repositoryAPI "app/repository/api"
 	opLog "app/unitOfWork/operationLog"
 	"context"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -33,7 +33,7 @@ type (
 		RefreshTokenBlackList
 	}
 
-	MongoUserSessionCacheUseCase[Output_T any] struct {
+	UserSessionManipulationUseCase[Output_T any] struct {
 		UserSessionCacheUseCase
 		opLog.OperationLogger
 		UserSessionRepo repository.IUserSession
@@ -41,7 +41,7 @@ type (
 	}
 )
 
-func (this *MongoUserSessionCacheUseCase[Output_T]) ModifyUserSession(
+func (this *UserSessionManipulationUseCase[Output_T]) ModifyUserSession(
 	ctx context.Context, fn func(context.Context) (*Output_T, error),
 ) (*Output_T, error) {
 
@@ -75,21 +75,29 @@ func (this *MongoUserSessionCacheUseCase[Output_T]) ModifyUserSession(
 	return nil, nil
 }
 
-func (this *MongoUserSessionCacheUseCase[Output_T]) RemoveUserSession(
+func (this *UserSessionManipulationUseCase[Output_T]) RemoveUserSession(
 	ctx context.Context, genToken generalTokenServicePort.IGeneralToken,
 ) (err error) {
 
-	userSessions, err := this.UserSessionRepo.FindMany(
-		bson.D{
-			{"userUUID", genToken.GetUserUUID()},
-			{
-				"sessionID", bson.D{
-					{"$ne", genToken.GetTokenID()},
-				},
-			},
+	// userSessions, err := this.UserSessionRepo.FindMany(
+	// 	bson.D{
+	// 		{"userUUID", genToken.GetUserUUID()},
+	// 		{
+	// 			"sessionID", bson.D{
+	// 				{"$ne", genToken.GetTokenID()},
+	// 			},
+	// 		},
+	// 	},
+	// 	ctx,
+	// )
+
+	userSessions, err := this.UserSessionRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+
+			filter.Field("userUUID").Equal(genToken.GetUserUUID())
+			filter.Field("sessionID").Not().Equal(genToken.GetTokenID())
 		},
-		ctx,
-	)
+	).Find(ctx)
 
 	if err != nil {
 
@@ -122,7 +130,7 @@ func (this *MongoUserSessionCacheUseCase[Output_T]) RemoveUserSession(
 	return nil
 }
 
-func (this *MongoUserSessionCacheUseCase[Output_T]) HasUserSession(
+func (this *UserSessionManipulationUseCase[Output_T]) HasUserSession(
 	generalToken generalTokenServicePort.IGeneralToken, ctx context.Context,
 ) (bool, error) {
 
@@ -133,12 +141,26 @@ func (this *MongoUserSessionCacheUseCase[Output_T]) HasUserSession(
 		return true, nil
 	}
 
-	switch existingUserSession, err := this.UserSessionRepo.Find(
-		bson.D{
-			{"sessionID", generalToken.GetTokenID()},
+	// switch existingUserSession, err := this.UserSessionRepo.Find(
+	// 	bson.D{
+	// 		{"sessionID", generalToken.GetTokenID()},
+	// 	},
+	// 	ctx,
+	// ); {
+	// case err != nil:
+	// 	return false, err
+	// case existingUserSession != nil:
+	// 	return true, nil
+	// default:
+	// 	return false, nil
+	// }
+
+	switch existingUserSession, err := this.UserSessionRepo.Filter(
+		func(filter repositoryAPI.IFilterGenerator) {
+
+			filter.Field("sessionID").Equal(generalToken.GetTokenID())
 		},
-		ctx,
-	); {
+	).FindOne(ctx); {
 	case err != nil:
 		return false, err
 	case existingUserSession != nil:

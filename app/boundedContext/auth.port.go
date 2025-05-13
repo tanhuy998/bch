@@ -116,7 +116,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 		modifyUserDomain.ModifyUserUseCase,
 	](container, nil)
 	irisIoc.BindDependency[
-		usecasePort.IUseCase[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse],
+		usecasePort.IUseCase[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse[model.Role]],
 		getAllRoleDomain.GetAllRolesUseCase,
 	](container, nil)
 	irisIoc.BindDependency[
@@ -140,7 +140,7 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 		reportUserParticipatedCommandGroupsDomain.ReportParticipatedCommandGroupsUseCase,
 	](container, nil)
 	irisIoc.BindDependency[
-		usecasePort.IUseCase[requestPresenter.GetTenantAllGroups, responsePresenter.GetTenantAllGroups],
+		usecasePort.IUseCase[requestPresenter.GetTenantAllGroups, responsePresenter.GetTenantAllGroups[model.CommandGroup]],
 		getTenantAllGroupsDomain.GetTenantAllGroupUseCase,
 	](container, nil)
 	irisIoc.BindDependency[

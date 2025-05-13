@@ -27,7 +27,7 @@ var (
 
 type (
 	SwitchTenantUseCase struct {
-		unitOfWork.MongoUserSessionCacheUseCase[responsePresenter.SwitchTenant]
+		unitOfWork.UserSessionManipulationUseCase[responsePresenter.SwitchTenant]
 		unitOfWork.GenericUseCase[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant]
 		unitOfWork.UseCaseResultWrapper[requestPresenter.SwitchTenant, responsePresenter.SwitchTenant]
 		unitOfWork.OperationLogger

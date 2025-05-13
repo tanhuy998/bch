@@ -2,6 +2,7 @@ package repository
 
 import (
 	"app/model"
+	repositoryAPI "app/repository/api"
 	mongoRepository "app/repository/driver/mongod"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,7 +20,7 @@ type (
 
 	//ICommandGroup = IRepository[model.CommandGroup]
 
-	ICommandGroup = mongoRepository.ICRUDMongoRepository[model.CommandGroup] // repositoryAPI.ICRUDRepository[model.CommandGroup]
+	ICommandGroup = repositoryAPI.ICRUDRepository[model.CommandGroup] // mongoRepository.ICRUDMongoRepository[model.CommandGroup] // repositoryAPI.ICRUDRepository[model.CommandGroup]
 
 	CommandGroupRepository struct {
 		//AbstractMongoRepository

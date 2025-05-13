@@ -3,12 +3,12 @@ package aggregate
 import (
 	"app/internal/db/query"
 	"app/model"
-	aggregateRelation "app/unitOfWork/aggregate/relation"
+	"app/unitOfWork/aggregate/relation/triat/leftJoin"
 )
 
 type (
 	assignmentGroupUser_assignmentGroup_Relation struct {
-		aggregateRelation.OneToManyWith[model.AssignmentGroup]
+		leftJoin.OneToManyWith[model.AssignmentGroup]
 	}
 )
 

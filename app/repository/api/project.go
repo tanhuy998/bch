@@ -4,7 +4,7 @@ import "context"
 
 type (
 	IRepositoryProjectableOperator[Model_T any] interface {
-		Find(ctx context.Context) ([]*Model_T, error)
+		Find(ctx context.Context) ([]Model_T, error)
 		FindOne(ctx context.Context) (*Model_T, error)
 	}
 

@@ -125,7 +125,7 @@ func (this *mongo_repository[Model_T]) FindByFilter(query bson.D, ctx context.Co
 	return ret, nil
 }
 
-func (this *mongo_repository[Model_T]) FindManyByFilter(query bson.D, ctx context.Context) ([]*Model_T, error) {
+func (this *mongo_repository[Model_T]) FindManyByFilter(query bson.D, ctx context.Context) ([]Model_T, error) {
 
 	ret, err := findManyDocuments[Model_T](
 		query, &this.MongoDBQueryMonitorCollection, ctx, this.sort.Get(), this.projection,
@@ -296,7 +296,7 @@ func (this *mongo_repository[Model_T]) _FindPrevious(
 
 func (this *mongo_repository[Model_T]) FindMany(
 	query bson.D, ctx context.Context,
-) ([]*Model_T, error) {
+) ([]Model_T, error) {
 
 	return findManyDocuments[Model_T](
 		query, &this.MongoDBQueryMonitorCollection, ctx, this.sort.Get(), this.projection,

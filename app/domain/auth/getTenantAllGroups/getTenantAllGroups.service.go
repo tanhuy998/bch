@@ -2,20 +2,23 @@ package getTenantAllGroupsDomain
 
 import (
 	"app/model"
+	authServicePort "app/port/auth"
 	"app/repository"
-	repositoryAPI "app/repository/api"
-	"context"
-
-	"github.com/google/uuid"
+	paginateUseCase "app/unitOfWork/genericUsecase/paginate"
 )
 
 type (
 	GetTenantAllGroupService struct {
-		CommandGroupRepo repository.ICommandGroup
+		//CommandGroupRepo repository.ICommandGroup
+		paginateUseCase.PaginateUseCase[
+			repository.ICommandGroup,
+			model.CommandGroup,
+			interface{},
+		]
 	}
 )
 
-func (this *GetTenantAllGroupService) Serve(tenantUUID uuid.UUID, ctx context.Context) ([]*model.CommandGroup, error) {
+func (this *GetTenantAllGroupService) Serve(input authServicePort.GetTenantAllGroupsInput) ([]model.CommandGroup, error) {
 
 	// return repository.Aggregate[model.CommandGroup](
 	// 	this.CommandGroupRepo.GetCollection(),
@@ -31,9 +34,13 @@ func (this *GetTenantAllGroupService) Serve(tenantUUID uuid.UUID, ctx context.Co
 	// 	ctx,
 	// )
 
-	return this.CommandGroupRepo.Filter(
-		func(filter repositoryAPI.IFilterGenerator) {
-			filter.Field("tenantUUID").Equal(tenantUUID)
-		},
-	).Find(ctx)
+	// return this.CommandGroupRepo.Filter(
+	// 	func(filter repositoryAPI.IFilterGenerator) {
+	// 		filter.Field("tenantUUID").Equal(input.GetTenantUUID())
+	// 	},
+	// ).Find(ctx)
+
+	return this.PaginateUseCase.UseCustomPaginator(
+		input.GetTenantUUID(), input.GetGeneralPaginator(), input.GetContext(),
+	)
 }

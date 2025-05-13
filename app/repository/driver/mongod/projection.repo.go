@@ -67,7 +67,7 @@ func (this *mongo_read_projection[Model_T]) initProjection() {
 	this.projection = make(map[string]uint)
 }
 
-func (this *mongo_read_projection[Model_T]) Find(ctx context.Context) ([]*Model_T, error) {
+func (this *mongo_read_projection[Model_T]) Find(ctx context.Context) ([]Model_T, error) {
 
 	return findManyDocuments[Model_T](this.prepareFilter(), &this.MongoDBQueryMonitorCollection, ctx, this.prepareSorter(), this.projection)
 }

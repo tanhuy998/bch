@@ -4,6 +4,7 @@ import (
 	"app/infrastructure/http/common"
 	"app/infrastructure/http/middleware"
 	"app/infrastructure/http/middleware/middlewareHelper"
+	"app/model"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -15,7 +16,7 @@ import (
 type (
 	AuthRoleManipulationController struct {
 		common.Controller
-		GetAllRolesUseCase                  usecasePort.IUseCase[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse]                                   // usecase.IGetAllRoles
+		GetAllRolesUseCase                  usecasePort.IUseCase[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse[model.Role]]                       // usecase.IGetAllRoles
 		GrantCommandGroupRolesToUserUseCase usecasePort.IUseCase[requestPresenter.GrantCommandGroupRolesToUserRequest, responsePresenter.GrantCommandGroupRolesToUserResponse] // usecase.IGrantCommandGroupRolesToUser
 	}
 )

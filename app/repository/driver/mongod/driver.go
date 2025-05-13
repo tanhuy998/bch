@@ -2,6 +2,7 @@ package mongoRepository
 
 import (
 	"app/internal"
+	"app/internal/db/driver/mongoDriver/lib"
 	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	"context"
@@ -87,7 +88,7 @@ func findManyDocuments[T any](
 	sort interface{},
 	//projections ...bson.E,
 	projection interface{},
-) ([]*T, error) {
+) ([]T, error) {
 
 	if ctx == nil {
 
@@ -121,7 +122,7 @@ func findManyDocuments[T any](
 		return nil, libError.NewInternal(err)
 	}
 
-	res, err := ParseCursor[T](cur, ctx)
+	res, err := lib.ParseValCursor[T](cur, ctx)
 
 	if err != nil {
 

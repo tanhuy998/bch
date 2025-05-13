@@ -3,8 +3,8 @@ package responsePresenter
 import "app/model"
 
 type (
-	GetAllRolesResponse struct {
-		Message string        `json:"message"`
-		Data    []*model.Role `json:"data"`
+	GetAllRolesResponse[Data_T any] struct {
+		Message string       `json:"message"`
+		Data    []model.Role `json:"data"`
 	}
 )

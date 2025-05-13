@@ -1,10 +1,8 @@
 package responsePresenter
 
-import "app/model"
-
 type (
-	GetTenantAllGroups struct {
-		Message string                `json:"message"`
-		Data    []*model.CommandGroup `json:"data"`
+	GetTenantAllGroups[Data_T any] struct {
+		Message string   `json:"message"`
+		Data    []Data_T `json:"data"`
 	}
 )

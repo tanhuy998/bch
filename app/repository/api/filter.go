@@ -13,8 +13,8 @@ type (
 		//IRepositoryReadOperator[Model_T]
 		IRepositoryProjectableOperator[Model_T]
 		IProjector[Model_T]
-		Find(ctx context.Context) ([]*Model_T, error)
-		FindOne(ctx context.Context) (*Model_T, error)
+		// Find(ctx context.Context) ([]Model_T, error)
+		// FindOne(ctx context.Context) (*Model_T, error)
 		Update(updateEntity Model_T, ctx context.Context) error
 		UpdateOne(updateEntity Model_T, ctx context.Context) error
 		Delete(ctx context.Context) error

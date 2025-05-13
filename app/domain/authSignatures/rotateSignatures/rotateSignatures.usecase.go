@@ -35,7 +35,7 @@ type (
 		//usecasePort.MongoUserSessionCacheUseCase[responsePresenter.RefreshLoginResponse]
 		//usecasePort.UseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
 		unitOfWork.GenericUseCase[requestPresenter.RefreshLoginRequest, responsePresenter.RefreshLoginResponse]
-		unitOfWork.MongoUserSessionCacheUseCase[responsePresenter.RefreshLoginResponse]
+		unitOfWork.UserSessionManipulationUseCase[responsePresenter.RefreshLoginResponse]
 		unitOfWork.OperationLogger
 		GetSingleUserService   authServicePort.IGetSingleUser
 		RefreshTokenIDProvider refreshTokenIdServicePort.IRefreshTokenIDProvider

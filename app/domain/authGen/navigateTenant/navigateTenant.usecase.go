@@ -22,7 +22,7 @@ type (
 	NavigateTenantUseCase struct {
 		unitOfWork.GenericUseCase[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant[model.Tenant]]
 		unitOfWork.UseCaseResultWrapper[requestPresenter.AuthNavigateTenant, responsePresenter.AuthNavigateTenant[model.Tenant]]
-		unitOfWork.MongoUserSessionCacheUseCase[requestPresenter.AuthNavigateTenant]
+		unitOfWork.UserSessionManipulationUseCase[requestPresenter.AuthNavigateTenant]
 		GeneralTokenClient    generalTokenClientServicePort.IGeneralTokenClient
 		NavigateTenantService authGenServicePort.INavigateTenant
 	}

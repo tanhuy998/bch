@@ -1,7 +1,7 @@
 package getAllRoleDomain
 
 import (
-	actionResultServicePort "app/port/actionResult"
+	"app/model"
 	authServicePort "app/port/auth"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
@@ -14,20 +14,20 @@ type (
 	IGetAllRoles interface {
 		Execute(
 			input *requestPresenter.GetAllRolesRequest,
-			output *responsePresenter.GetAllRolesResponse,
+			output *responsePresenter.GetAllRolesResponse[model.Role],
 		) (mvc.Result, error)
 	}
 
 	GetAllRolesUseCase struct {
-		usecasePort.UseCase[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse]
+		usecasePort.UseCase[requestPresenter.GetAllRolesRequest, responsePresenter.GetAllRolesResponse[model.Role]]
 		GetAllRolesService authServicePort.IGetAllRoles
-		ActionResult       actionResultServicePort.IActionResult
+		//ActionResult       actionResultServicePort.IActionResult
 	}
 )
 
 func (this *GetAllRolesUseCase) Execute(
 	input *requestPresenter.GetAllRolesRequest,
-) (*responsePresenter.GetAllRolesResponse, error) {
+) (*responsePresenter.GetAllRolesResponse[model.Role], error) {
 
 	ret, err := this.GetAllRolesService.Serve(input.GetContext())
 

@@ -7,7 +7,8 @@ type (
 		requestInput.ContextInput
 		requestInput.AuthorityInput
 		requestInput.TenantMappingInput
-		requestInput.RangePaginateInput
-		requestInput.MongoCursorPaginateInput
+		// requestInput.RangePaginateInput
+		// requestInput.MongoCursorPaginateInput
+		requestInput.PaginateInput
 	}
 )

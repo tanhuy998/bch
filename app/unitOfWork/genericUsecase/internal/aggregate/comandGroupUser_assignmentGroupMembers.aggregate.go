@@ -4,12 +4,12 @@ import (
 	"app/internal/db/query"
 	"app/internal/db/relation"
 	"app/model"
-	aggregateRelation "app/unitOfWork/aggregate/relation"
+	"app/unitOfWork/aggregate/relation/triat/leftJoin"
 )
 
 type (
 	CommandGroupUser_AssignmentGroupMember_Relation struct {
-		aggregateRelation.OneToManyWith[model.AssignmentGroupMember]
+		leftJoin.OneToManyWith[model.AssignmentGroupMember]
 		assignmentGroupUser_assignmentGroup_Relation
 	}
 )

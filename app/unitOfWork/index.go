@@ -22,12 +22,12 @@ type (
 	GenericUseCase[Input_T, Output_T any] struct {
 		genericUseCase.UseCase[Input_T, Output_T]
 	}
-	MongoUserSessionCacheUseCase[Output_T any] struct {
-		genericUseCase.MongoUserSessionCacheUseCase[Output_T]
+	UserSessionManipulationUseCase[Output_T any] struct {
+		genericUseCase.UserSessionManipulationUseCase[Output_T]
 	}
-	MongodAuthDomainUseCase[Input_T requestInput.ITenantDomainInput] struct {
-		genericUseCase.MongodAuthDomainUseCase[Input_T]
-	}
+	// MongodAuthDomainUseCase[Input_T requestInput.ITenantDomainInput] struct {
+	// 	genericUseCase.AuthDomainUseCase[Input_T]
+	// }
 
 	TenantDomainUseCase[Input_T requestInput.ITenantDomainInput, Output_T any] struct {
 		genericUseCase.TenantDomainUseCase[Input_T, Output_T]

@@ -31,7 +31,7 @@ type (
 		Cursor_T comparable,
 	] struct {
 		logger
-		PaginateRepo Repository_T // repositoryAPI.IPaginateClonableRepository[Entity_T]
+		Repository Repository_T // repositoryAPI.IPaginateClonableRepository[Entity_T]
 	}
 )
 
@@ -44,7 +44,7 @@ func (this *PaginateUseCase[Repository_T, Entity_T, Cursor_T]) Paginate(
 		return nil, fmt.Errorf("invalid tenant uuid, nil value given")
 	}
 
-	paginator := NewPaginator[Entity_T, Cursor_T](this.PaginateRepo)
+	paginator := NewPaginator[Entity_T, Cursor_T](this.Repository)
 
 	for _, fn := range options {
 
@@ -107,7 +107,7 @@ func (this *PaginateUseCase[Repository_T, Entity_T, Cursor_T]) UseCustomPaginato
 		return nil, fmt.Errorf("invalid tenant uuid, nil value given")
 	}
 
-	_p := NewPaginator[Entity_T, Cursor_T](this.PaginateRepo)
+	_p := NewPaginator[Entity_T, Cursor_T](this.Repository)
 
 	_p.IPaginationRepository.Filter(
 		func(filter repositoryAPI.IFilterGenerator) {

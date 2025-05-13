@@ -54,7 +54,7 @@ func (this *CreateAssignmentGroupService) Serve(
 		filter.Field("name").Equal(dataModel.Name)
 	}
 
-	switch existing, err := this.AssignmentGroupRepo.Filter(similarFilterFunc).Find(ctx); {
+	switch existing, err := this.AssignmentGroupRepo.Filter(similarFilterFunc).FindOne(ctx); {
 	case err != nil:
 		return nil, err
 	case existing != nil:

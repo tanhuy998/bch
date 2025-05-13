@@ -1,17 +1,18 @@
 package requestPresenter
 
 import (
-	accessTokenServicePort "app/port/accessToken"
+	"app/valueObject/requestInput"
 	"context"
-
-	"github.com/google/uuid"
 )
 
 type (
 	GetTenantAllGroups struct {
-		tenantUUID uuid.UUID
-		ctx        context.Context
-		auth       accessTokenServicePort.IAccessTokenAuthData
+		requestInput.AuthorityInput
+		requestInput.TenantMappingInput
+		requestInput.PaginateInput
+		//tenantUUID uuid.UUID
+		ctx context.Context
+		//auth accessTokenServicePort.IAccessTokenAuthData
 	}
 )
 
@@ -25,27 +26,27 @@ func (this *GetTenantAllGroups) GetContext() context.Context {
 	return this.ctx
 }
 
-func (this *GetTenantAllGroups) GetAuthority() accessTokenServicePort.IAccessTokenAuthData {
+// func (this *GetTenantAllGroups) GetAuthority() accessTokenServicePort.IAccessTokenAuthData {
 
-	return this.auth
-}
+// 	return this.auth
+// }
 
-func (this *GetTenantAllGroups) SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData) {
+// func (this *GetTenantAllGroups) SetAuthority(auth accessTokenServicePort.IAccessTokenAuthData) {
 
-	this.auth = auth
-}
+// 	this.auth = auth
+// }
 
-func (this *GetTenantAllGroups) SetTenantUUID(tenantUUID uuid.UUID) {
+// func (this *GetTenantAllGroups) SetTenantUUID(tenantUUID uuid.UUID) {
 
-	this.tenantUUID = tenantUUID
-}
+// 	this.tenantUUID = tenantUUID
+// }
 
-func (this *GetTenantAllGroups) IsValidTenantUUID() bool {
+// func (this *GetTenantAllGroups) IsValidTenantUUID() bool {
 
-	return this.tenantUUID != uuid.Nil
-}
+// 	return this.tenantUUID != uuid.Nil
+// }
 
-func (this *GetTenantAllGroups) GetTenantUUID() uuid.UUID {
+// func (this *GetTenantAllGroups) GetTenantUUID() uuid.UUID {
 
-	return this.tenantUUID
-}
+// 	return this.tenantUUID
+// }

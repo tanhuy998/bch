@@ -10,6 +10,7 @@ type (
 	PaginateInput struct {
 		RangePaginateInput
 		MongoCursorPaginateInput
+		IgnorablePaginator
 	}
 )
 
