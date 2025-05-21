@@ -21,3 +21,8 @@ func (this *BsonDocument) SetObjectID(id primitive.ObjectID) {
 
 	this.ObjectID = libCommon.PointerPrimitive(id)
 }
+
+func (this BsonDocument) GetCursor() interface{} /**tv(Cursor_T)*/ {
+
+	return this.ObjectID
+}
