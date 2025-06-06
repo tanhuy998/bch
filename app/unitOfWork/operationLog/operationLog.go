@@ -2,6 +2,7 @@ package opLog
 
 import (
 	"app/internal/bootstrap"
+	libCommon "app/internal/lib/common"
 	"context"
 )
 
@@ -10,21 +11,41 @@ const (
 )
 
 type (
-	IOperationLogger interface {
-		Messure(op string, msg string, ctx context.Context) func(err error)
-		PushTraceIfError(err error, op string, msg string, ctx context.Context)
-		PushTrace(op string, msg string, ctx context.Context)
-		PushTraceCond(op string, msgIfNoErr string, ctx context.Context) (logErrFunc func(err error, msgIfErr string))
-		PushTraceCondWithMessurement(
-			op string, msgIfNoErr string, ctx context.Context,
-		) func(err error, msgIfErr string)
-		PushTraceError(op string, err error, defaultMsg string, ctx context.Context)
-	}
+	// obsolete interface
+	// IOperationLogger interface {
+	// 	Messure(op string, msg string, ctx context.Context) func(err error)
+	// 	PushTraceIfError(err error, op string, msg string, ctx context.Context)
+	// 	PushTrace(op string, msg string, ctx context.Context)
+	// 	PushTraceCond(op string, msgIfNoErr string, ctx context.Context) (logErrFunc func(err error, msgIfErr string))
+	// 	PushTraceCondWithMessurement(
+	// 		op string, msgIfNoErr string, ctx context.Context,
+	// 	) func(err error, msgIfErr string)
+	// 	PushTraceError(op string, err error, defaultMsg string, ctx context.Context)
+	// }
 
 	OperationLogger struct {
 		DebugLogger
 	}
 )
+
+func (this *OperationLogger) NewTrace(logUnit string) ILogUseCase {
+
+	clone := libCommon.PointerPrimitive(*this)
+
+	clone.logUnit = logUnit
+
+	return clone
+}
+
+func (this *OperationLogger) Trace() ILogUseCase {
+
+	return this
+}
+
+func (this *OperationLogger) PushCustom(ctx context.Context, lines ...interface{}) {
+
+	this.general_logger_t.pushArbitrary(LOG_LEVEL_TRACE, ctx, lines)
+}
 
 func (this *OperationLogger) CouldLog(ctx context.Context) bool {
 
@@ -33,34 +54,46 @@ func (this *OperationLogger) CouldLog(ctx context.Context) bool {
 
 func (this *OperationLogger) Messure(op string, msg string, ctx context.Context) func(err error) {
 
-	return messure(this.AccessLogger, LOG_LEVEL_TRACE, op, msg, ctx)
+	// return this.messure(LOG_LEVEL_TRACE, op, msg, ctx)
+
+	return this.general_logger_t.Messure(LOG_LEVEL_TRACE, op, msg, ctx)
 }
 
-func (this *OperationLogger) PushTraceIfError(err error, op string, msg string, ctx context.Context) {
+func (this *OperationLogger) PushIfError(err error, op string, msg string, ctx context.Context) {
 
-	pushTraceIfError(this.AccessLogger, LOG_LEVEL_TRACE, err, op, msg, ctx)
+	// this.pushTraceIfError(LOG_LEVEL_TRACE, err, op, msg, ctx)
+
+	this.general_logger_t.PushIfError(LOG_LEVEL_TRACE, err, op, msg, ctx)
 }
 
 func (this *OperationLogger) PushTrace(op string, msg string, ctx context.Context) {
 
-	pushTrace(this.AccessLogger, LOG_LEVEL_TRACE, op, msg, ctx)
+	// this.pushTrace(LOG_LEVEL_TRACE, op, msg, ctx)
+
+	this.general_logger_t.Push(LOG_LEVEL_TRACE, op, msg, ctx)
 }
 
-func (this *OperationLogger) PushTraceCond(
+func (this *OperationLogger) PushCond(
 	op string, msgIfNoErr string, ctx context.Context,
 ) func(err error, msgIfErr string) {
 
-	return pushTraceCond(this.AccessLogger, LOG_LEVEL_TRACE, op, msgIfNoErr, ctx)
+	// return this.pushTraceCond(LOG_LEVEL_TRACE, op, msgIfNoErr, ctx)
+
+	return this.general_logger_t.PushCond(LOG_LEVEL_TRACE, op, msgIfNoErr, ctx)
 }
 
-func (this *OperationLogger) PushTraceCondWithMessurement(
+func (this *OperationLogger) PushCondWithMessurement(
 	op string, ctx context.Context,
 ) func(msgIfNoErr string, err error, msgIfErr string) {
 
-	return PushTraceCondWithMessurement(this.AccessLogger, LOG_LEVEL_TRACE, op, ctx)
+	// return this.pushTraceCondWithMessurement(LOG_LEVEL_TRACE, op, ctx)
+
+	return this.general_logger_t.PushCondWithMessurement(LOG_LEVEL_TRACE, op, ctx)
 }
 
-func (this *OperationLogger) PushTraceError(op string, err error, defaultMsg string, ctx context.Context) {
+func (this *OperationLogger) PushError(op string, err error, defaultMsg string, ctx context.Context) {
 
-	pushTraceError(this.AccessLogger, LOG_LEVEL_TRACE, op, err, defaultMsg, ctx)
+	// this.pushTraceError(LOG_LEVEL_TRACE, op, err, defaultMsg, ctx)
+
+	this.general_logger_t.PushError(LOG_LEVEL_TRACE, op, err, defaultMsg, ctx)
 }

@@ -1,21 +1,51 @@
 package opLog
 
 import (
-	"app/internal/bootstrap"
-	accessLogServicePort "app/port/accessLog"
+	"app/internal/debug"
+	libCommon "app/internal/lib/common"
 	"context"
-	"os"
 )
 
 type (
 	DebugLogger struct {
-		AccessLogger accessLogServicePort.IAccessLogger
+		general_logger_t
 	}
 )
 
+func (this *DebugLogger) NewDebug(logUnit string) ILogUseCase {
+
+	clone := libCommon.PointerPrimitive(*this)
+
+	clone.logUnit = logUnit
+
+	return clone
+}
+
+func (this *DebugLogger) Debug() ILogUseCase {
+
+	return this
+}
+
+func (this *DebugLogger) PushCustom(ctx context.Context, lines ...interface{}) {
+
+	this.general_logger_t.pushArbitrary(LOG_LEVEL_DEBUG, ctx, lines)
+}
+
+func (this *DebugLogger) isDebugContext(ctx context.Context) bool {
+
+	switch v := (ctx.Value(debug.DEBUG_CONTEXT_KEY)).(type) {
+	case bool:
+		return v
+	default:
+		return false
+	}
+}
+
 func (this *DebugLogger) couldLog(ctx context.Context) bool {
 
-	return os.Getenv(bootstrap.ENV_DEBUG_LOG) == "true" && couldLog(this.AccessLogger, ctx)
+	// return os.Getenv(bootstrap.ENV_DEBUG_LOG) == "true" || this.isDebugContext(ctx)
+
+	return debug.IsDebugging() || this.isDebugContext(ctx)
 }
 
 func (this *DebugLogger) Messure(op string, msg string, ctx context.Context) func(err error) {
@@ -25,17 +55,17 @@ func (this *DebugLogger) Messure(op string, msg string, ctx context.Context) fun
 		return empty_trace_func
 	}
 
-	return messure(this.AccessLogger, LOG_LEVEL_DEBUG, op, msg, ctx)
+	return this.general_logger_t.Messure(LOG_LEVEL_DEBUG, op, msg, ctx)
 }
 
 func (this *DebugLogger) PushIfError(err error, op string, msg string, ctx context.Context) {
 
-	if err == nil || !this.couldLog(ctx) {
+	if !this.couldLog(ctx) {
 
 		return
 	}
 
-	pushTraceIfError(this.AccessLogger, LOG_LEVEL_DEBUG, err, op, msg, ctx)
+	this.general_logger_t.PushIfError(LOG_LEVEL_DEBUG, err, op, msg, ctx)
 }
 
 func (this *DebugLogger) Push(op string, msg string, ctx context.Context) {
@@ -45,7 +75,7 @@ func (this *DebugLogger) Push(op string, msg string, ctx context.Context) {
 		return
 	}
 
-	pushTrace(this.AccessLogger, LOG_LEVEL_DEBUG, op, msg, ctx)
+	this.general_logger_t.Push(LOG_LEVEL_DEBUG, op, msg, ctx)
 }
 
 func (this *DebugLogger) PushCond(
@@ -57,7 +87,7 @@ func (this *DebugLogger) PushCond(
 		return empty_push_cond_func
 	}
 
-	return pushTraceCond(this.AccessLogger, LOG_LEVEL_DEBUG, op, msgIfNoErr, ctx)
+	return this.general_logger_t.PushCond(LOG_LEVEL_DEBUG, op, msgIfNoErr, ctx)
 }
 
 func (this *DebugLogger) PushCondWithMessurement(
@@ -69,9 +99,7 @@ func (this *DebugLogger) PushCondWithMessurement(
 		return empty_push_cond_with_messurement_func
 	}
 
-	return PushTraceCondWithMessurement(
-		this.AccessLogger, LOG_LEVEL_DEBUG, op, ctx,
-	)
+	return this.general_logger_t.PushCondWithMessurement(LOG_LEVEL_DEBUG, op, ctx)
 }
 
 func (this *DebugLogger) PushError(op string, err error, defaultMsg string, ctx context.Context) {
@@ -81,5 +109,5 @@ func (this *DebugLogger) PushError(op string, err error, defaultMsg string, ctx 
 		return
 	}
 
-	pushTraceError(this.AccessLogger, LOG_LEVEL_DEBUG, op, err, defaultMsg, ctx)
+	this.general_logger_t.PushError(LOG_LEVEL_DEBUG, op, err, defaultMsg, ctx)
 }
