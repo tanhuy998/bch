@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/gofor-little/env"
-	"github.com/joho/godotenv"
 )
 
 const (
@@ -60,33 +59,6 @@ var (
 	host_names_dictionary map[string]bool = make(map[string]bool)
 	allowed_cors_ports    []string
 )
-
-func init() {
-
-	defer ignorePanicWhenUnitTesting()
-
-	err := godotenv.Load()
-
-	if err != nil {
-
-		panic("error while loading env: " + err.Error())
-	}
-
-	host_names = RetrieveCORSHosts()
-
-	for _, val := range host_names {
-
-		host_names_dictionary[val] = true
-	}
-
-	initializeAuthEncryptionData()
-}
-
-func init() {
-
-	readCLIFlags()
-	parseTestLoginFlags()
-}
 
 func GetDomainNames() []string {
 

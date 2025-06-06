@@ -36,7 +36,6 @@ func init() {
 
 		panic(errors.Join(fmt.Errorf("error while initializing Refresh token cache topic"), err))
 	}
-
 }
 
 func NewGeneralTokenWhiteListClient() (*memoryCache.CacheClient[generalToken.GeneralTokenID, GeneralTokenWhiteListCacheValue], error) {
