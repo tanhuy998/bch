@@ -89,8 +89,12 @@ type (
 )
 
 type (
+	// IDataConditionExpressionResult interface {
+	// 	GetCondtionExpression() interface{}
+	// }
+
 	IDataConditionExpressionResult interface {
-		GetCondtionExpression() interface{}
+		ApplyConditionExpression()
 	}
 
 	DataConditionMatchFunc func(expression IGeneralDataConditionExpression) IDataConditionExpressionResult

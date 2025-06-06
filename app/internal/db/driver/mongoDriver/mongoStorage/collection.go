@@ -40,6 +40,18 @@ func (this *MongoDBQueryMonitorCollection) SetTracer(t dbQueryTracerPort.IDBQuer
 	this.Tracer = t
 }
 
+func (this *MongoDBQueryMonitorCollection) prepareOpFilterDebugLogContext(
+	filter interface{}, ctx context.Context,
+) *collection_filterable_operation_debug_log_context_t {
+
+	return NewCollectionOperationDebugLogContext(
+		&collection_filterable_operation_log_t{
+			AppliedFilter: filter,
+		},
+		ctx,
+	)
+}
+
 func (this *MongoDBQueryMonitorCollection) BulkWrite(
 	ctx context.Context,
 	models []mongo.WriteModel,
@@ -91,8 +103,11 @@ func (this *MongoDBQueryMonitorCollection) DeleteOne(
 ) (ret *mongo.DeleteResult, err error) {
 
 	defer func() {
+
 		this.Tracer.Trace(this.collection.Name(), "delete_one", ctx)(err)
 	}()
+
+	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
 
 	ret, err = this.collection.DeleteOne(ctx, filter, opts...)
 
@@ -108,6 +123,8 @@ func (this *MongoDBQueryMonitorCollection) DeleteMany(
 	defer func() {
 		this.Tracer.Trace(this.collection.Name(), "delete_many", ctx)(err)
 	}()
+
+	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
 
 	ret, err = this.collection.DeleteMany(ctx, filter, opts...)
 
@@ -141,6 +158,8 @@ func (this *MongoDBQueryMonitorCollection) UpdateOne(
 		this.Tracer.Trace(this.collection.Name(), "update_one", ctx)(err)
 	}()
 
+	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
 	ret, err = this.collection.UpdateOne(ctx, filter, update, opts...)
 
 	return
@@ -157,6 +176,8 @@ func (this *MongoDBQueryMonitorCollection) UpdateMany(
 		this.Tracer.Trace(this.collection.Name(), "update_many", ctx)(err)
 	}()
 
+	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
 	ret, err = this.collection.UpdateMany(ctx, filter, update, opts...)
 
 	return
@@ -172,6 +193,8 @@ func (this *MongoDBQueryMonitorCollection) ReplaceOne(
 	defer func() {
 		this.Tracer.Trace(this.collection.Name(), "replace_one", ctx)(err)
 	}()
+
+	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
 
 	ret, err = this.collection.ReplaceOne(ctx, filter, replacement, opts...)
 
@@ -204,6 +227,8 @@ func (this *MongoDBQueryMonitorCollection) Distinct(
 		this.Tracer.Trace(this.collection.Name(), "distinct", ctx)(err)
 	}()
 
+	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
 	ret, err = this.collection.Distinct(ctx, fieldName, filter, opts...)
 
 	return
@@ -219,6 +244,8 @@ func (this *MongoDBQueryMonitorCollection) Find(
 		this.Tracer.Trace(this.collection.Name(), "find", ctx)(err)
 	}()
 
+	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
 	ret, err = this.collection.Find(ctx, filter, opts...)
 
 	return
@@ -229,6 +256,8 @@ func (this *MongoDBQueryMonitorCollection) FindOne(
 	filter interface{},
 	opts ...*options.FindOneOptions,
 ) *mongo.SingleResult {
+
+	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
 
 	stopTrace := this.Tracer.Trace(this.collection.Name(), "find_one", ctx)
 
@@ -244,6 +273,8 @@ func (this *MongoDBQueryMonitorCollection) FindOneAndDelete(
 	filter interface{},
 	opts ...*options.FindOneAndDeleteOptions,
 ) *mongo.SingleResult {
+
+	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
 
 	stopTrace := this.Tracer.Trace(this.collection.Name(), "find_one_and_delete", ctx)
 
@@ -261,6 +292,8 @@ func (this *MongoDBQueryMonitorCollection) FindOneAndReplace(
 	opts ...*options.FindOneAndReplaceOptions,
 ) *mongo.SingleResult {
 
+	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
 	stopTrace := this.Tracer.Trace(this.collection.Name(), "find_one_and_replace", ctx)
 
 	res := this.collection.FindOneAndReplace(ctx, filter, replacement, opts...)
@@ -277,6 +310,8 @@ func (this *MongoDBQueryMonitorCollection) FindOneAndUpdate(
 	opts ...*options.FindOneAndUpdateOptions,
 ) *mongo.SingleResult {
 
+	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
 	stopTrace := this.Tracer.Trace(this.collection.Name(), "find_one_and_update", ctx)
 
 	res := this.collection.FindOneAndUpdate(ctx, filter, update, opts...)
@@ -291,18 +326,36 @@ func (this *MongoDBQueryMonitorCollection) Database() *mongo.Database {
 	return this.collection.Database()
 }
 
-func (this *MongoDBQueryMonitorCollection) CountDocuments(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error) {
+func (this *MongoDBQueryMonitorCollection) CountDocuments(
+	ctx context.Context, filter interface{}, opts ...*options.CountOptions,
+) (res int64, err error) {
 
-	return this.collection.CountDocuments(
+	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
+	stopTrace := this.Tracer.Trace(this.Collection().Name(), "count_document", ctx)
+
+	res, err = this.collection.CountDocuments(
 		ctx, filter, opts...,
 	)
+
+	stopTrace(err)
+
+	return
 }
 
-func (this *MongoDBQueryMonitorCollection) EstimatedDocumentCount(ctx context.Context, opts ...*options.EstimatedDocumentCountOptions) (int64, error) {
+func (this *MongoDBQueryMonitorCollection) EstimatedDocumentCount(
+	ctx context.Context, opts ...*options.EstimatedDocumentCountOptions,
+) (res int64, err error) {
 
-	return this.collection.EstimatedDocumentCount(
+	stopTrace := this.Tracer.Trace(this.Collection().Name(), "estimated_document_count", ctx)
+
+	res, err = this.collection.EstimatedDocumentCount(
 		ctx, opts...,
 	)
+
+	stopTrace(err)
+
+	return
 }
 
 func (this *MongoDBQueryMonitorCollection) Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*mongo.ChangeStream, error) {

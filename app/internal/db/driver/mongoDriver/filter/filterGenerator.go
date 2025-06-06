@@ -7,22 +7,22 @@ import (
 )
 
 type (
-	filter_generator bson.D
+	FilterGenerator bson.D
 )
 
-func (this *filter_generator) reset() {
+func (this *FilterGenerator) reset() {
 
 }
 
-func (this *filter_generator) init() {
+func (this *FilterGenerator) init() {
 
 	if *this == nil {
 
-		*this = filter_generator(bson.D{})
+		*this = FilterGenerator(bson.D{})
 	}
 }
 
-func (this *filter_generator) Add(exprs ...bson.E) query.IFilterGenerator {
+func (this *FilterGenerator) Add(exprs ...bson.E) query.IFilterGenerator {
 
 	this.init()
 
@@ -31,12 +31,12 @@ func (this *filter_generator) Add(exprs ...bson.E) query.IFilterGenerator {
 	return this
 }
 
-func (this *filter_generator) Get() bson.D {
+func (this *FilterGenerator) Get() bson.D {
 
 	return bson.D(*this)
 }
 
-func (this *filter_generator) Field(name string) query.IFilterExpressionOperator {
+func (this *FilterGenerator) Field(name string) query.IFilterExpressionOperator {
 
 	return &MongoComparisonExprFilter{
 		ref: this,
@@ -44,7 +44,7 @@ func (this *filter_generator) Field(name string) query.IFilterExpressionOperator
 	}
 }
 
-func (this *filter_generator) GetCondtionExpression() interface{} {
+func (this *FilterGenerator) GetCondtionExpression() interface{} {
 
 	return (bson.D)(*this)
 }

@@ -3,17 +3,20 @@ package expression
 import (
 	"app/internal/db/driver/mongoDriver/filter"
 	"app/internal/db/query"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type (
 	ConditionExpressionInitializer struct {
 		//logical_expression_generator
+		ref *bson.D
 	}
 )
 
-func NewConditionExpressionInitializer() *ConditionExpressionInitializer {
+func NewConditionExpressionInitializer(ref *bson.D) *ConditionExpressionInitializer {
 
-	return new(ConditionExpressionInitializer)
+	return &ConditionExpressionInitializer{ref}
 }
 
 // func (this *ConditionExpressionInitializer) init() {
@@ -51,14 +54,20 @@ func (this *ConditionExpressionInitializer) Filter(
 		panic("condtion expresstion filter init funciton must not be nil")
 	}
 
-	conditionFilterGenerator := filter.NewConditionFilterGenerator()
+	// conditionFilterGenerator := filter.NewConditionFilterGenerator()
 
-	fn(conditionFilterGenerator)
+	// fn(conditionFilterGenerator)
 
-	return conditionFilterGenerator
+	// return conditionFilterGenerator
+
+	filter := filter.NewConditionFilterResult(this.ref)
+
+	fn(filter)
+
+	return filter
 }
 
 func (this *ConditionExpressionInitializer) Logical() query.INegatableLogicalOperator {
 
-	return NewLogicalExpressionGenerator()
+	return NewLogicalExpressionGenerator(this.ref)
 }

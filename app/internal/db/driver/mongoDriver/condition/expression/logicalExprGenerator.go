@@ -1,12 +1,18 @@
 package expression
 
+import "go.mongodb.org/mongo-driver/bson"
+
 // type (
 // 	logical_expression_generator struct{}
 // )
 
-func NewLogicalExpressionGenerator() *logical_expression {
+func NewLogicalExpressionGenerator(refCondtionExpression *bson.D) *logical_expression {
 
-	return new(logical_expression)
+	ret := new(logical_expression)
+
+	ret.refConditionExpression = refCondtionExpression
+
+	return ret
 }
 
 // func (this *logical_expression_generator) Not() query.IConditionLogicalOperator {

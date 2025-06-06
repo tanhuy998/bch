@@ -9,13 +9,14 @@ import (
 type (
 	logical_expression struct {
 		ConditionExpressionInitializer
-		elements   bson.A
-		op         string
-		is_antonym bool
+		refConditionExpression *bson.D
+		elements               []bson.D
+		op                     string
+		is_antonym             bool
 	}
 )
 
-func (this *logical_expression) _resolveActualOpIfRelation() string {
+func (this *logical_expression) _resolveActualOpIfNegation() string {
 
 	if !this.is_antonym {
 
@@ -41,7 +42,21 @@ func (this *logical_expression) GetCondtionExpression() interface{} {
 	// }
 
 	return bson.D{
-		{this._resolveActualOpIfRelation(), this.elements},
+		{this._resolveActualOpIfNegation(), this.elements},
+	}
+}
+
+func (this *logical_expression) ApplyConditionExpression() {
+
+	switch len(this.elements) {
+	case 0:
+		return
+	case 1:
+		*this.refConditionExpression = this.elements[0]
+	default:
+		*this.refConditionExpression = bson.D{
+			{this._resolveActualOpIfNegation(), this.elements},
+		}
 	}
 }
 
@@ -49,18 +64,36 @@ func (this *logical_expression) _resolve(
 	expresstionFuncs []query.DataConditionMatchFunc,
 ) {
 
-	this.elements = make(bson.A, len(expresstionFuncs))
+	this.elements = make([]bson.D, 0)
 
-	for i, fn := range expresstionFuncs {
+	for _, fn := range expresstionFuncs {
 
 		if fn == nil {
 
 			panic("logical expression function must not be nil")
 		}
 
-		res := fn(&this.ConditionExpressionInitializer)
+		// res := fn(&this.ConditionExpressionInitializer)
 
-		this.elements[i] = res.GetCondtionExpression()
+		// this.elements[i] = res.GetCondtionExpression()
+
+		var expression bson.D
+
+		conditionExpressInitializer := NewConditionExpressionInitializer(&expression)
+
+		result := fn(conditionExpressInitializer)
+
+		if result == nil {
+
+			continue
+		}
+
+		switch result.ApplyConditionExpression(); {
+		case expression == nil:
+			continue
+		default:
+			this.elements = append(this.elements, expression)
+		}
 	}
 }
 

@@ -9,7 +9,7 @@ import (
 
 type (
 	MongoComparisonExprFilter struct {
-		ref        *filter_generator
+		ref        *FilterGenerator
 		lhs        string
 		rhs        interface{}
 		is_antonym bool

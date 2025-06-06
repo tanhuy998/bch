@@ -210,17 +210,29 @@ func (this *MongoAggregateQueryBuilder) Match(fn query.DataConditionMatchFunc) q
 		panic("data condition match fun must not be nil")
 	}
 
-	initializer := expression.NewConditionExpressionInitializer()
+	var condtionExpresstion bson.D
 
-	res := fn(initializer)
+	initializer := expression.NewConditionExpressionInitializer(&condtionExpresstion)
 
-	this.PushStages(
-		bson.D{
-			{"$match", res.GetCondtionExpression()},
-		},
-	)
+	result := fn(initializer)
 
-	return this
+	if result == nil {
+
+		return this
+	}
+
+	switch result.ApplyConditionExpression(); {
+	case condtionExpresstion == nil:
+		return this
+	default:
+		this.PushStages(
+			bson.D{
+				// {"$match", res.GetCondtionExpression()},
+				{"$match", condtionExpresstion},
+			},
+		)
+		return this
+	}
 }
 
 func (this *MongoAggregateQueryBuilder) LeftJoin(

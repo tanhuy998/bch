@@ -13,3 +13,9 @@ type (
 		Query     interface{} `json:"query,omitempty"`
 	}
 )
+
+type (
+	collection_filterable_operation_log_t struct {
+		AppliedFilter interface{} `json:"applied_filter"`
+	}
+)
