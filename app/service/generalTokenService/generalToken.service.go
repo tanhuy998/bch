@@ -80,7 +80,7 @@ func (this *GeneralTokenManipulator) SignString(at generalTokenServicePort.IGene
 
 func (this *GeneralTokenManipulator) makeFor(userUUID uuid.UUID, ctx context.Context) (ret IGeneralToken, err error) {
 
-	defer this.OperationLogger.PushTraceCondWithMessurement("generate_general_token", ctx)("success", err, "")
+	defer this.OperationLogger.PushCondWithMessurement("generate_general_token", ctx)("success", err, "")
 
 	if userUUID == uuid.Nil {
 

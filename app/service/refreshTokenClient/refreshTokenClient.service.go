@@ -2,7 +2,6 @@ package refreshTokenClientService
 
 import (
 	"app/internal/bootstrap"
-	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
 	refreshTokenServicePort "app/port/refreshToken"
 	"app/unitOfWork"
@@ -30,7 +29,7 @@ type (
 func (this *RefreshTokenClientService) Read(ctx context.Context) (ret refreshTokenServicePort.IRefreshToken, err error) {
 
 	defer func() {
-		this.PushTraceCond("read_refresh_token_from_client", libCommon.Ternary(ret != nil, "exist", "absent"), ctx)(err, "")
+		this.PushCond("read_refresh_token_from_client", "exist", ctx)(err, "absent")
 	}()
 
 	c, ok := ctx.(iris.Context)
@@ -60,7 +59,7 @@ func (this *RefreshTokenClientService) Read(ctx context.Context) (ret refreshTok
 func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken refreshTokenServicePort.IRefreshToken) (err error) {
 
 	defer func() {
-		this.PushTraceCond("write_refresh_token_to_client", libCommon.Ternary(err == nil, "sucess", "failed"), ctx)(err, "")
+		this.PushCond("write_refresh_token_to_client", "success", ctx)(err, "failed")
 	}()
 
 	c, ok := ctx.(iris.Context)
@@ -127,7 +126,7 @@ func (this *RefreshTokenClientService) Write(ctx context.Context, refreshToken r
 func (this *RefreshTokenClientService) Remove(ctx context.Context) (err error) {
 
 	defer func() {
-		this.PushTraceCond("read_refresh_token_from_client", libCommon.Ternary(err == nil, "success", "failed"), ctx)(err, "")
+		this.PushCond("read_refresh_token_from_client", "success", ctx)(err, "failed")
 	}()
 
 	c, ok := ctx.(iris.Context)

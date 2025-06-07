@@ -24,7 +24,7 @@ func (this *AuthSignatureTokenService) Generate(
 	TenantUUID uuid.UUID, generalToken IGeneralToken, ctx context.Context,
 ) (at accessTokenServicePort.IAccessToken, rt refreshTokenServicePort.IRefreshToken, err error) {
 
-	defer this.OperationLogger.PushTraceCondWithMessurement("provide_auth_signatures_pair", ctx)("success", err, "")
+	defer this.OperationLogger.PushCondWithMessurement("provide_auth_signatures_pair", ctx)("success", err, "")
 
 	rt, err = this.RefreshTokenManipulator.Generate(TenantUUID, generalToken, ctx)
 
@@ -49,7 +49,7 @@ func (this *AuthSignatureTokenService) Rotate(
 	oldRefreshToken refreshTokenServicePort.IRefreshToken, oldAccessToken accessTokenServicePort.IAccessToken, ctx context.Context,
 ) (at accessTokenServicePort.IAccessToken, rt refreshTokenServicePort.IRefreshToken, err error) {
 
-	defer this.OperationLogger.PushTraceCondWithMessurement("rotate_auth_signatures_pair", ctx)("success", err, "")
+	defer this.OperationLogger.PushCondWithMessurement("rotate_auth_signatures_pair", ctx)("success", err, "")
 
 	rt, err = this.RefreshTokenManipulator.Rotate(oldRefreshToken, ctx)
 

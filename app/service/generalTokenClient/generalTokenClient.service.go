@@ -31,7 +31,7 @@ func (this *GeneralTokenClientService) Read(ctx context.Context) (ret generalTok
 
 	defer func() {
 
-		this.PushTraceCond("read_general_token_from_client", libCommon.Ternary(ret != nil, "exist", "absent"), ctx)(err, "")
+		this.PushCond("read_general_token_from_client", libCommon.Ternary(ret != nil, "exist", "absent"), ctx)(err, "")
 	}()
 
 	c, ok := ctx.(iris.Context)
@@ -62,7 +62,7 @@ func (this *GeneralTokenClientService) Write(ctx context.Context, generalToken g
 
 	defer func() {
 
-		this.PushTraceCond("write_general_token_to_client", libCommon.Ternary(err == nil, "success", "failed"), ctx)(err, "")
+		this.PushCond("write_general_token_to_client", libCommon.Ternary(err == nil, "success", "failed"), ctx)(err, "")
 	}()
 
 	c, ok := ctx.(iris.Context)
@@ -138,7 +138,7 @@ func (this *GeneralTokenClientService) Remove(ctx context.Context) (err error) {
 
 	defer func() {
 
-		this.PushTraceCond("remove_general_token_from_client", libCommon.Ternary(err == nil, "success", "failed"), ctx)(err, "")
+		this.PushCond("remove_general_token_from_client", libCommon.Ternary(err == nil, "success", "failed"), ctx)(err, "")
 	}()
 
 	c, ok := ctx.(iris.Context)

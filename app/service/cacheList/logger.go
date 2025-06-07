@@ -39,7 +39,7 @@ func (this *CacheListLogger) PushTraceIfError(err error, op string, msg string, 
 		return
 	}
 
-	this.OperationLogger.PushTraceIfError(err, op, msg, ctx)
+	this.OperationLogger.PushIfError(err, op, msg, ctx)
 }
 
 func (this *CacheListLogger) PushTrace(op string, msg string, ctx context.Context) {
@@ -59,7 +59,7 @@ func (this *CacheListLogger) PushTraceCond(op string, msgIfNoErr string, ctx con
 		ctx = nil
 	}
 
-	return this.OperationLogger.PushTraceCond(op, msgIfNoErr, ctx)
+	return this.OperationLogger.PushCond(op, msgIfNoErr, ctx)
 }
 
 func (this *CacheListLogger) PushTraceCondWithMessurement(
@@ -71,7 +71,7 @@ func (this *CacheListLogger) PushTraceCondWithMessurement(
 		ctx = nil
 	}
 
-	return this.OperationLogger.PushTraceCondWithMessurement(op, ctx)
+	return this.OperationLogger.PushCondWithMessurement(op, ctx)
 }
 
 func (this *CacheListLogger) PushTraceError(op string, err error, defaultMsg string, ctx context.Context) {
@@ -81,5 +81,5 @@ func (this *CacheListLogger) PushTraceError(op string, err error, defaultMsg str
 		ctx = nil
 	}
 
-	this.OperationLogger.PushTraceError(op, err, defaultMsg, ctx)
+	this.OperationLogger.PushError(op, err, defaultMsg, ctx)
 }

@@ -56,7 +56,7 @@ func (this *RefreshTokenManipulatorService) makeFor(
 	tenantUUID uuid.UUID, generalTokenID generalToken.GeneralTokenID, ctx context.Context, claimOption ...ClaimsOption,
 ) (ret *jwt_refresh_token, err error) {
 
-	defer this.OperationLogger.PushTraceCondWithMessurement("generate_refresh_token", ctx)("success", err, "")
+	defer this.OperationLogger.PushCondWithMessurement("generate_refresh_token", ctx)("success", err, "failed")
 
 	token := this.JWTTokenService.GenerateToken()
 

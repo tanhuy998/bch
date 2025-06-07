@@ -95,7 +95,7 @@ func (this *JWTAccessTokenProviderService) makeFor(
 	tenantUUID, userUUID uuid.UUID, ctx context.Context,
 ) (ret *jwt_access_token, err error) {
 
-	defer this.OperationLogger.PushTraceCondWithMessurement("generate_access_token", ctx)("success", err, "")
+	defer this.OperationLogger.PushCondWithMessurement("generate_access_token", ctx)("success", err, "")
 
 	authData, err := this.GetUserAuthority.Serve(tenantUUID, userUUID, ctx)
 
