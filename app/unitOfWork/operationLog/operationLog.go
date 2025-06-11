@@ -28,7 +28,7 @@ type (
 	}
 )
 
-func (this *OperationLogger) NewTrace(logUnit string) ILogUseCase {
+func (this *OperationLogger) newTrace(logUnit string) ILogUseCase {
 
 	clone := libCommon.PointerPrimitive(*this)
 
@@ -37,9 +37,9 @@ func (this *OperationLogger) NewTrace(logUnit string) ILogUseCase {
 	return clone
 }
 
-func (this *OperationLogger) Trace() ILogUseCase {
+func (this *OperationLogger) Trace(logUnit string) ILogUseCase {
 
-	return this
+	return this.newTrace(logUnit)
 }
 
 func (this *OperationLogger) PushCustom(ctx context.Context, lines ...interface{}) {

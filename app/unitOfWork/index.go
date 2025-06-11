@@ -10,7 +10,7 @@ import (
 
 type (
 	OperationLogger  = opLog.OperationLogger
-	IOperationLogger = opLog.IOperationLogger
+	IOperationLogger = opLog.ILogUseCase
 
 	PaginateUseCase[Repository_T repositoryAPI.IPaginateClonableRepository[Entity_T], Entity_T any, Cursor_T comparable] struct {
 		paginateUseCase.PaginateUseCase[Repository_T, Entity_T, Cursor_T]

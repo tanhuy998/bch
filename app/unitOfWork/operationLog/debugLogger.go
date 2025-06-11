@@ -12,7 +12,7 @@ type (
 	}
 )
 
-func (this *DebugLogger) NewDebug(logUnit string) ILogUseCase {
+func (this *DebugLogger) newDebug(logUnit string) ILogUseCase {
 
 	clone := libCommon.PointerPrimitive(*this)
 
@@ -21,9 +21,9 @@ func (this *DebugLogger) NewDebug(logUnit string) ILogUseCase {
 	return clone
 }
 
-func (this *DebugLogger) Debug() ILogUseCase {
+func (this *DebugLogger) Debug(logUnit string) ILogUseCase {
 
-	return this
+	return this.newDebug(logUnit)
 }
 
 func (this *DebugLogger) PushCustom(ctx context.Context, lines ...interface{}) {
