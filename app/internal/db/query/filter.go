@@ -38,6 +38,8 @@ type (
 		Not() IComaparisonOperator
 	}
 
+	// IFilterExpressionOperator internalQuery.IFilterExpressionOperator
+
 	IComaparisonOperator interface {
 		//IFilterLogicalOperator
 		Equal(val interface{})
@@ -48,10 +50,34 @@ type (
 		In(vals ...interface{})
 	}
 
+	IFilterFieldCastedType interface {
+		AsText() IFilterTextOperator
+		AsNumeric() IFilterNumericalOperator
+		AsDate() IFilterDateOperator
+	}
+
+	// IComaparisonOperator internalQuery.IComaparisonOperator
+
+	IComparisonRangeOperator interface {
+		ByRange(IValueRangeFilter)
+	}
+
 	FilterLogicalGroupFunc func(filteredField IFilterExpressionOperator)
 	FilterFunc             func(filter IFilterExpression)
 
 	IFilterMethods[Model_T any] interface {
 		Filter(FilterFunc) IGenericQueryBuilder[Model_T]
+	}
+)
+
+type (
+	ITextSearchOperator interface {
+		Like(str string)
+	}
+)
+
+type (
+	IValueRangeFilter interface {
+		ApplyValueRange(IFilterExpressionOperator)
 	}
 )
