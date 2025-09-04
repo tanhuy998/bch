@@ -7,16 +7,13 @@ import (
 )
 
 type (
-	IEndpointBuilder interface {
-		_EndpointBuilder() *EndpointBuilder
-		Endpoint(
-			httpMethod, path, funcName string,
-		) IEndpointInitiator
+	IAPIEndpointCurator interface {
+		_Curator() *APIEndpointCurator
 	}
 )
 
 type (
-	EndpointBuilder struct {
+	APIEndpointCurator struct {
 		activator.ActivateController
 	}
 )
@@ -31,12 +28,12 @@ func AccquiredRegisteredMethod(in interface{}) string {
 	}
 }
 
-func (this *EndpointBuilder) _EndpointBuilder() *EndpointBuilder {
+func (this *APIEndpointCurator) _Curator() *APIEndpointCurator {
 
 	return this
 }
 
-func (this *EndpointBuilder) UseMiddleware(middlewares ...interface{}) {
+func (this *APIEndpointCurator) UseMiddleware(middlewares ...interface{}) {
 
 	container := this.Activator().Dependencies()
 
@@ -48,13 +45,13 @@ func (this *EndpointBuilder) UseMiddleware(middlewares ...interface{}) {
 	}
 }
 
-func (this *EndpointBuilder) Endpoint(
-	httpMethod, path, funcName string,
-) IEndpointInitiator {
+// func (this *APIEndpointCurator) Endpoint(
+// 	httpMethod, path, funcName string,
+// ) IEndpointInitiator {
 
-	return NewEnpoint(
-		this.Activator().Handle(
-			httpMethod, path, funcName,
-		),
-	)
-}
+// 	return NewEnpointBuilder(
+// 		this.Activator().Handle(
+// 			httpMethod, path, funcName,
+// 		),
+// 	)
+// }

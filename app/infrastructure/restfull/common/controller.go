@@ -24,7 +24,6 @@ type (
 	}
 
 	Controller struct {
-		activate_controller_t
 		//AccessLogger accessLogServicePort.IAccessLogger
 		ActionResult actionResultServicePort.IActionResult
 		ErrorLogger  loggerPort.ErrorLogger

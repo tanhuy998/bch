@@ -34,6 +34,21 @@ type (
 	EndpointEffector interface {
 		Apply(IEndpoint)
 	}
+
+	RouteEffectorWithAsset interface {
+		Accumulator
+		Apply(router *router.Route, asset interface{})
+	}
+
+	MiddlewareEffectorWithAsset interface {
+		Accumulator
+		Apply(e IEndpointUseMiddleware, asset interface{})
+	}
+
+	EndpointEffectorWithAsset interface {
+		Accumulator
+		Apply(e IEndpoint, asset interface{})
+	}
 )
 
 var (
@@ -58,7 +73,7 @@ func assertAffector(t reflect.Type) {
 	}
 }
 
-func prepareAnnotationEffector(endpoint *controller_endpoint_t, annotations []reflect.Value) {
+func prepareAnnotationEffector(endpoint *endpoint_builder_t, annotations []reflect.Value) {
 
 	for _, an := range annotations {
 
@@ -94,13 +109,13 @@ func prepareAndCall(reflectTypeMethod reflect.Method, method reflect.Value) {
 	annotations := make([]reflect.Value, argCount)
 
 	var (
-		singletons map[reflect.Type]reflect.Value = make(map[reflect.Type]reflect.Value)
-		endpoint   IEndpoint
+		singleton_annotations map[reflect.Type]reflect.Value = make(map[reflect.Type]reflect.Value)
+		endpoint              IEndpoint
 	)
 
 	defer func() {
 
-		singletons = nil
+		singleton_annotations = nil
 	}()
 
 	for i := passedReceiver; i < count; i++ {
@@ -109,7 +124,7 @@ func prepareAndCall(reflectTypeMethod reflect.Method, method reflect.Value) {
 
 		var challenged reflect.Value
 
-		switch singleton, acknowledgedAsSingleton := singletons[type_param]; {
+		switch singleton, acknowledgedAsSingleton := singleton_annotations[type_param]; {
 		case acknowledgedAsSingleton:
 			challenged = singleton
 		default:
@@ -122,13 +137,13 @@ func prepareAndCall(reflectTypeMethod reflect.Method, method reflect.Value) {
 
 			if type_param.Implements(type_singleton_annotation) {
 
-				singletons[type_param] = challenged
+				singleton_annotations[type_param] = challenged
 			}
 		}
 
 		switch challenged.Interface().(type) {
 		case OnceAnnotation:
-			if _, ok := singletons[reflectTypeMethod.Type]; ok {
+			if _, ok := singleton_annotations[reflectTypeMethod.Type]; ok {
 
 				panic("")
 			}
@@ -140,15 +155,27 @@ func prepareAndCall(reflectTypeMethod reflect.Method, method reflect.Value) {
 		}
 
 		switch effector := challenged.Interface().(type) {
+		case EndpointEffectorWithAsset:
+			defer func() {
+				effector.Apply(endpoint, session.AssetOf(effector))
+			}()
+		case RouteEffectorWithAsset:
+			defer func() {
+				effector.Apply(endpoint.getRoute(), session.AssetOf(effector))
+			}()
+		case MiddlewareEffectorWithAsset:
+			defer func() {
+				effector.Apply(endpoint, session.AssetOf(effector))
+			}()
+		case EndpointEffector:
+			defer func() {
+				effector.Apply(endpoint)
+			}()
 		case RouteEffector:
 			defer func() {
 				effector.Apply(endpoint.getRoute())
 			}()
 		case MiddlewareEffector:
-			defer func() {
-				effector.Apply(endpoint)
-			}()
-		case EndpointEffector:
 			defer func() {
 				effector.Apply(endpoint)
 			}()

@@ -11,25 +11,25 @@ import (
 )
 
 type (
-	IReadController[Initiator_T any] interface {
-		endpoint.IEndpointBuilder
+	IReadEndpointCurator[Initiator_T any] interface {
+		endpoint.IAPIEndpointCurator
 		IActivator
 		GET(path string) Initiator_T
 		HEAD(path string) Initiator_T
 	}
-	ICreateController[Initiator_T any] interface {
-		endpoint.IEndpointBuilder
+	ICreateEndpointCurator[Initiator_T any] interface {
+		endpoint.IAPIEndpointCurator
 		IActivator
 		POST(path string) Initiator_T
 	}
-	IUpdateController[Initiator_T any] interface {
-		endpoint.IEndpointBuilder
+	IUpdateEndpointCurator[Initiator_T any] interface {
+		endpoint.IAPIEndpointCurator
 		IActivator
 		PUT(path string) Initiator_T
 		PATCH(path string) Initiator_T
 	}
-	IDeleteController[Initiator_T any] interface {
-		endpoint.IEndpointBuilder
+	IDeleteEndpointCurator[Initiator_T any] interface {
+		endpoint.IAPIEndpointCurator
 		IActivator
 		DELETE(path string) Initiator_T
 	}
@@ -43,35 +43,34 @@ type (
 )
 
 type (
-	IMvcAppLauncher interface {
+	// IMvcAppLauncher interface {
+	// }
+
+	IAPILauncher interface {
+		//IMvcAppLauncher
 		_launch(app *mvc.Application, options []mvc.Option) *mvc.Application
 	}
-
-	ILauncher interface {
-		IMvcAppLauncher
-	}
 )
 
 type (
-	CRUDController[
-		Read_Controller_T IReadController[endpoint.IEndpointInitiator],
-		Create_Contrller_T ICreateController[endpoint.IEndpointInitiator],
-		Update_Controller_T IUpdateController[endpoint.IEndpointInitiator],
-		Delete_Controller_T IDeleteController[endpoint.IEndpointInitiator],
+	CrudAPILauncher[
+		Read_Curator_T IReadEndpointCurator[endpoint.IEndpointBuilder],
+		Create_Curator_T ICreateEndpointCurator[endpoint.IEndpointBuilder],
+		Update_Curator_T IUpdateEndpointCurator[endpoint.IEndpointBuilder],
+		Delete_Curator_T IDeleteEndpointCurator[endpoint.IEndpointBuilder],
 	] struct {
-		Controller
-		endpoint.EndpointBuilder
-		read   Read_Controller_T
-		update Update_Controller_T
-		create Create_Contrller_T
-		delete Delete_Controller_T
+		endpoint.APIEndpointCurator
+		read   Read_Curator_T
+		update Update_Curator_T
+		create Create_Curator_T
+		delete Delete_Curator_T
 	}
 )
 
 type (
-	controller_launcher[Controller_t ILauncher] struct {
+	controller_launcher[Launcher_T IAPILauncher] struct {
 		app *mvc.Application
-		c   Controller_t
+		c   Launcher_T
 	}
 )
 
@@ -82,7 +81,7 @@ func (this *controller_launcher[Controller_t]) Launch(
 	return this.c._launch(this.app, options)
 }
 
-func NewControllerLauncher[Controller_T ILauncher](
+func NewControllerLauncher[Controller_T IAPILauncher](
 	party router.Party,
 ) interface {
 	Launch(options ...mvc.Option) *mvc.Application
@@ -122,7 +121,7 @@ func InstantiateCRUDControllerActivator[T IActivator](ptr *T) {
 
 }
 
-func (copy CRUDController[Read_Controller_T, Write_Controller_T, Create_Contrller_T, Delete_Controller_T]) _launch(
+func (copy CrudAPILauncher[Read_Curator_T, Write_Controller_T, Create_Curator_T, Delete_Curator_T]) _launch(
 	app *mvc.Application, options []mvc.Option,
 ) *mvc.Application {
 
@@ -149,14 +148,7 @@ func (copy CRUDController[Read_Controller_T, Write_Controller_T, Create_Contrlle
 	return app
 }
 
-// func (this *CRUDController[Read_Controller_T, Write_Controller_T, Create_Contrller_T, Delete_Controller_T]) BeforeActivation(
-// 	activator mvc.BeforeActivation,
-// ) {
-
-// 	this.init()
-// }
-
-func (this *CRUDController[Read_Controller_T, Write_Controller_T, Create_Contrller_T, Delete_Controller_T]) init() {
+func (this *CrudAPILauncher[Read_Curator_T, Write_Controller_T, Create_Curator_T, Delete_Curator_T]) init() {
 
 	InstantiateCRUDControllerActivator(&this.read)
 	InstantiateCRUDControllerActivator(&this.update)
@@ -164,7 +156,7 @@ func (this *CRUDController[Read_Controller_T, Write_Controller_T, Create_Contrll
 	InstantiateCRUDControllerActivator(&this.delete)
 }
 
-func (this *CRUDController[Read_Controller_T, Write_Controller_T, Create_Contrller_T, Delete_Controller_T]) registerEndpoints() {
+func (this *CrudAPILauncher[Read_Curator_T, Write_Controller_T, Create_Curator_T, Delete_Curator_T]) registerEndpoints() {
 
 	endpoint.RegisterEndpointsOf(this)
 	endpoint.RegisterEndpointsOf(this.read)

@@ -39,6 +39,12 @@ func __getAssetOf(accumulator IAccumulator) (v interface{}, ok bool) {
 	}
 }
 
+func AssetOf(accumulator IAccumulator) (asset interface{}) {
+
+	asset, _ = __getAssetOf(accumulator)
+	return
+}
+
 func Adopt(accumulator IAccumulator) {
 
 	asset, _ := __getAssetOf(accumulator)

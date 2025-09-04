@@ -25,7 +25,7 @@ var (
 	)
 )
 
-func Handle(builder *EndpointBuilder, httpMethod string, path string) IEndpointInitiator {
+func Handle(builder *APIEndpointCurator, httpMethod string, path string) IEndpointBuilder {
 
 	switch {
 	case !session.In():
@@ -36,14 +36,14 @@ func Handle(builder *EndpointBuilder, httpMethod string, path string) IEndpointI
 		panic("no registered controller method to handle for endpoint.")
 	}
 
-	return NewEnpoint(
+	return NewEnpointBuilder(
 		builder.Activator().Handle(
 			httpMethod, path, session.RegisteredControllerMethod(),
 		),
 	)
 }
 
-func RegisterEndpointsOf[T IEndpointBuilder](builder T) {
+func RegisterEndpointsOf[T IAPIEndpointCurator](builder T) {
 
 	reflectValBuilder := reflect.ValueOf(any(builder))
 	reflectType := reflect.TypeOf(builder)
