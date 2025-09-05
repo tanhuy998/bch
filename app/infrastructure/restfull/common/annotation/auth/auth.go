@@ -1,4 +1,4 @@
-package annotation
+package auth
 
 import (
 	"app/infrastructure/restfull/common/endpoint/annotation"
@@ -14,16 +14,16 @@ type (
 	AllowAnonnymous struct{ annotation.Annotation }
 )
 
-func (a AllowAnonnymous) Apply(route *router.Route) {
+func (AllowAnonnymous) Apply(route *router.Route) {
 
 	routeAuth.AllowAnonymous(route)
 }
 
 type (
-	NoAuthentication struct{ annotation.Annotation }
+	Annonymous struct{ annotation.Annotation }
 )
 
-func (n NoAuthentication) Apply(route *router.Route) {
+func (Annonymous) Apply(route *router.Route) {
 
 	routeAuth.Exclude(route)
 }
@@ -32,7 +32,7 @@ type (
 	NoAuthorize struct{ annotation.Annotation }
 )
 
-func (n NoAuthorize) Apply(route *router.Route) {
+func (NoAuthorize) Apply(route *router.Route) {
 
 	routeAuth.NoAuthorize(route)
 }

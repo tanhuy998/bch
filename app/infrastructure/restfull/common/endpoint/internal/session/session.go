@@ -8,7 +8,7 @@ import (
 var builder_session *struct {
 	sync.Mutex
 	builder                      reflect.Value
-	accumulator_bag              map[interface{}]interface{}
+	accumulators_bag             map[interface{}]interface{}
 	controller_registered_method string
 }
 
@@ -21,7 +21,7 @@ type (
 
 func __bag() map[interface{}]interface{} {
 
-	return builder_session.accumulator_bag
+	return builder_session.accumulators_bag
 }
 
 func __getAssetOf(accumulator IAccumulator) (v interface{}, ok bool) {
@@ -51,20 +51,18 @@ func Adopt(accumulator IAccumulator) {
 
 	if __bag() == nil {
 
-		builder_session.accumulator_bag = make(map[interface{}]interface{})
+		builder_session.accumulators_bag = make(map[interface{}]interface{})
 	}
 
 	key := accumulator.GetAccumulatorKey()
 
-	builder_session.accumulator_bag[key] = accumulator.Accumulate(asset)
+	builder_session.accumulators_bag[key] = accumulator.Accumulate(asset)
 }
 
 func Start(
 	builder reflect.Value,
 	registered_controller_method string,
 ) {
-
-	builder_session.Lock()
 
 	switch {
 	case registered_controller_method == "":
@@ -74,12 +72,14 @@ func Start(
 	builder_session = &struct {
 		sync.Mutex
 		builder                      reflect.Value
-		accumulator_bag              map[interface{}]interface{}
+		accumulators_bag             map[interface{}]interface{}
 		controller_registered_method string
 	}{
 		builder:                      builder,
 		controller_registered_method: registered_controller_method,
 	}
+
+	builder_session.Lock()
 }
 
 func End() {
@@ -95,7 +95,7 @@ func End() {
 
 func In() bool {
 
-	return builder_session == nil
+	return builder_session != nil
 }
 
 func RegisteredControllerMethod() string {

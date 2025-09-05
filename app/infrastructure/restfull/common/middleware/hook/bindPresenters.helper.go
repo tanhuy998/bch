@@ -1,8 +1,7 @@
 package hook
 
 import (
-	libIris "app/internal/lib/iris"
-	accessTokenClientPort "app/port/accessTokenClient"
+	"app/infrastructure/restfull/common/middleware/hook/binding"
 	"app/valueObject/requestInput"
 
 	"errors"
@@ -24,58 +23,62 @@ func UseAuthority[Req_T requestInput.IAuthorityBringAlong, Res_T any](
 	container *hero.Container, ctx iris.Context, req Req_T, res Res_T,
 ) error {
 
-	accessToken := libIris.GetAccessToken(ctx)
+	// accessToken := libIris.GetAccessToken(ctx)
 
-	if accessToken == nil {
+	// if accessToken == nil {
 
-		container.Handler(readAccessToken)(ctx)
+	// 	container.Handler(readAccessToken)(ctx)
 
-		accessToken = libIris.GetAccessToken(ctx)
-	}
+	// 	accessToken = libIris.GetAccessToken(ctx)
+	// }
 
-	if accessToken == nil {
+	// if accessToken == nil {
 
-		return nil
-	}
+	// 	return nil
+	// }
 
-	req.SetAuthority(accessToken.GetAuthData())
-	return nil
+	// req.SetAuthority(accessToken.GetAuthData())
+	// return nil
+
+	return binding.UseAuthority(container, ctx, req, res)
 }
 
 func UseTenantMapping[Req_T requestInput.ITenantMappingInput, Res_T any](
 	container *hero.Container, ctx iris.Context, req Req_T, res Res_T,
 ) error {
 
-	accessToken := libIris.GetAccessToken(ctx)
+	// accessToken := libIris.GetAccessToken(ctx)
 
-	if accessToken == nil {
+	// if accessToken == nil {
 
-		container.Handler(readAccessToken)(ctx)
+	// 	container.Handler(readAccessToken)(ctx)
 
-		accessToken = libIris.GetAccessToken(ctx)
-	}
+	// 	accessToken = libIris.GetAccessToken(ctx)
+	// }
 
-	if accessToken == nil {
+	// if accessToken == nil {
 
-		return nil
-	}
+	// 	return nil
+	// }
 
-	req.SetTenantUUID(accessToken.GetTenantUUID())
-	return nil
+	// req.SetTenantUUID(accessToken.GetTenantUUID())
+	// return nil
+
+	return binding.UseTenantMapping(container, ctx, req, res)
 }
 
-func readAccessToken(
-	ctx iris.Context, accessTokenClient accessTokenClientPort.IAccessTokenClient,
-) error {
+// func readAccessToken(
+// 	ctx iris.Context, accessTokenClient accessTokenClientPort.IAccessTokenClient,
+// ) error {
 
-	at, err := accessTokenClient.Read(ctx)
+// 	at, err := accessTokenClient.Read(ctx)
 
-	if err != nil {
+// 	if err != nil {
 
-		return err
-	}
+// 		return err
+// 	}
 
-	libIris.SetAccessToken(ctx, at)
+// 	libIris.SetAccessToken(ctx, at)
 
-	return nil
-}
+// 	return nil
+// }

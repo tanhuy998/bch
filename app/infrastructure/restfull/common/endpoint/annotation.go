@@ -12,11 +12,6 @@ import (
 type (
 	Accumulator = session.IAccumulator
 
-	// SingletonAccumulator interface {
-	// 	Accumulator
-	// 	SingletonAnnotation
-	// }
-
 	SingletonAnnotation interface {
 		Singleton()
 	}
@@ -53,41 +48,11 @@ type (
 
 var (
 	type_singleton_annotation = reflect.TypeFor[SingletonAnnotation]()
-
-	type_route_effector      = reflect.TypeFor[RouteEffector]()
-	type_middleware_effector = reflect.TypeFor[MiddlewareEffector]()
-	type_endpoint_effector   = reflect.TypeFor[EndpointEffector]()
 )
 
-func assertAffector(t reflect.Type) {
-
-	ok := t.Implements(type_route_effector) ||
-		t.Implements(type_middleware_effector) ||
-		t.Implements(type_endpoint_effector)
-
-	if !ok {
-
-		panic(
-			fmt.Sprintf(`%s is not type of endpoint annotation`, t.Name()),
-		)
-	}
-}
-
-func prepareAnnotationEffector(endpoint *endpoint_builder_t, annotations []reflect.Value) {
-
-	for _, an := range annotations {
-
-		switch eff := an.Interface().(type) {
-		case RouteEffector:
-			eff.Apply(endpoint.route)
-		case MiddlewareEffector:
-			eff.Apply(endpoint)
-		case EndpointEffector:
-			eff.Apply(endpoint)
-		}
-	}
-}
-
+/*
+Read, detect, resolve annations that is placed in the endpoint builder method's structure
+*/
 func prepareAndCall(reflectTypeMethod reflect.Method, method reflect.Value) {
 
 	switch {
@@ -97,12 +62,12 @@ func prepareAndCall(reflectTypeMethod reflect.Method, method reflect.Value) {
 
 	const passedReceiver = 1
 
-	count := reflectTypeMethod.Type.NumIn()
-	argCount := count - passedReceiver
+	countWithReceiver := reflectTypeMethod.Type.NumIn()
+	argCount := countWithReceiver - passedReceiver
 
-	if count == 1 {
+	if countWithReceiver == 1 {
 		// first parameter of method reflection is the receiver type reflection, just skip
-		method.Call(make([]reflect.Value, 0))
+		method.Call(nil)
 		return
 	}
 
@@ -118,7 +83,7 @@ func prepareAndCall(reflectTypeMethod reflect.Method, method reflect.Value) {
 		singleton_annotations = nil
 	}()
 
-	for i := passedReceiver; i < count; i++ {
+	for i := passedReceiver; i < countWithReceiver; i++ {
 
 		type_param := reflectTypeMethod.Type.In(i)
 
@@ -145,7 +110,12 @@ func prepareAndCall(reflectTypeMethod reflect.Method, method reflect.Value) {
 		case OnceAnnotation:
 			if _, ok := singleton_annotations[reflectTypeMethod.Type]; ok {
 
-				panic("")
+				panic(
+					fmt.Sprintf(
+						`%s is once annotation that ought to be used once`,
+						challenged.Type().Name(),
+					),
+				)
 			}
 		}
 

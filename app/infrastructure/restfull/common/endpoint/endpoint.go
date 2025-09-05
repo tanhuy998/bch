@@ -30,18 +30,7 @@ type (
 		) IEndpoint
 	}
 
-	// IEndpointInitiator interface {
-	// 	//IEndpoint
-	// 	IEndpointAuthenticate
-	// 	IEndpointAuthorize
-	// }
-
 	IEndpoint interface {
-		//IEndpointUseMiddleware
-		//getEndpointInititor() IEndpointInitiator
-		//Middleware(middlewares ...interface{})
-		//IEndpointUseMiddleware
-		//Middleware(middlewares ...interface{})
 		IEndpointUseMiddleware
 		getRoute() *router.Route
 	}

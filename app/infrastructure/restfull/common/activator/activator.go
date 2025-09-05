@@ -7,8 +7,12 @@ import (
 type (
 	IActivator interface {
 		mvc.BeforeActivation
-		// Handle(httpMethod string, path string, methodName string, middilewares ...context.Handler) *router.Route
-		// Router() router.Party
+	}
+)
+
+type (
+	IControllerActivator interface {
+		BeforeActivation(activator mvc.BeforeActivation)
 	}
 )
 
@@ -22,18 +26,6 @@ func (this *ActivateController) BeforeActivation(activator mvc.BeforeActivation)
 
 	this.activator = activator
 }
-
-// func (this *ActivateController) UseMiddleware(middlewares ...interface{}) {
-
-// 	container := this.activator.Dependencies()
-
-// 	for _, fn := range middlewares {
-
-// 		this.activator.Router().Use(
-// 			middleware.TransformMiddleware(container, fn),
-// 		)
-// 	}
-// }
 
 func (this *ActivateController) Activator() IActivator {
 

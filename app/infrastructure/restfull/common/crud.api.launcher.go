@@ -43,16 +43,6 @@ type (
 )
 
 type (
-	// IMvcAppLauncher interface {
-	// }
-
-	IAPILauncher interface {
-		//IMvcAppLauncher
-		_launch(app *mvc.Application, options []mvc.Option) *mvc.Application
-	}
-)
-
-type (
 	CrudAPILauncher[
 		Read_Curator_T IReadEndpointCurator[endpoint.IEndpointBuilder],
 		Create_Curator_T ICreateEndpointCurator[endpoint.IEndpointBuilder],
@@ -66,20 +56,6 @@ type (
 		delete Delete_Curator_T
 	}
 )
-
-type (
-	controller_launcher[Launcher_T IAPILauncher] struct {
-		app *mvc.Application
-		c   Launcher_T
-	}
-)
-
-func (this *controller_launcher[Controller_t]) Launch(
-	options ...mvc.Option,
-) *mvc.Application {
-
-	return this.c._launch(this.app, options)
-}
 
 func NewControllerLauncher[Controller_T IAPILauncher](
 	party router.Party,
@@ -98,7 +74,7 @@ func NewControllerLauncher[Controller_T IAPILauncher](
 	return c
 }
 
-func InstantiateCRUDControllerActivator[T IActivator](ptr *T) {
+func instantiateCurator[T endpoint.IAPIEndpointCurator](ptr *T) {
 
 	if ptr == nil {
 
@@ -150,10 +126,10 @@ func (copy CrudAPILauncher[Read_Curator_T, Write_Controller_T, Create_Curator_T,
 
 func (this *CrudAPILauncher[Read_Curator_T, Write_Controller_T, Create_Curator_T, Delete_Curator_T]) init() {
 
-	InstantiateCRUDControllerActivator(&this.read)
-	InstantiateCRUDControllerActivator(&this.update)
-	InstantiateCRUDControllerActivator(&this.create)
-	InstantiateCRUDControllerActivator(&this.delete)
+	instantiateCurator(&this.read)
+	instantiateCurator(&this.update)
+	instantiateCurator(&this.create)
+	instantiateCurator(&this.delete)
 }
 
 func (this *CrudAPILauncher[Read_Curator_T, Write_Controller_T, Create_Curator_T, Delete_Curator_T]) registerEndpoints() {

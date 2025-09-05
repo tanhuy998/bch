@@ -49,7 +49,7 @@ func RegisterEndpointsOf[T IAPIEndpointCurator](builder T) {
 	reflectType := reflect.TypeOf(builder)
 	methodCount := reflectType.NumMethod()
 
-	for i := 0; i < methodCount; i++ {
+	for i := range methodCount {
 
 		reflectTypeMethod := reflectType.Method(i)
 		matches := regex_match_endpoint_method.FindStringSubmatch(reflectTypeMethod.Name)
@@ -63,14 +63,12 @@ func RegisterEndpointsOf[T IAPIEndpointCurator](builder T) {
 		prefix := matches[regex_match_endpoint_method.SubexpIndex(ENDPOINT_PREFIX_CAPTURING_GROUP)]
 
 		if prefix != ENDPOINT_PREFIX {
-
 			continue
 		}
 
 		registeredName := matches[regex_match_endpoint_method.SubexpIndex(ENDPOINT_REGISTERED_METHOD_CAPTURING_GROUP)]
 
 		if registeredName == "" {
-
 			continue
 		}
 

@@ -8,7 +8,9 @@ import (
 
 type (
 	IAPIEndpointCurator interface {
+		comparable
 		_Curator() *APIEndpointCurator
+		Activator() activator.IActivator
 	}
 )
 
@@ -44,14 +46,3 @@ func (this *APIEndpointCurator) UseMiddleware(middlewares ...interface{}) {
 		)
 	}
 }
-
-// func (this *APIEndpointCurator) Endpoint(
-// 	httpMethod, path, funcName string,
-// ) IEndpointInitiator {
-
-// 	return NewEnpointBuilder(
-// 		this.Activator().Handle(
-// 			httpMethod, path, funcName,
-// 		),
-// 	)
-// }
