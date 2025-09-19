@@ -1,33 +1,37 @@
 package ioc
 
 import (
+	checkAuthorityDomain "app/domain/auth/checkAuthority"
 	irisIoc "app/internal/lib/iris/ioc"
 	"app/main/internal/dependencies/jwt"
+	"app/main/internal/dependencies/log"
 
 	accessTokenServicePort "app/port/accessToken"
 	accessTokenClientPort "app/port/accessTokenClient"
+	"app/port/authenticatorServicePort"
 	generalTokenServicePort "app/port/generalToken"
 	generalTokenClientServicePort "app/port/generalTokenClient"
 	generalTokenIDServicePort "app/port/generalTokenID"
+	usecasePort "app/port/usecase"
 
 	jwtTokenServicePort "app/port/jwtTokenService"
 	refreshTokenIdServicePort "app/port/refreshTokenID"
 	uniqueIDServicePort "app/port/uniqueID"
 	accessTokenClientService "app/service/accessTokenClient"
 	"app/service/accessTokenService"
+	"app/service/authenticatorService"
 	generalTokenClientService "app/service/generalTokenClient"
 	generalTokenIDService "app/service/generalTokenID"
 	"app/service/generalTokenService"
 	refreshTokenIDService "app/service/refreshTokenID"
 	uniqueIDService "app/service/uniqueID"
-	"fmt"
 
 	"github.com/kataras/iris/v12/hero"
 )
 
 func RegisterAuthDependencies(container *hero.Container) {
 
-	fmt.Println("Initialize Auth service...")
+	log.Main().Println("Initialize Auth service...")
 
 	//irisIoc.BindAndMapDependencyToContext[authService.IAuthService, authService.AuthenticationService](container, nil, AUTH)
 
@@ -61,5 +65,10 @@ func RegisterAuthDependencies(container *hero.Container) {
 	irisIoc.BindDependency[generalTokenClientServicePort.IGeneralTokenClient, generalTokenClientService.GeneralTokenClientService](container, nil)
 	irisIoc.BindDependency[accessTokenClientPort.IAccessTokenClient, accessTokenClientService.BearerAccessTokenClientService](container, nil)
 
-	fmt.Println("Auth service initialized.")
+	irisIoc.BindDependency[
+		usecasePort.IMiddlewareUseCase, checkAuthorityDomain.CheckAuthoritySessionUseCase,
+	](container, nil)
+
+	irisIoc.BindDependency[authenticatorServicePort.IAuthenticator, authenticatorService.AuthenticatorService](container, nil)
+	log.Main().Println("Auth service initialized.")
 }

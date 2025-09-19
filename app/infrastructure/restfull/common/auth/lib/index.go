@@ -7,7 +7,7 @@ func CheckAuthExCludedPath(path string) bool {
 	return commonAuth.HasExcluded(path)
 }
 
-func CheckAuthAnonymouse(path string) bool {
+func CheckAuthAllowAnonymouse(path string) bool {
 
 	return commonAuth.HasAnonymous(path)
 }

@@ -6,12 +6,12 @@ import (
 	"app/internal/bootstrap"
 	"app/internal/rpc"
 	"app/internal/watcher"
-	"fmt"
 
 	"app/main/internal/ioc"
 	"app/main/internal/manifest"
 	"app/main/internal/tls"
-	"log"
+
+	"app/main/internal/dependencies/log"
 
 	"github.com/gofor-little/env"
 	"github.com/kataras/iris/v12"
@@ -22,7 +22,7 @@ const (
 )
 
 func init() {
-	fmt.Println("main init")
+
 	bootstrap.Boot()
 }
 
@@ -35,20 +35,21 @@ func main() {
 		},
 	)
 
+
 	restfullAPI.UseGlobal(
 		manifest.JustedSources,
 	)
 
-	restfullAPI.Configure(
-		iris.WithHostProxyHeader(
-			"Host",
-			"X-Real-IP",
-			"X-Forwarded-For",
-			"X-Forwarded-Proto",
-		),
-		iris.WithoutBodyConsumptionOnUnmarshal,
-		iris.WithOptimizations,
-	)
+	// for _, v := range restfullAPI.GetRoutes() {
+
+	// 	fmt.Println(v)
+	// }
+
+	// restfullAPI.Configure(
+
+	// 	iris.WithoutBodyConsumptionOnUnmarshal,
+	// 	iris.WithOptimizations,
+	// )
 	// globalContainer := app.ConfigureContainer().EnableStructDependents().Container
 
 	watcher.Watch(
@@ -62,16 +63,22 @@ func main() {
 					tls.GetSSLCert(),
 					tls.GetSSLKey(),
 				),
+				iris.WithHostProxyHeader(
+					"Host",
+					"X-Real-IP",
+					"X-Forwarded-For",
+					"X-Forwarded-Proto",
+				),
 				iris.WithoutBodyConsumptionOnUnmarshal,
 				iris.WithOptimizations,
 			)
 
-			log.Default().Println("Http server closed.")
+			log.Main().Println("Http server closed.")
 		},
 		func() {
 
 			rpc.Listen()
-			log.Default().Println("Rpc server closed.")
+			log.Main().Println("Rpc server closed.")
 		},
 	)
 

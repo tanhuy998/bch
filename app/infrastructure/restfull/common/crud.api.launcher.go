@@ -3,10 +3,8 @@ package common
 import (
 	"app/infrastructure/restfull/common/endpoint"
 	libCommon "app/internal/lib/common"
-	"fmt"
 	"reflect"
 
-	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/mvc"
 )
 
@@ -57,23 +55,6 @@ type (
 	}
 )
 
-func NewControllerLauncher[Controller_T IAPILauncher](
-	party router.Party,
-) interface {
-	Launch(options ...mvc.Option) *mvc.Application
-} {
-
-	if party == nil {
-		panic("bad party value, nil given")
-	}
-
-	c := &controller_launcher[Controller_T]{
-		app: mvc.New(party).EnableStructDependents(),
-	}
-
-	return c
-}
-
 func instantiateCurator[T endpoint.IAPIEndpointCurator](ptr *T) {
 
 	if ptr == nil {
@@ -97,31 +78,25 @@ func instantiateCurator[T endpoint.IAPIEndpointCurator](ptr *T) {
 
 }
 
-func (copy CrudAPILauncher[Read_Curator_T, Write_Controller_T, Create_Curator_T, Delete_Curator_T]) _launch(
-	app *mvc.Application, options []mvc.Option,
-) *mvc.Application {
+func (this *CrudAPILauncher[Read_Curator_T, Write_Controller_T, Create_Curator_T, Delete_Curator_T]) BeforeLaunch(
+	parentApp *mvc.Application, options []mvc.Option,
+) {
 
-	fmt.Println("------------- _launch()", mvc.IgnoreEmbeddedControllers)
+	//parentApp.EnableStructDependents().Handle(&this, options...)
 
-	defer copy.registerEndpoints()
+	childApp := mvc.New(parentApp.Router.Party("/")).EnableStructDependents()
 
-	app.Handle(&copy, options...)
-
-	childApp := mvc.New(app.Router.Party("/"))
-
-	copy.init()
+	this.init()
 
 	childApp.Handle(
-		copy.create, options...,
+		this.create, options...,
 	).Handle(
-		copy.read, options...,
+		this.read, options...,
 	).Handle(
-		copy.update, options...,
+		this.update, options...,
 	).Handle(
-		copy.delete, options...,
+		this.delete, options...,
 	)
-
-	return app
 }
 
 func (this *CrudAPILauncher[Read_Curator_T, Write_Controller_T, Create_Curator_T, Delete_Curator_T]) init() {
@@ -132,11 +107,9 @@ func (this *CrudAPILauncher[Read_Curator_T, Write_Controller_T, Create_Curator_T
 	instantiateCurator(&this.delete)
 }
 
-func (this *CrudAPILauncher[Read_Curator_T, Write_Controller_T, Create_Curator_T, Delete_Curator_T]) registerEndpoints() {
+func (this *CrudAPILauncher[Read_Curator_T, Create_Curator_T, Update_Curator_T, Delete_Curator_T]) Child() []endpoint.IAPICurator {
 
-	endpoint.RegisterEndpointsOf(this)
-	endpoint.RegisterEndpointsOf(this.read)
-	endpoint.RegisterEndpointsOf(this.create)
-	endpoint.RegisterEndpointsOf(this.update)
-	endpoint.RegisterEndpointsOf(this.delete)
+	return []endpoint.IAPICurator{
+		this.read, this.create, this.update, this.delete,
+	}
 }

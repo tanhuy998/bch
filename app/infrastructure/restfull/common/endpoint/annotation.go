@@ -2,6 +2,7 @@ package endpoint
 
 import (
 	"app/infrastructure/restfull/common/endpoint/annotation"
+	"app/infrastructure/restfull/common/endpoint/internal/annotate"
 	"app/infrastructure/restfull/common/endpoint/internal/session"
 	"fmt"
 	"reflect"
@@ -10,16 +11,39 @@ import (
 )
 
 type (
-	Accumulator = session.IAccumulator
-
+	// ANNOTATION CONSTRAINTS
 	SingletonAnnotation interface {
 		Singleton()
 	}
-
+	PresetSingletonAnnotation interface {
+		Singleton() interface{}
+	}
 	OnceAnnotation interface {
 		Once()
 	}
+	ForceOnceAnnotation interface {
+		OnceAnnotation
+		Panic()
+	}
+	// END ANNOTATION CONSTRAINTS
 
+	// PRE-ENDPOINT ANNOTATION
+	Accumulator = session.IAccumulator
+	// END PRE-ENDPOINT ANNOTATIONS
+
+	// POST-END POINT ANNOTATIONS
+	EndpointEffectorWithAsset interface {
+		Accumulator
+		Apply(e IEndpoint, asset interface{})
+	}
+	RouteEffectorWithAsset interface {
+		Accumulator
+		Apply(router *router.Route, asset interface{})
+	}
+	MiddlewareEffectorWithAsset interface {
+		Accumulator
+		Apply(e IEndpointUseMiddleware, asset interface{})
+	}
 	RouteEffector interface {
 		Apply(*router.Route)
 	}
@@ -29,94 +53,55 @@ type (
 	EndpointEffector interface {
 		Apply(IEndpoint)
 	}
-
-	RouteEffectorWithAsset interface {
-		Accumulator
-		Apply(router *router.Route, asset interface{})
-	}
-
-	MiddlewareEffectorWithAsset interface {
-		Accumulator
-		Apply(e IEndpointUseMiddleware, asset interface{})
-	}
-
-	EndpointEffectorWithAsset interface {
-		Accumulator
-		Apply(e IEndpoint, asset interface{})
-	}
+	// END POST-ENDPOINT ANNOTATIONS
 )
 
 var (
-	type_singleton_annotation = reflect.TypeFor[SingletonAnnotation]()
+	type_singleton_annotation        = reflect.TypeFor[SingletonAnnotation]()
+	type_preset_singleton_annotation = reflect.TypeFor[PresetSingletonAnnotation]()
 )
 
 /*
 Read, detect, resolve annations that is placed in the endpoint builder method's structure
 */
-func prepareAndCall(reflectTypeMethod reflect.Method, method reflect.Value) {
+func __prepareAnnotationsAndRetrieveEndpoint(
+	reflectTypeMethod reflect.Method, method reflect.Value,
+) {
 
 	switch {
 	case !session.In():
 		panic("endpoint.prepareAndRun() just only been called inside endpoint.RegisterEndpointsOf[T IEndpointBuilder](builder T) function")
 	}
 
-	const passedReceiver = 1
+	const excludedFromReceiver = 1
 
 	countWithReceiver := reflectTypeMethod.Type.NumIn()
-	argCount := countWithReceiver - passedReceiver
-
-	if countWithReceiver == 1 {
-		// first parameter of method reflection is the receiver type reflection, just skip
-		method.Call(nil)
-		return
-	}
-
-	annotations := make([]reflect.Value, argCount)
+	argCount := countWithReceiver - excludedFromReceiver
 
 	var (
-		singleton_annotations map[reflect.Type]reflect.Value = make(map[reflect.Type]reflect.Value)
-		endpoint              IEndpoint
+		endpoint    IEndpoint
+		annotations []reflect.Value = make([]reflect.Value, argCount)
 	)
 
-	defer func() {
+	for _, queuedAccumulator := range annotate.GetAccumulatorQueue() {
 
-		singleton_annotations = nil
-	}()
+		session.Adopt(queuedAccumulator)
+	}
 
-	for i := passedReceiver; i < countWithReceiver; i++ {
+	for i := excludedFromReceiver; i < countWithReceiver; i++ {
 
 		type_param := reflectTypeMethod.Type.In(i)
 
-		var challenged reflect.Value
+		var (
+			challenged           reflect.Value
+			shouldSkipInspecting bool
+		)
 
-		switch singleton, acknowledgedAsSingleton := singleton_annotations[type_param]; {
-		case acknowledgedAsSingleton:
-			challenged = singleton
-		default:
+		challenged, shouldSkipInspecting = __prepareAnnotationConstraints(type_param)
 
-			challenged = reflect.New(type_param).Elem()
+		if shouldSkipInspecting {
 
-			//if type_param.Kind() == reflect.Pointer
-
-			annotation.AssertAnnotation(challenged)
-
-			if type_param.Implements(type_singleton_annotation) {
-
-				singleton_annotations[type_param] = challenged
-			}
-		}
-
-		switch challenged.Interface().(type) {
-		case OnceAnnotation:
-			if _, ok := singleton_annotations[reflectTypeMethod.Type]; ok {
-
-				panic(
-					fmt.Sprintf(
-						`%s is once annotation that ought to be used once`,
-						challenged.Type().Name(),
-					),
-				)
-			}
+			continue
 		}
 
 		switch accumulator := challenged.Interface().(type) {
@@ -151,8 +136,57 @@ func prepareAndCall(reflectTypeMethod reflect.Method, method reflect.Value) {
 			}()
 		}
 
-		annotations[i-passedReceiver] = challenged
+		annotations[i-excludedFromReceiver] = challenged
 	}
 
-	endpoint = method.Call(annotations)[0].Interface().(IEndpoint) // no need to handle panic
+	session.ReserveAnnotationsFromEndpoint()
+	defer session.ReleaseReservation()
+	endpoint = method.Call(annotations)[0].Interface().(IEndpoint)
+	endpoint._register()
+}
+
+func __prepareAnnotationConstraints(type_param reflect.Type) (challenged reflect.Value, shouldSkipInspecting bool) {
+
+	switch singleton, acknowledgedAsSingleton := annotate.GetSingleton(type_param); {
+	case acknowledgedAsSingleton:
+		challenged = singleton
+	default:
+
+		challenged = reflect.New(type_param).Elem()
+
+		//if type_param.Kind() == reflect.Pointer
+
+		annotation.AssertAnnotation(challenged)
+
+		switch {
+		case type_param.Implements(type_singleton_annotation):
+			//singleton_annotations[type_param] = challenged
+			annotate.AcknowledgeSingleton(type_param, challenged)
+		case type_param.Implements(type_preset_singleton_annotation):
+			preset := challenged.Interface().(PresetSingletonAnnotation).Singleton()
+			//singleton_annotations[type_param] = reflect.ValueOf(stored)
+			annotate.AcknowledgeSingleton(type_param, reflect.ValueOf(preset))
+		}
+	}
+
+	switch challenged.Interface().(type) {
+	case ForceOnceAnnotation:
+		if annotate.HasSingleton(type_param) {
+			panic(
+				fmt.Sprintf(
+					`%s is forced once annotation that ought to be used once`,
+					challenged.Type().Name(),
+				),
+			)
+		}
+		annotate.AcknowledgeSingleton(type_param, challenged)
+	case OnceAnnotation:
+		if annotate.HasSingleton(type_param) {
+			shouldSkipInspecting = true
+		} else {
+			annotate.AcknowledgeSingleton(type_param, challenged)
+		}
+	}
+
+	return
 }

@@ -3,38 +3,39 @@ package common
 import (
 	"app/infrastructure/restfull/common/endpoint"
 
+	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
-	IAPILauncher interface {
-		_launch(app *mvc.Application, options []mvc.Option) *mvc.Application
+	IBeforeLaucnhEvent interface {
+		BeforeLaunch(parentApp *mvc.Application, options []mvc.Option)
 	}
 )
 
 type (
-	controller_launcher[Launcher_T IAPILauncher] struct {
-		app *mvc.Application
-		l   Launcher_T
+	APILauncher struct {
+		router router.Party
 	}
 )
 
-func (this *controller_launcher[Controller_t]) Launch(
-	options ...mvc.Option,
-) *mvc.Application {
+func NewAPILauncher(router router.Party) *APILauncher {
 
-	return this.l._launch(this.app, options)
+	return &APILauncher{router: router}
 }
 
-type (
-	APILauncher[Curator_t endpoint.IAPIEndpointCurator] struct {
-		curator Curator_t
+func (this *APILauncher) LaunchAPIOf(curator endpoint.IAPICurator, options ...mvc.Option) *mvc.Application {
+
+	app := mvc.New(this.router).EnableStructDependents()
+
+	app.Handle(curator, options...)
+
+	switch o := curator.(type) {
+	case IBeforeLaucnhEvent:
+		o.BeforeLaunch(app, options)
 	}
-)
 
-func (copy APILauncher[Curator_t]) _launch(app *mvc.Application, options []mvc.Option) *mvc.Application {
+	endpoint.LaunchApiOf(curator)
 
-	instantiateCurator(&copy.curator)
-
-	return app.Handle(&copy, options...)
+	return app
 }

@@ -7,27 +7,18 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
-func Api(app iris.Party) {
+func Legacy(parent iris.Party) {
 
-	router := app.Party("/assigns")
+	router := parent.Party("/assigns")
 
-	// wrapper := mvc.New(router)
+	launcher := common.NewAPILauncher(router)
 
-	// wrapper.Router.Use(
-	// 	middleware.Auth(container),
-	// )
+	launcher.LaunchAPIOf(new(controller.AssignmentController))
+}
 
-	//wrapper.Router.ConfigureContainer()
+func API(parent iris.Party) {
 
-	// container := router.ConfigureContainer().Container
+	launcher := common.NewAPILauncher(parent)
 
-	// controller := new(controller.AssignmentController).BindDependencies(container)
-
-	// wrapper.Handle(
-	// 	new(controller.AssignmentController),
-	// )
-
-	launcher := common.NewControllerLauncher[controller.AssignmentController](router)
-
-	launcher.Launch()
+	launcher.LaunchAPIOf(new(controller.AssignmentController))
 }

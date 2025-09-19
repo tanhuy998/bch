@@ -1,111 +1,95 @@
 package endpoint
 
 import (
+	"app/infrastructure/restfull/common/endpoint/internal/session"
 	"app/infrastructure/restfull/common/middleware"
-	"app/infrastructure/restfull/common/middleware/hook"
+	"io"
 
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
-	"github.com/kataras/iris/v12/hero"
 )
 
 type (
-	EndpointAction string
-
-	AuthorityConstraint = hook.AuthorityConstraint
-)
-
-type (
-	IEndpointUseMiddleware interface {
-		Middleware(middlewares ...interface{})
-	}
-
-	IEndpointAuthenticate interface {
-		Authenticate() IEndpoint
-	}
-
-	IEndpointAuthorize interface {
-		Authorize(
-			constraints ...AuthorityConstraint,
-		) IEndpoint
-	}
-
 	IEndpoint interface {
 		IEndpointUseMiddleware
+		IRoute
 		getRoute() *router.Route
-	}
-
-	IEndpointBuilder interface {
-		IEndpointUseMiddleware
-
-		UseMiddleware(middlewares ...interface{}) IEndpointBuilder
-		Build() IEndpoint
+		_register()
 	}
 )
 
 type (
-	endpoint_builder_t struct {
-		route *router.Route
-		auth  context.Handler
+	end_point_t struct {
+		builder *endpoint_builder_t
+		route   *router.Route
 	}
 )
 
-func NewEnpointBuilder(r *router.Route) *endpoint_builder_t {
+func newEndpoint(
+	builder *endpoint_builder_t,
+) *end_point_t {
 
-	ret := &endpoint_builder_t{
-		route: r,
-	}
-
-	return ret
+	return &end_point_t{builder: builder}
 }
 
-func (this *endpoint_builder_t) getContainer() *hero.Container {
+func (this *end_point_t) _register() {
 
-	return this.route.Party.ConfigureContainer().EnableStructDependents().Container
+	builder := this.builder
+
+	this.route = builder.acitvator.Handle(
+		builder.method, builder.path, session.RegisteredControllerMethod(),
+		builder.middlewares...,
+	).SetName(session.RegisteredControllerMethod())
+
+	this.builder = nil
 }
 
-func (this *endpoint_builder_t) UseMiddleware(middlewares ...interface{}) IEndpointBuilder {
-
-	this._middleware(middlewares)
-
-	return this
-}
-
-func (this *endpoint_builder_t) Middleware(middlewares ...interface{}) {
-
-	this._middleware(middlewares)
-}
-
-func (this *endpoint_builder_t) _middleware(middlewares []interface{}) {
-
-	for _, fn := range middlewares {
-
-		this.route.Use(
-			middleware.TransformMiddleware(this.getContainer(), fn),
-		)
-	}
-}
-
-func (this *endpoint_builder_t) Authenticate() IEndpoint {
-
-	this.auth = middleware.Auth()(this.getContainer())
-
-	return this
-}
-
-func (this *endpoint_builder_t) Authorize(constraints ...AuthorityConstraint) IEndpoint {
-
-	this.auth = middleware.Auth(constraints...)(this.getContainer())
-
-	return this
-}
-
-func (this *endpoint_builder_t) getRoute() *router.Route {
+func (this *end_point_t) getRoute() *router.Route {
 
 	return this.route
 }
 
-func (this *endpoint_builder_t) Build() IEndpoint {
+func (this *end_point_t) Middleware(middlewares ...interface{}) {
 
-	return this
+	for _, m := range middlewares {
+
+		this.route.Use(
+			middleware.TransformMiddleware(this.route.Party.ConfigureContainer().Container, m),
+		)
+	}
+}
+
+func (this *end_point_t) Use(handlers ...context.Handler) {
+
+	this.route.Use(handlers...)
+}
+
+func (this *end_point_t) Done(handlers ...context.Handler) {
+
+	this.route.Done(handlers...)
+}
+
+func (this *end_point_t) IsStatic() bool {
+
+	return this.route.IsStatic()
+}
+
+func (this *end_point_t) StaticPath() string {
+
+	return this.route.StaticPath()
+}
+
+func (this *end_point_t) GetTitle() string {
+
+	return this.route.GetTitle()
+}
+
+func (this *end_point_t) Trace(w io.Writer, stoppedIndex int) {
+
+	this.route.Trace(w, stoppedIndex)
+}
+
+func (this *end_point_t) IsOnline() bool {
+
+	return this.route.IsOnline()
 }

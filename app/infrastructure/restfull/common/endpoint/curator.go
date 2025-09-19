@@ -7,10 +7,14 @@ import (
 )
 
 type (
-	IAPIEndpointCurator interface {
-		comparable
+	IAPICurator interface {
 		_Curator() *APIEndpointCurator
 		Activator() activator.IActivator
+	}
+
+	IAPIEndpointCurator interface {
+		comparable
+		IAPICurator
 	}
 )
 

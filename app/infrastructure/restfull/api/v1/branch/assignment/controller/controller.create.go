@@ -2,10 +2,11 @@ package controller
 
 import (
 	"app/infrastructure/restfull/common"
+	"app/infrastructure/restfull/common/annotation/auth"
+	"app/infrastructure/restfull/common/annotation/auth/constraint"
+	"app/infrastructure/restfull/common/annotation/input"
 	"app/infrastructure/restfull/common/crud"
 	"app/infrastructure/restfull/common/endpoint"
-	"app/infrastructure/restfull/common/middleware"
-	"app/infrastructure/restfull/common/middleware/hook"
 	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
@@ -23,71 +24,49 @@ type (
 	}
 )
 
-func (this *create) ENDPOINT_CreateAssignment() endpoint.IEndpoint {
+func (this *create) ENDPOINT_CreateAssignment(
+	auth.Authorize[constraint.TenantAgent],
+	input.Bind[requestPresenter.CreateAssigmentRequest],
+) endpoint.IEndpoint {
 
 	return this.POST("/").
-		UseMiddleware(
-			middleware.Auth(
-				hook.AuthRequireTenantAgent,
-			),
-			middleware.BindRequest[requestPresenter.CreateAssigmentRequest](
-				hook.UseAuthority,
-				hook.UseTenantMapping,
-			),
-		).
-		Build()
-}
-func (this *create) CreateAssignment(
-	input *requestPresenter.CreateAssigmentRequest,
-) (mvc.Result, error) {
+		BuildAction(
+			func(input *requestPresenter.CreateAssigmentRequest) (mvc.Result, error) {
 
-	return this.ResultOf(
-		this.CreateAssignmentUseCase.Execute(input),
-	)
+				return this.ResultOf(
+					this.CreateAssignmentUseCase.Execute(input),
+				)
+			},
+		)
 }
 
-func (this *create) ENDPOINT_CreateAssignmentGroup() endpoint.IEndpoint {
+func (this *create) ENDPOINT_CreateAssignmentGroup(
+	auth.Authorize[constraint.TenantAgent],
+	input.Bind[requestPresenter.CreateAssignmentGroupRequest],
+) endpoint.IEndpoint {
 
 	return this.POST("/{assignmentUUID:uuid}/group/command/{commandGroupUUID:uuid}").
-		UseMiddleware(
-			middleware.Auth(
-				hook.AuthRequireTenantAgent,
-			),
-			middleware.BindRequest[requestPresenter.CreateAssignmentGroupRequest](
-				hook.UseAuthority,
-				hook.UseTenantMapping,
-			),
-		).
-		Build()
-}
-func (this *create) CreateAssignmentGroup(
-	input *requestPresenter.CreateAssignmentGroupRequest,
-) (mvc.Result, error) {
+		BuildAction(
+			func(input *requestPresenter.CreateAssignmentGroupRequest) (mvc.Result, error) {
 
-	return this.ResultOf(
-		this.CreateAssignmentGroupUseCase.Execute(input),
-	)
+				return this.ResultOf(
+					this.CreateAssignmentGroupUseCase.Execute(input),
+				)
+			},
+		)
 }
 
-func (this *create) ENDPOINT_CreateAssignmentGroupMember() endpoint.IEndpoint {
+func (this *create) ENDPOINT_CreateAssignmentGroupMember(
+	auth.Authorize[constraint.TenantAgent],
+	input.Bind[requestPresenter.CreateAssignmentGroupMember],
+) endpoint.IEndpoint {
 
 	return this.POST("/group/{groupUUID:uuid}/member").
-		UseMiddleware(
-			middleware.Auth(
-				hook.AuthRequiredTenantAgentExceptMeetRoles("COMMANDER"),
-			),
-			middleware.BindRequest[requestPresenter.CreateAssignmentGroupMember](
-				hook.UseAuthority,
-				hook.UseTenantMapping,
-			),
-		).
-		Build()
-}
-func (this *create) CreateAssignmentGroupMember(
-	input *requestPresenter.CreateAssignmentGroupMember,
-) (mvc.Result, error) {
-
-	return this.ResultOf(
-		this.AddCommandGroupUserToAssignmentGroupUseCase.Execute(input),
-	)
+		BuildAction(
+			func(input *requestPresenter.CreateAssignmentGroupMember) (mvc.Result, error) {
+				return this.ResultOf(
+					this.AddCommandGroupUserToAssignmentGroupUseCase.Execute(input),
+				)
+			},
+		)
 }

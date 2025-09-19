@@ -1,22 +1,26 @@
 package session
 
 import (
+	"app/infrastructure/restfull/common/endpoint/internal/annotate"
 	"reflect"
 	"sync"
 )
 
+var reserving_endpoint bool
 var builder_session *struct {
 	sync.Mutex
-	builder                      reflect.Value
+	api_curator                  reflect.Value
 	accumulators_bag             map[interface{}]interface{}
 	controller_registered_method string
 }
 
 type (
-	IAccumulator interface {
-		Accumulate(interface{}) interface{}
-		GetAccumulatorKey() interface{}
-	}
+	// IAccumulator interface {
+	// 	Accumulate(interface{}) interface{}
+	// 	GetAccumulatorKey() interface{}
+	// }
+
+	IAccumulator = annotate.IAccumulator
 )
 
 func __bag() map[interface{}]interface{} {
@@ -60,7 +64,7 @@ func Adopt(accumulator IAccumulator) {
 }
 
 func Start(
-	builder reflect.Value,
+	apiCurator reflect.Value,
 	registered_controller_method string,
 ) {
 
@@ -71,15 +75,16 @@ func Start(
 
 	builder_session = &struct {
 		sync.Mutex
-		builder                      reflect.Value
+		api_curator                  reflect.Value
 		accumulators_bag             map[interface{}]interface{}
 		controller_registered_method string
 	}{
-		builder:                      builder,
+		api_curator:                  apiCurator,
 		controller_registered_method: registered_controller_method,
 	}
 
 	builder_session.Lock()
+	annotate.StackSingletonLayer()
 }
 
 func End() {
@@ -90,7 +95,26 @@ func End() {
 	default:
 		builder_session.Unlock()
 		builder_session = nil
+		annotate.PopSingletonLayer()
 	}
+}
+
+func ReserveAnnotationsFromEndpoint() {
+
+	reserving_endpoint = true
+}
+
+func InReservation() {
+
+	if reserving_endpoint {
+
+		panic(``)
+	}
+}
+
+func ReleaseReservation() {
+
+	reserving_endpoint = false
 }
 
 func In() bool {

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"app/infrastructure/restfull/common"
+	"app/infrastructure/restfull/common/annotation/input"
 	"app/infrastructure/restfull/common/middleware"
 	"app/infrastructure/restfull/common/middleware/hook"
 
@@ -21,4 +22,10 @@ func (this *AssignmentController) AfterActivation(activator mvc.AfterActivation)
 			hook.AuthRequiredTenantAgentExceptOneOfRoles("COMMANDER"),
 		),
 	)
+}
+
+func (this *AssignmentController) ANNOTATIONS_(
+	input.UseInputAuthorityMapping,
+	input.UseInputTenantMapping,
+) {
 }

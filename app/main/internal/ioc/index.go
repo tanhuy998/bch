@@ -3,7 +3,8 @@ package ioc
 import (
 	"app/internal/bootstrap"
 	"app/main/internal/dependencies/boundedContext"
-	"fmt"
+	"app/main/internal/dependencies/log"
+
 	"reflect"
 
 	"github.com/kataras/iris/v12/core/router"
@@ -55,7 +56,7 @@ func RegisterServices(app router.Party) {
 				global_ioc_container = container
 			}()
 
-			fmt.Println("Wiring dependencies...")
+			log.Main().Println("Wiring dependencies...")
 
 			InitializeENV(container)
 			/*
@@ -77,7 +78,7 @@ func RegisterServices(app router.Party) {
 			boundedContext.RegisterAuthSignaturesBoundedContext(container)
 			boundedContext.RegisterAssignmentBoundedContext(container)
 
-			fmt.Println("Wiring dependencies successully.")
+			log.Main().Println("Wiring dependencies successully.")
 		},
 	)
 

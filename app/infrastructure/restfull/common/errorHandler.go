@@ -2,25 +2,29 @@ package common
 
 import (
 	"app/internal/common"
+	"app/internal/errorMap"
 	accessLogServicePort "app/port/accessLog"
 	actionResultServicePort "app/port/actionResult"
 	contextHolderPort "app/port/contextHolder"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/hero"
 )
 
-type ()
+type (
+	error_response_body_t struct {
+		HttpStatusCode int    `json:status,omitempty`
+		ErrorCode      string `json:"code,omitempty"`
+		Message        string `json:"message,omitempty"`
+	}
+)
 
 type (
-	// IMiddlewareErrorHandler interface {
-	// 	HandleContextError(iris.Context, error)
-	// }
-
 	ErrorHandler struct {
 		AccessLogger accessLogServicePort.IAccessLogger
 		ActionResult actionResultServicePort.IActionResult
@@ -61,29 +65,43 @@ func (this *ErrorHandler) HandleError(err error, ctx context.Context) hero.Resul
 		return res
 	}
 
+	var httpStatusCode int
+
 	switch {
 	case errors.Is(err, common.ERR_INTERNAL):
 		res.SetCode(http.StatusInternalServerError)
+		httpStatusCode = http.StatusInternalServerError
 	case errors.Is(err, common.ERR_NOT_FOUND):
 		res.SetCode(http.StatusNotFound) // 404
+		httpStatusCode = http.StatusNotFound
 	case errors.Is(err, common.ERR_UNAUTHORIZED):
 		res.SetCode(http.StatusUnauthorized) // 401
+		httpStatusCode = http.StatusUnauthorized
 	case errors.Is(err, common.ERR_FORBIDEN):
 		res.SetCode(http.StatusForbidden) // 403
+		httpStatusCode = http.StatusForbidden
 	case errors.Is(err, common.ERR_CONFLICT):
 		res.SetCode(http.StatusConflict) // 409
+		httpStatusCode = http.StatusConflict
 	default:
 		res.SetCode(http.StatusBadRequest) // 400
+		httpStatusCode = http.StatusBadRequest
 	}
 
-	resBody := default_response{}
+	resBody := error_response_body_t{}
+	resBody.HttpStatusCode = httpStatusCode
 
 	if errors.Is(err, common.ERR_INTERNAL) {
-
 		resBody.Message = "internal error"
 	} else {
-		//fmt.Println("-------------", err == nil)
 		resBody.Message = err.Error()
+	}
+
+	var codeErr errorMap.ICodeError
+
+	if errors.As(err, &codeErr) {
+
+		resBody.ErrorCode = fmt.Sprintf("%X", codeErr.GetCode())
 	}
 
 	raw, _ := json.Marshal(resBody)

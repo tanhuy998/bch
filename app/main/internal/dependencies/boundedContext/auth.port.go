@@ -148,9 +148,5 @@ func RegisterAuthBoundedContext(container *hero.Container) {
 		getAssignmentGroupUnAssignedCommandGroupUsersDomain.GetAssignmentGroupUnAssignedCommandGroupUsersUseCase,
 	](container, nil)
 
-	irisIoc.BindDependency[
-		usecasePort.IMiddlewareUseCase, checkAuthorityDomain.CheckAuthoritySessionUseCase,
-	](container, nil)
-
 	container.Register(new(AuthBoundedContext)).Explicitly().EnableStructDependents()
 }

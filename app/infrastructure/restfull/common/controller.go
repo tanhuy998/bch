@@ -15,8 +15,9 @@ import (
 type ()
 
 type (
-	default_response struct {
-		Message string `json:"message,omitempty"`
+	default_response_body_t struct {
+		HttpStatusCode int    `json:"status,omitempty"`
+		Message        string `json:"message,omitempty"`
 	}
 
 	IController interface {
@@ -24,7 +25,6 @@ type (
 	}
 
 	Controller struct {
-		//AccessLogger accessLogServicePort.IAccessLogger
 		ActionResult actionResultServicePort.IActionResult
 		ErrorLogger  loggerPort.ErrorLogger
 		ErrorHandler
@@ -34,7 +34,6 @@ type (
 func (this *Controller) ResultOf(output any, usecaseError error) (mvc.Result, error) {
 
 	defer this.logResult(output)
-	//defer this.logError(usecaseError)
 
 	if usecaseError != nil {
 
@@ -121,69 +120,7 @@ func (this *Controller) logResult(res any) {
 
 func (this *Controller) dispatchError(err error) (mvc.Result, error) {
 
-	// if errors.Is(err, common.ERR_INTERNAL) {
-
-	// 	return this.hanleInternalError(err)
-	// }
-
-	// res := this.ActionResult.Prepare()
-
-	// switch {
-	// case errors.Is(err, common.ERR_NOT_FOUND):
-	// 	res.SetCode(http.StatusNotFound) // 404
-	// case errors.Is(err, common.ERR_UNAUTHORIZED):
-	// 	res.SetCode(http.StatusUnauthorized) // 401
-	// case errors.Is(err, common.ERR_FORBIDEN):
-	// 	res.SetCode(http.StatusForbidden) // 403
-	// case errors.Is(err, common.ERR_CONFLICT):
-	// 	res.SetCode(http.StatusConflict) // 409
-	// default:
-	// 	res.SetCode(http.StatusBadRequest) // 400
-	// }
-
-	// resObj := default_response{
-	// 	Message: err.Error(),
-	// }
-
-	// raw, _ := json.Marshal(resObj)
-
-	// res.SetContent(raw)
-
 	res := this.ErrorHandler.HandleError(err, nil)
 
 	return res, nil
 }
-
-// func (this *Controller) hanleInternalError(err error) (mvc.Result, error) {
-
-// 	res := this.ActionResult.Prepare()
-
-// 	resObj := default_response{
-// 		Message: "internal error",
-// 	}
-// 	fmt.Println("handle error")
-// 	this.logError(err)
-
-// 	raw, _ := json.Marshal(resObj)
-
-// 	return res.SetCode(http.StatusInternalServerError).SetContent(raw).Done()
-// }
-
-// func (this *Controller) logError(err error) {
-
-// 	errOutput, ok := any(err).(contextHolderPort.IContextHolder)
-
-// 	if !ok {
-
-// 		return
-// 	}
-
-// 	ctx := errOutput.GetContext()
-
-// 	if ctx == nil {
-
-// 		return
-// 	}
-
-// 	this.AccessLogger.PushError(ctx, err)
-// }

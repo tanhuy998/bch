@@ -6,10 +6,10 @@ import (
 )
 
 type (
-	BindInputTenant struct{ annotation.Annotation }
+	UseInputTenantMapping struct{ annotation.Annotation }
 )
 
-func (BindInputTenant) Accumulate(asset interface{}) interface{} {
+func (UseInputTenantMapping) Accumulate(asset interface{}) interface{} {
 
 	switch payload := asset.(type) {
 	case *binding_t:
@@ -22,9 +22,9 @@ func (BindInputTenant) Accumulate(asset interface{}) interface{} {
 	}
 }
 
-func (BindInputTenant) GetAccumulatorKey() interface{} {
+func (UseInputTenantMapping) GetAccumulatorKey() interface{} {
 
 	return input_annotation_accumulator_key
 }
 
-func (BindInputTenant) Once() {}
+func (UseInputTenantMapping) Once() {}

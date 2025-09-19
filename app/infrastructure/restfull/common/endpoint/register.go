@@ -1,106 +1,84 @@
 package endpoint
 
 import (
+	"app/infrastructure/restfull/common/endpoint/internal/annotate"
 	"app/infrastructure/restfull/common/endpoint/internal/session"
-	"fmt"
 	"reflect"
-	"regexp"
-	"strconv"
 )
 
-const (
-	ENDPOINT_PREFIX_CAPTURING_GROUP            = `prefix`
-	ENDPOINT_REGISTERED_METHOD_CAPTURING_GROUP = `registerd_method`
-	ENDPOINT_PREFIX                            = `ENDPOINT`
-)
-
-var (
-	regex_match_endpoint_method = regexp.MustCompile(
-		fmt.Sprintf(
-			`(?P<%s>%s)_(?P<%s>[A-Z][\w_]*)`,
-			ENDPOINT_PREFIX_CAPTURING_GROUP,
-			ENDPOINT_PREFIX,
-			ENDPOINT_REGISTERED_METHOD_CAPTURING_GROUP,
-		),
-	)
-)
-
-func Handle(builder *APIEndpointCurator, httpMethod string, path string) IEndpointBuilder {
+func Handle(curator *APIEndpointCurator, httpMethod string, path string) IEndpointBuilder {
 
 	switch {
 	case !session.In():
 		panic("calling endpoint initialization method when not on initialization session is not allowed.")
-	case builder == nil:
+	case curator == nil:
 		panic("bad builder value, nil given")
 	case session.RegisteredControllerMethod() == "":
 		panic("no registered controller method to handle for endpoint.")
 	}
 
 	return NewEnpointBuilder(
-		builder.Activator().Handle(
-			httpMethod, path, session.RegisteredControllerMethod(),
-		),
+		curator.Activator(), httpMethod, path,
 	)
 }
 
-func RegisterEndpointsOf[T IAPIEndpointCurator](builder T) {
+func RegisterEndpointsOf(curator IAPICurator) {
 
-	reflectValBuilder := reflect.ValueOf(any(builder))
-	reflectType := reflect.TypeOf(builder)
-	methodCount := reflectType.NumMethod()
+	LaunchApiOf(curator)
+}
 
-	for i := range methodCount {
+func LaunchApiOf(curator IAPICurator) {
 
-		reflectTypeMethod := reflectType.Method(i)
-		matches := regex_match_endpoint_method.FindStringSubmatch(reflectTypeMethod.Name)
+	// wire dependencies for controller
+	curator.Activator().Dependencies().Struct(curator, 0)
 
-		switch {
-		case len(matches) == 0,
-			len(matches) < regex_match_endpoint_method.NumSubexp()+1:
-			continue
-		}
+	reflectValCurator := reflect.ValueOf(curator)
+	reflectTypeCurator := reflect.TypeOf(curator)
 
-		prefix := matches[regex_match_endpoint_method.SubexpIndex(ENDPOINT_PREFIX_CAPTURING_GROUP)]
+	annotate.StackSingletonLayer()
+	defer annotate.PopSingletonLayer()
 
-		if prefix != ENDPOINT_PREFIX {
-			continue
-		}
+	defer __pop(
+		__registerAnnotations(reflectTypeCurator),
+	)
+	__registerEndpoints(reflectTypeCurator, reflectValCurator)
+	__launchRecursiveAPIsOf(curator)
+}
 
-		registeredName := matches[regex_match_endpoint_method.SubexpIndex(ENDPOINT_REGISTERED_METHOD_CAPTURING_GROUP)]
+func __pop(numAccumulator int, numEffector int) {
 
-		if registeredName == "" {
-			continue
-		}
+	for numAccumulator != 0 || numEffector != 0 {
 
 		switch {
-		case reflectTypeMethod.Type.NumOut() != 1:
-			panic(
-				fmt.Sprintf(
-					`(%s.%s) endpoint method must return 1 value that implements endpoint.IEndpoint, %s value(s) given`,
-					reflectType.Name(),
-					reflectTypeMethod.Name,
-					strconv.Itoa(reflectTypeMethod.Type.NumOut()),
-				),
-			)
-		case !reflectTypeMethod.Type.Out(0).Implements(reflect.TypeFor[IEndpoint]()):
-			panic(
-				fmt.Sprintf(
-					`(%s.%s) endpoint method must return 1 value that implements endpoint.IEndpoint, %s`,
-					reflectType.Name(),
-					reflectTypeMethod.Name,
-					reflectTypeMethod.Type.Out(0).Name(),
-				),
-			)
+		case numAccumulator > 0:
+			annotate.PopAccumulator()
+			numAccumulator--
+			fallthrough
+		case numEffector > 0:
+			annotate.PopEffector()
+			numEffector--
 		}
+	}
+}
 
-		session.Start(
-			reflectValBuilder, registeredName,
-		)
+func __launchRecursiveAPIsOf(curator IAPICurator) {
 
-		reflectMethod := reflectValBuilder.Method(i)
+	recursiveCurator, ok := curator.(IRecursiveAPICurator)
 
-		prepareAndCall(reflectTypeMethod, reflectMethod)
+	if !ok {
 
-		session.End()
+		return
+	}
+
+	childAPIs := recursiveCurator.Child()
+
+	if len(childAPIs) == 0 {
+
+		return
+	}
+
+	for _, curator := range childAPIs {
+
+		LaunchApiOf(curator)
 	}
 }

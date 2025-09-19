@@ -3,6 +3,7 @@ package ioc
 import (
 	repositoryConfig "app/infrastructure/http/common/config/repository"
 	"app/infrastructure/http/common/config/repository/binding"
+	"app/main/internal/dependencies/log"
 	"app/main/internal/dependencies/repositories"
 
 	"app/internal/db"
@@ -17,7 +18,6 @@ import (
 
 	"app/repository"
 	"app/service/mongoDBTracerService"
-	"fmt"
 
 	"github.com/kataras/iris/v12/hero"
 )
@@ -40,7 +40,7 @@ func InitializeDatabase(container *hero.Container /*app router.Party*/) {
 
 	// var container *hero.Container = app.ConfigureContainer().EnableStructDependents().Container
 
-	fmt.Println("Initialize DBMS client...")
+	log.Main().Println("Initialize DBMS client...")
 	client := db.GetClient()
 
 	dbInstance := db.GetDB()
@@ -50,7 +50,7 @@ func InitializeDatabase(container *hero.Container /*app router.Party*/) {
 
 	irisIoc.BindDependency[repository.ITransactionDBClient, repository.MongoDBClient](container, nil)
 
-	fmt.Println("DBMS client initialized.")
+	log.Main().Println("DBMS client initialized.")
 
 	irisIoc.BindDependency[
 		dbQueryTracerPort.IDBQueryTracer, mongoDBTracerService.DBQueryTracerService,
@@ -72,7 +72,7 @@ func InitializeDatabase(container *hero.Container /*app router.Party*/) {
 		iocOption.BindAs[relation.IReadRelationQueryBuilderGenerator](),
 	)
 
-	fmt.Println("Initialize Repositories...")
+	log.Main().Println("Initialize Repositories...")
 
 	repositoryConfig.BindRepositories(
 		container,
@@ -133,5 +133,5 @@ func InitializeDatabase(container *hero.Container /*app router.Party*/) {
 		),
 	)
 
-	fmt.Println("Repositories Initialized.")
+	log.Main().Println("Repositories Initialized.")
 }
