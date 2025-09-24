@@ -7,6 +7,10 @@ import (
 	"context"
 )
 
+const (
+	PAGINATE_EXECUTOR_LOG_UNIT_STR = "paginate_executor"
+)
+
 type (
 	log_unit struct {
 		Op              string      `json:"operation"`
@@ -14,17 +18,19 @@ type (
 		Message         string      `json:"message"`
 		CursorDirection string      `json:"cursor_direction,omitempty"`
 		PageSize        uint64      `json:"page_size"`
-		PageNumber      uint64      `json:"page_number,omitempty"`
+		PageNumber      int64       `json:"page_number,omitempty"`
 		Error           error       `json:"error,omitempty"`
 		Cursor          interface{} `json:"cursor,omitempty"`
 	}
+)
 
-	logger struct {
+type (
+	logger_t struct {
 		opLog.OperationLogger
 	}
 )
 
-func (this *logger) logCursor(c interface{}, pageSize uint64, direction paginateServicePort.CursorDirection, err error, ctx context.Context) {
+func (this *logger_t) logCursor(c interface{}, pageSize uint64, direction paginateServicePort.CursorDirection, err error, ctx context.Context) {
 
 	l := log_unit{
 		Op:              "paginate",
@@ -43,12 +49,14 @@ func (this *logger) logCursor(c interface{}, pageSize uint64, direction paginate
 		l.Message = "failed"
 	}
 
-	this.AccessLogger.PushTraceLogs(
-		ctx, l,
-	)
+	// this.AccessLogger.PushTraceLogs(
+	// 	ctx, l,
+	// )
+
+	this.Trace(PAGINATE_EXECUTOR_LOG_UNIT_STR).PushCustom(ctx, l)
 }
 
-func (this *logger) logOffset(pageNumber uint64, pageSize uint64, err error, ctx context.Context) {
+func (this *logger_t) logOffset(pageNumber int64, pageSize uint64, err error, ctx context.Context) {
 
 	l := log_unit{
 		Op:         "paginate",
@@ -66,7 +74,9 @@ func (this *logger) logOffset(pageNumber uint64, pageSize uint64, err error, ctx
 		l.Message = "failed"
 	}
 
-	this.AccessLogger.PushTraceLogs(
-		ctx, l,
-	)
+	// this.AccessLogger.PushTraceLogs(
+	// 	ctx, l,
+	// )
+
+	this.Trace(PAGINATE_EXECUTOR_LOG_UNIT_STR).PushCustom(ctx, l)
 }

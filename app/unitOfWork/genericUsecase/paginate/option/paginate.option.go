@@ -8,7 +8,7 @@ import (
 
 func ByCursor[Cursor_T comparable](c Cursor_T) paginateUseCase.PaginationOption[Cursor_T] {
 
-	return func(paginator paginateUseCase.IPaginatorInitializer[Cursor_T]) {
+	return func(paginator paginateUseCase.IOptionablePaginatorInitializer[Cursor_T]) {
 
 		paginator.SetCursor(c)
 	}
@@ -16,15 +16,15 @@ func ByCursor[Cursor_T comparable](c Cursor_T) paginateUseCase.PaginationOption[
 
 func CursorDirection[Cursor_T comparable](dir paginateServicePort.CursorDirection) paginateUseCase.PaginationOption[Cursor_T] {
 
-	return func(paginator paginateUseCase.IPaginatorInitializer[Cursor_T]) {
+	return func(paginator paginateUseCase.IOptionablePaginatorInitializer[Cursor_T]) {
 
 		paginator.SetCursorDirection(dir)
 	}
 }
 
-func Offset[Cursor_T comparable](offset uint64) paginateUseCase.PaginationOption[Cursor_T] {
+func Offset[Cursor_T comparable](offset int64) paginateUseCase.PaginationOption[Cursor_T] {
 
-	return func(paginator paginateUseCase.IPaginatorInitializer[Cursor_T]) {
+	return func(paginator paginateUseCase.IOptionablePaginatorInitializer[Cursor_T]) {
 
 		paginator.SetOffset(offset)
 	}
@@ -32,7 +32,7 @@ func Offset[Cursor_T comparable](offset uint64) paginateUseCase.PaginationOption
 
 func Size[Cursor_T comparable](size uint64) paginateUseCase.PaginationOption[Cursor_T] {
 
-	return func(paginator paginateUseCase.IPaginatorInitializer[Cursor_T]) {
+	return func(paginator paginateUseCase.IOptionablePaginatorInitializer[Cursor_T]) {
 
 		paginator.SetSize(size)
 	}
@@ -40,7 +40,7 @@ func Size[Cursor_T comparable](size uint64) paginateUseCase.PaginationOption[Cur
 
 func SelectFields[Cursor_T comparable](fields ...string) paginateUseCase.PaginationOption[Cursor_T] {
 
-	return func(paginator paginateUseCase.IPaginatorInitializer[Cursor_T]) {
+	return func(paginator paginateUseCase.IOptionablePaginatorInitializer[Cursor_T]) {
 
 		paginator.Select(fields...)
 	}
@@ -48,7 +48,7 @@ func SelectFields[Cursor_T comparable](fields ...string) paginateUseCase.Paginat
 
 func ExcludeFields[Cursor_T comparable](fields ...string) paginateUseCase.PaginationOption[Cursor_T] {
 
-	return func(paginator paginateUseCase.IPaginatorInitializer[Cursor_T]) {
+	return func(paginator paginateUseCase.IOptionablePaginatorInitializer[Cursor_T]) {
 
 		paginator.ExcludeField(fields...)
 	}
@@ -56,15 +56,15 @@ func ExcludeFields[Cursor_T comparable](fields ...string) paginateUseCase.Pagina
 
 func Filter[Cursor_T comparable](fn repositoryAPI.FilterFunc) paginateUseCase.PaginationOption[Cursor_T] {
 
-	return func(paginator paginateUseCase.IPaginatorInitializer[Cursor_T]) {
+	return func(paginator paginateUseCase.IOptionablePaginatorInitializer[Cursor_T]) {
 
 		paginator.ApplyFilter(fn)
 	}
 }
 
-func ByOffsetWhenNoCursor[Cursor_T comparable](offset uint64, size uint64) paginateUseCase.PaginationOption[Cursor_T] {
+func ByOffsetWhenNoCursor[Cursor_T comparable](offset int64, size uint64) paginateUseCase.PaginationOption[Cursor_T] {
 
-	return func(paginator paginateUseCase.IPaginatorInitializer[Cursor_T]) {
+	return func(paginator paginateUseCase.IOptionablePaginatorInitializer[Cursor_T]) {
 
 		paginator.SetOffset(offset)
 		paginator.SetSize(size)
@@ -74,7 +74,7 @@ func ByOffsetWhenNoCursor[Cursor_T comparable](offset uint64, size uint64) pagin
 
 func CursorNilValue[Cursor_T comparable](val Cursor_T) paginateUseCase.PaginationOption[Cursor_T] {
 
-	return func(paginator paginateUseCase.IPaginatorInitializer[Cursor_T]) {
+	return func(paginator paginateUseCase.IOptionablePaginatorInitializer[Cursor_T]) {
 
 		paginator.SetCursorNilValue(val)
 	}
