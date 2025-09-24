@@ -25,7 +25,7 @@ type (
 	}
 
 	IFilterExpression interface {
-		Field(name string) IFilterExpressionOperator
+		Field(name string) INegatableDataConditionComparisonOperator //IFilterExpressionOperator
 	}
 
 	IFilterLogicalOperator interface {
@@ -34,13 +34,14 @@ type (
 	}
 
 	IFilterExpressionOperator interface {
-		IComaparisonOperator
-		Not() IComaparisonOperator
+		IComparisonOperator
+		Not() IComparisonOperator
 	}
 
 	// IFilterExpressionOperator internalQuery.IFilterExpressionOperator
 
-	IComaparisonOperator interface {
+	IComparisonOperator interface {
+		IComparisonRange
 		//IFilterLogicalOperator
 		Equal(val interface{})
 		GreaterThan(val interface{})

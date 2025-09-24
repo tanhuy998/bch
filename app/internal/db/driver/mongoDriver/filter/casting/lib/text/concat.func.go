@@ -33,8 +33,12 @@ func NewMongoFuncRegexConcat(concatElements []interface{}) mongoFunc.IBson {
 	return mongoFunc.NewMongoFunction().
 		Parameters(params...).
 		SetArguments(concatElements...).
-		Body(nil).
-		Return(`new RegExp(targetField + %s)`).
+		Body(
+			mongoFunc.MongoFuncBody{
+				`const concatStr = arguments.join("");`,
+			},
+		).
+		Return("new RegExp(`^${concateStr}$`).match()").
 		Build()
 }
 

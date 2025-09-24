@@ -33,15 +33,16 @@ type (
 	IDataConditionComparisonOperator interface {
 		//Not() IDataConditionComparisonOperator
 		//IGenericConditionNotOperator[IDataConditionComparisonOperator]
-		IComaparisonOperator
-		IComparisonRange
-		INumericalRangeComparisonOperator
+		IComparisonOperator
+		//IComparisonRange
+		//INumericalRangeComparisonOperator
 		//IConditionLogicalOperator
 	}
 
 	INegatableDataConditionComparisonOperator interface {
 		IDataConditionComparisonOperator
 		IGenericNegationOperator[IDataConditionComparisonOperator]
+		IFilterFieldCastedType
 	}
 )
 

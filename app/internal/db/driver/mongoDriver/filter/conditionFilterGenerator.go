@@ -6,16 +6,16 @@ import (
 
 type (
 	ConditionFilterGenerator struct {
-		FilterGenerator
+		filter_t //FilterGenerator
 	}
 )
 
 func (this *ConditionFilterGenerator) Field(field string) query.INegatableDataConditionComparisonOperator {
 
-	ret := new(MongoNegationFilter)
+	//ret := new(MongoNegationFilter)
 
-	ret.ref = &this.FilterGenerator
-	ret.lhs = field
+	//ret.ref = &this.FilterGenerator
+	//ret.lhs = field
 
-	return ret
+	return this.filter_t._manageField(field)
 }

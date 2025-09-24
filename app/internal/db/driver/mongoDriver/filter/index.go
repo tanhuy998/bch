@@ -1,8 +1,10 @@
 package filter
 
-func NewFilterGenerator() *FilterGenerator {
+func NewFilterGenerator() *filter_t /**FilterGenerator*/ {
 
-	return &FilterGenerator{}
+	//return &FilterGenerator{}
+
+	return new(filter_t)
 }
 
 func NewConditionFilterGenerator() *ConditionFilterGenerator {
