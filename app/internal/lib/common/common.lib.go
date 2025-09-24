@@ -1,7 +1,7 @@
 package libCommon
 
 import (
-	"fmt"
+	"log"
 	"reflect"
 	"time"
 )
@@ -93,7 +93,17 @@ func MeassureTime(content string) func() {
 	start := time.Now()
 
 	return func() {
-		fmt.Println(content, time.Since(start))
+		log.Default().Println(content, time.Since(start))
+	}
+}
+
+func LMessureTime(content string, logger *log.Logger) func() {
+
+	start := time.Now()
+
+	return func() {
+
+		logger.Println(content, time.Since(start))
 	}
 }
 
