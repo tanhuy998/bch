@@ -23,19 +23,3 @@ func NewFilterExpressionDateCasting(
 
 	return ret
 }
-
-func (f *filter_expression_date_casting_t) Date(date interface{}) {
-	panic("TODO: Implement")
-}
-
-func (f *filter_expression_date_casting_t) YearOf(date interface{}) {
-	panic("TODO: Implement")
-}
-
-func (f *filter_expression_date_casting_t) MonthOf(date interface{}) {
-	panic("TODO: Implement")
-}
-
-func (f *filter_expression_date_casting_t) DateOf(date interface{}) {
-	panic("TODO: Implement")
-}
