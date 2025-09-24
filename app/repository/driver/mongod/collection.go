@@ -1,316 +1,316 @@
 package mongoRepository
 
-import (
-	dbQueryTracerPort "app/port/dbQueryTracer"
-	repositoryAPI "app/repository/api"
-	"context"
+// import (
+// 	dbQueryTracerPort "app/port/dbQueryTracer"
+// 	repositoryAPI "app/repository/api"
+// 	"context"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-)
+// 	"go.mongodb.org/mongo-driver/mongo"
+// 	"go.mongodb.org/mongo-driver/mongo/options"
+// )
 
-type (
-	IQueryTracer interface {
-		Trace(collectionName string, label string, ctx context.Context) (stop func(error))
-	}
+// type (
+// 	IQueryTracer interface {
+// 		Trace(collectionName string, label string, ctx context.Context) (stop func(error))
+// 	}
 
-	MongoDBQueryMonitorCollection struct {
-		AbstractMongoRepository
-		//collection *mongo.Collection
-		Tracer dbQueryTracerPort.IDBQueryTracer
-	}
-)
+// 	MongoDBQueryMonitorCollection struct {
+// 		AbstractMongoRepository
+// 		//collection *mongo.Collection
+// 		Tracer dbQueryTracerPort.IDBQueryTracer
+// 	}
+// )
 
-func (this *MongoDBQueryMonitorCollection) GetCollection() repositoryAPI.IMongoRepositoryOperator {
+// func (this *MongoDBQueryMonitorCollection) GetCollection() repositoryAPI.IMongoRepositoryOperator {
 
-	return this
-}
+// 	return this
+// }
 
-func (this *MongoDBQueryMonitorCollection) SetTracer(t dbQueryTracerPort.IDBQueryTracer) {
+// func (this *MongoDBQueryMonitorCollection) SetTracer(t dbQueryTracerPort.IDBQueryTracer) {
 
-	if t == nil {
+// 	if t == nil {
 
-		panic("MongoDBQueryMonitorCollection error: tracer must not be nil")
-	}
+// 		panic("MongoDBQueryMonitorCollection error: tracer must not be nil")
+// 	}
 
-	this.Tracer = t
-}
+// 	this.Tracer = t
+// }
 
-func (this *MongoDBQueryMonitorCollection) BulkWrite(
-	ctx context.Context,
-	models []mongo.WriteModel,
-	opts ...*options.BulkWriteOptions,
-) (ret *mongo.BulkWriteResult, err error) {
+// func (this *MongoDBQueryMonitorCollection) BulkWrite(
+// 	ctx context.Context,
+// 	models []mongo.WriteModel,
+// 	opts ...*options.BulkWriteOptions,
+// ) (ret *mongo.BulkWriteResult, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "buld_write", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "buld_write", ctx)
 
-	ret, err = this.collection.BulkWrite(ctx, models, opts...)
+// 	ret, err = this.collection.BulkWrite(ctx, models, opts...)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) InsertOne(
-	ctx context.Context,
-	document interface{},
-	opts ...*options.InsertOneOptions,
-) (ret *mongo.InsertOneResult, err error) {
+// func (this *MongoDBQueryMonitorCollection) InsertOne(
+// 	ctx context.Context,
+// 	document interface{},
+// 	opts ...*options.InsertOneOptions,
+// ) (ret *mongo.InsertOneResult, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "insert_one", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "insert_one", ctx)
 
-	ret, err = this.collection.InsertOne(ctx, document, opts...)
+// 	ret, err = this.collection.InsertOne(ctx, document, opts...)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) InsertMany(
-	ctx context.Context,
-	documents []interface{},
-	opts ...*options.InsertManyOptions,
-) (ret *mongo.InsertManyResult, err error) {
+// func (this *MongoDBQueryMonitorCollection) InsertMany(
+// 	ctx context.Context,
+// 	documents []interface{},
+// 	opts ...*options.InsertManyOptions,
+// ) (ret *mongo.InsertManyResult, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "insert_many", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "insert_many", ctx)
 
-	ret, err = this.collection.InsertMany(ctx, documents, opts...)
+// 	ret, err = this.collection.InsertMany(ctx, documents, opts...)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) DeleteOne(
-	ctx context.Context,
-	filter interface{},
-	opts ...*options.DeleteOptions,
-) (ret *mongo.DeleteResult, err error) {
+// func (this *MongoDBQueryMonitorCollection) DeleteOne(
+// 	ctx context.Context,
+// 	filter interface{},
+// 	opts ...*options.DeleteOptions,
+// ) (ret *mongo.DeleteResult, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "delete_one", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "delete_one", ctx)
 
-	ret, err = this.collection.DeleteOne(ctx, filter, opts...)
+// 	ret, err = this.collection.DeleteOne(ctx, filter, opts...)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) DeleteMany(
-	ctx context.Context,
-	filter interface{},
-	opts ...*options.DeleteOptions,
-) (ret *mongo.DeleteResult, err error) {
+// func (this *MongoDBQueryMonitorCollection) DeleteMany(
+// 	ctx context.Context,
+// 	filter interface{},
+// 	opts ...*options.DeleteOptions,
+// ) (ret *mongo.DeleteResult, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "delete_many", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "delete_many", ctx)
 
-	ret, err = this.collection.DeleteMany(ctx, filter, opts...)
+// 	ret, err = this.collection.DeleteMany(ctx, filter, opts...)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) UpdateByID(
-	ctx context.Context,
-	id interface{},
-	update interface{},
-	opts ...*options.UpdateOptions,
-) (ret *mongo.UpdateResult, err error) {
+// func (this *MongoDBQueryMonitorCollection) UpdateByID(
+// 	ctx context.Context,
+// 	id interface{},
+// 	update interface{},
+// 	opts ...*options.UpdateOptions,
+// ) (ret *mongo.UpdateResult, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "update_by_id", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "update_by_id", ctx)
 
-	ret, err = this.collection.UpdateByID(ctx, id, update, opts...)
+// 	ret, err = this.collection.UpdateByID(ctx, id, update, opts...)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) UpdateOne(
-	ctx context.Context,
-	filter interface{},
-	update interface{},
-	opts ...*options.UpdateOptions,
-) (ret *mongo.UpdateResult, err error) {
+// func (this *MongoDBQueryMonitorCollection) UpdateOne(
+// 	ctx context.Context,
+// 	filter interface{},
+// 	update interface{},
+// 	opts ...*options.UpdateOptions,
+// ) (ret *mongo.UpdateResult, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "update_one", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "update_one", ctx)
 
-	ret, err = this.collection.UpdateOne(ctx, filter, update, opts...)
+// 	ret, err = this.collection.UpdateOne(ctx, filter, update, opts...)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) UpdateMany(
-	ctx context.Context,
-	filter interface{},
-	update interface{},
-	opts ...*options.UpdateOptions,
-) (ret *mongo.UpdateResult, err error) {
+// func (this *MongoDBQueryMonitorCollection) UpdateMany(
+// 	ctx context.Context,
+// 	filter interface{},
+// 	update interface{},
+// 	opts ...*options.UpdateOptions,
+// ) (ret *mongo.UpdateResult, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "update_many", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "update_many", ctx)
 
-	ret, err = this.collection.UpdateMany(ctx, filter, update, opts...)
+// 	ret, err = this.collection.UpdateMany(ctx, filter, update, opts...)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) ReplaceOne(
-	ctx context.Context,
-	filter interface{},
-	replacement interface{},
-	opts ...*options.ReplaceOptions,
-) (ret *mongo.UpdateResult, err error) {
+// func (this *MongoDBQueryMonitorCollection) ReplaceOne(
+// 	ctx context.Context,
+// 	filter interface{},
+// 	replacement interface{},
+// 	opts ...*options.ReplaceOptions,
+// ) (ret *mongo.UpdateResult, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "replace_one", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "replace_one", ctx)
 
-	ret, err = this.collection.ReplaceOne(ctx, filter, replacement, opts...)
+// 	ret, err = this.collection.ReplaceOne(ctx, filter, replacement, opts...)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) Aggregate(
-	ctx context.Context,
-	pipeline interface{},
-	opts ...*options.AggregateOptions,
-) (ret *mongo.Cursor, err error) {
+// func (this *MongoDBQueryMonitorCollection) Aggregate(
+// 	ctx context.Context,
+// 	pipeline interface{},
+// 	opts ...*options.AggregateOptions,
+// ) (ret *mongo.Cursor, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "aggregate", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "aggregate", ctx)
 
-	ret, err = this.collection.Aggregate(ctx, pipeline, opts...)
+// 	ret, err = this.collection.Aggregate(ctx, pipeline, opts...)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) Distinct(
-	ctx context.Context,
-	fieldName string,
-	filter interface{},
-	opts ...*options.DistinctOptions,
-) (ret []interface{}, err error) {
+// func (this *MongoDBQueryMonitorCollection) Distinct(
+// 	ctx context.Context,
+// 	fieldName string,
+// 	filter interface{},
+// 	opts ...*options.DistinctOptions,
+// ) (ret []interface{}, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "distinct", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "distinct", ctx)
 
-	ret, err = this.collection.Distinct(ctx, fieldName, filter, opts...)
+// 	ret, err = this.collection.Distinct(ctx, fieldName, filter, opts...)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) Find(
-	ctx context.Context,
-	filter interface{},
-	opts ...*options.FindOptions,
-) (ret *mongo.Cursor, err error) {
+// func (this *MongoDBQueryMonitorCollection) Find(
+// 	ctx context.Context,
+// 	filter interface{},
+// 	opts ...*options.FindOptions,
+// ) (ret *mongo.Cursor, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "find", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "find", ctx)
 
-	ret, err = this.collection.Find(ctx, filter, opts...)
+// 	ret, err = this.collection.Find(ctx, filter, opts...)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) FindOne(
-	ctx context.Context,
-	filter interface{},
-	opts ...*options.FindOneOptions,
-) *mongo.SingleResult {
+// func (this *MongoDBQueryMonitorCollection) FindOne(
+// 	ctx context.Context,
+// 	filter interface{},
+// 	opts ...*options.FindOneOptions,
+// ) *mongo.SingleResult {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "find_one", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "find_one", ctx)
 
-	res := this.collection.FindOne(ctx, filter, opts...)
+// 	res := this.collection.FindOne(ctx, filter, opts...)
 
-	stopTrace(res.Err())
+// 	stopTrace(res.Err())
 
-	return res
-}
+// 	return res
+// }
 
-func (this *MongoDBQueryMonitorCollection) FindOneAndDelete(
-	ctx context.Context,
-	filter interface{},
-	opts ...*options.FindOneAndDeleteOptions,
-) *mongo.SingleResult {
+// func (this *MongoDBQueryMonitorCollection) FindOneAndDelete(
+// 	ctx context.Context,
+// 	filter interface{},
+// 	opts ...*options.FindOneAndDeleteOptions,
+// ) *mongo.SingleResult {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "find_one_and_delete", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "find_one_and_delete", ctx)
 
-	res := this.collection.FindOneAndDelete(ctx, filter, opts...)
+// 	res := this.collection.FindOneAndDelete(ctx, filter, opts...)
 
-	stopTrace(res.Err())
+// 	stopTrace(res.Err())
 
-	return res
-}
+// 	return res
+// }
 
-func (this *MongoDBQueryMonitorCollection) FindOneAndReplace(
-	ctx context.Context,
-	filter interface{},
-	replacement interface{},
-	opts ...*options.FindOneAndReplaceOptions,
-) *mongo.SingleResult {
+// func (this *MongoDBQueryMonitorCollection) FindOneAndReplace(
+// 	ctx context.Context,
+// 	filter interface{},
+// 	replacement interface{},
+// 	opts ...*options.FindOneAndReplaceOptions,
+// ) *mongo.SingleResult {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "find_one_and_replace", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "find_one_and_replace", ctx)
 
-	res := this.collection.FindOneAndReplace(ctx, filter, replacement, opts...)
+// 	res := this.collection.FindOneAndReplace(ctx, filter, replacement, opts...)
 
-	stopTrace(res.Err())
+// 	stopTrace(res.Err())
 
-	return res
-}
+// 	return res
+// }
 
-func (this *MongoDBQueryMonitorCollection) FindOneAndUpdate(
-	ctx context.Context,
-	filter interface{},
-	update interface{},
-	opts ...*options.FindOneAndUpdateOptions,
-) *mongo.SingleResult {
+// func (this *MongoDBQueryMonitorCollection) FindOneAndUpdate(
+// 	ctx context.Context,
+// 	filter interface{},
+// 	update interface{},
+// 	opts ...*options.FindOneAndUpdateOptions,
+// ) *mongo.SingleResult {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "find_one_and_update", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "find_one_and_update", ctx)
 
-	res := this.collection.FindOneAndUpdate(ctx, filter, update, opts...)
+// 	res := this.collection.FindOneAndUpdate(ctx, filter, update, opts...)
 
-	stopTrace(res.Err())
+// 	stopTrace(res.Err())
 
-	return res
-}
+// 	return res
+// }
 
-func (this *MongoDBQueryMonitorCollection) Database() *mongo.Database {
+// func (this *MongoDBQueryMonitorCollection) Database() *mongo.Database {
 
-	return this.collection.Database()
-}
+// 	return this.collection.Database()
+// }
 
-func (this *MongoDBQueryMonitorCollection) CountDocuments(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (n int64, err error) {
+// func (this *MongoDBQueryMonitorCollection) CountDocuments(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (n int64, err error) {
 
-	stopTrace := this.Tracer.Trace(this.collection.Name(), "count_documents", ctx)
+// 	stopTrace := this.Tracer.Trace(this.collection.Name(), "count_documents", ctx)
 
-	n, err = this.collection.CountDocuments(
-		ctx, filter, opts...,
-	)
+// 	n, err = this.collection.CountDocuments(
+// 		ctx, filter, opts...,
+// 	)
 
-	stopTrace(err)
+// 	stopTrace(err)
 
-	return
-}
+// 	return
+// }
 
-func (this *MongoDBQueryMonitorCollection) EstimatedDocumentCount(ctx context.Context, opts ...*options.EstimatedDocumentCountOptions) (int64, error) {
+// func (this *MongoDBQueryMonitorCollection) EstimatedDocumentCount(ctx context.Context, opts ...*options.EstimatedDocumentCountOptions) (int64, error) {
 
-	return this.collection.EstimatedDocumentCount(
-		ctx, opts...,
-	)
-}
+// 	return this.collection.EstimatedDocumentCount(
+// 		ctx, opts...,
+// 	)
+// }
 
-func (this *MongoDBQueryMonitorCollection) Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*mongo.ChangeStream, error) {
+// func (this *MongoDBQueryMonitorCollection) Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (*mongo.ChangeStream, error) {
 
-	return this.collection.Watch(
-		ctx, pipeline, opts...,
-	)
-}
+// 	return this.collection.Watch(
+// 		ctx, pipeline, opts...,
+// 	)
+// }

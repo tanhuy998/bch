@@ -3,10 +3,8 @@ package mongoRepository
 import (
 	"app/internal"
 
-	"app/internal/db/driver/mongoDriver/mongoStorage"
 	libCommon "app/internal/lib/common"
 	libError "app/internal/lib/error"
-	mongoRepositoryFilter "app/repository/driver/mongod/filter"
 	mongoRepositorySorter "app/repository/driver/mongod/sort"
 	"context"
 	"errors"
@@ -22,12 +20,34 @@ type (
 	mongo_repository[Model_T any] struct {
 		//MongoDBQueryMonitorCollection
 		//mongoStorage.MongoDBQueryMonitorCollection
-		mongoStorage.QueryExecutorProxy[Model_T]
-		filter     mongoRepositoryFilter.MongoRepositoryFilterGenerator
+		//mongoStorage.QueryExecutorProxy[Model_T]
+		mongo_statistic_unit_t[Model_T]
+		// filter                       filter.FilterGenerator // mongoRepositoryFilter.MongoRepositoryFilterGenerator
 		sort       mongoRepositorySorter.MongoSorterGenerator
 		projection map[string]uint
 	}
 )
+
+// func (this *mongo_repository[Model_T]) Statistic(fn repositoryAPI.FilterFunc) repositoryAPI.IStatisticUnit {
+
+// 	statisticUnit := this.mongo_statistic_unit_t.Clone()
+
+// 	if fn != nil {
+
+// 		fn(&statisticUnit.filter)
+// 	}
+
+// 	return statisticUnit
+// }
+
+// func (this *mongo_repository[Model_T]) SelfStatistic() repositoryAPI.IStatisticAffectedCountableUnit {
+
+// 	statisticUnit := this.mongo_statistic_unit_t.Clone()
+
+// 	statisticUnit.filter = this.filter
+
+// 	return statisticUnit
+// }
 
 func (this *mongo_repository[Model_T]) UpdateOneByUUID(uuid uuid.UUID, model *Model_T, ctx context.Context) error {
 
@@ -180,7 +200,16 @@ func (this *mongo_repository[Model_T]) _FindOffset(
 		ctx = context.TODO()
 	}
 
-	cursor, err := this.GetStorageUnit().Find(ctx, this.prepareFilter(), findOption)
+	filter, err := this.query_condition_materializer.getFilterExpression()
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	// cursor, err := this.GetStorageUnit().Find(ctx, this.prepareFilter(), findOption)
+
+	cursor, err := this.GetStorageUnit().Find(ctx, filter, findOption)
 
 	if err != nil {
 
@@ -241,16 +270,25 @@ func (this *mongo_repository[Model_T]) FindOffset(
 	return ret, nil
 }
 
-func (this *mongo_repository[Model_T]) prepareFilter() bson.D {
+func (this *mongo_repository[Model_T]) prepareFilter() (bson.D, error) {
 
-	ret := this.filter.Get()
+	// ret := this.filter.Get()
 
-	if len(ret) == 0 {
+	// if len(ret) == 0 {
 
-		return bson.D{{}}
+	// 	return bson.D{{}}
+	// }
+
+	// return ret
+
+	filter, err := this.query_condition_materializer.getFilterExpression()
+
+	if err != nil {
+
+		return nil, err
 	}
 
-	return ret
+	return filter, nil
 }
 
 func (this *mongo_repository[Model_T]) prepareSorter() interface{} {
@@ -262,8 +300,19 @@ func (this *mongo_repository[Model_T]) FindNext(
 	cursor primitive.ObjectID, size uint64, ctx context.Context,
 ) ([]Model_T, error) {
 
+	// return FindNext[Model_T](
+	// 	this.GetCollection(), internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
+	// )
+
+	filter, err := this.query_condition_materializer.getFilterExpression()
+
+	if err != nil {
+
+		return nil, err
+	}
+
 	return FindNext[Model_T](
-		this.GetCollection(), internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
+		this.GetCollection(), internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx, filter, this.prepareSorter(), this.projection,
 	)
 }
 
@@ -271,8 +320,19 @@ func (this *mongo_repository[Model_T]) FindPrevious(
 	cursor primitive.ObjectID, size uint64, ctx context.Context,
 ) ([]Model_T, error) {
 
-	return FindPrevious[Model_T](
-		this.GetCollection(), internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
+	// return FindPrevious[Model_T](
+	// 	this.GetCollection(), internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
+	// )
+
+	filter, err := this.query_condition_materializer.getFilterExpression()
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return FindNext[Model_T](
+		this.GetCollection(), internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx, filter, this.prepareSorter(), this.projection,
 	)
 }
 
@@ -280,8 +340,19 @@ func (this *mongo_repository[Model_T]) _FindNext(
 	cursorField string, cursor interface{}, size uint64, ctx context.Context,
 ) ([]Model_T, error) {
 
+	// return FindNext[Model_T](
+	// 	this.GetCollection(), cursorField, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
+	// )
+
+	filter, err := this.query_condition_materializer.getFilterExpression()
+
+	if err != nil {
+
+		return nil, err
+	}
+
 	return FindNext[Model_T](
-		this.GetCollection(), cursorField, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
+		this.GetCollection(), cursorField, cursor, size, ctx, filter, this.prepareSorter(), this.projection,
 	)
 }
 
@@ -289,8 +360,19 @@ func (this *mongo_repository[Model_T]) _FindPrevious(
 	cursorField string, cursor interface{}, size uint64, ctx context.Context,
 ) ([]Model_T, error) {
 
+	// return FindPrevious[Model_T](
+	// 	this.GetCollection(), cursorField, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
+	// )
+
+	filter, err := this.query_condition_materializer.getFilterExpression()
+
+	if err != nil {
+
+		return nil, err
+	}
+
 	return FindPrevious[Model_T](
-		this.GetCollection(), cursorField, cursor, size, ctx, this.prepareFilter(), this.prepareSorter(), this.projection,
+		this.GetCollection(), cursorField, cursor, size, ctx, filter, this.prepareSorter(), this.projection,
 	)
 }
 

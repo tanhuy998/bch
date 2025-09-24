@@ -1,6 +1,7 @@
 package repositoryAPI
 
 import (
+	"app/internal/db/query"
 	"context"
 )
 
@@ -22,10 +23,12 @@ type (
 		Upsert(entity Model_T, ctx context.Context) error
 	}
 
-	IFilterGenerator interface {
-		//Add(...interface{}) IFilterGenerator
-		IFilterExpression
-	}
+	// IFilterGenerator interface {
+	// 	//Add(...interface{}) IFilterGenerator
+	// 	IFilterExpression
+	// }
+
+	IFilterGenerator query.IFilterGenerator
 
 	IFilterExpression interface {
 		Field(name string) IFilterExpressionOperator

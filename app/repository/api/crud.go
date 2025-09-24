@@ -50,9 +50,11 @@ type (
 		IRepositoryReadOperator[Model_T]
 		IRepositoryFilterableOperator[Model_T]
 		IFilterMethods[Model_T]
+		IConditionMethod[Model_T]
 		IProjector[Model_T]
 		IPaginateClonableRepository[Model_T]
 		storage.IDBStorageQueryExecutor[Model_T]
+		IStatisticRepsitory
 		Create(model *Model_T, ctx context.Context) error
 
 		// FindOffset(

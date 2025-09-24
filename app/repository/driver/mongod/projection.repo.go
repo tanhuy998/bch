@@ -69,12 +69,30 @@ func (this *mongo_read_projection[Model_T]) initProjection() {
 
 func (this *mongo_read_projection[Model_T]) Find(ctx context.Context) ([]Model_T, error) {
 
-	return findManyDocuments[Model_T](this.prepareFilter(), &this.MongoDBQueryMonitorCollection, ctx, this.prepareSorter(), this.projection)
+	// return findManyDocuments[Model_T](this.prepareFilter(), &this.MongoDBQueryMonitorCollection, ctx, this.prepareSorter(), this.projection)
+
+	filter, err := this.prepareFilter()
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return findManyDocuments[Model_T](filter, &this.MongoDBQueryMonitorCollection, ctx, this.prepareSorter(), this.projection)
 }
 
 func (this *mongo_read_projection[Model_T]) FindOne(ctx context.Context) (*Model_T, error) {
 
-	return findOneDocument[Model_T](this.prepareFilter(), &this.MongoDBQueryMonitorCollection, ctx, this.projection)
+	// return findOneDocument[Model_T](this.prepareFilter(), &this.MongoDBQueryMonitorCollection, ctx, this.projection)
+
+	filter, err := this.prepareFilter()
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return findOneDocument[Model_T](filter, &this.MongoDBQueryMonitorCollection, ctx, this.projection)
 }
 
 func (this *mongo_read_projection[Model_T]) FindNext(

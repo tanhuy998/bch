@@ -1,132 +1,131 @@
 package mongoRepositoryFilter
 
-import (
-	libCommon "app/internal/lib/common"
+// import (
+// 	"app/internal/db/query"
+// 	libCommon "app/internal/lib/common"
 
-	repositoryAPI "app/repository/api"
+// 	"go.mongodb.org/mongo-driver/bson"
+// )
 
-	"go.mongodb.org/mongo-driver/bson"
-)
+// type (
+// 	mongo_filter_expr struct {
+// 		ref        *MongoRepositoryFilterGenerator
+// 		lhs        string
+// 		rhs        interface{}
+// 		is_antonym bool
+// 	}
+// )
 
-type (
-	mongo_filter_expr struct {
-		ref        *MongoRepositoryFilterGenerator
-		lhs        string
-		rhs        interface{}
-		is_antonym bool
-	}
-)
+// func (this *mongo_filter_expr) Equal(val interface{}) {
 
-func (this *mongo_filter_expr) Equal(val interface{}) {
+// 	if this.lhs == "" {
 
-	if this.lhs == "" {
+// 		return
+// 	}
 
-		return
-	}
+// 	if this.is_antonym {
 
-	if this.is_antonym {
+// 		this.ref.Add(
+// 			bson.E{
+// 				this.lhs, bson.E{
+// 					"$ne", val,
+// 				},
+// 			},
+// 		)
+// 		return
+// 	}
 
-		this.ref.Add(
-			bson.E{
-				this.lhs, bson.E{
-					"$ne", val,
-				},
-			},
-		)
-		return
-	}
+// 	this.ref.Add(bson.E{this.lhs, val})
+// }
 
-	this.ref.Add(bson.E{this.lhs, val})
-}
+// func (this *mongo_filter_expr) GreaterThan(val interface{}) {
 
-func (this *mongo_filter_expr) GreaterThan(val interface{}) {
+// 	if this.lhs == "" {
 
-	if this.lhs == "" {
+// 		return
+// 	}
 
-		return
-	}
+// 	op := libCommon.Ternary(this.is_antonym, "$lte", "$gt")
 
-	op := libCommon.Ternary(this.is_antonym, "$lte", "$gt")
+// 	this.ref.Add(
+// 		bson.E{
+// 			this.lhs, bson.E{
+// 				op, val,
+// 			},
+// 		},
+// 	)
+// }
 
-	this.ref.Add(
-		bson.E{
-			this.lhs, bson.E{
-				op, val,
-			},
-		},
-	)
-}
+// func (this *mongo_filter_expr) GreaterOrEqual(val interface{}) {
 
-func (this *mongo_filter_expr) GreaterOrEqual(val interface{}) {
+// 	if this.lhs == "" {
 
-	if this.lhs == "" {
+// 		return
+// 	}
 
-		return
-	}
+// 	op := libCommon.Ternary(this.is_antonym, "$lt", "$gte")
 
-	op := libCommon.Ternary(this.is_antonym, "$lt", "$gte")
+// 	this.ref.Add(
+// 		bson.E{
+// 			this.lhs, bson.E{
+// 				op, val,
+// 			},
+// 		},
+// 	)
+// }
 
-	this.ref.Add(
-		bson.E{
-			this.lhs, bson.E{
-				op, val,
-			},
-		},
-	)
-}
+// func (this *mongo_filter_expr) LessThan(val interface{}) {
 
-func (this *mongo_filter_expr) LessThan(val interface{}) {
+// 	if this.lhs == "" {
 
-	if this.lhs == "" {
+// 		return
+// 	}
 
-		return
-	}
+// 	op := libCommon.Ternary(this.is_antonym, "$gte", "$lt")
 
-	op := libCommon.Ternary(this.is_antonym, "$gte", "$lt")
+// 	this.ref.Add(
+// 		bson.E{
+// 			this.lhs, bson.E{
+// 				op, val,
+// 			},
+// 		},
+// 	)
+// }
 
-	this.ref.Add(
-		bson.E{
-			this.lhs, bson.E{
-				op, val,
-			},
-		},
-	)
-}
+// func (this *mongo_filter_expr) LessThanOrEqual(val interface{}) {
 
-func (this *mongo_filter_expr) LessThanOrEqual(val interface{}) {
+// 	if this.lhs == "" {
 
-	if this.lhs == "" {
+// 		return
+// 	}
 
-		return
-	}
+// 	op := libCommon.Ternary(this.is_antonym, "$gt", "$lte")
 
-	op := libCommon.Ternary(this.is_antonym, "$gt", "$lte")
+// 	this.ref.Add(
+// 		bson.E{
+// 			this.lhs, bson.E{
+// 				op, val,
+// 			},
+// 		},
+// 	)
+// }
 
-	this.ref.Add(
-		bson.E{
-			this.lhs, bson.E{
-				op, val,
-			},
-		},
-	)
-}
+// func (this *mongo_filter_expr) In(vals ...interface{}) {
 
-func (this *mongo_filter_expr) In(vals ...interface{}) {
+// 	op := libCommon.Ternary(this.is_antonym, "$nin", "$in")
 
-	op := libCommon.Ternary(this.is_antonym, "$nin", "$in")
+// 	this.ref.Add(
+// 		bson.E{
+// 			this.lhs, bson.E{
+// 				op, vals,
+// 			},
+// 		},
+// 	)
+// }
 
-	this.ref.Add(
-		bson.E{
-			this.lhs, bson.E{
-				op, vals,
-			},
-		},
-	)
-}
+// func (this *mongo_filter_expr) Not() query.IComparisonOperator /* repositoryAPI.IComaparisonOperator */ {
 
-func (this *mongo_filter_expr) Not() repositoryAPI.IComaparisonOperator {
+// 	this.is_antonym = true
 
-	this.is_antonym = true
-
-	return this
-}
+// 	return this
+// }

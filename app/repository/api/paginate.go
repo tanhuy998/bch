@@ -5,6 +5,17 @@ import (
 )
 
 type (
+	IPaginateQueryConditionUnitGetter interface {
+		QueryConditionUnit() IPaginateQueryConditionUnit
+	}
+
+	IPaginateQueryConditionUnit interface {
+		AsFilter(fn FilterFunc)
+		AsConditionExpression(fn MatchFunc)
+	}
+)
+
+type (
 	ICursorPaginationRepository[Model_T any] interface {
 		FindNext(
 			cursorField string, cursor interface{}, size uint64, ctx context.Context,
@@ -21,15 +32,19 @@ type (
 	}
 
 	IPaginateClonableRepository[Model_T any] interface {
-		IPaginationRepository[Model_T]
-		Clone() IPaginationRepository[Model_T]
+		IPaginationUnit[Model_T]
+		Clone() IPaginationUnit[Model_T]
 	}
 
-	IPaginationRepository[Model_T any] interface {
+	IPaginationUnit[Model_T any] interface {
+		IStatisticRepsitory
+		ISelfStatisticable
 		IFilterMethods[Model_T]
 		IProjector[Model_T]
 		ICursorPaginationRepository[Model_T]
 		IOffsetPaginationRepository[Model_T]
+		IPaginateQueryConditionUnitGetter
+		//IPaginateFilterableUnit
 		//ICRUDRepository[Model_T]
 	}
 )

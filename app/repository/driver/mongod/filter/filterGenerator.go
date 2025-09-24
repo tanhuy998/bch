@@ -1,45 +1,50 @@
 package mongoRepositoryFilter
 
-import (
-	repositoryAPI "app/repository/api"
+// import (
+// 	"app/internal/db/query"
 
-	"go.mongodb.org/mongo-driver/bson"
-)
+// 	"go.mongodb.org/mongo-driver/bson"
+// )
 
-type (
-	MongoRepositoryFilterGenerator bson.D
-)
+// type (
+// 	MongoRepositoryFilterGenerator bson.D
+// )
 
-func (this *MongoRepositoryFilterGenerator) reset() {
+// func (this *MongoRepositoryFilterGenerator) reset() {
 
-}
+// }
 
-func (this *MongoRepositoryFilterGenerator) init() {
+// func (this *MongoRepositoryFilterGenerator) init() {
 
-	if *this == nil {
+// 	if *this == nil {
 
-		*this = MongoRepositoryFilterGenerator(bson.D{})
-	}
-}
+// 		*this = MongoRepositoryFilterGenerator(bson.D{})
+// 	}
+// }
 
-func (this *MongoRepositoryFilterGenerator) Add(exprs ...bson.E) repositoryAPI.IFilterGenerator {
+// func (this *MongoRepositoryFilterGenerator) Add(exprs ...bson.E) query.IFilterGenerator /* repositoryAPI.IFilterGenerator */ {
 
-	this.init()
+// 	this.init()
 
-	*this = append(*this, exprs...)
+// 	*this = append(*this, exprs...)
 
-	return this
-}
+// 	return this
+// }
 
-func (this *MongoRepositoryFilterGenerator) Get() bson.D {
+// func (this *MongoRepositoryFilterGenerator) Get() bson.D {
 
-	return bson.D(*this)
-}
+// 	switch *this {
+// 	case nil:
+// 		return bson.D{}
+// 	default:
+// 		return bson.D(*this)
+// 	}
+// }
 
-func (this *MongoRepositoryFilterGenerator) Field(name string) repositoryAPI.IFilterExpressionOperator {
+// func (this *MongoRepositoryFilterGenerator) Field(name string) query.IFilterExpressionOperator /* repositoryAPI.IFilterExpressionOperator */ {
 
-	return &mongo_filter_expr{
-		ref: this,
-		lhs: name,
-	}
-}
+// 	return &mongo_filter_expr{
+// 		ref: this,
+// 		lhs: name,
+// 	}
+// }

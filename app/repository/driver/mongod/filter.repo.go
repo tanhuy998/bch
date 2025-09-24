@@ -2,7 +2,6 @@ package mongoRepository
 
 import (
 	"app/internal/common"
-	repositoryAPI "app/repository/api"
 	"context"
 	"errors"
 	"fmt"
@@ -17,7 +16,16 @@ type (
 
 func (this *mongo_filter[Model_T]) Update(updateEntity Model_T, ctx context.Context) error {
 
-	return this.UpdateManyByFilter(this.prepareFilter(), updateEntity, ctx)
+	// return this.UpdateManyByFilter(this.prepareFilter(), updateEntity, ctx)
+
+	filter, err := this.prepareFilter()
+
+	if err != nil {
+
+		return err
+	}
+
+	return this.UpdateManyByFilter(filter, updateEntity, ctx)
 }
 
 func (this *mongo_filter[Model_T]) UpdateOne(updateEntity Model_T, ctx context.Context) error {
@@ -27,8 +35,19 @@ func (this *mongo_filter[Model_T]) UpdateOne(updateEntity Model_T, ctx context.C
 		ctx = context.TODO()
 	}
 
+	// updateRes, err := this.MongoDBQueryMonitorCollection.UpdateOne(
+	// 	ctx, this.filter, updateEntity,
+	// )
+
+	filter, err := this.prepareFilter()
+
+	if err != nil {
+
+		return err
+	}
+
 	updateRes, err := this.MongoDBQueryMonitorCollection.UpdateOne(
-		ctx, this.filter, updateEntity,
+		ctx, filter, updateEntity,
 	)
 
 	if err != nil {
@@ -57,7 +76,16 @@ func (this *mongo_filter[Model_T]) UpdateOne(updateEntity Model_T, ctx context.C
 
 func (this *mongo_filter[Model_T]) Delete(ctx context.Context) error {
 
-	return this.DeleteManyByFilter(this.filter, ctx)
+	// return this.DeleteManyByFilter(this.filter, ctx)
+
+	filter, err := this.prepareFilter()
+
+	if err != nil {
+
+		return err
+	}
+
+	return this.DeleteManyByFilter(filter, ctx)
 }
 
 func (this *mongo_filter[Model_T]) DeleteOne(ctx context.Context) error {
@@ -67,7 +95,16 @@ func (this *mongo_filter[Model_T]) DeleteOne(ctx context.Context) error {
 		ctx = context.TODO()
 	}
 
-	_, err := this.MongoDBQueryMonitorCollection.DeleteOne(ctx, this.filter)
+	// _, err := this.MongoDBQueryMonitorCollection.DeleteOne(ctx, this.filter)
+
+	filter, err := this.prepareFilter()
+
+	if err != nil {
+
+		return err
+	}
+
+	_, err = this.MongoDBQueryMonitorCollection.DeleteOne(ctx, filter)
 
 	if err != nil {
 
@@ -79,7 +116,16 @@ func (this *mongo_filter[Model_T]) DeleteOne(ctx context.Context) error {
 
 func (this *mongo_filter[Model_T]) Upsert(entity Model_T, ctx context.Context) error {
 
-	return this.UpsertManyByFilter(this.filter, entity, ctx)
+	// return this.UpsertManyByFilter(this.filter, entity, ctx)
+
+	filter, err := this.prepareFilter()
+
+	if err != nil {
+
+		return err
+	}
+
+	return this.UpsertManyByFilter(filter, entity, ctx)
 }
 
 // func (this *mongo_filter[Model_T]) FindNext(cursor interface{}, size uint64, ctx context.Context) ([]Model_T, error) {
@@ -92,11 +138,21 @@ func (this *mongo_filter[Model_T]) Upsert(entity Model_T, ctx context.Context) e
 // 	return this._FindPrevious(internal.PAGINATION_CURSOR_FIELD, cursor, size, ctx)
 // }
 
-func (this *mongo_filter[Model_T]) Filter(
-	fn repositoryAPI.FilterFunc,
-) repositoryAPI.IRepositoryFilterableOperator[Model_T] {
+// func (this *mongo_filter[Model_T]) Filter(
+// 	fn repositoryAPI.FilterFunc,
+// ) repositoryAPI.IRepositoryFilterableOperator[Model_T] {
 
-	fn(&this.filter)
+// 	fn(&this.filter)
 
-	return this
-}
+// 	return this
+// }
+
+// func (this *mongo_filter[Model_T]) Match(
+// 	fn repositoryAPI.MatchFunc,
+// ) repositoryAPI.IRepositoryFilterableOperator[Model_T] {
+
+// 	condInitializer := expression.NewConditionExpressionInitializer()
+
+// 	filter := fn(condInitializer)
+
+// }
