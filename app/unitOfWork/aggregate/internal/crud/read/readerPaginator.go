@@ -67,7 +67,7 @@ func (this *ReaderPaginateExecutor[Read_Entity_T, Local_Storage_Unit_Entity_T]) 
 			sorter.Field("_id").Descending()
 		},
 	)
-	this.query_builder.Skip(pageNumber)
+	this.query_builder.Skip(libCommon.Ternary[uint64](pageNumber < 0, 0, uint64(pageNumber)))
 	this.query_builder.Limit(
 		libCommon.Ternary[uint64](pageSize == 0, 1, pageSize),
 	)
