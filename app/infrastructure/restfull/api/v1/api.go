@@ -63,7 +63,7 @@ func Initialize(parent iris.Party) {
 		},
 	)
 
-	builder.Branch("tenants",
+	builder.Branch("/tenants",
 		func(cur *api.APIBuilder) {
 
 			tenant.API(cur.Party)
