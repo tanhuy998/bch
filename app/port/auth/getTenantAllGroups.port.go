@@ -11,7 +11,8 @@ import (
 type (
 	GetTenantAllGroupsInput interface {
 		GetTenantUUID() uuid.UUID
-		paginateServicePort.IGeneralPaginator
+		//paginateServicePort.IGeneralPaginator
+		GetPaginator() paginateServicePort.IPaginator[interface{}]
 		GetContext() context.Context
 	}
 

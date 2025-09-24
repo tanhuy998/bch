@@ -12,7 +12,8 @@ import (
 type (
 	GetUserParticipatedCommandGroupInput interface {
 		aggregate.IDomainContext
-		paginateServicePort.IGeneralPaginator
+		//paginateServicePort.IGeneralPaginator
+		paginateServicePort.IGeneralPaginatorInput
 		GetRequestedUserUUID() uuid.UUID
 		GetContext() context.Context
 	}

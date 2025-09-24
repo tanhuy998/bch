@@ -3,12 +3,11 @@ package irisAccessLoggerService
 import (
 	"app/internal/bootstrap"
 	libCommon "app/internal/lib/common"
+	"app/port/loggerServicePort"
 	"app/valueObject/log"
 	"context"
 	"encoding/json"
 	"os"
-
-	stdLog "log"
 
 	"github.com/kataras/iris/v12"
 )
@@ -20,7 +19,7 @@ const (
 
 type (
 	IrisAccessLoggerService struct {
-		LogChannel *stdLog.Logger
+		LogChannel loggerServicePort.ILogger //*stdLog.Logger
 	}
 )
 

@@ -15,7 +15,8 @@ type (
 		aggregate.IDomainContext
 		aggregate.IAssignmentGroupDomain
 		contextHolderPort.IContextHolder
-		paginateServicePort.IGeneralPaginator
+		//paginateServicePort.IGeneralPaginator
+		paginateServicePort.IGeneralPaginatorInput
 	}
 )
 

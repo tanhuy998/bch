@@ -12,7 +12,7 @@ import (
 // )
 
 type (
-	jwt_HMACTokenService struct {
+	JWTHMACTokenService struct {
 		// private_key *ecdsa.PrivateKey
 		// public_key  *ecdsa.PublicKey
 		secret        []byte
@@ -21,14 +21,14 @@ type (
 	}
 )
 
-func NewHMACService(signingMethod *jwt.SigningMethodHMAC, secret []byte) *jwt_HMACTokenService {
+func NewHMACService(signingMethod *jwt.SigningMethodHMAC, secret []byte) *JWTHMACTokenService {
 
 	if signingMethod == nil {
 
 		signingMethod = jwt.SigningMethodHS256
 	}
 
-	ret := &jwt_HMACTokenService{
+	ret := &JWTHMACTokenService{
 		signingMethod: signingMethod,
 		secret:        secret,
 	}
@@ -36,12 +36,12 @@ func NewHMACService(signingMethod *jwt.SigningMethodHMAC, secret []byte) *jwt_HM
 	return ret
 }
 
-func (this *jwt_HMACTokenService) GenerateToken() *jwt.Token {
+func (this *JWTHMACTokenService) GenerateToken() *jwt.Token {
 
 	return GenerateHMACToken(this.signingMethod)
 }
 
-func (this *jwt_HMACTokenService) SignString(token *jwt.Token) (string, error) {
+func (this *JWTHMACTokenService) SignString(token *jwt.Token) (string, error) {
 
 	ret, err := token.SignedString(this.secret)
 
@@ -53,7 +53,7 @@ func (this *jwt_HMACTokenService) SignString(token *jwt.Token) (string, error) {
 	return ret, nil
 }
 
-func (this *jwt_HMACTokenService) VerifyTokenStringCustomClaim(token_str string, customClaim jwt.Claims) (*jwt.Token, error) {
+func (this *JWTHMACTokenService) VerifyTokenStringCustomClaim(token_str string, customClaim jwt.Claims) (*jwt.Token, error) {
 
 	ret, err := jwt.ParseWithClaims(
 		token_str,
@@ -78,7 +78,7 @@ func (this *jwt_HMACTokenService) VerifyTokenStringCustomClaim(token_str string,
 	return ret, nil
 }
 
-func (this *jwt_HMACTokenService) VerifyTokenString(token_str string) (*jwt.Token, error) {
+func (this *JWTHMACTokenService) VerifyTokenString(token_str string) (*jwt.Token, error) {
 
 	ret, err := jwt.NewParser(claim_validations...).
 		Parse(token_str, func(token *jwt.Token) (interface{}, error) {
@@ -99,7 +99,7 @@ func (this *jwt_HMACTokenService) VerifyTokenString(token_str string) (*jwt.Toke
 	return ret, nil
 }
 
-func (this *jwt_HMACTokenService) Validate(token *jwt.Token) error {
+func (this *JWTHMACTokenService) Validate(token *jwt.Token) error {
 
 	err := ValidateToken(token)
 
@@ -111,12 +111,12 @@ func (this *jwt_HMACTokenService) Validate(token *jwt.Token) error {
 	return nil
 }
 
-func (this *jwt_HMACTokenService) GetSigningMethod() interface{} {
+func (this *JWTHMACTokenService) GetSigningMethod() interface{} {
 
 	return this.signingMethod
 }
 
-func (this *jwt_HMACTokenService) GetSecret() interface{} {
+func (this *JWTHMACTokenService) GetSecret() interface{} {
 
 	copy := make([]byte, len(this.secret))
 

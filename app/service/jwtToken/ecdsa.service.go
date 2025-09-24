@@ -13,7 +13,7 @@ import (
 // )
 
 type (
-	jwt_ECTokenService struct {
+	JWTECTokenService struct {
 		private_key   *ecdsa.PrivateKey
 		public_key    *ecdsa.PublicKey
 		signingMethod *jwt.SigningMethodECDSA
@@ -25,14 +25,14 @@ func NewECDSAService(
 	signingMethod *jwt.SigningMethodECDSA,
 	privateKey ecdsa.PrivateKey,
 	publicKey ecdsa.PublicKey,
-) *jwt_ECTokenService {
+) *JWTECTokenService {
 
 	if signingMethod == nil {
 
 		signingMethod = jwt.SigningMethodES256
 	}
 
-	ret := &jwt_ECTokenService{
+	ret := &JWTECTokenService{
 		private_key:   &privateKey,
 		public_key:    &publicKey,
 		signingMethod: signingMethod,
@@ -41,12 +41,12 @@ func NewECDSAService(
 	return ret
 }
 
-func (this *jwt_ECTokenService) GenerateToken() *jwt.Token {
+func (this *JWTECTokenService) GenerateToken() *jwt.Token {
 
 	return GenerateECJWTToken(this.signingMethod)
 }
 
-func (this *jwt_ECTokenService) SignString(token *jwt.Token) (string, error) {
+func (this *JWTECTokenService) SignString(token *jwt.Token) (string, error) {
 
 	ret, err := token.SignedString(this.private_key)
 
@@ -58,7 +58,7 @@ func (this *jwt_ECTokenService) SignString(token *jwt.Token) (string, error) {
 	return ret, nil
 }
 
-func (this *jwt_ECTokenService) VerifyTokenStringCustomClaim(token_str string, customClaim jwt.Claims) (*jwt.Token, error) {
+func (this *JWTECTokenService) VerifyTokenStringCustomClaim(token_str string, customClaim jwt.Claims) (*jwt.Token, error) {
 
 	ret, err := jwt.ParseWithClaims(
 		token_str,
@@ -83,7 +83,7 @@ func (this *jwt_ECTokenService) VerifyTokenStringCustomClaim(token_str string, c
 	return ret, nil
 }
 
-func (this *jwt_ECTokenService) VerifyTokenString(token_str string) (*jwt.Token, error) {
+func (this *JWTECTokenService) VerifyTokenString(token_str string) (*jwt.Token, error) {
 
 	ret, err := jwt.NewParser(claim_validations...).
 		Parse(token_str, func(token *jwt.Token) (interface{}, error) {
@@ -104,7 +104,7 @@ func (this *jwt_ECTokenService) VerifyTokenString(token_str string) (*jwt.Token,
 	return ret, nil
 }
 
-func (this *jwt_ECTokenService) Validate(token *jwt.Token) error {
+func (this *JWTECTokenService) Validate(token *jwt.Token) error {
 
 	err := ValidateToken(token)
 
@@ -116,17 +116,17 @@ func (this *jwt_ECTokenService) Validate(token *jwt.Token) error {
 	return nil
 }
 
-func (this *jwt_ECTokenService) GetSigningMethod() interface{} {
+func (this *JWTECTokenService) GetSigningMethod() interface{} {
 
 	return this.signingMethod
 }
 
-func (this *jwt_ECTokenService) GetPrivateKey() interface{} {
+func (this *JWTECTokenService) GetPrivateKey() interface{} {
 
 	return *this.private_key
 }
 
-func (this *jwt_ECTokenService) GetPublicKey() interface{} {
+func (this *JWTECTokenService) GetPublicKey() interface{} {
 
 	return *this.public_key
 }

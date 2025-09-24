@@ -1,8 +1,8 @@
 package assignmentServicePort
 
 import (
-	"app/model"
 	paginateServicePort "app/port/paginate"
+	paginateUseCase "app/unitOfWork/genericUsecase/paginate"
 	"context"
 
 	"github.com/google/uuid"
@@ -24,7 +24,9 @@ type (
 		Expired    bool
 	}
 
-	IGetAssignments[Cursor_T comparable] interface {
-		Serve(TenantUUID uuid.UUID, filter IGetAssignmentPaginate[Cursor_T], ctx context.Context) ([]model.Assignment, error)
+	IGetAssignments[Data_T paginateServicePort.ICursorEntity[interface{}]] interface {
+		Serve(
+			TenantUUID uuid.UUID, filter paginateServicePort.IPaginator[interface{}], ctx context.Context,
+		) (paginateUseCase.INavigator[Data_T, interface{}], error)
 	}
 )

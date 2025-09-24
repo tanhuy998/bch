@@ -1,7 +1,6 @@
 package paginateServicePort
 
 import (
-	repositoryAPI "app/repository/api"
 	"context"
 
 	"github.com/google/uuid"
@@ -26,7 +25,7 @@ type (
 
 	IOffsetPaginator interface {
 		IAbstractPaginator
-		GetPageNumber() uint64
+		GetPageNumber() int64
 	}
 
 	IAbstractPaginator interface {
@@ -44,9 +43,9 @@ type (
 		CursorNilValue() *Cursor_T
 	}
 
-	IFilterablePaginator interface {
-		ApplyPaginateFilter(filterGenerator repositoryAPI.IFilterGenerator)
-	}
+	// IFilterablePaginator interface {
+	// 	ApplyPaginateFilter(filterGenerator repositoryAPI.IFilterGenerator)
+	// }
 
 	IPaginateProjector interface {
 		Select(fields ...string)
@@ -63,6 +62,24 @@ type (
 	}
 
 	IGeneralPaginator interface {
-		GetGeneralPaginator() IPaginator[interface{}]
+		//IOffsetPaginator
+		IPaginator[interface{}]
+		GetCursor() interface{}
+	}
+
+	IGeneralPaginatorGetter interface {
+		GetGeneralPaginator() IGeneralPaginator
+	}
+
+	IGeneralCursorPaginator interface {
+		GetCursor() interface{}
+		IsPrevious() bool
+		GetCursorDirection() CursorDirection
+	}
+)
+
+type (
+	IGeneralPaginatorInput interface {
+		GetGeneralPaginator() IGeneralPaginator
 	}
 )
