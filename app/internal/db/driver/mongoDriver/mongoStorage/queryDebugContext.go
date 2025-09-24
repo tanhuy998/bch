@@ -32,7 +32,7 @@ func (this *aggregate_query_debug_context) GetDBDebugLog() interface{} {
 		return nil
 	}
 
-	return aggregate_debug_log{
+	return aggregate_debug_log_t{
 		QueryType: "aggregate",
 		Detail:    this.getDetailQueryDebugLog(),
 		Query:     this.query.GetArbitraryQuery(),

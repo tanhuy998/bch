@@ -1,7 +1,6 @@
 package mongoStorage
 
 import (
-	dbQueryTracerPort "app/port/dbQueryTracer"
 	repositoryAPI "app/repository/api"
 	"context"
 
@@ -19,9 +18,10 @@ type (
 		logging which messures the queries.
 	*/
 	MongoDBQueryMonitorCollection struct {
-		AbstractMongoCollection
-		//collection *mongo.Collection
-		Tracer dbQueryTracerPort.IDBQueryTracer
+		// AbstractMongoCollection
+		// //collection *mongo.Collection
+		// Tracer dbQueryTracerPort.IDBQueryTracer
+		debug_collection_t
 	}
 )
 
@@ -30,27 +30,30 @@ func (this *MongoDBQueryMonitorCollection) GetCollection() repositoryAPI.IMongoR
 	return this
 }
 
-func (this *MongoDBQueryMonitorCollection) SetTracer(t dbQueryTracerPort.IDBQueryTracer) {
+// func (this *MongoDBQueryMonitorCollection) SetTracer(t dbQueryTracerPort.IDBQueryTracer) {
 
-	if t == nil {
+// 	if t == nil {
 
-		panic("MongoDBQueryMonitorCollection error: tracer must not be nil")
-	}
+// 		panic("MongoDBQueryMonitorCollection error: tracer must not be nil")
+// 	}
 
-	this.Tracer = t
-}
+// 	this.Tracer = t
+// }
 
-func (this *MongoDBQueryMonitorCollection) prepareOpFilterDebugLogContext(
-	filter interface{}, ctx context.Context,
-) *collection_filterable_operation_debug_log_context_t {
+// func (this *MongoDBQueryMonitorCollection) prepareOpFilterDebugLogContext(
+// 	filter interface{}, ctx context.Context,
+// ) *collection_filterable_operation_debug_log_context_t {
 
-	return NewCollectionOperationDebugLogContext(
-		&collection_filterable_operation_log_t{
-			AppliedFilter: filter,
-		},
-		ctx,
-	)
-}
+// 	return NewCollectionOperationDebugLogContext(
+// 		// &collection_filterable_operation_log_t{
+// 		// 	AppliedFilter: filter_debug_log_t{
+// 		// 		JsonForm: filter,
+// 		// 	},
+// 		// },
+// 		filter,
+// 		ctx,
+// 	)
+// }
 
 func (this *MongoDBQueryMonitorCollection) BulkWrite(
 	ctx context.Context,
@@ -58,11 +61,11 @@ func (this *MongoDBQueryMonitorCollection) BulkWrite(
 	opts ...*options.BulkWriteOptions,
 ) (ret *mongo.BulkWriteResult, err error) {
 
-	defer func() {
-		this.Tracer.Trace(this.collection.Name(), "buld_write", ctx)(err)
-	}()
+	stop := this.Tracer.Trace(this.collection.Name(), "buld_write", ctx)
 
 	ret, err = this.collection.BulkWrite(ctx, models, opts...)
+
+	stop(err)
 	return
 }
 
@@ -72,12 +75,11 @@ func (this *MongoDBQueryMonitorCollection) InsertOne(
 	opts ...*options.InsertOneOptions,
 ) (ret *mongo.InsertOneResult, err error) {
 
-	defer func() {
-		this.Tracer.Trace(this.collection.Name(), "insert_one", ctx)(err)
-	}()
+	stop := this.Tracer.Trace(this.collection.Name(), "insert_one", ctx)
 
 	ret, err = this.collection.InsertOne(ctx, document, opts...)
 
+	stop(err)
 	return
 }
 
@@ -87,12 +89,11 @@ func (this *MongoDBQueryMonitorCollection) InsertMany(
 	opts ...*options.InsertManyOptions,
 ) (ret *mongo.InsertManyResult, err error) {
 
-	defer func() {
-		this.Tracer.Trace(this.collection.Name(), "insert_many", ctx)(err)
-	}()
+	stop := this.Tracer.Trace(this.collection.Name(), "insert_many", ctx)
 
 	ret, err = this.collection.InsertMany(ctx, documents, opts...)
 
+	stop(err)
 	return
 }
 
@@ -102,15 +103,13 @@ func (this *MongoDBQueryMonitorCollection) DeleteOne(
 	opts ...*options.DeleteOptions,
 ) (ret *mongo.DeleteResult, err error) {
 
-	defer func() {
-
-		this.Tracer.Trace(this.collection.Name(), "delete_one", ctx)(err)
-	}()
-
 	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
+	stop := this.Tracer.Trace(this.collection.Name(), "delete_one", ctx)
 
 	ret, err = this.collection.DeleteOne(ctx, filter, opts...)
 
+	stop(err)
 	return
 }
 
@@ -120,14 +119,13 @@ func (this *MongoDBQueryMonitorCollection) DeleteMany(
 	opts ...*options.DeleteOptions,
 ) (ret *mongo.DeleteResult, err error) {
 
-	defer func() {
-		this.Tracer.Trace(this.collection.Name(), "delete_many", ctx)(err)
-	}()
-
 	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
+	stop := this.Tracer.Trace(this.collection.Name(), "delete_many", ctx)
 
 	ret, err = this.collection.DeleteMany(ctx, filter, opts...)
 
+	stop(err)
 	return
 }
 
@@ -138,12 +136,11 @@ func (this *MongoDBQueryMonitorCollection) UpdateByID(
 	opts ...*options.UpdateOptions,
 ) (ret *mongo.UpdateResult, err error) {
 
-	defer func() {
-		this.Tracer.Trace(this.collection.Name(), "update_by_id", ctx)(err)
-	}()
+	stop := this.Tracer.Trace(this.collection.Name(), "update_by_id", ctx)
 
 	ret, err = this.collection.UpdateByID(ctx, id, update, opts...)
 
+	stop(err)
 	return
 }
 
@@ -154,14 +151,13 @@ func (this *MongoDBQueryMonitorCollection) UpdateOne(
 	opts ...*options.UpdateOptions,
 ) (ret *mongo.UpdateResult, err error) {
 
-	defer func() {
-		this.Tracer.Trace(this.collection.Name(), "update_one", ctx)(err)
-	}()
-
 	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
+	stop := this.Tracer.Trace(this.collection.Name(), "update_one", ctx)
 
 	ret, err = this.collection.UpdateOne(ctx, filter, update, opts...)
 
+	stop(err)
 	return
 }
 
@@ -172,14 +168,13 @@ func (this *MongoDBQueryMonitorCollection) UpdateMany(
 	opts ...*options.UpdateOptions,
 ) (ret *mongo.UpdateResult, err error) {
 
-	defer func() {
-		this.Tracer.Trace(this.collection.Name(), "update_many", ctx)(err)
-	}()
-
 	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
+	stop := this.Tracer.Trace(this.collection.Name(), "update_many", ctx)
 
 	ret, err = this.collection.UpdateMany(ctx, filter, update, opts...)
 
+	stop(err)
 	return
 }
 
@@ -190,14 +185,13 @@ func (this *MongoDBQueryMonitorCollection) ReplaceOne(
 	opts ...*options.ReplaceOptions,
 ) (ret *mongo.UpdateResult, err error) {
 
-	defer func() {
-		this.Tracer.Trace(this.collection.Name(), "replace_one", ctx)(err)
-	}()
+	stop := this.Tracer.Trace(this.collection.Name(), "replace_one", ctx)
 
 	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
 
 	ret, err = this.collection.ReplaceOne(ctx, filter, replacement, opts...)
 
+	stop(err)
 	return
 }
 
@@ -207,12 +201,11 @@ func (this *MongoDBQueryMonitorCollection) Aggregate(
 	opts ...*options.AggregateOptions,
 ) (ret *mongo.Cursor, err error) {
 
-	defer func() {
-		this.Tracer.Trace(this.collection.Name(), "aggregate", ctx)(err)
-	}()
+	stop := this.Tracer.Trace(this.collection.Name(), "aggregate", ctx)
 
 	ret, err = this.collection.Aggregate(ctx, pipeline, opts...)
 
+	stop(err)
 	return
 }
 
@@ -223,14 +216,13 @@ func (this *MongoDBQueryMonitorCollection) Distinct(
 	opts ...*options.DistinctOptions,
 ) (ret []interface{}, err error) {
 
-	defer func() {
-		this.Tracer.Trace(this.collection.Name(), "distinct", ctx)(err)
-	}()
-
 	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
+	stop := this.Tracer.Trace(this.collection.Name(), "distinct", ctx)
 
 	ret, err = this.collection.Distinct(ctx, fieldName, filter, opts...)
 
+	stop(err)
 	return
 }
 
@@ -240,14 +232,13 @@ func (this *MongoDBQueryMonitorCollection) Find(
 	opts ...*options.FindOptions,
 ) (ret *mongo.Cursor, err error) {
 
-	defer func() {
-		this.Tracer.Trace(this.collection.Name(), "find", ctx)(err)
-	}()
-
 	ctx = this.prepareOpFilterDebugLogContext(filter, ctx)
+
+	stop := this.Tracer.Trace(this.collection.Name(), "find", ctx)
 
 	ret, err = this.collection.Find(ctx, filter, opts...)
 
+	stop(err)
 	return
 }
 

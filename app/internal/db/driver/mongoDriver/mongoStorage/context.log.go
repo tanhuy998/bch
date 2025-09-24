@@ -12,7 +12,8 @@ type (
 )
 
 func NewCollectionOperationDebugLogContext(
-	log *collection_filterable_operation_log_t,
+	//log *collection_filterable_operation_log_t,
+	filter interface{},
 	ctx context.Context,
 ) *collection_filterable_operation_debug_log_context_t {
 
@@ -23,11 +24,13 @@ func NewCollectionOperationDebugLogContext(
 
 	return &collection_filterable_operation_debug_log_context_t{
 		Context: ctx,
-		log:     log,
+		log:     NewfilterableOpLogLine(filter),
 	}
 }
 
 func (this *collection_filterable_operation_debug_log_context_t) GetDBDebugLog() interface{} {
+
+	//this.log.AppliedFilter.resolveLog()
 
 	return this.log
 }
