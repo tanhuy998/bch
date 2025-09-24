@@ -1,13 +1,15 @@
 package db
 
 import (
+	"app/internal/bootstrap"
 	"context"
 	"errors"
-	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"time"
 
+	"github.com/gofor-little/env"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -38,6 +40,11 @@ type (
 	MongoCandidateCollection = mongo.Collection
 )
 
+func init() {
+	bootstrap.Boot()
+	Init()
+}
+
 func Init() {
 
 	var err error
@@ -56,10 +63,10 @@ func Init() {
 		panic(err)
 	}
 
-	dbName := os.Getenv(ENV_MONGOD_DB_NAME)
+	dbName := env.Get(ENV_MONGOD_DB_NAME, "") // os.Getenv(ENV_MONGOD_DB_NAME)
 	db = dbClient.Database(dbName)
 
-	fmt.Println("Initialize database connection")
+	log.Default().Println("Initialize database connection")
 }
 
 func GetClient() *mongo.Client {
@@ -122,6 +129,7 @@ func newClient() (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), CONN_TIMEOUT*time.Second)
 	defer cancel()
 
-	connString := os.Getenv(ENV_MONGOD_CONN_STR) //env.Get(ENV_MONGOD_CONN_STR, "")
+	connString := os.Getenv(ENV_MONGOD_CONN_STR) // env.Get(ENV_MONGOD_CONN_STR, "") //
+
 	return mongo.Connect(ctx, options.Client().ApplyURI(connString))
 }

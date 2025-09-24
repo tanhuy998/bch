@@ -1,8 +1,6 @@
 package bootstrap
 
-import "app/internal/db"
+// func InitDatabaseClient() {
 
-func InitDatabaseClient() {
-
-	db.GetDB()
-}
+// 	db.GetDB()
+// }

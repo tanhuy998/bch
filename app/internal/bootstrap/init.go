@@ -3,13 +3,14 @@ package bootstrap
 import (
 	"app/internal/internal/cmd"
 	libCommon "app/internal/lib/common"
+	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
 )
 
 func init() {
-
+	fmt.Println("bootstrap init")
 	defer ignorePanicWhenUnitTesting()
 
 	err := godotenv.Load()
@@ -36,11 +37,15 @@ func init() {
 }
 
 func init() {
-	//fmt.Println("is debugging", os.Getenv(ENV_DEBUG_LOG))
+
 	cmd.ToggleDebugMode(
 		libCommon.Ternary(
 			os.Getenv(ENV_DEBUG_LOG) == "true",
 			true, false,
 		),
 	)
+}
+
+func Boot() {
+
 }

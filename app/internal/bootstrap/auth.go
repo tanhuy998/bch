@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"crypto/ecdsa"
 	"fmt"
+	"log"
 	"os"
 	"path"
 
@@ -19,12 +20,12 @@ var (
 	jwt_asym_public_key  *ecdsa.PublicKey
 
 	jwt_symmetric_secret []byte
-	jwt_algo             *jwt.SigningMethodECDSA = jwt.SigningMethodES256
+	//jwt_algo             *jwt.SigningMethodECDSA = jwt.SigningMethodES256
 )
 
 func initializeAuthEncryptionData() {
 
-	fmt.Println("Reading auth key pair")
+	log.Default().Println("Reading auth key pair")
 
 	__dir, err := os.Getwd()
 
@@ -89,7 +90,7 @@ func GetJWTAsymmetricEncryptionPublicKey() *ecdsa.PublicKey {
 	return jwt_asym_public_key
 }
 
-func GetJWTEncryptionAlgo() *jwt.SigningMethodECDSA {
+// func GetJWTEncryptionAlgo() *jwt.SigningMethodECDSA {
 
-	return jwt_algo
-}
+// 	return jwt_algo
+// }
