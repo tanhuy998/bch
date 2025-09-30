@@ -14,7 +14,6 @@ type (
 
 type (
 	LogRecorder struct {
-		//context.Context
 		sync.NullableContext[context.Context]
 		logQueue sync.Queue[interface{}]
 	}
@@ -43,7 +42,7 @@ func (this *LogRecorder) PushLog(lines interface{}) {
 
 func (this *LogRecorder) GetBaseContext() context.Context {
 
-	return &this.NullableContext
+	return *this.NullableContext.GetBaseContext()
 }
 
 func (this *LogRecorder) SetBaseContext(ctx context.Context) {

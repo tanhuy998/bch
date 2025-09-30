@@ -31,52 +31,41 @@ func (this *general_logger_t) pushArbitrary(level string, ctx context.Context, l
 
 func (this *general_logger_t) defaultStrategyFor(ctx context.Context) IInternalGeneralLogger {
 
-	logRecorder, isLogRecorder := this.adaptive_logger_t.isLogRecorder(ctx)
-
-	accessLogCompatible := this.default_logger_t.isAccessLoggerCompatibale(ctx)
-
-	if accessLogCompatible {
-
+	switch logRecorder, isLogRecorder := this.adaptive_logger_t.isLogRecorder(ctx); {
+	case isLogRecorder && this._tryMergeLogs(logRecorder):
 		return &this.default_logger_t
-	}
-
-	if isLogRecorder && this.tryMergeLogs(logRecorder) {
-
-		return &this.default_logger_t
-
-	} else if isLogRecorder {
-
+	case isLogRecorder:
 		return &this.adaptive_logger_t
+	default:
+		return &this.default_logger_t
 	}
-
-	return &this.default_logger_t
 }
 
 func (this *general_logger_t) TryMergeLogs(ctx context.Context) bool {
 
-	switch logCtx, isLogCtx := this.adaptive_logger_t.isLogRecorder(ctx); {
-	case isLogCtx:
-		return this.tryMergeLogs(logCtx)
+	switch logRecorder, isLogRecorder := this.adaptive_logger_t.isLogRecorder(ctx); {
+	case isLogRecorder:
+		return this._tryMergeLogs(logRecorder)
 	default:
 		return false
 	}
 }
 
-func (this *general_logger_t) tryMergeLogs(logCtx ILogRecorderContext) bool {
+func (this *general_logger_t) _tryMergeLogs(recorder ILogRecorderContext) bool {
 
-	if logCtx == nil {
+	if recorder == nil {
 
 		return false
 	}
 
-	baseCtx := logCtx.GetBaseContext()
+	baseCtx := recorder.GetBaseContext()
 
 	if !this.default_logger_t.isAccessLoggerCompatibale(baseCtx) {
 
 		return false
 	}
 
-	for line := range logCtx.Release() {
+	for line := range recorder.Release() {
 
 		this.default_logger_t.AccessLogger.PushTraceLogs(baseCtx, line)
 	}
