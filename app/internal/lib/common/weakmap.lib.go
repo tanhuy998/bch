@@ -42,6 +42,10 @@ func (this *WeakMap[Key_T, Value_T]) Get(key Key_T) (val Value_T, ok bool) {
 	case !_ok:
 		return
 	default:
+		if weak == nil {
+			return
+		}
+
 		p := (*Value_T)(weak)
 
 		if p == nil {
