@@ -8,12 +8,16 @@ import (
 	"app/infrastructure/restfull/api/v1/branch/auth/manipulation/user"
 	authSignaturesApi "app/infrastructure/restfull/api/v1/branch/auth/signatures"
 	"app/infrastructure/restfull/api/v1/branch/tenant"
+	"app/infrastructure/restfull/common/log"
 	"app/shared/lib/iris/api"
 
 	"github.com/kataras/iris/v12"
 )
 
 func Initialize(parent iris.Party) {
+
+	log.Logger().Println("Register API v1 endpoints")
+	defer log.Logger().Println("API v1 Endpoints Registered.")
 
 	builder := api.NewAPIBuilder(parent.Party("/v1"))
 
@@ -76,4 +80,5 @@ func Initialize(parent iris.Party) {
 			assignment.API(cur.Party)
 		},
 	)
+
 }

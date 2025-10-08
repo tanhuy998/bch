@@ -31,6 +31,25 @@ type (
 	}
 )
 
+func (this *Controller) ResultAndDispose(
+	output any, usecaseError error, disposers ...IDisposer,
+) (mvc.Result, error) {
+
+	defer this.disposeOutput(disposers, output, usecaseError)
+
+	res, err := this.ResultOf(output, usecaseError)
+
+	return res, err
+}
+
+func (this *Controller) disposeOutput(disposser []IDisposer, objectsToBeDisposed ...interface{}) {
+
+	for _, obj := range disposser {
+
+		obj.Dispose(objectsToBeDisposed...)
+	}
+}
+
 func (this *Controller) ResultOf(output any, usecaseError error) (mvc.Result, error) {
 
 	defer this.logResult(output)

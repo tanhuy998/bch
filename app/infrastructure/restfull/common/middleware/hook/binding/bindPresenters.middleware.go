@@ -3,6 +3,7 @@ package binding
 import (
 	libCommon "app/internal/lib/common"
 	libIris "app/internal/lib/iris"
+	"app/shared/common/object"
 	"app/valueObject/requestInput"
 
 	"io"
@@ -12,16 +13,6 @@ import (
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/hero"
 )
-
-// type (
-// 	PresenterInitializer[RequestPresenter_T, ResponsePresenter_T any] func(req *RequestPresenter_T, res *ResponsePresenter_T)
-// 	RequestPresenterInitializer[RequestPresenter_T any]               func(req *RequestPresenter_T)
-// )
-
-func init() {
-
-	//schema.Query.ZeroEmpty(true)
-}
 
 type IRequestBinder interface {
 	/*
@@ -49,6 +40,112 @@ type (
 type EmptyPresenter struct {
 }
 
+type (
+	BindingHandler[RequestPresenter_T any, ResponsePresenter_T any] struct {
+		Validator    context.Validator
+		requestPool  object.ObjectRecycler[RequestPresenter_T]
+		responsePool object.ObjectRecycler[ResponsePresenter_T]
+	}
+)
+
+func resolveoObject[T any](pool *object.ObjectRecycler[T]) *T {
+
+	if libCommon.IsInterface[T]() {
+
+		panic("presenter must be type of concrete, not abstract")
+	}
+
+	if isEmptyPresenter[T]() {
+
+		return nil
+	}
+
+	switch obj := pool.Load(); {
+	case obj == nil:
+		obj = new(T)
+		return obj
+	default:
+		return obj
+	}
+}
+
+func (this *BindingHandler[RequestPresenter_T, ResponsePresenter_T]) collectPresenters(req *RequestPresenter_T, res *ResponsePresenter_T) {
+
+	if req != nil {
+
+		this.requestPool.Collect(req)
+	}
+
+	if res != nil {
+
+		this.responsePool.Collect(res)
+	}
+}
+
+func (this *BindingHandler[RequestPresenter_T, ResponsePresenter_T]) Handle(container *hero.Container, ctx iris.Context, hooks []Hook) {
+
+	if this.Validator == nil {
+
+		libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, "no validator")
+		return
+	}
+
+	var (
+		request  *RequestPresenter_T  = resolveoObject(&this.requestPool)
+		response *ResponsePresenter_T = resolveoObject(&this.responsePool)
+		err      error
+	)
+
+	if val, ok := any(request).(requestInput.IContextBringAlong); ok {
+
+		val.ReceiveContext(ctx)
+	}
+
+	err = runInitializers(container, ctx, request, response, hooks)
+
+	if err != nil {
+
+		libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if p, ok := any(request).(IRequestBinder); ok {
+
+		err = p.Bind(ctx)
+
+	} else {
+
+		err = bindRequestDefault(request, ctx)
+	}
+
+	switch err {
+	case nil:
+	case io.EOF:
+	default:
+		libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := this.Validator.Struct(request); err != nil {
+
+		libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if request != nil {
+
+		ctx.RegisterDependency(request)
+	}
+
+	if response != nil {
+
+		ctx.RegisterDependency(response)
+	}
+
+	ctx.Next()
+	this.collectPresenters(request, response)
+}
+
 func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 	hooks ...Hook,
 ) ContainerDependentMiddleware {
@@ -62,92 +159,25 @@ func BindPresenters[RequestPresenter_T any, ResponsePresenter_T any](
 
 		ensureProperPresenteTypes[RequestPresenter_T, ResponsePresenter_T]()
 
-		return container.Handler(func(ctx iris.Context, validator context.Validator) {
+		// handlerObject := new(BindingHandler[RequestPresenter_T, ResponsePresenter_T])
 
-			if validator == nil {
+		container.EnableStructDependents = true
 
-				// ctx.StopWithJSON(500, &responsePresenter.ErrorResponse{
-				// 	Message: "no validator",
-				// })
-				libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, "no validator")
-				return
-			}
+		container.Register(
+			new(BindingHandler[RequestPresenter_T, ResponsePresenter_T]),
+		).Explicitly().EnableStructDependents()
 
-			var (
-				request  *RequestPresenter_T  = instantiatePresenter[RequestPresenter_T]()  //new(RequestPresenter_T)
-				response *ResponsePresenter_T = instantiatePresenter[ResponsePresenter_T]() //new(ResponsePresenter_T)
-				err      error
-			)
+		// return func(ctx iris.Context) {
 
-			if val, ok := any(request).(requestInput.IContextBringAlong); ok {
+		// 	handlerObject.Handle(container, ctx, hooks)
+		// }
 
-				val.ReceiveContext(ctx)
-			}
+		return container.Handler(
+			func(ctx iris.Context, handlerObj *BindingHandler[RequestPresenter_T, ResponsePresenter_T]) {
 
-			err = runInitializers(container, ctx, request, response, hooks)
-
-			if err != nil {
-
-				libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusInternalServerError, err.Error())
-				return
-			}
-
-			if p, ok := any(request).(IRequestBinder); ok {
-
-				err = p.Bind(ctx)
-
-			} else {
-
-				err = bindRequestDefault(request, ctx)
-			}
-
-			// if !libError.IsAcceptable(err, io.EOF) {
-			// 	/*
-			// 		io.EOF returned when request body is empty
-			// 	*/
-			// 	// ctx.StopWithJSON(400, &responsePresenter.ErrorResponse{
-			// 	// 	Message: err.Error(),
-			// 	// })
-			// 	sendBodyAndEndRequest(ctx, http.StatusBadRequest, )
-			// 	return
-			// }
-
-			switch err {
-			case nil:
-			case io.EOF:
-			default:
-				libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusBadRequest, err.Error())
-				return
-			}
-
-			// err = validator.Struct(request)
-
-			// if err != nil {
-
-			// 	ctx.StopWithJSON(400, &responsePresenter.ErrorResponse{
-			// 		Message: err.Error(),
-			// 	})
-			// 	return
-			// }
-
-			if err := validator.Struct(request); err != nil {
-
-				libIris.SendDefaulJsonBodyAndEndRequest(ctx, http.StatusBadRequest, err.Error())
-				return
-			}
-
-			if request != nil {
-
-				ctx.RegisterDependency(request)
-			}
-
-			if response != nil {
-
-				ctx.RegisterDependency(response)
-			}
-
-			ctx.Next()
-		})
+				handlerObj.Handle(container, ctx, hooks)
+			},
+		)
 	}
 }
 
@@ -190,18 +220,6 @@ func isEmptyPresenter[T any]() bool {
 		return false
 	}
 }
-
-// func BindRequestPresenter[RequestPresenter_T any](
-// 	container *hero.Container,
-// 	initilaizers ...RequestPresenterInitializer[RequestPresenter_T],
-// ) {
-
-// 	mustHaveContainer(container)
-
-// 	return container.Handler(func(ctx iris.Context, validator context.Validator) {
-
-// 	})
-// }
 
 func runInitializers[RequestPresenter_T, ResponsePresenter_T any](
 	container *hero.Container,
@@ -250,26 +268,3 @@ func bindRequestDefault[RequestPresenter_T any](presenter *RequestPresenter_T, c
 
 	return nil
 }
-
-// func isValidationError(err error) bool {
-
-// 	if _, ok := err.(*validator.InvalidValidationError); ok {
-
-// 		return true
-// 	}
-
-// 	if _, ok := err.(validator.ValidationErrors); ok {
-
-// 		return true
-// 	}
-
-// 	return false
-// }
-
-// func mustHaveContainer(container *hero.Container) {
-
-// 	if container == nil {
-
-// 		panic("BindPresenter middleware need container to function")
-// 	}
-// }

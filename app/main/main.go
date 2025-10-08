@@ -3,6 +3,7 @@ package main
 import (
 	irisConfig "app/infrastructure/http/api/v1/config"
 	"app/infrastructure/restfull"
+	v1 "app/infrastructure/restfull/api/v1"
 	"app/internal/bootstrap"
 	"app/internal/rpc"
 	"app/internal/watcher"
@@ -28,36 +29,20 @@ func init() {
 
 func main() {
 
-	var restfullAPI *iris.Application = restfull.NewAPI(
-		func(api iris.Party) {
-
-			ioc.RegisterServices(api)
-		},
-	)
-
+	var restfullAPI *restfull.API = restfull.NewAPI(
+		ioc.RegisterServices,
+	).Build(v1.Initialize)
 
 	restfullAPI.UseGlobal(
 		manifest.JustedSources,
 	)
 
-	// for _, v := range restfullAPI.GetRoutes() {
-
-	// 	fmt.Println(v)
-	// }
-
-	// restfullAPI.Configure(
-
-	// 	iris.WithoutBodyConsumptionOnUnmarshal,
-	// 	iris.WithOptimizations,
-	// )
-	// globalContainer := app.ConfigureContainer().EnableStructDependents().Container
-
 	watcher.Watch(
 		func() {
 
-			defer irisConfig.ConfigureLogger(restfullAPI).Close()
+			defer irisConfig.ConfigureLogger(restfullAPI.Application).Close()
 
-			restfullAPI.Run(
+			err := restfullAPI.Run(
 				iris.TLS(
 					env.Get("HTTP_PORT", ":443"),
 					tls.GetSSLCert(),
@@ -73,7 +58,7 @@ func main() {
 				iris.WithOptimizations,
 			)
 
-			log.Main().Println("Http server closed.")
+			log.Main().Println("Http server closed.", err)
 		},
 		func() {
 

@@ -68,6 +68,12 @@ func (this *InternalAccessLogHandler) wrapPanicMessage(ctx iris.Context, msg str
 
 func InternalAccessLog(container *hero.Container) context.Handler {
 
+	handlerObj := new(InternalAccessLogHandler)
+
+	container.EnableStructDependents = true
+
+	container.Register(handlerObj)
+
 	return container.Handler(
 		func(ctx iris.Context, handler *InternalAccessLogHandler) {
 

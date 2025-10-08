@@ -1,16 +1,14 @@
 package middleware
 
 import (
-	"app/infrastructure/restfull/common/middleware/hook"
+	"app/infrastructure/restfull/common/middleware/hook/binding"
 )
 
 type ()
 
 func BindRequest[Request_T any](
-	//container *hero.Container,
-	hooks ...hook.PresenterBindingHook[Request_T, EmptyPresenter],
+	hooks ...binding.Hook,
 ) ContainerDependentMiddleware {
 
-	//return BindPresenters(container, initializer...)
-	return BindPresenters(hooks...)
+	return binding.BindPresenters[Request_T, EmptyPresenter](hooks...)
 }
