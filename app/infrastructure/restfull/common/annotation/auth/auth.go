@@ -3,6 +3,7 @@ package auth
 import (
 	"app/infrastructure/restfull/common/endpoint"
 	"app/infrastructure/restfull/common/endpoint/annotation"
+	"app/infrastructure/restfull/common/endpoint/annotationScope"
 	"app/infrastructure/restfull/common/middleware"
 	"app/infrastructure/restfull/common/middleware/hook"
 	"fmt"
@@ -20,7 +21,11 @@ type (
 
 	authorize_accumulator_t = []hook.AuthorityConstraint
 
-	Authorize[Constraint IAnnotationAuthorizeConstraint] struct{ annotation.Annotation }
+	Authorize[Constraint IAnnotationAuthorizeConstraint] struct {
+		annotation.Annotation
+		annotationScope.Method
+		annotationScope.Struct
+	}
 )
 
 func (Authorize[Constraint]) Accumulate(asset interface{}) interface{} {

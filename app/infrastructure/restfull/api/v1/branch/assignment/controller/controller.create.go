@@ -2,71 +2,40 @@ package controller
 
 import (
 	"app/infrastructure/restfull/common"
+	"app/infrastructure/restfull/common/annotation/action"
 	"app/infrastructure/restfull/common/annotation/auth"
 	"app/infrastructure/restfull/common/annotation/auth/constraint"
-	"app/infrastructure/restfull/common/annotation/input"
 	"app/infrastructure/restfull/common/crud"
 	"app/infrastructure/restfull/common/endpoint"
-	usecasePort "app/port/usecase"
 	requestPresenter "app/presenter/request"
 	responsePresenter "app/presenter/response"
-
-	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
 	create struct {
+		auth.Authorize[constraint.TenantAgent]
 		crud.CreateEndpointCurator
 		common.Controller
-		CreateAssignmentUseCase                     usecasePort.IUseCase[requestPresenter.CreateAssigmentRequest, responsePresenter.CreateAssignmentResponse]
-		CreateAssignmentGroupUseCase                usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupRequest, responsePresenter.CreateAssignmentGroupResponse]
-		AddCommandGroupUserToAssignmentGroupUseCase usecasePort.IUseCase[requestPresenter.CreateAssignmentGroupMember, responsePresenter.CreateAssignmentGroupMemeber]
 	}
 )
 
 func (this *create) ENDPOINT_CreateAssignment(
-	auth.Authorize[constraint.TenantAgent],
-	input.Bind[requestPresenter.CreateAssigmentRequest],
+	action.UseCaseFor[requestPresenter.CreateAssigmentRequest, responsePresenter.CreateAssignmentResponse],
 ) endpoint.IEndpoint {
 
-	return this.POST("/").
-		BuildAction(
-			func(input *requestPresenter.CreateAssigmentRequest) (mvc.Result, error) {
-
-				return this.ResultOf(
-					this.CreateAssignmentUseCase.Execute(input),
-				)
-			},
-		)
+	return this.POST("/").BuildAction(nil)
 }
 
 func (this *create) ENDPOINT_CreateAssignmentGroup(
-	auth.Authorize[constraint.TenantAgent],
-	input.Bind[requestPresenter.CreateAssignmentGroupRequest],
+	action.UseCaseFor[requestPresenter.CreateAssignmentGroupRequest, responsePresenter.CreateAssignmentGroupResponse],
 ) endpoint.IEndpoint {
 
-	return this.POST("/{assignmentUUID:uuid}/group/command/{commandGroupUUID:uuid}").
-		BuildAction(
-			func(input *requestPresenter.CreateAssignmentGroupRequest) (mvc.Result, error) {
-
-				return this.ResultOf(
-					this.CreateAssignmentGroupUseCase.Execute(input),
-				)
-			},
-		)
+	return this.POST("/{assignmentUUID:uuid}/group/command/{commandGroupUUID:uuid}").BuildAction(nil)
 }
 
 func (this *create) ENDPOINT_CreateAssignmentGroupMember(
-	auth.Authorize[constraint.TenantAgent],
-	input.Bind[requestPresenter.CreateAssignmentGroupMember],
+	action.UseCaseFor[requestPresenter.CreateAssignmentGroupMember, responsePresenter.CreateAssignmentGroupMemeber],
 ) endpoint.IEndpoint {
 
-	return this.POST("/group/{groupUUID:uuid}/member").
-		BuildAction(
-			func(input *requestPresenter.CreateAssignmentGroupMember) (mvc.Result, error) {
-				return this.ResultOf(
-					this.AddCommandGroupUserToAssignmentGroupUseCase.Execute(input),
-				)
-			},
-		)
+	return this.POST("/group/{groupUUID:uuid}/member").BuildAction(nil)
 }

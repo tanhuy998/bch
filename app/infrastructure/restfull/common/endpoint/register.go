@@ -32,16 +32,20 @@ func LaunchApiOf(curator IAPICurator) {
 	// wire dependencies for controller
 	curator.Activator().Dependencies().Struct(curator, 0)
 
+	// curator is pointer
 	reflectValCurator := reflect.ValueOf(curator)
-	reflectTypeCurator := reflect.TypeOf(curator)
 
 	annotate.StackSingletonLayer()
 	defer annotate.PopSingletonLayer()
 
 	defer __pop(
-		__registerAnnotations(reflectTypeCurator),
+		__registerStructAnnotations(curator.Activator(), reflectValCurator),
 	)
-	__registerEndpoints(reflectTypeCurator, reflectValCurator)
+
+	defer __pop(
+		__registerAnnotations(curator.Activator(), reflectValCurator.Type()),
+	)
+	__registerMethodEndpoints(curator.Activator(), reflectValCurator)
 	__launchRecursiveAPIsOf(curator)
 }
 

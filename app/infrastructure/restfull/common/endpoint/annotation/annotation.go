@@ -1,11 +1,12 @@
 package annotation
 
 import (
+	"fmt"
 	"reflect"
 )
 
 type (
-	annotation_t interface {
+	IEndpointAnnotation interface {
 		prove()
 	}
 	Annotation struct{}
@@ -15,9 +16,23 @@ func (Annotation) prove() {}
 
 func AssertAnnotation(target reflect.Value) {
 
+	if !TryAssertAnnotation(target) {
+
+		panic(
+			fmt.Sprintf(
+				"%s is not valid annotation (not embed Annotation struct)",
+				target.Type().Name(),
+			),
+		)
+	}
+}
+
+func TryAssertAnnotation(target reflect.Value) bool {
+
 	switch target.Interface().(type) {
-	case annotation_t:
+	case IEndpointAnnotation:
+		return true
 	default:
-		panic("expect the type that embed the Annotation type")
+		return false
 	}
 }

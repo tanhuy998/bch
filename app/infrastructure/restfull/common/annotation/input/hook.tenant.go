@@ -2,11 +2,16 @@ package input
 
 import (
 	"app/infrastructure/restfull/common/endpoint/annotation"
+	"app/infrastructure/restfull/common/endpoint/annotationScope"
 	"app/infrastructure/restfull/common/middleware/hook/binding"
 )
 
 type (
-	UseInputTenantMapping struct{ annotation.Annotation }
+	UseInputTenantMapping struct {
+		annotation.Annotation
+		annotationScope.Method
+		annotationScope.Struct
+	}
 )
 
 func (UseInputTenantMapping) Accumulate(asset interface{}) interface{} {
@@ -28,3 +33,5 @@ func (UseInputTenantMapping) GetAccumulatorKey() interface{} {
 }
 
 func (UseInputTenantMapping) Once() {}
+
+func (UseInputTenantMapping) Singleton() {}

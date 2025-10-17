@@ -2,11 +2,16 @@ package input
 
 import (
 	"app/infrastructure/restfull/common/endpoint/annotation"
+	"app/infrastructure/restfull/common/endpoint/annotationScope"
 	"app/infrastructure/restfull/common/middleware/hook/binding"
 )
 
 type (
-	UseInputAuthorityMapping struct{ annotation.Annotation }
+	UseInputAuthorityMapping struct {
+		annotation.Annotation
+		annotationScope.Method
+		annotationScope.Struct
+	}
 )
 
 func (UseInputAuthorityMapping) Accumulate(asset interface{}) interface{} {
@@ -27,4 +32,8 @@ func (UseInputAuthorityMapping) GetAccumulatorKey() interface{} {
 	return input_annotation_accumulator_key
 }
 
-func (m *UseInputAuthorityMapping) Once() {}
+func (UseInputAuthorityMapping) Once() {}
+
+func (UseInputAuthorityMapping) Singleton() {
+
+}

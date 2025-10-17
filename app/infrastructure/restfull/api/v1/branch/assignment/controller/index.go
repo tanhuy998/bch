@@ -11,6 +11,8 @@ import (
 
 type (
 	AssignmentController struct {
+		input.UseInputAuthorityMapping
+		input.UseInputTenantMapping
 		common.CrudAPILauncher[*read, *create, *update, *delete]
 	}
 )
@@ -22,10 +24,4 @@ func (this *AssignmentController) AfterActivation(activator mvc.AfterActivation)
 			hook.AuthRequiredTenantAgentExceptOneOfRoles("COMMANDER"),
 		),
 	)
-}
-
-func (this *AssignmentController) ANNOTATIONS_(
-	input.UseInputAuthorityMapping,
-	input.UseInputTenantMapping,
-) {
 }

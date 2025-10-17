@@ -1,6 +1,7 @@
 package endpoint
 
 import (
+	"app/infrastructure/restfull/common/activator"
 	"app/infrastructure/restfull/common/endpoint/internal/session"
 	"fmt"
 	"reflect"
@@ -24,8 +25,9 @@ var (
 	)
 )
 
-func __registerEndpoints(reflectTypeCurator reflect.Type, reflectValCurator reflect.Value) {
+func __registerMethodEndpoints(activator activator.IActivator, reflectValCurator reflect.Value) {
 
+	reflectTypeCurator := reflectValCurator.Type()
 	methodCount := reflectTypeCurator.NumMethod()
 
 	for i := range methodCount {
@@ -77,10 +79,11 @@ func __registerEndpoints(reflectTypeCurator reflect.Type, reflectValCurator refl
 		session.Start(
 			reflectValCurator, registeredName,
 		)
-		defer session.End()
 
 		reflectMethod := reflectValCurator.Method(i)
 
-		__prepareAnnotationsAndRetrieveEndpoint(reflectTypeMethod, reflectMethod)
+		__prepareMethodAnnotationsAndRetrieveEndpoint(activator, reflectTypeMethod, reflectMethod)
+
+		session.End()
 	}
 }

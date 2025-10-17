@@ -1,7 +1,6 @@
 package restfull
 
 import (
-	v1 "app/infrastructure/restfull/api/v1"
 	"app/infrastructure/restfull/common/log"
 	"app/infrastructure/restfull/common/middleware"
 	libCommon "app/internal/lib/common"
@@ -39,7 +38,7 @@ type (
 	}
 )
 
-func NewAPI(options ...RestFullAPIInitializationOption) /**iris.Application*/ IApplicationAPIBuilder {
+func NewAPI(options ...RestFullAPIInitializationOption) IApplicationAPIBuilder {
 
 	apiBuilder := new(APIBuilder)
 
@@ -58,8 +57,6 @@ func NewAPI(options ...RestFullAPIInitializationOption) /**iris.Application*/ IA
 			app.ConfigureContainer().Container,
 		),
 	)
-
-	v1.Initialize(app)
 
 	log.Logger().Println("Registered endpoints")
 
@@ -91,8 +88,6 @@ func (this *APIBuilder) Build(endpointOptions ...RestFullAPIInitializationOption
 	applyOptions(app, this.after_local_dep...)
 
 	applyOptions(app, this.before_endpoints...)
-
-	//v1.Initialize(app)
 
 	applyOptions(app, endpointOptions...)
 

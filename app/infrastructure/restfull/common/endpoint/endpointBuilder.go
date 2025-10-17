@@ -109,12 +109,10 @@ func (this *endpoint_builder_t) _middleware(middlewares []interface{}) {
 
 func (this *endpoint_builder_t) Build() IEndpoint {
 
-	return newEndpoint(this)
+	return newDefaultEndpoint(this)
 }
 
 func (this *endpoint_builder_t) BuildAction(actionFn interface{}) IEndpoint {
-
-	_assertActionFn(actionFn)
 
 	return newActionEndpoint(this, actionFn)
 }

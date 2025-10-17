@@ -2,94 +2,54 @@ package endpoint
 
 import (
 	"app/infrastructure/restfull/common/endpoint/internal/session"
-	"app/infrastructure/restfull/common/middleware"
-	"io"
+	"fmt"
 
 	"github.com/kataras/iris/v12/context"
-	"github.com/kataras/iris/v12/core/router"
 )
 
 type (
-	IEndpoint interface {
-		IEndpointUseMiddleware
-		IRoute
-		getRoute() *router.Route
-		_register()
+	endpoint_t struct {
+		//
+		action_endpoint_t
 	}
 )
 
-type (
-	end_point_t struct {
-		builder *endpoint_builder_t
-		route   *router.Route
+func newEndpoint(builder *endpoint_builder_t, middlewares []context.Handler) *endpoint_t {
+
+	return &endpoint_t{
+		action_endpoint_t: action_endpoint_t{
+			endpoint_default_t: endpoint_default_t{
+				builder:   builder,
+				activator: builder.acitvator,
+			},
+			actionFn: nil,
+		},
 	}
-)
-
-func newEndpoint(
-	builder *endpoint_builder_t,
-) *end_point_t {
-
-	return &end_point_t{builder: builder}
 }
 
-func (this *end_point_t) _register() {
+func (this *endpoint_t) _register() {
 
-	builder := this.builder
+	switch {
+	case this.actionFn == nil:
+		this.endpoint_default_t._register()
+	default:
+		this.action_endpoint_t._register()
+	}
 
-	this.route = builder.acitvator.Handle(
-		builder.method, builder.path, session.RegisteredControllerMethod(),
-		builder.middlewares...,
-	).SetName(session.RegisteredControllerMethod())
-
-	this.builder = nil
+	this.route.SetName(
+		fmt.Sprintf("%s %s %s", this.builder.method, this.builder.path, session.RegisteredControllerMethod()),
+	)
 }
 
-func (this *end_point_t) getRoute() *router.Route {
+func (this *endpoint_t) _done() {
 
-	return this.route
-}
-
-func (this *end_point_t) Middleware(middlewares ...interface{}) {
-
-	for _, m := range middlewares {
-
-		this.route.Use(
-			middleware.TransformMiddleware(this.route.Party.ConfigureContainer().Container, m),
+	switch {
+	case this.actionFn == nil:
+		panic(
+			fmt.Sprintf(
+				"The endpoint %s is built as custom action but have no action func attached to it",
+				this.route.Name,
+			),
 		)
 	}
-}
-
-func (this *end_point_t) Use(handlers ...context.Handler) {
-
-	this.route.Use(handlers...)
-}
-
-func (this *end_point_t) Done(handlers ...context.Handler) {
-
-	this.route.Done(handlers...)
-}
-
-func (this *end_point_t) IsStatic() bool {
-
-	return this.route.IsStatic()
-}
-
-func (this *end_point_t) StaticPath() string {
-
-	return this.route.StaticPath()
-}
-
-func (this *end_point_t) GetTitle() string {
-
-	return this.route.GetTitle()
-}
-
-func (this *end_point_t) Trace(w io.Writer, stoppedIndex int) {
-
-	this.route.Trace(w, stoppedIndex)
-}
-
-func (this *end_point_t) IsOnline() bool {
-
-	return this.route.IsOnline()
 }

@@ -3,6 +3,7 @@ package input
 import (
 	"app/infrastructure/restfull/common/endpoint"
 	"app/infrastructure/restfull/common/endpoint/annotation"
+	"app/infrastructure/restfull/common/endpoint/annotationScope"
 	"app/infrastructure/restfull/common/middleware/hook/binding"
 	"app/shared/common/variable"
 	"time"
@@ -26,6 +27,7 @@ type (
 type (
 	Bind[Input_T any] struct {
 		annotation.Annotation
+		annotationScope.Method
 	}
 )
 
@@ -60,4 +62,16 @@ func (Bind[Input_T]) Apply(endpoint endpoint.IEndpointUseMiddleware, asset inter
 	default:
 		panic("error while retrieving Input annotation binding")
 	}
+}
+
+func (b Bind[Input_T]) Once() {
+
+}
+
+func (b Bind[Input_T]) Singleton() {
+
+}
+
+func (b Bind[Input_T]) Panic() {
+
 }

@@ -1,20 +1,30 @@
 package endpoint
 
 import (
-	"app/infrastructure/restfull/common/endpoint/internal/session"
+	libCommon "app/internal/lib/common"
 	"fmt"
 	"reflect"
 
-	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/mvc"
 )
 
 type (
-	action_endpoint_t struct {
-		end_point_t
-		actionFn interface{}
+	IActionBuilder interface {
+		BuildAction(actionFn interface{})
 	}
 )
+
+type (
+	action_endpoint_t struct {
+		endpoint_default_t
+		actualActionFn interface{}
+		actionFn       interface{}
+	}
+)
+
+func emptyAction() {
+
+}
 
 func _assertActionFn(actionFn interface{}) {
 
@@ -64,13 +74,44 @@ func _assertActionFn(actionFn interface{}) {
 	}
 }
 
-func newActionEndpoint(builder *endpoint_builder_t, actionfn interface{}) *action_endpoint_t {
+func newActionEndpoint(builder *endpoint_builder_t, actionFn interface{}) *action_endpoint_t {
 
-	return &action_endpoint_t{
-		end_point_t: end_point_t{
+	switch {
+	case actionFn != nil:
+		_assertActionFn(actionFn)
+	}
+
+	ret := &action_endpoint_t{
+		endpoint_default_t: endpoint_default_t{
 			builder: builder,
 		},
-		actionFn: actionfn,
+	}
+
+	ret.actionFn = actionFn
+
+	return ret
+}
+
+func (this *action_endpoint_t) BuildAction(actionFn interface{}) {
+
+	switch this.actionFn.(type) {
+	case nil:
+		_assertActionFn(actionFn)
+
+		this.route.Party.RemoveRoute(
+			this.route.Name,
+		)
+
+		this.actionFn = actionFn
+
+		this._register()
+	default:
+		panic(
+			fmt.Sprintf(
+				"The endpoint %s are built with a valid action function, could not override",
+				this.route.Name,
+			),
+		)
 	}
 }
 
@@ -78,15 +119,26 @@ func (this *action_endpoint_t) _register() {
 
 	builder := this.builder
 
-	builder.acitvator.Router().ConfigureContainer(
+	container := builder.acitvator.Router().ConfigureContainer().Container
 
-		func(api *router.APIContainer) {
-
-			this.route = api.Handle(
-				builder.method, builder.path, this.actionFn,
-			).SetName(session.RegisteredControllerMethod())
-		},
+	registeredActionFn := container.Handler(
+		libCommon.Ternary[interface{}](this.actionFn == nil, emptyAction, this.actionFn),
 	)
 
-	this.builder = nil
+	this.route = builder.acitvator.Router().Handle(
+		builder.method, builder.path, append(this.builder.middlewares, registeredActionFn)...,
+	)
+}
+
+func (this *action_endpoint_t) _buildDone() {
+
+	switch {
+	case this.actionFn == nil:
+		panic(
+			fmt.Sprintf(
+				"The enpoint %s is built as action endpoint but no valid action function passed to",
+				this.route.Name,
+			),
+		)
+	}
 }
