@@ -2,14 +2,10 @@ package libTryLock
 
 import (
 	"context"
-	"errors"
 	"sync"
 )
 
 type (
-	MutexPollingSignal  byte
-	MutexPollingChannel chan MutexPollingSignal
-
 	ITryLockMutex interface {
 		TryLock() bool
 		sync.Locker
@@ -31,16 +27,6 @@ type (
 	}
 
 	TryRWLockFunction[MutexMode_t any] func(mutext MutexMode_t) bool
-)
-
-const (
-	StopPollingSignal       MutexPollingSignal = 0x0
-	ContextDoneSignal       MutexPollingSignal = 0x1
-	MutexLockAcquiredSignal MutexPollingSignal = 0x2
-)
-
-var (
-	errOutOfContext = errors.New("libTryLock polling error: context done before lock acquired")
 )
 
 func tryRWMutexRLock(mutex ITryReadLockMutex) bool {
@@ -70,7 +56,7 @@ func waitLock[MutexMode_T any](
 
 func pollRWMutex[MutexMode_T any](
 	ctx context.Context, mutex MutexMode_T, tryFunc TryRWLockFunction[MutexMode_T], locker sync.Locker,
-) (lockAcquired bool, err error) {
+) (err error) {
 
 	if ctx == nil {
 
@@ -87,22 +73,18 @@ func pollRWMutex[MutexMode_T any](
 		panic("polling internal error: try lock function is nil")
 	}
 
+	lockAcquired := waitLock(ctx, mutex, tryFunc)
+
 	defer func() {
 
 		if lockAcquired && err != nil {
-
-			lockAcquired = false
 			locker.Unlock()
 		}
 	}()
 
-	lockAcquired = waitLock(ctx, mutex, tryFunc)
-
 	if ctx.Err() != nil {
 
-		//locker.Unlock()
-
-		return false, errOutOfContext
+		return ctx.Err()
 	}
 
 	return
@@ -112,36 +94,32 @@ func AcquireLock(
 	ctx context.Context, mutex ITryLockMutex,
 ) (lockAcquired bool, release func(), err error) {
 
-	lockAcquired, err = pollRWMutex[ITryLockMutex](ctx, mutex, tryRWMutexLock, mutex)
+	err = pollRWMutex[ITryLockMutex](ctx, mutex, tryRWMutexLock, mutex)
 
 	switch {
-	case errors.Is(err, errOutOfContext):
-		err = errors.Join(errors.New("(write lock)"), err)
-		return
 	case err != nil:
 		return
+	default:
+		lockAcquired = true
+		release = generateReleaseFunc(mutex)
+		return
 	}
-
-	release = generateReleaseFunc(mutex)
-	return
 }
 
 func AccquireReadLock(
 	ctx context.Context, mutex ITryReadLockMutex,
 ) (lockAcquired bool, release func(), err error) {
 
-	lockAcquired, err = pollRWMutex[ITryReadLockMutex](ctx, mutex, tryRWMutexRLock, mutex.RLocker())
+	err = pollRWMutex[ITryReadLockMutex](ctx, mutex, tryRWMutexRLock, mutex.RLocker())
 
 	switch {
-	case errors.Is(err, errOutOfContext):
-		err = errors.Join(errors.New("(read lock)"), err)
-		return
 	case err != nil:
 		return
+	default:
+		lockAcquired = true
+		release = generateReleaseFunc(mutex.RLocker())
+		return
 	}
-
-	release = generateReleaseFunc(mutex.RLocker())
-	return
 }
 
 func generateReleaseFunc(locker sync.Locker) func() {
